@@ -10,9 +10,10 @@ type Props = {
   label: string;
   hint?: string;
   className?: string;
+  bonus?: boolean;
 };
 
-export default function HuntHintTrigger({ id, label, hint, className }: Props) {
+export default function HuntHintTrigger({ id, label, hint, className, bonus = false }: Props) {
   const { isFound, markFound, progress, total } = useHunt();
   const { ref, near, prefersReduced, isTouch } = useProximity(120);
   const [localToast, setLocalToast] = useState(false);
@@ -34,9 +35,12 @@ export default function HuntHintTrigger({ id, label, hint, className }: Props) {
   const handle = () => {
     if (!found) {
       markFound(id);
+      const message = bonus ? "Bonus secret found!" : "Secret found!";
+      const description = bonus ? label : `${label} — ${progress + 1} / ${total}`;
+      
       toast({
-        title: "Secret found!",
-        description: `${label} — ${progress + 1} / ${total}`,
+        title: message,
+        description: description,
       });
       setLocalToast(true);
       setTimeout(() => setLocalToast(false), 1200);
@@ -65,7 +69,7 @@ export default function HuntHintTrigger({ id, label, hint, className }: Props) {
       />
       {localToast && (
         <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-2 py-1 text-xs text-white shadow-md">
-          Secret found!
+          {bonus ? "Bonus secret!" : "Secret found!"}
         </div>
       )}
     </div>

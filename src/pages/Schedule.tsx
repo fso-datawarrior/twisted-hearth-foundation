@@ -6,51 +6,45 @@ import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 const Schedule = () => {
   const scheduleItems = [
     {
-      time: "7:00 PM",
+      time: "6:30 PM",
       title: "Gates Open: Welcome to the Dark Forest",
-      description: "Arrival and check-in. Receive your story cards and choose your path.",
+      description: "Arrival and check-in. The ancient gates creak open as twilight falls. Receive your story cards and choose your path through the evening's twisted tales.",
       type: "arrival"
     },
     {
-      time: "7:30 PM", 
-      title: "Twisted Cocktail Hour",
-      description: "Poison apple martinis, blood wine, and other fairytale libations served.",
+      time: "7:15 PM", 
+      title: "Welcome Gathering & Poison Toasts",
+      description: "Signature cocktails served as we gather in the main hall. Meet your fellow travelers on this dark journey.",
       type: "social"
     },
     {
       time: "8:00 PM",
-      title: "The First Tale Begins", 
-      description: "Interactive storytelling experience - multiple paths available.",
+      title: "Vignettes Loop Begins", 
+      description: "Wander room to room; each tale changes on each pass. Interactive storytelling where you shape the narrative. Multiple paths, darker endings.",
       type: "performance"
     },
     {
       time: "8:45 PM",
       title: "Feast of the Damned",
-      description: "Twisted fairytale potluck dinner. Bring a dish inspired by your darkest tale.",
+      description: "Twisted fairytale potluck dinner begins. Each dish tells its own dark story, each bite a new chapter.",
       type: "feast"
     },
     {
-      time: "9:30 PM",
-      title: "Costume Parade & Contest",
-      description: "Showcase your twisted fairytale character. Prizes for best interpretations.",
+      time: "9:00 PM",
+      title: "Costume Court Begins",
+      description: "Showcase your twisted fairytale character. Judges evaluate creativity, presentation, and the darkness of your tale.",
       type: "contest"
     },
     {
-      time: "10:15 PM",
-      title: "The Midnight Vignettes",
-      description: "Short performances in different rooms - choose your own adventure.",
+      time: "10:00 PM",
+      title: "The Midnight Vignettes Continue",
+      description: "The stories grow darker as the night deepens. New scenes unlock, old secrets are revealed.",
       type: "performance"
     },
     {
-      time: "11:00 PM",
-      title: "Dance of the Damned",
-      description: "Dark fairytale playlist with haunting melodies and twisted beats.",
-      type: "dance"
-    },
-    {
-      time: "12:00 AM",
-      title: "The Final Twist",
-      description: "The night's grand finale - not all stories end as expected.",
+      time: "10:45 PM",
+      title: "Final Toast & The Last Dance",
+      description: "As midnight approaches, we gather one last time. The music plays, but some dances never end.",
       type: "finale"
     }
   ];
@@ -92,29 +86,44 @@ const Schedule = () => {
             </p>
             
             <div className="space-y-6">
-              {scheduleItems.map((item, index) => (
-                <div 
-                  key={index}
-                  className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe"
-                >
-                  <div className="flex flex-col md:flex-row md:items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className={`font-subhead text-2xl font-bold ${getTypeColor(item.type).split(' ')[0]} bg-bg-2 px-4 py-2 rounded-lg border-2 ${getTypeColor(item.type).split(' ')[1]}`}>
-                        {item.time}
+              <ol role="list" className="space-y-6">
+                {scheduleItems.map((item, index) => (
+                  <li 
+                    key={index}
+                    className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
+                  >
+                    {/* Add bonus hunt rune to the final toast */}
+                    {item.type === "finale" && (
+                      <HuntHintTrigger 
+                        id="schedule.late" 
+                        label="Midnight keeps its own time"
+                        bonus={true}
+                        className="absolute top-4 right-4"
+                      />
+                    )}
+                    
+                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <time 
+                          dateTime={item.time}
+                          className={`font-subhead text-2xl font-bold ${getTypeColor(item.type).split(' ')[0]} bg-bg-2 px-4 py-2 rounded-lg border-2 ${getTypeColor(item.type).split(' ')[1]} block`}
+                        >
+                          {item.time}
+                        </time>
+                      </div>
+                      
+                      <div className="flex-grow">
+                        <h3 className="font-subhead text-xl mb-2 text-accent-gold">
+                          {item.title}
+                        </h3>
+                        <p className="font-body text-muted-foreground">
+                          {item.description}
+                        </p>
                       </div>
                     </div>
-                    
-                    <div className="flex-grow">
-                      <h3 className="font-subhead text-xl mb-2 text-accent-gold">
-                        {item.title}
-                      </h3>
-                      <p className="font-body text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  </li>
+                ))}
+              </ol>
             </div>
             
             <div className="mt-16 grid md:grid-cols-2 gap-8">

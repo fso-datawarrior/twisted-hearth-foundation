@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      guestbook: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      potluck_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_name: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_name: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_name?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       rsvps: {
         Row: {
           contributions: string | null

@@ -1,47 +1,104 @@
+import { useState } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import Carousel from "@/components/Carousel";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const Costumes = () => {
+  const [activeFilter, setActiveFilter] = useState("All");
+  
+  const filterCategories = ["All", "Royalty", "Creatures", "Cursed", "Woodland"];
+  
   const costumeInspiration = [
     {
       id: 1,
-      title: "Corporate Cinderella",
+      title: "Ragged Queen of Thorns",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop",
-      description: "Glass ceiling instead of glass slipper. Power suit with subtle fairy godmother tech accessories."
+      description: "Crown of twisted vines, torn royal robes, ruling from ruins.",
+      category: "Royalty"
     },
     {
       id: 2, 
-      title: "Surveillance Red Riding Hood",
+      title: "Wolf-Worn Hunter",
       image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=600&fit=crop",
-      description: "Red hooded cloak embedded with cameras and tracking devices. The hunter becomes the hunted."
+      description: "Red cloak stained with secrets, eyes that have seen too much.",
+      category: "Cursed"
     },
     {
       id: 3,
-      title: "Influencer Rapunzel", 
+      title: "Moss-Eaten Dryad", 
       image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=600&fit=crop",
-      description: "LED fiber optic hair extensions, ring light crown, and 'trapped' by social media metrics."
+      description: "Ancient tree spirit, bark for skin, leaves for hair.",
+      category: "Woodland"
     },
     {
       id: 4,
-      title: "Pharmaceutical Snow White",
+      title: "Poisoned Princess",
       image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=600&fit=crop",
-      description: "Lab coat princess with poison apple prescription bottles and seven dwarf test subjects."
+      description: "Beauty preserved by toxins, apple-red lips that kill with a kiss.",
+      category: "Royalty"
     },
     {
       id: 5,
-      title: "Climate Change Elsa",
+      title: "Spectral Swan",
       image: "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=400&h=600&fit=crop", 
-      description: "Melting ice dress with rising sea level hemline. 'Let it go' takes on new meaning."
+      description: "Cursed to dance forever, feathers falling like snow.",
+      category: "Cursed"
     },
     {
       id: 6,
-      title: "Gentrified Three Bears",
+      title: "Bear King's Heir",
       image: "https://images.unsplash.com/photo-1485062934645-5c8021e4b5b5?w=400&h=600&fit=crop",
-      description: "Upscale bear family displaced by development. Goldilocks as a real estate developer."
+      description: "Royal beast with crown of bone, civilized but wild.",
+      category: "Creatures"
+    },
+    {
+      id: 7,
+      title: "Thorn Witch of the Briar",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
+      description: "Guardian of sleeping curses, spinner of endless dreams.",
+      category: "Woodland"
+    },
+    {
+      id: 8,
+      title: "Shadow Court Jester",
+      image: "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=400&h=600&fit=crop",
+      description: "Entertainer of the damned, jokes that cut like knives.",
+      category: "Royalty"
+    },
+    {
+      id: 9,
+      title: "Raven Parliament Speaker",
+      image: "https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400&h=600&fit=crop",
+      description: "Collector of secrets, keeper of dark prophecies.",
+      category: "Creatures"
+    },
+    {
+      id: 10,
+      title: "Mushroom Circle Keeper",
+      image: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=600&fit=crop",
+      description: "Guardian of fairy rings, dealer in dangerous bargains.",
+      category: "Woodland"
+    },
+    {
+      id: 11,
+      title: "Mirror Shard Collector",
+      image: "https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&h=600&fit=crop",
+      description: "Seven reflections, each showing a different truth.",
+      category: "Cursed"
+    },
+    {
+      id: 12,
+      title: "Bone Crown Emperor",
+      image: "https://images.unsplash.com/photo-1509557965043-e78fcf5299ad?w=400&h=600&fit=crop",
+      description: "Ruler of forgotten kingdoms, crowned with the past.",
+      category: "Royalty"
     }
   ];
+
+  const filteredCostumes = activeFilter === "All" 
+    ? costumeInspiration 
+    : costumeInspiration.filter(costume => costume.category === activeFilter);
 
   const costumeCategories = [
     {
@@ -89,13 +146,38 @@ const Costumes = () => {
               The more creative and thought-provoking, the better!
             </p>
             
+            {/* Filter Chips */}
+            <div className="mb-8">
+              <div className="flex flex-wrap justify-center gap-3" id="costumes.filter">
+                <HuntHintTrigger 
+                  id="costumes.filter" 
+                  label="Choose your mask wisely"
+                  bonus={true}
+                  className="absolute -top-2 -right-2"
+                />
+                {filterCategories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveFilter(category)}
+                    className={`px-4 py-2 rounded-full font-subhead text-sm transition-colors motion-safe focus-visible ${
+                      activeFilter === category
+                        ? "bg-accent-gold text-background"
+                        : "bg-bg-2 text-ink hover:bg-accent-purple/20 border border-accent-purple/30"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             {/* Costume Carousel */}
             <div className="mb-16">
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Featured Twisted Interpretations
               </h2>
               <Carousel 
-                items={costumeInspiration}
+                items={filteredCostumes}
                 visible={3}
                 auto={true}
                 interval={5000}
