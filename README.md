@@ -159,24 +159,48 @@ In development, you can test error boundaries by temporarily throwing an error i
 throw new Error("Test error boundary");
 ```
 
-### How It Works
-- **15 Hidden Secrets**: Small glowing runes scattered across all pages
-- **Progress Tracking**: Floating chip appears after finding your first secret
-- **Rewards**: Complete modal with congratulatory message when all 15 are found
-- **Persistence**: Progress saved in localStorage across browser sessions
+## Scavenger Hunt
 
-### For Developers
-- **Reset Hunt**: In dev mode, use `window.hunt.reset()` in browser console
-- **Add New Hints**: Add entries to `hunt-config.ts` and place `<HuntHintTrigger>` components
-- **Testing**: Progress panel includes DEV-only reset button
+The site includes an interactive scavenger hunt with 15 hidden hints scattered across different pages. Players must discover these "runes" to unlock special rewards.
+
+### Features
+- **15 Hidden Hints**: Strategically placed across all pages with thematic positioning
+- **Progress Tracking**: Persistent localStorage with floating progress chip after first discovery
+- **Reward System**: Unlock congratulatory modal with special messages at completion
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Reduced Motion**: Respects user motion preferences
 
 ### Hunt Locations
-- **Home** (5): Logo area, hero overlay, CTA region, footer
-- **Vignettes** (4): Card overlays, theme link area  
-- **Costumes** (2): Header, contest section
-- **Feast** (2): Header, drinks section
-- **Schedule** (1): Near date/time
-- **About** (1): Footer area
+- **Home (5 hints)**: Logo, moon, path, CTA, footer icon
+- **Vignettes (4 hints)**: Each story card plus theme link
+- **Costumes (2 hints)**: Header and preparation section
+- **Feast (2 hints)**: Header and chopping board
+- **Schedule (1 hint)**: Near event date
+- **About (1 hint)**: Near signature/closing
+
+### Developer Tools
+In development mode, use `window.hunt.reset()` to clear all progress for testing.
+
+## Motion & A11y Polish
+
+The site includes advanced accessibility and motion features designed for an inclusive experience.
+
+### Proximity-Based Hunt Reveals
+- **Desktop**: Hunt runes are invisible until pointer comes within ~120px radius OR focused/hovered
+- **Touch Devices**: Runes remain faint-visible for easy discovery
+- **Debug Mode**: Set `VITE_HUNT_DEBUG=1` to force all runes visible during development
+- **Found State**: Completed runes appear gold-tinted with enhanced visual feedback
+
+### Section Reveal Animation
+- **Intersection Observer**: Major content sections gently reveal as they scroll into view
+- **Reduced Motion**: Sections appear instantly when motion preferences are disabled
+- **Performance**: Uses efficient observer pattern with automatic cleanup
+
+### Global Accessibility
+- **Skip Link**: Keyboard users can jump directly to main content with tab + enter
+- **Focus Management**: Consistent high-contrast focus rings across all interactive elements
+- **Landmarks**: Proper semantic structure with `<main>` landmark and ARIA labels
+- **Motion Safety**: All animations respect `prefers-reduced-motion` settings
 
 ## 🎯 Performance Targets
 

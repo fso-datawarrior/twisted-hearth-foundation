@@ -82,6 +82,12 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-background;
   }
   
+  /* Global consistent focus ring */
+  :where(button, [href], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--accent-gold));
+    outline-offset: 2px;
+  }
+  
   /* Motion system - respects user preferences */
   .motion-safe {
     transition: all 0.2s ease-out;
@@ -101,6 +107,31 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 }
 
 @layer components {
+  /* Hunt rune found state enhancement */
+  .hunt-rune[aria-pressed="true"] { 
+    filter: saturate(1.1) brightness(1.1); 
+  }
+  
+  /* Section reveal styles */
+  .reveal {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .reveal--shown {
+    opacity: 1;
+    transform: translateY(0);
+    animation: rise-fade 450ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal--shown { 
+      animation: none !important; 
+      transform: none !important; 
+      opacity: 1 !important; 
+    }
+  }
+  
   /* Glow effects for interactive elements */
   .glow-purple {
     box-shadow: 0 0 20px var(--glow-purple);
@@ -128,6 +159,19 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     .hover-tilt:hover {
       transform: none;
     }
+  }
+  
+  /* Micro-interactions with motion safety */
+  .motion-safe\:hover\:scale-\[1\.01\]:hover {
+    transform: scale(1.01);
+  }
+  
+  .motion-safe\:active\:scale-\[0\.99\]:active {
+    transform: scale(0.99);
+  }
+  
+  .motion-safe\:hover\:-translate-y-0\.5:hover {
+    transform: translateY(-0.125rem);
   }
   
   /* Fade in animations */
@@ -167,6 +211,11 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   .text-shadow-gothic {
     text-shadow: var(--text-shadow-gothic);
   }
+}
+
+@keyframes rise-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
