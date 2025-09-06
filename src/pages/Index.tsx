@@ -1,10 +1,45 @@
+import { useState } from "react";
 import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
 import Card from "@/components/Card";
+import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [selectedVignette, setSelectedVignette] = useState<any>(null);
+
+  const rotatingTeasers = [
+    "A cottage too cozy to trust… where the meal is already waiting.",
+    "A beanstalk that leads to riches — and a very heavy downfall.",
+    "A glass coffin where mourning turns into midnight hunger.",
+    "Not every bedtime story ends with a kiss goodnight."
+  ];
+
+  const pastVignettes = [
+    {
+      id: 1,
+      title: "Goldilocks — The Butcher's Den",
+      hook: "What if the cozy little cottage wasn't a home at all… but a butcher's den?",
+      thumbImage: "/img/goldilocks-thumb.jpg",
+      teaserImage: "/img/goldilocks-teaser.jpg"
+    },
+    {
+      id: 2,
+      title: "Jack & the Beanstalk — A Thief's Reward",
+      hook: "What if Jack wasn't a hero at all, but a thief who finally got what he deserved?",
+      thumbImage: "/img/jack-thumb.jpg",
+      teaserImage: "/img/jack-teaser.jpg"
+    },
+    {
+      id: 3,
+      title: "Snow White & the Goblin-Dwarves — The Glass Coffin Feast",
+      hook: "What if the seven dwarves had a curse of their own?",
+      thumbImage: "/img/snowwhite-thumb.jpg",
+      teaserImage: "/img/snowwhite-teaser.jpg"
+    }
+  ];
+
   const featuredHighlights = [
     {
       id: 1,
@@ -32,11 +67,13 @@ const Index = () => {
       
       {/* Hero Section */}
       <HeroVideo
-        poster="https://images.unsplash.com/photo-1509557965043-e78fcf5299ad?w=1920&h=1080&fit=crop"
+        src="/hero.mp4"
+        poster="/hero-poster.jpg"
         headline="The Ruths' Twisted Fairytale Halloween Bash"
-        tagline="Where happily ever after takes a darker turn..."
+        tagline="Grimm, gruesome, and just the right amount of wrong."
+        rotatingLines={rotatingTeasers}
         cta={{
-          label: "Secure Your Place",
+          label: "RSVP",
           href: "/rsvp"
         }}
       />
@@ -45,6 +82,41 @@ const Index = () => {
       <main id="main-content" className="py-16 px-6">
         <div className="container mx-auto max-w-6xl">
           
+          {/* Past Vignettes Section */}
+          <section className="mb-16">
+            <h2 className="font-heading text-4xl md:text-5xl text-center mb-4 text-accent-gold">
+              Twisted Tales of Years Past
+            </h2>
+            <p className="font-body text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Glimpse the darkness that has unfolded in previous gatherings. Each tale a warning, 
+              each story a promise of what's to come.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8 mb-8">
+              {pastVignettes.map((vignette) => (
+                <Card
+                  key={vignette.id}
+                  variant="vignette"
+                  image={vignette.thumbImage}
+                  title={vignette.title}
+                  hook={vignette.hook}
+                  onClick={() => setSelectedVignette(vignette)}
+                  className="hover:shadow-lg hover:shadow-accent-green/20 hover:rotate-1 motion-safe transition-all cursor-pointer"
+                />
+              ))}
+            </div>
+            
+            <div className="text-center">
+              <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent-purple to-transparent mx-auto mb-4" />
+              <a 
+                href="/about" 
+                className="font-subhead text-accent-gold hover:text-ink transition-colors inline-flex items-center gap-2"
+              >
+                See more about the theme <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </section>
+
           {/* Event Overview */}
           <section className="text-center mb-16">
             <h2 className="font-heading text-4xl md:text-5xl mb-6 text-accent-gold">
@@ -158,6 +230,36 @@ const Index = () => {
           </section>
         </div>
       </main>
+      
+      {/* Vignette Modal */}
+      <Modal
+        isOpen={!!selectedVignette}
+        onClose={() => setSelectedVignette(null)}
+        ariaLabel={selectedVignette ? `Details for ${selectedVignette.title}` : "Vignette details"}
+        className="max-w-3xl"
+      >
+        {selectedVignette && (
+          <div className="text-center">
+            <img 
+              src={selectedVignette.teaserImage}
+              alt={selectedVignette.title}
+              className="w-full h-64 object-cover rounded-lg mb-6"
+              width="600"
+              height="256"
+              decoding="async"
+            />
+            <h3 
+              className="font-heading text-2xl md:text-3xl mb-4 text-accent-gold"
+              id={`vignette-title-${selectedVignette.id}`}
+            >
+              {selectedVignette.title}
+            </h3>
+            <p className="font-body text-lg text-muted-foreground leading-relaxed">
+              {selectedVignette.hook}
+            </p>
+          </div>
+        )}
+      </Modal>
       
       <Footer />
     </div>

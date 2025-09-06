@@ -140,8 +140,8 @@ src/
 ## 📊 Verification Screenshots
 
 Recommended verification points:
-1. **Hero Section**: Dark video background with gothic typography overlay
-2. **Vignettes Grid**: Past event cards with hover effects
+1. **Hero Section**: Dark video background with rotating teasers and unmute button
+2. **Past Vignettes**: Interactive cards that open accessible modals with teaser images
 3. **RSVP Form**: Validation working, gothic styling applied
 
 ## 🔮 Next Development Phase
