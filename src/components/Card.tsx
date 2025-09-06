@@ -20,12 +20,12 @@ const Card = ({
   className,
   children 
 }: CardProps) => {
-  const baseClasses = "bg-card rounded-lg border overflow-hidden transition-all motion-safe cursor-pointer";
+  const baseClasses = "group relative rounded-2xl bg-[--bg-2] shadow/50 transition cursor-pointer overflow-hidden";
   
   const variantClasses = {
-    vignette: "border-accent-purple/30 hover:border-accent-gold/50 hover:scale-105",
-    costume: "border-accent-green/30 hover:border-accent-red/50 hover:scale-105",
-    default: "border-accent-purple/30 hover:border-accent-gold/50"
+    vignette: "border border-accent-purple/30 hover:shadow-[0_0_30px_rgba(59,110,71,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]",
+    costume: "border border-accent-green/30 hover:shadow-[0_0_30px_rgba(59,47,74,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]",
+    default: "border border-accent-purple/30 hover:shadow-[0_0_30px_rgba(197,164,93,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]"
   };
 
   return (
