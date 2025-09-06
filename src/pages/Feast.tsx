@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const Feast = () => {
   const signatureDrinks = [
@@ -63,9 +64,16 @@ const Feast = () => {
       <main className="pt-20">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
-            <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
-              Feast of Dark Delights
-            </h1>
+            <div className="relative">
+              <HuntHintTrigger 
+                id="feast.header" 
+                label="Flavor sharp as a blade"
+                className="absolute top-0 right-4"
+              />
+              <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
+                Feast of Dark Delights
+              </h1>
+            </div>
             
             <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-3xl mx-auto">
               A twisted potluck where every dish tells a story. Bring something inspired by your 
@@ -82,8 +90,15 @@ const Feast = () => {
                 {signatureDrinks.map((drink, index) => (
                   <div 
                     key={index}
-                    className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe"
+                    className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
                   >
+                    {index === 0 && (
+                      <HuntHintTrigger 
+                        id="feast.board" 
+                        label="A diced confession"
+                        className="absolute top-2 right-2"
+                      />
+                    )}
                     <h3 className="font-subhead text-xl mb-3 text-accent-red">
                       {drink.name}
                     </h3>

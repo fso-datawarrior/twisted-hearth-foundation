@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import Carousel from "@/components/Carousel";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const Costumes = () => {
   const costumeInspiration = [
@@ -72,9 +73,16 @@ const Costumes = () => {
       <main className="pt-20">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
-            <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
-              Costume Inspiration Gallery
-            </h1>
+            <div className="relative">
+              <HuntHintTrigger 
+                id="costumes.header" 
+                label="Masks within masks"
+                className="absolute top-0 right-4"
+              />
+              <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
+                Costume Inspiration Gallery
+              </h1>
+            </div>
             
             <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-3xl mx-auto">
               Transform your favorite fairytale character with a twisted modern interpretation. 

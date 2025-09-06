@@ -132,6 +132,27 @@ src/
 - [ ] Photo upload functionality
 - [ ] Real-time guestbook
 
+## 🔍 Scavenger Hunt
+
+### How It Works
+- **15 Hidden Secrets**: Small glowing runes scattered across all pages
+- **Progress Tracking**: Floating chip appears after finding your first secret
+- **Rewards**: Complete modal with congratulatory message when all 15 are found
+- **Persistence**: Progress saved in localStorage across browser sessions
+
+### For Developers
+- **Reset Hunt**: In dev mode, use `window.hunt.reset()` in browser console
+- **Add New Hints**: Add entries to `hunt-config.ts` and place `<HuntHintTrigger>` components
+- **Testing**: Progress panel includes DEV-only reset button
+
+### Hunt Locations
+- **Home** (5): Logo area, hero overlay, CTA region, footer
+- **Vignettes** (4): Card overlays, theme link area  
+- **Costumes** (2): Header, contest section
+- **Feast** (2): Header, drinks section
+- **Schedule** (1): Near date/time
+- **About** (1): Footer area
+
 ## 🎯 Performance Targets
 
 - **LCP**: < 2.5s (Large Contentful Paint)

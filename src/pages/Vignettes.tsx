@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import Card from "@/components/Card";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const Vignettes = () => {
   const pastVignettes = [
@@ -48,27 +49,36 @@ const Vignettes = () => {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {pastVignettes.map((vignette) => (
-                <Card
-                  key={vignette.id}
-                  variant="vignette"
-                  image={vignette.image}
-                  title={vignette.title}
-                  hook={vignette.hook}
-                  onClick={() => {
-                    // TODO: Open modal with full vignette details
-                    console.log(`Opening vignette: ${vignette.title}`);
-                  }}
-                  className="hover-tilt motion-safe"
-                >
-                  <div className="mt-4 flex justify-between items-center text-sm">
-                    <span className="font-subhead text-accent-gold">{vignette.year}</span>
-                    <span className="font-body text-muted-foreground">{vignette.theme}</span>
-                  </div>
-                </Card>
+                <div key={vignette.id} className="relative">
+                  <HuntHintTrigger
+                    id={`vig.${vignette.id === 1 ? 'goldilocks' : vignette.id === 2 ? 'jack' : 'snowwhite'}`}
+                    label={
+                      vignette.id === 1 ? "Knives gleam where spoons should lie" :
+                      vignette.id === 2 ? "Coins seldom tell a clean story" :
+                      "Glass remembers every breath"
+                    }
+                    className="absolute top-2 right-2 z-10"
+                  />
+                  <Card
+                    variant="vignette"
+                    image={vignette.image}
+                    title={vignette.title}
+                    hook={vignette.hook}
+                    onClick={() => {
+                      console.log(`Opening vignette: ${vignette.title}`);
+                    }}
+                    className="hover-tilt motion-safe"
+                  >
+                    <div className="mt-4 flex justify-between items-center text-sm">
+                      <span className="font-subhead text-accent-gold">{vignette.year}</span>
+                      <span className="font-body text-muted-foreground">{vignette.theme}</span>
+                    </div>
+                  </Card>
+                </div>
               ))}
             </div>
             
-            <div className="mt-16 text-center">
+            <div className="mt-16 text-center relative">
               <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
                 <h2 className="font-subhead text-2xl mb-4 text-accent-gold">This Year's Vignette</h2>
                 <p className="font-body text-muted-foreground mb-6">
@@ -80,6 +90,11 @@ const Vignettes = () => {
                   "Not all who wander are lost... but some should be."
                 </div>
               </div>
+              <HuntHintTrigger 
+                id="vig.link" 
+                label="Stories have roots"
+                className="absolute bottom-4 right-4"
+              />
             </div>
           </div>
         </section>

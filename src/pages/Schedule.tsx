@@ -1,5 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { formatEventTime } from "@/lib/event";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const Schedule = () => {
   const scheduleItems = [
@@ -73,9 +75,16 @@ const Schedule = () => {
       <main className="pt-20">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
-            <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
-              Schedule of Dark Delights
-            </h1>
+            <div className="relative">
+              <HuntHintTrigger 
+                id="schedule.date" 
+                label="Time keeps darker promises"
+                className="absolute top-0 right-4"
+              />
+              <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
+                Schedule of Dark Delights
+              </h1>
+            </div>
             
             <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-3xl mx-auto">
               The evening unfolds like a storybook, with each chapter bringing new twists and turns. 
