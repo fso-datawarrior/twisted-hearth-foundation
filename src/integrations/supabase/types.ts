@@ -20,6 +20,8 @@ export type Database = {
           costume_idea: string | null
           created_at: string
           dietary_restrictions: string | null
+          email_sent_at: string | null
+          idempotency_token: string | null
           num_guests: number
           rsvp_id: string
           status: string
@@ -31,6 +33,8 @@ export type Database = {
           costume_idea?: string | null
           created_at?: string
           dietary_restrictions?: string | null
+          email_sent_at?: string | null
+          idempotency_token?: string | null
           num_guests?: number
           rsvp_id?: string
           status?: string
@@ -42,6 +46,8 @@ export type Database = {
           costume_idea?: string | null
           created_at?: string
           dietary_restrictions?: string | null
+          email_sent_at?: string | null
+          idempotency_token?: string | null
           num_guests?: number
           rsvp_id?: string
           status?: string
@@ -91,14 +97,24 @@ export type Database = {
     }
     Functions: {
       submit_rsvp: {
-        Args: {
-          p_contributions: string
-          p_costume_idea: string
-          p_dietary: string
-          p_email: string
-          p_name: string
-          p_num_guests: number
-        }
+        Args:
+          | {
+              p_contributions: string
+              p_costume_idea: string
+              p_dietary: string
+              p_email: string
+              p_idempotency?: string
+              p_name: string
+              p_num_guests: number
+            }
+          | {
+              p_contributions: string
+              p_costume_idea: string
+              p_dietary: string
+              p_email: string
+              p_name: string
+              p_num_guests: number
+            }
         Returns: string
       }
     }

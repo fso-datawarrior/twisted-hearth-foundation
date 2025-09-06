@@ -248,6 +248,7 @@ The RSVP system is fully implemented with a secure server-side email flow:
 - **Never exposed** in client code, UI, or browser
 - Location details sent only via confirmation email
 - RLS policies protect database access
+- Adds anti-spam (honeypot + ≥1s timing guard), ICS calendar invite attachment, CORS allowlist, and idempotent submits. No physical address is ever rendered client-side.
 
 ### Deployment Setup
 1. **SQL Migration**: Tables and RPC function already deployed
