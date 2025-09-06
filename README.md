@@ -3,7 +3,8 @@
 A dark, immersive Halloween event website featuring twisted fairytale themes, interactive storytelling, and gothic design.
 
 **Event Domain**: [partytillyou.rip](https://partytillyou.rip)
-**Hosts**: Jamie & Kat Ruth
+**Hosts**: Jamie & Kat Ruth  
+**Event Date**: Saturday, October 18, 2025 — 7:00 PM (America/Denver)
 
 ## 🎭 Project Overview
 

@@ -1,5 +1,27 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## [2.1.0] - 2025-01-06
+
+### 📅 Event Date Centralization
+
+#### Added
+- **Centralized Event Configuration**: Created `src/lib/event.ts` with official date helpers and timezone support
+- **Dynamic Date Display**: All pages now use standardized date formatting functions
+- **SEO Enhancement**: Added JSON-LD Event structured data to index.html with proper schema markup
+- **Official Event Date**: Saturday, October 18, 2025 at 7:00 PM (America/Denver timezone)
+
+#### Updated
+- **Index Page**: Replaced hard-coded "October 31st, 2024" with dynamic date formatting
+- **RSVP Page**: Updated event details section to use centralized date helpers
+- **Vignettes Page**: Updated year reference from 2024 to 2025 for current event
+- **README**: Added official event date information to project overview
+
+#### Technical Details
+- Date helpers support proper timezone handling (America/Denver)
+- Internationalization-ready date formatting with Intl.DateTimeFormat
+- Privacy maintained: no physical address in client-side code or structured data
+- All date references now use single source of truth from event config
+
 ## [2.0.0] - 2024-10-31
 
 ### Added

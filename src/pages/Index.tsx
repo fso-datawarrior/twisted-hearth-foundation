@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatEventLong, formatEventTime } from "@/lib/event";
 import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
@@ -160,9 +161,12 @@ const Index = () => {
 
           {/* Event Overview */}
           <section className="text-center mb-16">
-            <h2 className="font-heading text-4xl md:text-5xl mb-6 text-accent-gold">
-              October 31st, 2024
+            <h2 className="font-heading text-4xl md:text-5xl mb-6 text-accent-gold uppercase tracking-wide">
+              {formatEventLong()}
             </h2>
+            <p className="mt-1 text-sm opacity-80 mb-6">
+              {formatEventTime()} start • Location revealed after RSVP
+            </p>
             <p className="font-body text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Join Jamie & Kat Ruth for an immersive Halloween experience where beloved fairytales 
               meet contemporary darkness. This isn't your childhood storybook - this is what happens 
