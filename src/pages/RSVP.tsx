@@ -1,5 +1,6 @@
 import { useState } from "react";
 import NavBar from "@/components/NavBar";
+import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
@@ -189,11 +190,11 @@ const RSVP = () => {
               <div className="grid md:grid-cols-3 gap-4 text-center font-body text-sm">
                 <div>
                   <span className="block font-subhead text-accent-purple">Date</span>
-                  <span className="text-muted-foreground">October 31st, 2024</span>
+                  <span className="text-muted-foreground">{formatEventShort()}</span>
                 </div>
                 <div>
                   <span className="block font-subhead text-accent-purple">Time</span>
-                  <span className="text-muted-foreground">7:00 PM - Late</span>
+                  <span className="text-muted-foreground">{formatEventTime()} - Late</span>
                 </div>
                 <div>
                   <span className="block font-subhead text-accent-purple">Attire</span>

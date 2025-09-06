@@ -72,7 +72,7 @@ const Vignettes = () => {
               <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
                 <h2 className="font-subhead text-2xl mb-4 text-accent-gold">This Year's Vignette</h2>
                 <p className="font-body text-muted-foreground mb-6">
-                  We're crafting something special for 2024. Multiple twisted tales will unfold 
+                  We're crafting something special for 2025. Multiple twisted tales will unfold 
                   throughout the evening, with guests becoming part of the story. Which path 
                   will you choose when the clock strikes midnight?
                 </p>
