@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import NavBar from "@/components/NavBar";
 import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";
@@ -9,13 +9,15 @@ import { supabase } from "@/lib/supabase";
 
 const RSVP = () => {
   const { toast } = useToast();
+  const startRef = useRef(Date.now());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     guestCount: 1,
     costumeIdea: "",
     dietary: "",
-    contribution: ""
+    contribution: "",
+    nickname: "" // Honeypot field
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,18 +47,41 @@ const RSVP = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Anti-spam: timing guard and honeypot
+    if (Date.now() - startRef.current < 1000 || formData.nickname) {
+      toast({
+        title: "RSVP Received!",
+        description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
+        variant: "default"
+      });
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        guestCount: 1,
+        costumeIdea: "",
+        dietary: "",
+        contribution: "",
+        nickname: ""
+      });
+      return;
+    }
+    
     if (validateForm()) {
       setIsSubmitting(true);
       
       try {
+        const idem = crypto?.randomUUID?.() ?? String(Date.now());
+        
         // Call Supabase RPC to save RSVP
-        const { data: rsvpId, error: rpcError } = await supabase.rpc("submit_rsvp", {
+        const { data, error: rpcError } = await supabase.rpc("submit_rsvp", {
           p_name: formData.name,
-          p_email: formData.email,
+          p_email: formData.email.toLowerCase().trim(),
           p_num_guests: formData.guestCount,
           p_costume_idea: formData.costumeIdea || null,
           p_dietary: formData.dietary || null,
           p_contributions: formData.contribution || null,
+          p_idempotency: idem,
         });
 
         if (rpcError) {
@@ -64,13 +89,14 @@ const RSVP = () => {
           throw new Error("Failed to save RSVP");
         }
 
+        const rsvpId = (data?.rsvp_id ?? data?.[0]?.rsvp_id) as string;
         console.log("RSVP saved successfully:", rsvpId);
 
         // Send confirmation email via Edge Function
         try {
           const { error: emailError } = await supabase.functions.invoke("send-rsvp-confirmation", {
             body: {
-              rsvpId: rsvpId as string,
+              rsvpId: rsvpId,
               name: formData.name,
               email: formData.email,
               guests: formData.guestCount,
@@ -99,7 +125,8 @@ const RSVP = () => {
           guestCount: 1,
           costumeIdea: "",
           dietary: "",
-          contribution: ""
+          contribution: "",
+          nickname: ""
         });
       } catch (error) {
         console.error("RSVP Error:", error);
@@ -140,6 +167,18 @@ const RSVP = () => {
             
             <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
               <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
+                {/* Honeypot field - anti-spam */}
+                <input 
+                  type="text" 
+                  name="nickname" 
+                  tabIndex={-1} 
+                  autoComplete="off" 
+                  className="hidden" 
+                  aria-hidden="true"
+                  value={formData.nickname}
+                  onChange={(e) => handleInputChange("nickname", e.target.value)}
+                />
+                
                 {/* Required Fields */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <FormField
