@@ -14,13 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      rsvps: {
+        Row: {
+          contributions: string | null
+          costume_idea: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          num_guests: number
+          rsvp_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contributions?: string | null
+          costume_idea?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          num_guests?: number
+          rsvp_id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contributions?: string | null
+          costume_idea?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          num_guests?: number
+          rsvp_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          auth_provider_id: string | null
+          created_at: string
+          email: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth_provider_id?: string | null
+          created_at?: string
+          email: string
+          name: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          auth_provider_id?: string | null
+          created_at?: string
+          email?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_rsvp: {
+        Args: {
+          p_contributions: string
+          p_costume_idea: string
+          p_dietary: string
+          p_email: string
+          p_name: string
+          p_num_guests: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
