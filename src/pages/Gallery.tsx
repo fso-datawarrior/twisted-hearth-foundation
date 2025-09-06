@@ -1,7 +1,82 @@
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Upload } from "lucide-react";
 
 const Gallery = () => {
+  const [images, setImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadImages();
+  }, []);
+
+  const loadImages = async () => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('gallery')
+        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+      
+      if (error) throw error;
+      
+      const imageUrls = data
+        ?.filter(file => file.name.includes('/'))
+        ?.map(file => supabase.storage.from('gallery').getPublicUrl(file.name).data.publicUrl)
+        || [];
+      
+      setImages(imageUrls);
+    } catch (error) {
+      console.error('Error loading images:', error);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !user) return;
+
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        
+        const { error } = await supabase.storage
+          .from('gallery')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) throw error;
+      }
+      
+      toast({
+        title: "Images uploaded!",
+        description: "Your photos have been added to the gallery.",
+      });
+      
+      loadImages();
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  };
   const placeholderImages = [
     "https://images.unsplash.com/photo-1509557965043-e78fcf5299ad?w=400&h=400&fit=crop",
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
@@ -27,7 +102,73 @@ const Gallery = () => {
               Every image tells a story... some darker than others.
             </p>
             
-            {/* Coming Soon Message */}
+            {/* Upload Section */}
+            {user ? (
+              <div className="mb-12 text-center relative">
+                <HuntHintTrigger 
+                  id="gallery.upload" 
+                  label="A picture is a promise"
+                  bonus={true}
+                  className="absolute -top-2 -right-2"
+                />
+                <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
+                  <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Share Your Photos</h2>
+                  <Label htmlFor="image-upload" className="cursor-pointer">
+                    <div className="border-2 border-dashed border-accent-purple/50 rounded-lg p-8 hover:border-accent-gold/50 transition-colors">
+                      <Upload className="mx-auto mb-4 text-accent-purple" size={48} />
+                      <p className="font-subhead text-accent-purple mb-2">Click to upload images</p>
+                      <p className="font-body text-sm text-muted-foreground">
+                        Multiple files supported. By uploading, you confirm you have permission to share these images.
+                      </p>
+                    </div>
+                    <Input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="sr-only"
+                    />
+                  </Label>
+                  {uploading && (
+                    <p className="font-body text-sm text-accent-gold mt-4">Uploading...</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="mb-12 text-center">
+                <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
+                  <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Sign In to Share</h2>
+                  <p className="font-body text-muted-foreground mb-6">
+                    Sign in to upload and share your photos from the event.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Image Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {images.length > 0 ? (
+                images.map((url, index) => (
+                  <div key={index} className="aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+                    <img 
+                      src={url}
+                      alt={`Gallery image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="font-body text-muted-foreground">
+                    No images yet. Be the first to share memories from the bash!
+                  </p>
+                </div>
+              )}
+            </div>
             <div className="text-center mb-16">
               <div className="bg-card p-12 rounded-lg border border-accent-purple/30 max-w-3xl mx-auto">
                 <div className="font-heading text-6xl mb-6 text-accent-gold">🖼️</div>

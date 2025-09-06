@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
@@ -28,15 +29,16 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <HuntProvider>
-        <SkipLink />
-        <Toaster />
-        <Sonner />
-        <ErrorBoundary>
-          <Suspense fallback={
-            <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-          }>
-            <BrowserRouter>
+      <AuthProvider>
+        <HuntProvider>
+          <SkipLink />
+          <Toaster />
+          <Sonner />
+          <ErrorBoundary>
+            <Suspense fallback={
+              <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+            }>
+              <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />
@@ -53,12 +55,13 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </Suspense>
-        </ErrorBoundary>
-        
-        {/* Hunt UI overlays */}
-        <HuntProgress />
-        <HuntReward />
-      </HuntProvider>
+          </ErrorBoundary>
+          
+          {/* Hunt UI overlays */}
+          <HuntProgress />
+          <HuntReward />
+        </HuntProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

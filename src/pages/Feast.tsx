@@ -1,9 +1,80 @@
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Feast = () => {
+  const [potluckItems, setPotluckItems] = useState<any[]>([]);
+  const [itemName, setItemName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  // Load potluck items
+  useEffect(() => {
+    const loadPotluckItems = async () => {
+      const { data, error } = await supabase
+        .from('potluck_items')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.error("Error loading potluck items:", error);
+      } else {
+        setPotluckItems(data || []);
+      }
+    };
+    
+    loadPotluckItems();
+  }, []);
+
+  const handleSubmitItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !itemName.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('potluck_items')
+        .insert({
+          user_id: user.id,
+          item_name: itemName.trim(),
+          notes: notes.trim() || null
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Optimistically add to list
+      setPotluckItems([data, ...potluckItems]);
+      setItemName("");
+      setNotes("");
+      
+      toast({
+        title: "Contribution added!",
+        description: "Your dish has been added to the feast.",
+      });
+    } catch (error) {
+      console.error("Error adding potluck item:", error);
+      toast({
+        title: "Failed to add item",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const signatureDrinks = [
     {
       name: "Poison Apple Martini",
@@ -125,7 +196,125 @@ const Feast = () => {
               </div>
             </div>
             
-            {/* Potluck Guidelines */}
+            {/* Potluck Contributions Panel */}
+            <div className="mb-16 relative">
+              <HuntHintTrigger 
+                id="feast.potluck" 
+                label="What's shared tastes sweeter"
+                bonus={true}
+                className="absolute -top-2 -right-2 z-10"
+              />
+              <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
+                Potluck Contributions
+              </h2>
+              <p className="font-body text-center mb-8 text-muted-foreground max-w-2xl mx-auto">
+                Bring a dish for the banquet table—beware the knives. See what others are contributing 
+                and add your own twisted creation to the feast.
+              </p>
+              
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* Contribution Form */}
+                <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
+                  <h3 className="font-subhead text-xl mb-4 text-accent-purple">Add Your Contribution</h3>
+                  
+                  {user ? (
+                    <form onSubmit={handleSubmitItem} className="space-y-4">
+                      <div>
+                        <Label htmlFor="item_name" className="font-subhead text-accent-gold">
+                          Dish Name
+                        </Label>
+                        <Input
+                          id="item_name"
+                          value={itemName}
+                          onChange={(e) => setItemName(e.target.value)}
+                          placeholder="e.g., Grandmother's Secret Stew"
+                          maxLength={80}
+                          required
+                          disabled={isLoading}
+                          className="bg-background border-accent-purple/30 focus:border-accent-gold"
+                        />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {itemName.length}/80 characters
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="notes" className="font-subhead text-accent-gold">
+                          Notes (Optional)
+                        </Label>
+                        <Textarea
+                          id="notes"
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Any special ingredients, dietary info, or dark secrets..."
+                          maxLength={140}
+                          rows={3}
+                          disabled={isLoading}
+                          className="bg-background border-accent-purple/30 focus:border-accent-gold"
+                        />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {notes.length}/140 characters
+                        </div>
+                      </div>
+                      
+                      <Button
+                        type="submit"
+                        disabled={isLoading || !itemName.trim()}
+                        className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+                      >
+                        {isLoading ? "Adding..." : "Add to Feast"}
+                      </Button>
+                    </form>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="font-body text-muted-foreground mb-4">
+                        Sign in to add what you'll bring to the feast
+                      </p>
+                      <Button 
+                        onClick={() => {/* This will open auth modal via NavBar */}}
+                        variant="outline"
+                        className="border-accent-purple hover:bg-accent-purple/10 font-subhead"
+                      >
+                        Sign In to Contribute
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Current Contributions List */}
+                <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
+                  <h3 className="font-subhead text-xl mb-4 text-accent-purple">Current Contributions</h3>
+                  
+                  <div className="space-y-4 max-h-96 overflow-y-auto" role="region" aria-label="Potluck contributions list">
+                    {potluckItems.length > 0 ? (
+                      potluckItems.map((item) => (
+                        <div key={item.id} className="bg-bg-2 p-4 rounded border border-accent-purple/20">
+                          <h4 className="font-subhead text-accent-gold text-sm">
+                            {item.item_name}
+                          </h4>
+                          {item.notes && (
+                            <p className="font-body text-xs text-muted-foreground mt-1">
+                              {item.notes}
+                            </p>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-2">
+                            Added {new Date(item.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="font-body text-muted-foreground">
+                          No contributions yet. Be the first to add a dish!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Original Potluck Guidelines */}
             <div className="mb-16">
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Potluck Contribution Guidelines

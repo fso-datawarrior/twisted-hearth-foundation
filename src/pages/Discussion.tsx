@@ -1,8 +1,67 @@
+import { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Discussion = () => {
+  const [posts, setPosts] = useState<any[]>([]);
+  const [displayName, setDisplayName] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadPosts();
+    if (user?.email) {
+      setDisplayName(user.email.split("@")[0]);
+    }
+  }, [user]);
+
+  const loadPosts = async () => {
+    const { data, error } = await supabase
+      .from('guestbook')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    if (!error) setPosts(data || []);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !message.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('guestbook')
+        .insert({
+          user_id: user.id,
+          display_name: displayName.trim(),
+          message: message.trim()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setPosts([data, ...posts]);
+      setMessage("");
+      toast({ title: "Message posted!", description: "Your note has been added to the guestbook." });
+    } catch (error) {
+      toast({ title: "Failed to post", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // TODO v2: Connect to Supabase for real guestbook functionality
   const placeholderMessages = [
     {
