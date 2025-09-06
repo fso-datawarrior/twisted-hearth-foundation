@@ -3,23 +3,25 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
 import Index from "./pages/Index";
-import About from "./pages/About";
-import Vignettes from "./pages/Vignettes";
-import Schedule from "./pages/Schedule";
-import Costumes from "./pages/Costumes";
-import Feast from "./pages/Feast";
-import RSVP from "./pages/RSVP";
-import Gallery from "./pages/Gallery";
-import Discussion from "./pages/Discussion";
-import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+
+// Lazy load non-critical pages
+const About = lazy(() => import("./pages/About"));
+const Vignettes = lazy(() => import("./pages/Vignettes"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const Costumes = lazy(() => import("./pages/Costumes"));
+const Feast = lazy(() => import("./pages/Feast"));
+const RSVP = lazy(() => import("./pages/RSVP"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const Discussion = lazy(() => import("./pages/Discussion"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const queryClient = new QueryClient();
 
