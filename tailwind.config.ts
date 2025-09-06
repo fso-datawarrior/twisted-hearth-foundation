@@ -13,7 +13,24 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        heading: ['Cinzel Decorative', 'serif'],
+        subhead: ['IM Fell English SC', 'serif'],
+        body: ['Inter', 'sans-serif'],
+      },
       colors: {
+        // Core theme colors
+        bg: 'hsl(var(--bg))',
+        'bg-2': 'hsl(var(--bg-2))',
+        ink: 'hsl(var(--ink))',
+        
+        // Fairytale accents
+        'accent-purple': 'hsl(var(--accent-purple))',
+        'accent-green': 'hsl(var(--accent-green))',
+        'accent-red': 'hsl(var(--accent-red))',
+        'accent-gold': 'hsl(var(--accent-gold))',
+        
+        // Semantic colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

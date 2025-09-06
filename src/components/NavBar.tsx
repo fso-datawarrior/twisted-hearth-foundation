@@ -1,0 +1,130 @@
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu, X } from "lucide-react";
+
+interface NavBarProps {
+  variant?: "public";
+  ctaLabel?: string;
+}
+
+const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
+    { to: "/vignettes", label: "Vignettes" },
+    { to: "/schedule", label: "Schedule" },
+    { to: "/costumes", label: "Costumes" },
+    { to: "/feast", label: "Feast" },
+    { to: "/gallery", label: "Gallery" },
+    { to: "/discussion", label: "Discussion" },
+    { to: "/contact", label: "Contact" },
+  ];
+
+  return (
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe ${
+        isScrolled ? "bg-accent-purple/95 backdrop-blur-md shadow-lg" : "bg-transparent"
+      }`}
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo/Title */}
+          <Link 
+            to="/" 
+            className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
+            aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
+          >
+            The Ruths' Bash
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-8">
+            {navLinks.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe focus-visible ${
+                  location.pathname === to
+                    ? "text-accent-gold border-b-2 border-accent-gold"
+                    : "text-ink hover:text-accent-gold"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+            <Button 
+              asChild 
+              variant="destructive" 
+              className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead"
+            >
+              <Link to="/rsvp">{ctaLabel}</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2 text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div 
+            id="mobile-menu"
+            className="lg:hidden absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
+          >
+            <div className="container mx-auto px-6 py-4 space-y-4">
+              {navLinks.map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe focus-visible ${
+                    location.pathname === to
+                      ? "text-accent-gold"
+                      : "text-ink hover:text-accent-gold"
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+              <Button 
+                asChild 
+                variant="destructive" 
+                className="w-full bg-accent-red hover:bg-accent-red/80 font-subhead"
+              >
+                <Link to="/rsvp" onClick={() => setIsMenuOpen(false)}>
+                  {ctaLabel}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;

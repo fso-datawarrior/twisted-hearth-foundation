@@ -1,73 +1,165 @@
-# Welcome to your Lovable project
+# The Ruths' Twisted Fairytale Halloween Bash
 
-## Project info
+A dark, immersive Halloween event website featuring twisted fairytale themes, interactive storytelling, and gothic design.
 
-**URL**: https://lovable.dev/projects/b2f1725a-abb3-40e7-bc74-4d5d9e0ed98b
+**Event Domain**: [partytillyou.rip](https://partytillyou.rip)
+**Hosts**: Jamie & Kat Ruth
 
-## How can I edit this code?
+## 🎭 Project Overview
 
-There are several ways of editing your application.
+This website serves as the digital gateway to an exclusive Halloween celebration where beloved fairytales meet contemporary darkness. Built with React, TypeScript, and Tailwind CSS, it features a comprehensive design system, multiple themed pages, and scaffolding for future interactive features.
 
-**Use Lovable**
+## 🚀 Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b2f1725a-abb3-40e7-bc74-4d5d9e0ed98b) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Development Server
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Production Preview
+```bash
+npm run build
+npm run preview
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🎨 Design System
 
-**Use GitHub Codespaces**
+### Color Palette (HSL)
+All colors are defined as semantic tokens in `src/index.css`:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Core Theme**: 
+  - `--bg`: Deep charcoal (#0B0B0C)
+  - `--bg-2`: Midnight purple (#1A1F3A)  
+  - `--ink`: Soft white (#EDEDED)
 
-## What technologies are used for this project?
+- **Fairytale Accents**:
+  - `--accent-purple`: Enchanted purple (#3B1F4A)
+  - `--accent-green`: Forest green (#3B6E47)
+  - `--accent-red`: Blood red (#8B0000)
+  - `--accent-gold`: Ancient gold (#C5A45D)
 
-This project is built with:
+### Typography
+- **Headings**: Cinzel Decorative (Gothic elegance)
+- **Subheadings**: IM Fell English SC (Fairytale authenticity)  
+- **Body Text**: Inter (Modern readability)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Motion System
+- Respects `prefers-reduced-motion`
+- Subtle hover effects (glow, tilt, scale)
+- Smooth transitions with `motion-safe` class
 
-## How can I deploy this project?
+## 📁 Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/b2f1725a-abb3-40e7-bc74-4d5d9e0ed98b) and click on Share -> Publish.
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # shadcn/ui components
+│   ├── hunt/            # Scavenger hunt stubs (v2)
+│   ├── NavBar.tsx       # Main navigation
+│   ├── Footer.tsx       # Gothic footer with icons
+│   ├── Card.tsx         # Multi-variant card component
+│   ├── Carousel.tsx     # Accessible image carousel
+│   ├── FormField.tsx    # Form input with validation
+│   ├── HeroVideo.tsx    # Video/image hero section
+│   └── Modal.tsx        # Accessible modal with focus trap
+├── pages/               # Route components
+│   ├── Index.tsx        # Home/Hero page
+│   ├── About.tsx        # Theme explanation
+│   ├── Vignettes.tsx    # Past event showcases
+│   ├── Schedule.tsx     # Event timeline
+│   ├── Costumes.tsx     # Inspiration gallery
+│   ├── Feast.tsx        # Food & drinks info
+│   ├── RSVP.tsx         # Registration form
+│   ├── Gallery.tsx      # Photo gallery (placeholder)
+│   ├── Discussion.tsx   # Guestbook (placeholder)
+│   └── Contact.tsx      # Host information
+├── lib/                 # Utilities and integrations
+│   ├── utils.ts         # Tailwind utility function
+│   ├── supabase.ts      # Backend client (v3)
+│   └── mailjet.ts       # Email service (v3)
+└── styles/
+    └── index.css        # Design system tokens
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 🔒 Privacy & Security
 
-Yes, you can!
+### Critical Privacy Rule
+**NEVER render physical addresses in client-side code.** Location details are provided only via server-side email after RSVP confirmation.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Accessibility (WCAG 2.1 AA)
+- Semantic HTML structure
+- Keyboard navigation support
+- Focus management in modals
+- Screen reader friendly
+- Color contrast >= 4.5:1
+- `prefers-reduced-motion` support
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🛠️ Technology Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui components  
+- **Routing**: React Router DOM (file-based structure)
+- **State**: Lightweight React state (no global store yet)
+- **Backend** (v3): Supabase integration planned
+- **Email** (v3): Mailjet server-side integration planned
+
+## 📋 Current Status - Scaffold v1
+
+### ✅ Completed
+- [x] Full design system with gothic fairytale theme
+- [x] Responsive navigation with mobile menu
+- [x] All 10 routes with themed content
+- [x] Reusable component library
+- [x] RSVP form with client-side validation
+- [x] Accessibility features and focus management
+- [x] Performance optimizations (font-display, lazy loading ready)
+- [x] SEO meta tags and semantic HTML
+
+### 🔄 TODO v2 - Interactive Features
+- [ ] Scavenger hunt system (components stubbed in `src/components/hunt/`)
+- [ ] Photo gallery with real images
+- [ ] Interactive guestbook/discussion
+- [ ] Advanced carousel functionality
+- [ ] Animation refinements
+
+### 🔄 TODO v3 - Backend Integration  
+- [ ] Supabase project setup and connection
+- [ ] RSVP → Database → Email automation
+- [ ] Mailjet server-side email templates
+- [ ] User authentication (if needed)
+- [ ] Photo upload functionality
+- [ ] Real-time guestbook
+
+## 🎯 Performance Targets
+
+- **LCP**: < 2.5s (Large Contentful Paint)
+- **CLS**: < 0.1 (Cumulative Layout Shift)  
+- **INP**: < 200ms (Interaction to Next Paint)
+
+## 📊 Verification Screenshots
+
+Recommended verification points:
+1. **Hero Section**: Dark video background with gothic typography overlay
+2. **Vignettes Grid**: Past event cards with hover effects
+3. **RSVP Form**: Validation working, gothic styling applied
+
+## 🔮 Next Development Phase
+
+When ready for v2, focus on:
+1. Enable hunt system: Set `HUNT_ENABLED = true` in hunt components
+2. Connect real image sources for gallery
+3. Implement interactive storytelling elements
+4. Add more sophisticated animations
+
+For v3 backend integration:
+1. Click the green Supabase button in Lovable interface
+2. Set up database tables for RSVPs, hunts, comments
+3. Configure Mailjet API keys as secrets
+4. Implement server-side email with location injection
+
+---
+
+*"Not all who wander are lost... but some should be."*
+
+**© 2024 Jamie & Kat Ruth. All twisted tales reserved.**
