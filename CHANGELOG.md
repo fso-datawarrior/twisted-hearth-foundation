@@ -1,5 +1,36 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## v3.2 — Motion & accessibility polish: proximity-based hunt reveals, section animations, skip link, global focus ring.
+
+### 🎨 Motion & Accessibility Enhancements
+
+#### Added
+- **Proximity-Based Hunt Reveals**: Hunt runes now invisible until pointer is within ~120px (desktop) or faint-visible (touch)
+- **Section Reveal Animations**: Major content sections gently animate into view using Intersection Observer
+- **Skip Link**: Keyboard users can jump directly to main content with tab + enter
+- **Global Focus Ring**: Consistent high-contrast focus indicators across all interactive elements
+- **Motion Safety**: All animations respect `prefers-reduced-motion` user preferences
+
+#### Enhanced Components
+- **HuntHintTrigger**: Complete rewrite with proximity detection, aria-pressed states, and gold tinting for found runes
+- **Index Page**: Added section reveal animations to vignettes, preparation, and CTA sections
+- **CSS Animation System**: New `reveal` classes with rise-fade keyframes and motion-reduce fallbacks
+
+#### New Hooks
+- **use-proximity**: Detects pointer distance for stealthy hunt rune reveals on desktop
+- **use-reveal**: Intersection Observer hook for scroll-triggered section animations
+
+#### Accessibility Improvements
+- **Proper Landmarks**: Main content wrapped with `<main id="main">` for skip link targeting
+- **Enhanced ARIA**: Hunt runes announce pressed state to screen readers
+- **Keyboard Navigation**: All interactive elements properly focusable with consistent styling
+- **Debug Mode**: Set `VITE_HUNT_DEBUG=1` to force hunt runes visible during development
+
+#### Technical Enhancements
+- **Passive Event Listeners**: Optimized pointer tracking with passive scroll handling
+- **Performance**: Efficient cleanup of observers and event listeners
+- **Reduced Motion**: Comprehensive support for motion preferences across all animations
+
 ## v3.1 — SPA links, ErrorBoundary + Suspense, loading states (hero/images/forms), SEO meta tags
 
 ### 🔧 Code Quality & Resilience Improvements

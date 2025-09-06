@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { formatEventLong, formatEventTime } from "@/lib/event";
+import { useReveal } from "@/hooks/use-reveal";
 import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
@@ -59,6 +60,11 @@ function OneLinerRotator() {
 const Index = () => {
   const [selectedVignette, setSelectedVignette] = useState<any>(null);
   const navigate = useNavigate();
+  
+  // Section reveals
+  const { ref: vigRef, shown: vigShown } = useReveal();
+  const { ref: prepRef, shown: prepShown } = useReveal();
+  const { ref: ctaRef, shown: ctaShown } = useReveal();
 
   const pastVignettes = [
     {
@@ -149,11 +155,11 @@ const Index = () => {
       </div>
       
       {/* Main Content */}
-      <main id="main-content" className="py-16 px-6">
+      <main id="main" className="py-16 px-6">
         <div className="container mx-auto max-w-6xl">
           
           {/* Past Vignettes Section */}
-          <section className="mb-16">
+          <section ref={vigRef as any} className={`mb-16 reveal ${vigShown ? "reveal--shown" : ""}`}>
             <h2 className="font-heading text-4xl md:text-5xl text-center mb-4 text-accent-gold">
               Twisted Tales of Years Past
             </h2>
@@ -171,7 +177,7 @@ const Index = () => {
                   title={vignette.title}
                   hook={vignette.hook}
                   onClick={() => setSelectedVignette(vignette)}
-                  className="hover:shadow-lg hover:shadow-accent-green/20 hover:rotate-1 motion-safe transition-all cursor-pointer"
+                  className="hover:shadow-lg hover:shadow-accent-green/20 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] transition-all motion-reduce:transition-none cursor-pointer"
                 />
               ))}
             </div>
@@ -239,7 +245,7 @@ const Index = () => {
           </section>
           
           {/* Quick Links */}
-          <section className="mb-16">
+          <section ref={prepRef as any} className={`mb-16 reveal ${prepShown ? "reveal--shown" : ""}`}>
             <div className="bg-card p-8 rounded-lg border border-accent-purple/30">
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Prepare for Your Twisted Tale
@@ -278,7 +284,7 @@ const Index = () => {
           </section>
           
           {/* Call to Action */}
-          <section className="text-center">
+          <section ref={ctaRef as any} className={`text-center reveal ${ctaShown ? "reveal--shown" : ""}`}>
             <div className="bg-bg-2 p-12 rounded-lg border border-accent-red/50 max-w-3xl mx-auto">
               <h2 className="font-heading text-4xl mb-6 text-accent-red">
                 Your Story Awaits
@@ -291,7 +297,7 @@ const Index = () => {
               <Button 
                 asChild 
                 size="lg"
-                className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-xl px-16 py-6 glow-gold hover:scale-105 transition-all motion-safe"
+                className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-xl px-16 py-6 glow-gold motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
               >
                 <Link to="/rsvp">Join the Tale</Link>
               </Button>

@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
+import SkipLink from "@/components/SkipLink";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Vignettes from "./pages/Vignettes";
@@ -26,6 +27,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <HuntProvider>
+        <SkipLink />
         <Toaster />
         <Sonner />
         <ErrorBoundary>
