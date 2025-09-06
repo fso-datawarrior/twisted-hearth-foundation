@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,11 +8,13 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  ariaLabel: string;
+  ariaLabel?: string;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
   className?: string;
 }
 
-const Modal = ({ isOpen, onClose, children, ariaLabel, className }: ModalProps) => {
+const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLabelledBy, 'aria-describedby': ariaDescribedBy, className }: ModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -77,13 +80,18 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, className }: ModalProps) 
   };
 
   if (!isOpen) return null;
+  
+  // Guard SSR
+  if (typeof document === "undefined") return null;
 
-  return (
+  const content = (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
     >
       {/* Backdrop */}
       <div 
@@ -120,6 +128,8 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, className }: ModalProps) 
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 };
 
 export default Modal;
