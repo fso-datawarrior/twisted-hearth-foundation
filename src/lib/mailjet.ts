@@ -1,5 +1,6 @@
-// TODO v3: Implement server-side Mailjet integration
-// This is a stub for email functionality
+// PRIVACY: This file is intentionally unused on the client for security
+// All email functionality happens server-side via Supabase Edge Functions
+// This prevents exposing API keys or private addresses in the client bundle
 
 interface EmailData {
   to: string;

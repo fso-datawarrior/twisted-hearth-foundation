@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const RSVP = () => {
   const { toast } = useToast();
@@ -48,13 +49,46 @@ const RSVP = () => {
       setIsSubmitting(true);
       
       try {
-        // TODO v3: Connect to Supabase -> Mailjet flow
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-        console.log("RSVP Form Data:", formData);
+        // Call Supabase RPC to save RSVP
+        const { data: rsvpId, error: rpcError } = await supabase.rpc("submit_rsvp", {
+          p_name: formData.name,
+          p_email: formData.email,
+          p_num_guests: formData.guestCount,
+          p_costume_idea: formData.costumeIdea || null,
+          p_dietary: formData.dietary || null,
+          p_contributions: formData.contribution || null,
+        });
+
+        if (rpcError) {
+          console.error("RPC Error:", rpcError);
+          throw new Error("Failed to save RSVP");
+        }
+
+        console.log("RSVP saved successfully:", rsvpId);
+
+        // Send confirmation email via Edge Function
+        try {
+          const { error: emailError } = await supabase.functions.invoke("send-rsvp-confirmation", {
+            body: {
+              rsvpId: rsvpId as string,
+              name: formData.name,
+              email: formData.email,
+              guests: formData.guestCount,
+            },
+          });
+
+          if (emailError) {
+            console.warn("Email send failed:", emailError);
+            // Don't fail the RSVP if email fails
+          }
+        } catch (emailErr) {
+          console.warn("Email function error:", emailErr);
+          // Email failure doesn't block RSVP success
+        }
         
         toast({
           title: "RSVP Received!",
-          description: "Your twisted tale reservation has been confirmed. Prepare for the unexpected...",
+          description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
           variant: "default"
         });
         
@@ -68,9 +102,10 @@ const RSVP = () => {
           contribution: ""
         });
       } catch (error) {
+        console.error("RSVP Error:", error);
         toast({
           title: "Error",
-          description: "Something went wrong. Please try again.",
+          description: "We couldn't save your RSVP. Please try again.",
           variant: "destructive"
         });
       } finally {
