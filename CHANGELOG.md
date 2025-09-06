@@ -1,6 +1,17 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
-## [2.1.0] - 2025-01-06
+## v3 — Scavenger Hunt v1: 15 hints, progress chip, reward modal, localStorage persistence
+
+- Implemented complete scavenger hunt system with 15 hidden triggers across all pages
+- Added HuntProvider context with localStorage persistence and progress tracking
+- Created HuntHintTrigger interactive component with keyboard accessibility 
+- Built floating progress chip and detailed progress panel with reset function
+- Added reward modal with confetti animation and random congratulatory messages
+- Placed hunt triggers strategically: Home (5), Vignettes (4), Costumes (2), Feast (2), Schedule (1), About (1)
+- Full keyboard support, reduced-motion compliance, and focus management
+- Dev tools: window.hunt.reset() for testing, DEV-only reset button in progress panel
+
+## v2.1 — Centralized event date & updated to Oct 18, 2025; added JSON-LD Event metadata
 
 ### 📅 Event Date Centralization
 

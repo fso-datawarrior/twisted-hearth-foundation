@@ -1,5 +1,6 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const About = () => {
   return (
@@ -77,7 +78,14 @@ const About = () => {
         </section>
       </main>
       
-      <Footer />
+      <div className="relative">
+        <HuntHintTrigger 
+          id="about.sig" 
+          label="Ink that won't dry"
+          className="absolute top-4 left-8"
+        />
+        <Footer />
+      </div>
     </div>
   );
 };

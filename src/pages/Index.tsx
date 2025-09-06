@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
+import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const LINES = [
   "A cottage too cozy to trust… where the meal is already waiting.",
@@ -106,19 +107,46 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hunt triggers positioned absolutely */}
+      <div className="relative">
+        <HuntHintTrigger 
+          id="home.logo" 
+          label="Hidden mark near the crest" 
+          className="absolute top-4 left-4 z-50" 
+        />
+        <HuntHintTrigger 
+          id="home.moon" 
+          label="Something stirs beneath the moon"
+          className="absolute top-6 right-6 z-50"
+        />
+      </div>
+      
       <NavBar />
       
       {/* Hero Section */}
-      <HeroVideo
-        src="/hero.mp4"
-        poster="/hero-poster.jpg"
-        headline="The Ruths' Twisted Fairytale Halloween Bash"
-        tagline="Grimm, gruesome, and just the right amount of wrong."
-        ctaLabel="RSVP"
-        onCta={() => navigate("/rsvp")}
-      >
-        <OneLinerRotator />
-      </HeroVideo>
+      <div className="relative">
+        <HuntHintTrigger 
+          id="home.path" 
+          label="Footsteps that don't belong"
+          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50"
+        />
+        <HuntHintTrigger 
+          id="home.cta" 
+          label="A whisper urging you forward"
+          className="absolute bottom-6 right-8 z-50"
+        />
+        
+        <HeroVideo
+          src="/hero.mp4"
+          poster="/hero-poster.jpg"
+          headline="The Ruths' Twisted Fairytale Halloween Bash"
+          tagline="Grimm, gruesome, and just the right amount of wrong."
+          ctaLabel="RSVP"
+          onCta={() => navigate("/rsvp")}
+        >
+          <OneLinerRotator />
+        </HeroVideo>
+      </div>
       
       {/* Main Content */}
       <main id="main-content" className="py-16 px-6">
@@ -306,7 +334,15 @@ const Index = () => {
         )}
       </Modal>
       
-      <Footer />
+      {/* Footer with hunt trigger */}
+      <div className="relative">
+        <HuntHintTrigger 
+          id="home.footer.icon" 
+          label="A faint crown in the dark"
+          className="absolute top-2 left-8 z-50"
+        />
+        <Footer />
+      </div>
     </div>
   );
 };
