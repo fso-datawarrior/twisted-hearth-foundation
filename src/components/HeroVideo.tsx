@@ -42,7 +42,11 @@ export default function HeroVideo({
   }, []);
 
   return (
-    <section className="relative isolate min-h-[80vh] overflow-hidden">
+    <section className="relative isolate min-h-[80vh] overflow-hidden" aria-busy={!ready}>
+      <div className="sr-only" aria-live="polite">
+        {ready ? "Hero ready" : "Loading hero…"}
+      </div>
+      
       {/* Poster shows immediately; fades out once video is ready */}
       <img
         src={poster}

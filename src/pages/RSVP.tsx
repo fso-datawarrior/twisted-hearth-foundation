@@ -18,6 +18,7 @@ const RSVP = () => {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -40,28 +41,41 @@ const RSVP = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // TODO v3: Connect to Supabase -> Mailjet flow
-      console.log("RSVP Form Data:", formData);
+      setIsSubmitting(true);
       
-      toast({
-        title: "RSVP Received!",
-        description: "Your twisted tale reservation has been confirmed. Prepare for the unexpected...",
-        variant: "default"
-      });
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        guestCount: 1,
-        costumeIdea: "",
-        dietary: "",
-        contribution: ""
-      });
+      try {
+        // TODO v3: Connect to Supabase -> Mailjet flow
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        console.log("RSVP Form Data:", formData);
+        
+        toast({
+          title: "RSVP Received!",
+          description: "Your twisted tale reservation has been confirmed. Prepare for the unexpected...",
+          variant: "default"
+        });
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          guestCount: 1,
+          costumeIdea: "",
+          dietary: "",
+          contribution: ""
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -90,7 +104,7 @@ const RSVP = () => {
             </p>
             
             <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
                 {/* Required Fields */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <FormField
@@ -169,9 +183,10 @@ const RSVP = () => {
                 <div className="pt-6 text-center">
                   <Button
                     type="submit"
-                    className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform"
+                    disabled={isSubmitting}
+                    className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Seal Your Fate
+                    {isSubmitting ? "Submitting…" : "Seal Your Fate"}
                   </Button>
                   
                   <p className="font-body text-xs text-muted-foreground mt-4 max-w-md mx-auto">

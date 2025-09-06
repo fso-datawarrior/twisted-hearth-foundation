@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { formatEventLong, formatEventTime } from "@/lib/event";
 import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
@@ -178,12 +178,12 @@ const Index = () => {
             
             <div className="text-center">
               <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent-purple to-transparent mx-auto mb-4" />
-              <a 
-                href="/about" 
+              <Link 
+                to="/about" 
                 className="font-subhead text-accent-gold hover:text-ink transition-colors inline-flex items-center gap-2"
               >
                 See more about the theme <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
           </section>
 
@@ -250,28 +250,28 @@ const Index = () => {
                   variant="outline" 
                   className="border-accent-purple text-accent-purple hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
                 >
-                  <a href="/costumes">Costume Ideas</a>
+                  <Link to="/costumes">Costume Ideas</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
                   className="border-accent-green text-accent-green hover:bg-accent-green/20 hover:text-accent-gold font-subhead"
                 >
-                  <a href="/schedule">Event Schedule</a>
+                  <Link to="/schedule">Event Schedule</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
                   className="border-accent-gold text-accent-gold hover:bg-accent-gold/20 hover:text-ink font-subhead"
                 >
-                  <a href="/feast">Feast Details</a>
+                  <Link to="/feast">Feast Details</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
                   className="border-accent-red text-accent-red hover:bg-accent-red/20 hover:text-accent-gold font-subhead"
                 >
-                  <a href="/vignettes">Past Stories</a>
+                  <Link to="/vignettes">Past Stories</Link>
                 </Button>
               </div>
             </div>
@@ -293,7 +293,7 @@ const Index = () => {
                 size="lg"
                 className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-xl px-16 py-6 glow-gold hover:scale-105 transition-all motion-safe"
               >
-                <a href="/rsvp">Join the Tale</a>
+                <Link to="/rsvp">Join the Tale</Link>
               </Button>
               
               <p className="font-body text-sm text-muted-foreground mt-6 italic">

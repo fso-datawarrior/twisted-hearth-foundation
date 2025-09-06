@@ -1,5 +1,34 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## v3.1 — SPA links, ErrorBoundary + Suspense, loading states (hero/images/forms), SEO meta tags
+
+### 🔧 Code Quality & Resilience Improvements
+
+#### Added
+- **Error Boundaries**: Created ErrorBoundary component to catch runtime errors and display friendly fallback UI
+- **Suspense Fallbacks**: Added React Suspense wrapper with loading states for future code-splitting
+- **Loading States**: Enhanced user experience with loading indicators for hero video, card images, and form submissions
+- **SPA Navigation**: Replaced all internal `<a href>` links with React Router `<Link>` components for instant navigation
+- **Comprehensive SEO**: Added complete meta tags (keywords, Open Graph, Twitter Card) without physical address exposure
+
+#### Enhanced Components
+- **HeroVideo**: Added aria-busy state and screen reader announcements for loading states
+- **Card**: Implemented image loading state with skeleton placeholder to prevent layout shift
+- **RSVP Form**: Added submission loading state with disabled button and "Submitting..." feedback
+- **App**: Wrapped entire application with ErrorBoundary and Suspense for better error handling
+
+#### Technical Improvements
+- **Type Safety**: Added proper async handling for form submissions with error states
+- **Accessibility**: Loading states announced to screen readers, proper aria-busy attributes
+- **Performance**: Image loading optimizations with lazy loading and proper dimensions
+- **User Experience**: No more page reloads on internal navigation, graceful error recovery
+
+#### SEO Enhancements
+- **Meta Tags**: Complete Open Graph and Twitter Card metadata
+- **Structured Data**: Maintained existing JSON-LD Event schema
+- **Social Sharing**: Proper image and description for social media previews
+- **Privacy Compliant**: All meta tags exclude physical address information
+
 ## v3 — Scavenger Hunt v1: 15 hints, progress chip, reward modal, localStorage persistence
 
 - Implemented complete scavenger hunt system with 15 hidden triggers across all pages

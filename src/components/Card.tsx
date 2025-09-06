@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface CardProps {
@@ -20,6 +20,7 @@ const Card = ({
   className,
   children 
 }: CardProps) => {
+  const [imgReady, setImgReady] = useState(false);
   const baseClasses = "group relative rounded-2xl bg-[--bg-2] shadow/50 transition cursor-pointer overflow-hidden";
   
   const variantClasses = {
@@ -43,12 +44,23 @@ const Card = ({
       aria-label={onClick ? `View details for ${title}` : undefined}
     >
       {image && (
-        <div className="aspect-video overflow-hidden">
+        <div className="aspect-video overflow-hidden relative">
           <img 
             src={image} 
             alt={title}
-            className="w-full h-full object-cover transition-transform motion-safe hover:scale-110"
+            loading="lazy"
+            decoding="async"
+            width="400"
+            height="225"
+            onLoad={() => setImgReady(true)}
+            className={cn(
+              "w-full h-full object-cover transition-all motion-safe hover:scale-110",
+              imgReady ? "opacity-100" : "opacity-0"
+            )}
           />
+          {!imgReady && (
+            <div className="absolute inset-0 animate-pulse rounded bg-white/5" aria-hidden="true" />
+          )}
         </div>
       )}
       
