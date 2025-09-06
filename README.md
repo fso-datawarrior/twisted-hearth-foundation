@@ -128,10 +128,14 @@ src/
 - [ ] Advanced carousel functionality
 - [ ] Animation refinements
 
-### 🔄 TODO v3 - Backend Integration  
-- [ ] Supabase project setup and connection
-- [ ] RSVP → Database → Email automation
-- [ ] Mailjet server-side email templates
+### ✅ COMPLETE - Backend Integration
+- [x] Supabase project setup and connection
+- [x] RSVP → Database → Email automation pipeline
+- [x] Mailjet server-side email templates with private address
+- [x] Database tables (users, rsvps) with RLS policies
+- [x] Security definer RPC function for atomic RSVP upserts
+
+### 🔄 TODO - Advanced Features
 - [ ] User authentication (if needed)
 - [ ] Photo upload functionality
 - [ ] Real-time guestbook
@@ -223,11 +227,44 @@ When ready for v2, focus on:
 3. Implement interactive storytelling elements
 4. Add more sophisticated animations
 
-For v3 backend integration:
-1. Click the green Supabase button in Lovable interface
-2. Set up database tables for RSVPs, hunts, comments
-3. Configure Mailjet API keys as secrets
-4. Implement server-side email with location injection
+## 📧 RSVP Pipeline (Production Ready)
+
+The RSVP system is fully implemented with a secure server-side email flow:
+
+### Architecture Flow
+1. **Frontend Form** (`/rsvp`) → Validates input and calls backend
+2. **Database RPC** (`public.submit_rsvp`) → Atomically upserts user + RSVP data
+3. **Edge Function** (`send-rsvp-confirmation`) → Sends email with private address
+4. **Email Delivery** → Mailjet sends confirmation with location details
+
+### Database Schema
+- `public.users` - User information (name, email)
+- `public.rsvps` - RSVP details (guests, dietary, costume ideas, etc.)
+- RLS policies enabled for security
+- Atomic upserts via security definer function
+
+### Privacy & Security
+- **Private address** is stored only in server environment variables
+- **Never exposed** in client code, UI, or browser
+- Location details sent only via confirmation email
+- RLS policies protect database access
+
+### Deployment Setup
+1. **SQL Migration**: Tables and RPC function already deployed
+2. **Edge Function**: `supabase functions deploy send-rsvp-confirmation` 
+3. **Environment Variables** (Set in Supabase Dashboard → Functions → Variables):
+   ```
+   MAILJET_API_KEY=your_mailjet_api_key
+   MAILJET_API_SECRET=your_mailjet_secret
+   MAILJET_FROM_EMAIL=rsvp@partytillyou.rip
+   MAILJET_FROM_NAME=Jamie & Kat Ruth
+   PRIVATE_EVENT_ADDRESS=your_private_address
+   ```
+
+### Testing
+- Use `.env.example` as template for local development
+- Test RSVP flow end-to-end via `/rsvp` page
+- Check Supabase logs for Edge Function execution
 
 ---
 
