@@ -1,6 +1,25 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
-## [Scaffold v1] - 2024-XX-XX
+## [2.0.0] - 2024-10-31
+
+### Added
+- Hero video with autoplay, muted controls, and unmute button
+- Rotating teaser lines beneath hero tagline (4 atmospheric one-liners, 4.5s intervals)
+- Past Vignettes section with 3 interactive cards (Goldilocks, Jack & Beanstalk, Snow White)
+- Accessible modal system for vignette teasers with focus management and keyboard navigation
+- Generated placeholder images for all vignettes (thumb and teaser versions)
+- Hero poster image and video placeholder references
+- Enhanced accessibility with proper ARIA labels and reduced motion support
+- Caption track placeholder for hero video
+- Improved text shadows and visual effects for hero overlay
+
+### Enhanced
+- HeroVideo component with video controls and reduced-motion fallbacks
+- Modal component with better focus trap and keyboard navigation
+- Index page restructured with new Past Vignettes section
+- CSS improvements for gothic atmosphere and reduced motion support
+
+## [1.0.0] - 2024-10-31
 
 ### 🎭 Initial Scaffold Release
 
@@ -51,11 +70,6 @@
 - Fully responsive and accessible design
 
 ### 🔄 Next Milestones
-
-**v2 - Interactive Features**
-- Scavenger hunt system activation
-- Real photo gallery implementation
-- Enhanced animation system
 
 **v3 - Backend Integration**
 - Supabase database connection
