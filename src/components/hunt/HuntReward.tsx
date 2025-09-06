@@ -43,6 +43,8 @@ export default function HuntReward() {
       isOpen={showModal}
       onClose={handleClose}
       ariaLabel="Hunt completion reward"
+      aria-labelledby="reward-title"
+      aria-describedby="reward-message"
       className="max-w-2xl"
     >
       <div className="text-center p-8" onKeyDown={handleKeyDown}>
@@ -73,7 +75,7 @@ export default function HuntReward() {
         <div className="relative z-10">
           <div className="mb-6">
             <div className="text-6xl mb-4">🏆</div>
-            <h2 className="font-heading text-3xl md:text-4xl mb-4 text-accent-gold">
+            <h2 id="reward-title" className="font-heading text-3xl md:text-4xl mb-4 text-accent-gold">
               All Secrets Found!
             </h2>
             <div className="text-accent-green font-subhead text-lg mb-2">
@@ -81,7 +83,7 @@ export default function HuntReward() {
             </div>
           </div>
 
-          <div className="mb-8">
+          <div id="reward-message" className="mb-8">
             <div className="bg-bg-2 p-6 rounded-lg border border-accent-gold/30 max-w-md mx-auto">
               <p className="font-body text-lg leading-relaxed text-muted-foreground italic">
                 "{message}"

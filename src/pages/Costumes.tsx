@@ -137,7 +137,12 @@ const Costumes = () => {
             </div>
             
             {/* Contest Info */}
-            <div className="bg-bg-2 p-8 rounded-lg border border-accent-red/50">
+            <div className="relative bg-bg-2 p-8 rounded-lg border border-accent-red/50">
+              <HuntHintTrigger
+                id="costumes.cta"
+                label="Seams stitched with secrets"
+                className="absolute bottom-4 right-4"
+              />
               <h2 className="font-subhead text-3xl text-center mb-6 text-accent-red">
                 Costume Contest Prizes
               </h2>

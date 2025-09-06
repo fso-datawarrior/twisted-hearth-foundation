@@ -48,6 +48,19 @@ export function HuntProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  // Dev-only diagnostic logging
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.table({
+        total: HUNT_TOTAL,
+        progress: Object.keys(state.found).length,
+        completed: !!state.completedAt,
+        completedAt: state.completedAt || "null",
+        foundIds: Object.keys(state.found),
+      });
+    }
+  }, [state]);
+
   const isFound = (id: string): boolean => {
     return id in state.found;
   };

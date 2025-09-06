@@ -3,6 +3,7 @@ import { useHunt } from "./HuntProvider";
 import { useProximity } from "@/hooks/use-proximity";
 import { cn } from "@/lib/utils";
 import { HUNT_ENABLED } from "./hunt-config";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
   id: string;
@@ -12,9 +13,10 @@ type Props = {
 };
 
 export default function HuntHintTrigger({ id, label, hint, className }: Props) {
-  const { isFound, markFound } = useHunt();
+  const { isFound, markFound, progress, total } = useHunt();
   const { ref, near, prefersReduced, isTouch } = useProximity(120);
-  const [toast, setToast] = useState(false);
+  const [localToast, setLocalToast] = useState(false);
+  const { toast } = useToast();
 
   const DEBUG = import.meta.env.DEV && import.meta.env.VITE_HUNT_DEBUG === "1";
   const found = isFound(id);
@@ -32,8 +34,12 @@ export default function HuntHintTrigger({ id, label, hint, className }: Props) {
   const handle = () => {
     if (!found) {
       markFound(id);
-      setToast(true);
-      setTimeout(() => setToast(false), 1200);
+      toast({
+        title: "Secret found!",
+        description: `${label} — ${progress + 1} / ${total}`,
+      });
+      setLocalToast(true);
+      setTimeout(() => setLocalToast(false), 1200);
     }
   };
 
@@ -57,7 +63,7 @@ export default function HuntHintTrigger({ id, label, hint, className }: Props) {
         )}
         title={hint}
       />
-      {toast && (
+      {localToast && (
         <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-2 py-1 text-xs text-white shadow-md">
           Secret found!
         </div>
