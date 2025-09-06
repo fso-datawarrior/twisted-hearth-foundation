@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
@@ -6,15 +7,56 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 
+const LINES = [
+  "A cottage too cozy to trust… where the meal is already waiting.",
+  "A beanstalk that leads to riches — and a very heavy downfall.",
+  "A glass coffin where mourning turns into midnight hunger.",
+  "Not every bedtime story ends with a kiss goodnight.",
+];
+
+function OneLinerRotator() {
+  const [i, setI] = useState(0);
+  const [fade, setFade] = useState(true);
+  const paused = useRef(false);
+
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const id = setInterval(() => {
+      if (paused.current) return;
+      setFade(false);
+      setTimeout(() => {
+        setI((n) => (n + 1) % LINES.length);
+        setFade(true);
+      }, 250);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [prefersReducedMotion]);
+
+  return (
+    <div
+      className="mx-auto min-h-[1.8em] max-w-[60ch] text-balance text-sm sm:text-base leading-snug"
+      onMouseEnter={() => (paused.current = true)}
+      onMouseLeave={() => (paused.current = false)}
+    >
+      <span
+        className={`inline-block transition-opacity duration-300 ${
+          fade ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {LINES[i]}
+      </span>
+    </div>
+  );
+}
+
 const Index = () => {
   const [selectedVignette, setSelectedVignette] = useState<any>(null);
-
-  const rotatingTeasers = [
-    "A cottage too cozy to trust… where the meal is already waiting.",
-    "A beanstalk that leads to riches — and a very heavy downfall.",
-    "A glass coffin where mourning turns into midnight hunger.",
-    "Not every bedtime story ends with a kiss goodnight."
-  ];
+  const navigate = useNavigate();
 
   const pastVignettes = [
     {
@@ -71,12 +113,11 @@ const Index = () => {
         poster="/hero-poster.jpg"
         headline="The Ruths' Twisted Fairytale Halloween Bash"
         tagline="Grimm, gruesome, and just the right amount of wrong."
-        rotatingLines={rotatingTeasers}
-        cta={{
-          label: "RSVP",
-          href: "/rsvp"
-        }}
-      />
+        ctaLabel="RSVP"
+        onCta={() => navigate("/rsvp")}
+      >
+        <OneLinerRotator />
+      </HeroVideo>
       
       {/* Main Content */}
       <main id="main-content" className="py-16 px-6">
