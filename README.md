@@ -116,6 +116,10 @@ src/
 - [x] Accessibility features and focus management
 - [x] Performance optimizations (font-display, lazy loading ready)
 - [x] SEO meta tags and semantic HTML
+- [x] Complete scavenger hunt system (15 secrets)
+- [x] Error boundaries and Suspense fallbacks for resilience
+- [x] Loading states for hero video, images, and form submissions
+- [x] SPA navigation with React Router Links
 
 ### 🔄 TODO v2 - Interactive Features
 - [ ] Scavenger hunt system (components stubbed in `src/components/hunt/`)
@@ -132,7 +136,28 @@ src/
 - [ ] Photo upload functionality
 - [ ] Real-time guestbook
 
-## 🔍 Scavenger Hunt
+## 🔧 Quality & Resilience
+
+### SPA Navigation
+- **React Router Links**: All internal navigation uses `<Link>` components for instant client-side routing
+- **No Page Reloads**: Seamless navigation preserves application state
+
+### Error Handling
+- **Error Boundaries**: React error boundaries catch and display friendly fallback UI
+- **Suspense Fallbacks**: Graceful loading states for route changes and lazy-loaded components
+- **Form Validation**: Client-side validation with loading states and error messaging
+
+### Loading States
+- **Hero Video**: Screen reader announcements and loading indicators until video metadata loads
+- **Card Images**: Skeleton placeholders prevent layout shift during image loading
+- **Form Submissions**: Button disabled state with "Submitting..." feedback during async operations
+
+### Testing Error Boundaries
+In development, you can test error boundaries by temporarily throwing an error in any component:
+```tsx
+// Temporary test code - remove after testing
+throw new Error("Test error boundary");
+```
 
 ### How It Works
 - **15 Hidden Secrets**: Small glowing runes scattered across all pages
