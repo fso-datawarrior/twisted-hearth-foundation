@@ -18,14 +18,17 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
+      // Parse URL hash parameters (Supabase uses hash fragments, not search params)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      
       // Check if we have an error in the URL
-      const error = searchParams.get('error');
-      const errorDescription = searchParams.get('error_description');
+      const error = hashParams.get('error') || searchParams.get('error');
+      const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
       
       if (error) {
         console.log('Auth callback error:', error, errorDescription);
         
-        if (error === 'access_denied' && searchParams.get('error_code') === 'otp_expired') {
+        if (error === 'access_denied' && (hashParams.get('error_code') === 'otp_expired' || searchParams.get('error_code') === 'otp_expired')) {
           setStatus('expired');
           setErrorMessage('The magic link has expired or been used already.');
         } else {
@@ -35,9 +38,9 @@ export default function AuthCallback() {
         return;
       }
 
-      // Check if we have auth tokens in the URL
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
+      // Check if we have auth tokens in the URL (hash fragments)
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
       
       if (accessToken && refreshToken) {
         try {
