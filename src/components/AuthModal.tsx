@@ -14,8 +14,13 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, devSignIn } = useAuth();
   const { toast } = useToast();
+
+  // Check if we're in development (preview or localhost)
+  const isDev = window.location.hostname.includes('preview--') || 
+               window.location.hostname.includes('localhost') ||
+               window.location.hostname.includes('127.0.0.1');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +54,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         description: errorMessage,
         variant: "destructive",
         duration: 6000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDevSignIn = async () => {
+    if (!email.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      await devSignIn(email.trim().toLowerCase());
+      toast({
+        title: "Dev sign-in successful! 🚀",
+        description: "You're now signed in (dev mode - no email required)",
+        duration: 4000,
+      });
+      onClose();
+      setEmail("");
+    } catch (error) {
+      console.error('Dev sign-in error:', error);
+      toast({
+        title: "Dev sign-in failed",
+        description: "Something went wrong with dev mode sign-in",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -99,6 +129,29 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {isLoading ? "Sending..." : "Send Magic Link"}
             </Button>
           </div>
+
+          {isDev && (
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-accent-purple/20" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Dev Mode</span>
+              </div>
+            </div>
+          )}
+
+          {isDev && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleDevSignIn}
+              disabled={isLoading || !email.trim()}
+              className="w-full bg-accent-purple/20 hover:bg-accent-purple/30 text-accent-purple border-accent-purple/40"
+            >
+              {isLoading ? "Signing in..." : "🚀 Dev Sign In (No Email)"}
+            </Button>
+          )}
           
           <div className="text-center">
             <p className="font-body text-sm text-muted-foreground">
