@@ -364,6 +364,27 @@ After successful migration, remove old Lovable domain from Supabase redirect URL
 - Check browser console for CORS or network errors
 - Verify DNS propagation is complete
 
+### Development Mode Authentication
+
+For easier development testing, a **Dev Mode** sign-in is available in preview/localhost environments:
+
+1. Enter any email address in the auth modal
+2. Click **🚀 Dev Sign In (No Email)** instead of "Send Magic Link"
+3. Instantly sign in without waiting for emails
+
+**Dev Mode Features**:
+- ✅ Only appears on `preview--` URLs and localhost
+- ✅ Creates mock authenticated sessions
+- ✅ Perfect for testing protected pages
+- ✅ No email sending required
+- ✅ Automatic session state management
+
+**When to Use Dev Mode**:
+- Testing authentication flows
+- Working on protected pages like `/discussion`
+- Avoiding email rate limits during development
+- Quick UI testing without email delays
+
 ---
 
 *"Not all who wander are lost... but some should be."*

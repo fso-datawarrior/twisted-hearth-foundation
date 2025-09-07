@@ -8,6 +8,7 @@ type AuthCtx = {
   session: Session | null;
   signIn: (email: string) => Promise<void>; 
   signOut: () => Promise<void>; 
+  devSignIn: (email: string) => Promise<void>;
   loading: boolean;
 };
 
@@ -57,8 +58,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut(); 
   };
 
+  // Dev mode: Create a mock session for testing (bypasses email)
+  const devSignIn = async (email: string) => {
+    // Create a mock user session for development
+    const mockUser = {
+      id: 'dev-user-' + Date.now(),
+      email: email,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: { email },
+      aud: 'authenticated',
+      confirmation_sent_at: new Date().toISOString(),
+    };
+    
+    setUser({ id: mockUser.id, email: mockUser.email });
+    setSession({
+      access_token: 'dev-token',
+      refresh_token: 'dev-refresh',
+      expires_in: 3600,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      token_type: 'bearer',
+      user: mockUser as any
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signOut, loading }}>
+    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, loading }}>
       {children}
     </AuthContext.Provider>
   );
