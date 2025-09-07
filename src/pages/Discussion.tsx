@@ -15,7 +15,7 @@ const Discussion = () => {
   const [displayName, setDisplayName] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,6 +24,18 @@ const Discussion = () => {
       setDisplayName(user.email.split("@")[0]);
     }
   }, [user]);
+
+  // Show loading spinner while auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="font-heading text-2xl mb-4">Loading...</div>
+          <div className="font-body text-muted-foreground">Checking authentication status</div>
+        </div>
+      </div>
+    );
+  }
 
   const loadPosts = async () => {
     const { data, error } = await supabase
