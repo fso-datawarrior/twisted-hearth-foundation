@@ -40,10 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string) => {
-    // Use the correct port for local development
-    const redirectUrl = window.location.origin === 'http://localhost:3000' 
-      ? 'http://localhost:8080/' 
-      : `${window.location.origin}/`;
+    // Always use the auth callback route for better error handling
+    const redirectUrl = `${window.location.origin}/auth`;
       
     const { error } = await supabase.auth.signInWithOtp({ 
       email, 
