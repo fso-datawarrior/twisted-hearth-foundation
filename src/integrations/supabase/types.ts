@@ -17,26 +17,137 @@ export type Database = {
       guestbook: {
         Row: {
           created_at: string
+          deleted_at: string | null
           display_name: string
           id: string
+          is_anonymous: boolean
           message: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          display_name: string
+          id?: string
+          is_anonymous?: boolean
+          message: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          display_name?: string
+          id?: string
+          is_anonymous?: boolean
+          message?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      guestbook_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          post_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          post_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guestbook_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "guestbook"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guestbook_replies: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_anonymous: boolean
+          message: string
+          post_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           display_name: string
           id?: string
+          is_anonymous?: boolean
           message: string
+          post_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           display_name?: string
           id?: string
+          is_anonymous?: boolean
           message?: string
+          post_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "guestbook_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "guestbook"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guestbook_reports: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string | null
+          reason: string | null
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string | null
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string | null
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guestbook_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "guestbook"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       potluck_items: {
         Row: {
@@ -144,6 +255,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      guestbook_insert_message: {
+        Args: {
+          p_display_name: string
+          p_is_anonymous?: boolean
+          p_message: string
+        }
+        Returns: {
+          created_at: string
+          deleted_at: string | null
+          display_name: string
+          id: string
+          is_anonymous: boolean
+          message: string
+          updated_at: string | null
+          user_id: string
+        }
+      }
       submit_rsvp: {
         Args:
           | {
