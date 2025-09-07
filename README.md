@@ -267,6 +267,103 @@ The RSVP system is fully implemented with a secure server-side email flow:
 - Test RSVP flow end-to-end via `/rsvp` page
 - Check Supabase logs for Edge Function execution
 
+## 🔐 Authentication System
+
+The project includes a magic link authentication system using Supabase Auth with a secure hash-based token flow.
+
+### Authentication Flow
+
+1. **Sign In** (`/auth`) → User enters email, receives magic link
+2. **Magic Link Click** → Redirects to `/auth` with authentication tokens in URL hash
+3. **Token Processing** (`AuthCallback.tsx`) → Extracts tokens from hash, creates session
+4. **Session Management** (`AuthProvider`) → Maintains auth state across app
+5. **Auto Redirect** → Authenticated users redirected to `/discussion`
+
+### Technical Implementation
+
+#### Hash-Based Token Parsing
+Supabase returns authentication data in URL hash fragments (not query parameters):
+```
+https://domain.com/auth#access_token=xxx&refresh_token=yyy&expires_at=zzz
+```
+
+The `AuthCallback` component correctly parses these hash parameters:
+```typescript
+// Parse URL hash parameters (Supabase uses hash fragments)
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+const accessToken = hashParams.get('access_token');
+const refreshToken = hashParams.get('refresh_token');
+```
+
+#### Session Management
+- Uses Supabase's `onAuthStateChange` listener for real-time auth updates
+- Maintains both `user` and `session` objects in React context
+- Automatic token refresh handled by Supabase client
+- Persistent auth state via localStorage
+
+#### Error Handling
+- Expired/used magic links → Clear error message with resend option
+- Network failures → Graceful fallback with retry functionality
+- Invalid tokens → Proper error display and redirect to sign-in
+
+### Authentication Pages
+- **`/auth`** - Main authentication page (sign in/sign up)
+- **`/auth` (callback)** - Handles magic link redirects and token processing
+- **`/discussion`** - Protected page requiring authentication
+
+### Domain Migration for Authentication
+
+When migrating to your custom domain, you MUST update Supabase authentication settings:
+
+#### Step 1: Update Supabase Dashboard Settings
+Go to [Supabase Dashboard → Authentication → Settings](https://supabase.com/dashboard/project/hsyyculqmeslhwiznjwh/auth/providers):
+
+1. **Site URL**: Update to your new domain
+   ```
+   https://your-custom-domain.com
+   ```
+
+2. **Additional Redirect URLs**: Add both old and new domains during transition
+   ```
+   https://your-custom-domain.com/auth
+   https://twisted-hearth-foundation.lovable.app/auth
+   http://localhost:8080/auth
+   ```
+
+#### Step 2: Update Domain References in Code
+The authentication system automatically uses `window.location.origin` so no code changes needed, but verify these files reference correct domains:
+
+- `src/lib/auth.tsx` - Uses dynamic origin for redirects ✅
+- `src/pages/AuthCallback.tsx` - Domain-agnostic hash parsing ✅
+- `supabase/functions/send-rsvp-confirmation/index.ts` - Update CORS origins if needed
+
+#### Step 3: Test Authentication Flow
+1. Update Supabase settings
+2. Deploy to your custom domain
+3. Test complete flow:
+   - Sign in at `https://your-domain.com/auth`
+   - Click magic link in email
+   - Verify redirect to `https://your-domain.com/auth` with tokens
+   - Confirm successful authentication and redirect to `/discussion`
+
+#### Step 4: Clean Up Old Redirect URLs
+After successful migration, remove old Lovable domain from Supabase redirect URLs.
+
+### Troubleshooting Authentication
+
+**Blank Page on Magic Link Click**:
+- Check Supabase redirect URLs include your domain + `/auth`
+- Verify hash-based token parsing (not query parameters)
+
+**Magic Link Goes to Wrong Domain**:
+- Update Supabase Site URL to your custom domain
+- Clear browser cache after DNS changes
+
+**Authentication Fails After Domain Change**:
+- Ensure CORS settings allow your new domain
+- Check browser console for CORS or network errors
+- Verify DNS propagation is complete
+
 ---
 
 *"Not all who wander are lost... but some should be."*
