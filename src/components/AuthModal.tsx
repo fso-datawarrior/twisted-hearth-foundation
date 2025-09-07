@@ -25,17 +25,30 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       await signIn(email.trim().toLowerCase());
       toast({
-        title: "Magic link sent!",
-        description: "Check your email for a sign-in link.",
-        duration: 5000,
+        title: "Magic link sent! ✨",
+        description: "Check your email and click the link to sign in. The link expires in 1 hour.",
+        duration: 8000,
       });
       onClose();
       setEmail("");
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Sign-in error:', error);
+      
+      let errorMessage = "Please try again or contact support.";
+      
+      if (error?.message?.includes('rate')) {
+        errorMessage = "Too many requests. Please wait a moment before trying again.";
+      } else if (error?.message?.includes('invalid')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error?.message?.includes('network')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+      
       toast({
-        title: "Sign-in failed",
-        description: "Please try again or contact support.",
+        title: "Could not send magic link",
+        description: errorMessage,
         variant: "destructive",
+        duration: 6000,
       });
     } finally {
       setIsLoading(false);
@@ -90,6 +103,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <div className="text-center">
             <p className="font-body text-sm text-muted-foreground">
               We'll send you a secure sign-in link. No passwords required.
+            </p>
+            <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
+              Make sure to check your spam folder if you don't see the email.
             </p>
           </div>
         </form>

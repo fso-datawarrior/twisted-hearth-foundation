@@ -22,11 +22,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    await supabase.auth.signInWithOtp({ 
+    // Use the correct port for local development
+    const redirectUrl = window.location.origin === 'http://localhost:3000' 
+      ? 'http://localhost:8080/' 
+      : `${window.location.origin}/`;
+      
+    const { error } = await supabase.auth.signInWithOtp({ 
       email, 
       options: { emailRedirectTo: redirectUrl } 
     });
+    
+    if (error) {
+      throw error;
+    }
   };
   
   const signOut = async () => { 
