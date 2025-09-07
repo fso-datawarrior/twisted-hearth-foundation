@@ -1,0 +1,129 @@
+/**
+ * VS Code Integration for Stagewise
+ * 
+ * This file handles communication between the Stagewise toolbar
+ * and VS Code's chat interface for component analysis.
+ */
+
+export interface VS CodeMessage {
+  type: 'stagewise-component-info';
+  data: string;
+  source: 'stagewise-toolbar';
+}
+
+export interface ComponentInfo {
+  tagName: string;
+  className: string;
+  id: string;
+  textContent: string;
+  boundingRect: DOMRect;
+  attributes: string[];
+  computedStyles: CSSStyleDeclaration;
+}
+
+/**
+ * Listen for messages from the Stagewise toolbar
+ */
+export function setupVS CodeIntegration() {
+  // Listen for messages from the Stagewise toolbar
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'stagewise-component-info') {
+      handleComponentInfoMessage(event.data);
+    }
+  });
+
+  // Also listen for postMessage from iframe context
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.source === 'stagewise-toolbar') {
+      handleComponentInfoMessage(event.data);
+    }
+  });
+}
+
+/**
+ * Handle component info messages from Stagewise toolbar
+ */
+function handleComponentInfoMessage(message: VS CodeMessage) {
+  console.log('🎃 Received component info from Stagewise:', message.data);
+  
+  // Try to send to VS Code chat if available
+  if (window.vscode) {
+    // VS Code webview context
+    window.vscode.postMessage({
+      command: 'stagewise.componentInfo',
+      data: message.data
+    });
+  } else if (window.parent && window.parent !== window) {
+    // Iframe context - try to send to parent
+    window.parent.postMessage({
+      type: 'stagewise-component-info',
+      data: message.data,
+      source: 'stagewise-webview'
+    }, '*');
+  } else {
+    // Fallback: show in console and copy to clipboard
+    console.log('🎃 Component info for VS Code chat:', message.data);
+    
+    // Copy to clipboard as fallback
+    navigator.clipboard.writeText(message.data).then(() => {
+      console.log('🎃 Component info copied to clipboard for VS Code chat');
+    }).catch(err => {
+      console.error('Failed to copy component info to clipboard:', err);
+    });
+  }
+}
+
+/**
+ * Send component info directly to VS Code chat
+ */
+export function sendToVS CodeChat(componentInfo: ComponentInfo) {
+  const formattedMessage = formatComponentForVS CodeChat(componentInfo);
+  
+  // Try different methods to send to VS Code
+  if (window.vscode) {
+    // VS Code webview context
+    window.vscode.postMessage({
+      command: 'stagewise.componentInfo',
+      data: formattedMessage
+    });
+  } else if (window.parent && window.parent !== window) {
+    // Iframe context
+    window.parent.postMessage({
+      type: 'stagewise-component-info',
+      data: formattedMessage,
+      source: 'stagewise-webview'
+    }, '*');
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(formattedMessage).then(() => {
+      console.log('🎃 Component info copied to clipboard for VS Code chat');
+    });
+  }
+}
+
+/**
+ * Format component info for VS Code chat
+ */
+function formatComponentForVS CodeChat(info: ComponentInfo): string {
+  const timestamp = new Date().toLocaleTimeString();
+  
+  return `🎃 **Stagewise Component Analysis** (${timestamp})
+
+**Component Details:**
+- **Tag:** \`${info.tagName}\`
+- **Classes:** \`${info.className || 'none'}\`
+- **ID:** \`${info.id || 'none'}\`
+- **Text Content:** "${info.textContent || 'none'}"
+- **Position:** (${Math.round(info.boundingRect.x)}, ${Math.round(info.boundingRect.y)})
+- **Size:** ${Math.round(info.boundingRect.width)} × ${Math.round(info.boundingRect.height)}px
+
+**Attributes:**
+${info.attributes.length > 0 ? info.attributes.map(attr => `- ${attr}`).join('\n') : '- None'}
+
+**Request:** Please help me understand this component and suggest improvements or modifications.`;
+}
+
+// Initialize VS Code integration when module loads
+if (typeof window !== 'undefined') {
+  setupVS CodeIntegration();
+}

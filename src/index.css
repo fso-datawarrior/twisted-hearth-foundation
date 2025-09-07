@@ -239,3 +239,97 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     transform: scale(1);
   }
 }
+
+/* Stagewise Component Inspection Styles */
+.stagewise-inspect-mode * {
+  position: relative;
+}
+
+.stagewise-inspect-mode *:hover {
+  outline: 2px solid #3B82F6 !important;
+  outline-offset: 2px !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  cursor: pointer !important;
+}
+
+.stagewise-inspect-mode [data-stagewise-component] {
+  outline: 2px solid #10B981 !important;
+  outline-offset: 2px !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.stagewise-inspect-mode [data-stagewise-component]:hover {
+  outline: 2px solid #F59E0B !important;
+  outline-offset: 2px !important;
+  background-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Prevent screenshot functionality on Stagewise buttons */
+[data-stagewise-component-info] button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+[data-stagewise-component-info] button:active {
+  transform: scale(0.98);
+}
+
+/* Prevent context menu on Stagewise buttons */
+[data-stagewise-component-info] button {
+  -webkit-context-menu: none;
+  -moz-context-menu: none;
+  -ms-context-menu: none;
+  context-menu: none;
+}
+
+/* Isolate Stagewise overlay from component selection */
+[data-stagewise-component-info] {
+  pointer-events: auto;
+  z-index: 10000;
+}
+
+[data-stagewise-component-info] * {
+  pointer-events: auto;
+}
+
+/* Prevent component selection on Stagewise overlay */
+[data-stagewise-component-info] {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Stagewise Debug Panel Styles */
+[data-stagewise-debug] {
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+[data-stagewise-performance] {
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Stagewise Toolbar Animation */
+[data-stagewise-toolbar] {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

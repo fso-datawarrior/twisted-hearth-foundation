@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .error {
+            color: #f00;
+        }
+        .success {
+            color: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎃 Clipboard Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Clipboard API Tests</h2>
+        <button onclick="testModernClipboard()">Test Modern Clipboard API</button>
+        <button onclick="testLegacyClipboard()">Test Legacy execCommand</button>
+        <button onclick="testUserInteraction()">Test with User Interaction</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '';
+        }
+        
+        // Display browser information
+        function displayBrowserInfo() {
+            const info = document.getElementById('browser-info');
+            info.innerHTML = `
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Clipboard API Available:</strong> ${!!navigator.clipboard}</p>
+                <p><strong>Secure Context:</strong> ${window.isSecureContext}</p>
+                <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+                <p><strong>Host:</strong> ${window.location.host}</p>
+                <p><strong>execCommand Available:</strong> ${!!document.execCommand}</p>
+            `;
+        }
+        
+        // Test modern clipboard API
+        async function testModernClipboard() {
+            log('Testing Modern Clipboard API...');
+            
+            if (!navigator.clipboard) {
+                log('❌ Clipboard API not available', 'error');
+                return;
+            }
+            
+            if (!window.isSecureContext) {
+                log('❌ Not in secure context (HTTPS required)', 'error');
+                return;
+            }
+            
+            try {
+                const testText = `Test clipboard at ${new Date().toLocaleTimeString()}`;
+                await navigator.clipboard.writeText(testText);
+                log('✅ Modern Clipboard API: SUCCESS', 'success');
+                
+                // Try to read back
+                try {
+                    const readText = await navigator.clipboard.readText();
+                    log(`✅ Read back: "${readText}"`, 'success');
+                } catch (readError) {
+                    log(`⚠️ Write succeeded but read failed: ${readError.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Modern Clipboard API failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test legacy execCommand
+        function testLegacyClipboard() {
+            log('Testing Legacy execCommand...');
+            
+            if (!document.execCommand) {
+                log('❌ execCommand not available', 'error');
+                return;
+            }
+            
+            try {
+                const testText = `Legacy test at ${new Date().toLocaleTimeString()}`;
+                const textArea = document.createElement('textarea');
+                textArea.value = testText;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                textArea.style.opacity = '0';
+                textArea.style.pointerEvents = 'none';
+                textArea.setAttribute('readonly', '');
+                document.body.appendChild(textArea);
+                
+                textArea.focus();
+                textArea.select();
+                textArea.setSelectionRange(0, 99999);
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    log('✅ Legacy execCommand: SUCCESS', 'success');
+                } else {
+                    log('❌ Legacy execCommand: FAILED', 'error');
+                }
+            } catch (error) {
+                log(`❌ Legacy execCommand failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test with user interaction
+        function testUserInteraction() {
+            log('Testing with user interaction...');
+            
+            // Create a button that requires user click
+            const button = document.createElement('button');
+            button.textContent = 'Click to Test Clipboard';
+            button.style.margin = '10px';
+            button.onclick = async () => {
+                log('User clicked test button, testing clipboard...');
+                await testModernClipboard();
+                testLegacyClipboard();
+                button.remove();
+            };
+            
+            document.body.appendChild(button);
+            log('Click the button that appeared to test clipboard with user interaction');
+        }
+        
+        // Initialize
+        displayBrowserInfo();
+        log('Clipboard test page loaded. Try the tests above.');
+    </script>
+</body>
+</html>

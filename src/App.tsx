@@ -10,6 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
+import StagewiseToolbar from "@/components/StagewiseToolbar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -62,6 +63,9 @@ const App = () => (
           {/* Hunt UI overlays */}
           <HuntProgress />
           <HuntReward />
+          
+          {/* Stagewise Development Toolbar */}
+          <StagewiseToolbar />
         </HuntProvider>
       </AuthProvider>
     </TooltipProvider>
