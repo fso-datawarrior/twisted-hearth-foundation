@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { formatEventLong, formatEventTime } from "@/lib/event";
 import { useReveal } from "@/hooks/use-reveal";
-import NavBar from "@/components/NavBar";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
 import Card from "@/components/Card";
@@ -126,8 +125,6 @@ const Index = () => {
           className="absolute top-6 right-6 z-50"
         />
       </div>
-      
-      <NavBar />
       
       {/* Hero Section */}
       <div className="relative">

@@ -10,6 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
+import { SecretNav } from "@/components/nav/SecretNav";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
       <AuthProvider>
         <HuntProvider>
           <SkipLink />
+          <SecretNav />
           <Toaster />
           <Sonner />
           <ErrorBoundary>

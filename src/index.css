@@ -239,3 +239,24 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     transform: scale(1);
   }
 }
+
+/* --- Secret Nav: scroll-driven hint --- */
+@supports (animation-timeline: scroll()) {
+  @scroll-timeline pageScroll {
+    source: auto;
+    orientation: block;
+  }
+  .nav-glow {
+    animation: mirrorGlow 1.2s linear both;
+    animation-timeline: pageScroll;
+  }
+  @keyframes mirrorGlow {
+    0%   { filter: drop-shadow(0 0 0 rgba(255, 200, 255, 0)); }
+    100% { filter: drop-shadow(0 0 12px rgba(255, 200, 255, 0.35)); }
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-glow { animation: none !important; }
+}

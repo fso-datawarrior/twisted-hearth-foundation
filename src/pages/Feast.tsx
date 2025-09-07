@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,7 +129,6 @@ const Feast = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
       
       <main className="pt-20">
         <section className="py-16 px-6">
@@ -270,13 +268,9 @@ const Feast = () => {
                       <p className="font-body text-muted-foreground mb-4">
                         Sign in to add what you'll bring to the feast
                       </p>
-                      <Button 
-                        onClick={() => {/* This will open auth modal via NavBar */}}
-                        variant="outline"
-                        className="border-accent-purple hover:bg-accent-purple/10 font-subhead"
-                      >
-                        Sign In to Contribute
-                      </Button>
+                      <p className="font-body text-sm text-muted-foreground">
+                        Use the Magic Mirror navigation (top-right) to sign in
+                      </p>
                     </div>
                   )}
                 </div>
