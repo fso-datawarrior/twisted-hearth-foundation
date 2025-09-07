@@ -18,71 +18,133 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      // Parse URL hash parameters (Supabase uses hash fragments, not search params)
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      
-      // Check if we have an error in the URL
-      const error = hashParams.get('error') || searchParams.get('error');
-      const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
-      
-      if (error) {
-        console.log('Auth callback error:', error, errorDescription);
+      try {
+        console.log('🔐 AuthCallback: Starting authentication process...');
+        console.log('Current URL:', window.location.href);
         
-        if (error === 'access_denied' && (hashParams.get('error_code') === 'otp_expired' || searchParams.get('error_code') === 'otp_expired')) {
-          setStatus('expired');
-          setErrorMessage('The magic link has expired or been used already.');
-        } else {
-          setStatus('error');
-          setErrorMessage(errorDescription || 'Authentication failed. Please try again.');
-        }
-        return;
-      }
-
-      // Check if we have auth tokens in the URL (hash fragments)
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      
-      if (accessToken && refreshToken) {
-        try {
-          // Set the session from the URL tokens
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+        // Parse URL hash parameters (Supabase uses hash fragments, not search params)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        
+        console.log('Hash params:', Object.fromEntries(hashParams.entries()));
+        console.log('Search params:', Object.fromEntries(urlSearchParams.entries()));
+        
+        // Check if we have an error in the URL
+        const error = hashParams.get('error') || urlSearchParams.get('error');
+        const errorDescription = hashParams.get('error_description') || urlSearchParams.get('error_description');
+        
+        if (error) {
+          console.log('🚨 Auth callback error detected:', error, errorDescription);
           
-          if (error) {
-            console.error('Error setting session:', error);
+          // Clear URL hash immediately to prevent reprocessing
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          if (error === 'access_denied' && (hashParams.get('error_code') === 'otp_expired' || urlSearchParams.get('error_code') === 'otp_expired')) {
+            setStatus('expired');
+            setErrorMessage('The magic link has expired or been used already.');
+          } else {
             setStatus('error');
-            setErrorMessage('Failed to authenticate. Please try again.');
-          } else if (data.user) {
-            console.log('Successfully authenticated user:', data.user.email);
-            setStatus('success');
-            toast({
-              title: "Welcome back! 🎉",
-              description: `Successfully signed in as ${data.user.email}`,
-              duration: 5000,
+            setErrorMessage(errorDescription || 'Authentication failed. Please try again.');
+          }
+          return;
+        }
+
+        // Check if we have auth tokens in the URL (hash fragments)
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const tokenType = hashParams.get('token_type');
+        const expiresIn = hashParams.get('expires_in');
+        
+        console.log('🔑 Tokens found:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          tokenType,
+          expiresIn
+        });
+        
+        if (accessToken && refreshToken) {
+          console.log('🔄 Setting session with tokens...');
+          
+          // Clear URL hash immediately to prevent token exposure
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          try {
+            // Set the session from the URL tokens
+            const { data, error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
             });
             
-            // Redirect to discussion page after successful auth
-            setTimeout(() => {
-              navigate('/discussion', { replace: true });
-            }, 2000);
+            console.log('📋 Session result:', {
+              hasData: !!data,
+              hasUser: !!data?.user,
+              hasSession: !!data?.session,
+              error: sessionError
+            });
+            
+            if (sessionError) {
+              console.error('❌ Error setting session:', sessionError);
+              setStatus('error');
+              setErrorMessage('Failed to authenticate. Please try again.');
+              
+              // Defensive fallback - try to get session from storage
+              setTimeout(async () => {
+                console.log('🔄 Attempting defensive fallback...');
+                const { data: fallbackData } = await supabase.auth.getSession();
+                if (fallbackData?.session?.user) {
+                  console.log('✅ Fallback successful:', fallbackData.session.user.email);
+                  setStatus('success');
+                  navigate('/discussion', { replace: true });
+                }
+              }, 1000);
+              
+            } else if (data?.user) {
+              console.log('✅ Successfully authenticated user:', data.user.email);
+              setStatus('success');
+              toast({
+                title: "Welcome back! 🎉",
+                description: `Successfully signed in as ${data.user.email}`,
+                duration: 5000,
+              });
+              
+              // Redirect to discussion page after successful auth
+              setTimeout(() => {
+                console.log('🔄 Redirecting to discussion...');
+                navigate('/discussion', { replace: true });
+              }, 2000);
+            } else {
+              console.warn('⚠️ Session set but no user data received');
+              setStatus('error');
+              setErrorMessage('Authentication completed but user data is missing. Please try again.');
+            }
+          } catch (sessionError) {
+            console.error('💥 Exception during session setting:', sessionError);
+            setStatus('error');
+            setErrorMessage('Something went wrong during authentication. Please try again.');
           }
-        } catch (error) {
-          console.error('Auth callback error:', error);
+        } else {
+          console.log('🚫 No tokens found in URL');
+          // Clear URL hash anyway
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
           setStatus('error');
-          setErrorMessage('Something went wrong. Please try again.');
+          setErrorMessage('Invalid authentication link. Please request a new magic link.');
         }
-      } else {
-        // No tokens found, this might be a direct access
+      } catch (outerError) {
+        console.error('💥 Critical error in AuthCallback:', outerError);
+        // Clear URL hash to prevent loops
+        window.history.replaceState({}, document.title, window.location.pathname);
         setStatus('error');
-        setErrorMessage('Invalid authentication link. Please request a new magic link.');
+        setErrorMessage('A critical error occurred. Please try again.');
       }
     };
 
     if (!loading) {
+      console.log('🔍 Auth loading complete. User status:', !!user);
+      
       if (user) {
         // User is already authenticated, redirect them
+        console.log('✅ User already authenticated:', user.email);
         toast({
           title: "Already signed in",
           description: "You're already authenticated!",
@@ -90,8 +152,11 @@ export default function AuthCallback() {
         });
         navigate('/discussion', { replace: true });
       } else {
+        console.log('🔄 No authenticated user, processing callback...');
         handleAuthCallback();
       }
+    } else {
+      console.log('⏳ Auth still loading...');
     }
   }, [searchParams, navigate, user, loading, toast]);
 
