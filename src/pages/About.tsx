@@ -1,11 +1,9 @@
-import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
       
       <main className="pt-20">
         <section className="py-16 px-6">
