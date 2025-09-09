@@ -1,0 +1,135 @@
+@layer utilities {
+  /* Section scoping helpers */
+  .fog-scope {
+    position: relative;
+    isolation: isolate;    /* keep z-index local */
+    overflow: hidden;      /* prevent bleed */
+  }
+  
+  .fog-mount {
+    position: absolute;
+    inset: 0;
+    z-index: 0;            /* behind content */
+    pointer-events: none;
+    contain: paint;
+  }
+  
+  .fog-content {
+    position: relative;
+    z-index: 1;            /* keep content on top */
+  }
+
+  /* Optional: guard for navs, modals, etc. (never auto-fog these) */
+  .fog-opt-out, 
+  nav, 
+  [role="dialog"], 
+  .modal, 
+  .drawer { 
+    --fog-opt-out: 1; 
+  }
+
+  /* Fog background base styles */
+  .fog-background {
+    background: 
+      radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        rgba(100, 100, 120, 0.15) 0%, 
+        rgba(50, 50, 70, 0.08) 40%, 
+        transparent 70%),
+      radial-gradient(800px circle at calc(var(--mouse-x, 50%) + 200px) calc(var(--mouse-y, 50%) - 100px), 
+        rgba(80, 80, 100, 0.1) 0%, 
+        transparent 50%);
+    animation: smokeDrift 20s ease-in-out infinite;
+  }
+
+  /* Intensity variations */
+  .fog-intensity-low .fog-background {
+    opacity: 0.4;
+  }
+  
+  .fog-intensity-md .fog-background {
+    opacity: 0.7;
+  }
+  
+  .fog-intensity-high .fog-background {
+    opacity: 1;
+  }
+
+  /* Speed variations */
+  .fog-speed-slow .fog-background {
+    animation-duration: 30s;
+  }
+  
+  .fog-speed-medium .fog-background {
+    animation-duration: 20s;
+  }
+  
+  .fog-speed-fast .fog-background {
+    animation-duration: 10s;
+  }
+
+  /* Tint variations */
+  .fog-tint-purple .fog-background {
+    background: 
+      radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        rgba(120, 80, 150, 0.15) 0%, 
+        rgba(80, 50, 100, 0.08) 40%, 
+        transparent 70%),
+      radial-gradient(800px circle at calc(var(--mouse-x, 50%) + 200px) calc(var(--mouse-y, 50%) - 100px), 
+        rgba(100, 60, 130, 0.1) 0%, 
+        transparent 50%);
+  }
+  
+  .fog-tint-gold .fog-background {
+    background: 
+      radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        rgba(200, 150, 80, 0.15) 0%, 
+        rgba(150, 120, 60, 0.08) 40%, 
+        transparent 70%),
+      radial-gradient(800px circle at calc(var(--mouse-x, 50%) + 200px) calc(var(--mouse-y, 50%) - 100px), 
+        rgba(180, 140, 70, 0.1) 0%, 
+        transparent 50%);
+  }
+
+  /* Static fog for reduced motion / mobile */
+  .fog-static .fog-background {
+    animation: none !important;
+    background: rgba(60, 60, 80, 0.2);
+  }
+
+  /* Paused state for hidden tabs */
+  .fog-paused .fog-background {
+    animation-play-state: paused;
+  }
+
+  /* Keyframe for fog drift animation */
+  @keyframes smokeDrift {
+    0% { 
+      background-position: 0% 0%, 100% 100%;
+      transform: scale(1) rotate(0deg);
+    }
+    25% { 
+      background-position: 100% 0%, 0% 100%;
+      transform: scale(1.05) rotate(0.5deg);
+    }
+    50% { 
+      background-position: 100% 100%, 0% 0%;
+      transform: scale(1) rotate(0deg);
+    }
+    75% { 
+      background-position: 0% 100%, 100% 0%;
+      transform: scale(1.05) rotate(-0.5deg);
+    }
+    100% { 
+      background-position: 0% 0%, 100% 100%;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .fog-background { 
+      animation: none !important; 
+      background: rgba(60, 60, 80, 0.15) !important;
+    }
+  }
+}

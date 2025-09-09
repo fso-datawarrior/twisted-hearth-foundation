@@ -11,6 +11,7 @@ import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
+import AutoFogManager from "@/components/effects/AutoFogManager";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,8 @@ const App = () => (
       <AuthProvider>
         <HuntProvider>
           <BrowserRouter>
+            {/* Global fog manager: auto-adds fog to black sections across pages */}
+            <AutoFogManager />
             <SkipLink />
             <NavBar />
             <main>
