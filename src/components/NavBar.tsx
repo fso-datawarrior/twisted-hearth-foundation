@@ -76,7 +76,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               <Link
                 key={to}
                 to={to}
-                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe focus-visible ${
+                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
                   location.pathname === to
                     ? "text-accent-gold"
                     : "text-ink hover:text-accent-gold"
@@ -154,7 +154,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                     key={to}
                     to={to}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe focus-visible ${
+                    className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
                       location.pathname === to
                         ? "text-accent-gold"
                         : "text-ink hover:text-accent-gold"
