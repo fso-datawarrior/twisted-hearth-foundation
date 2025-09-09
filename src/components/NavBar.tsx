@@ -132,9 +132,9 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
           <button
-            className="nav-compact:hidden p-2 text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
+            className="nav-compact:hidden nav-full:block p-2 text-ink hover:text-accent-gold transition-colors motion-safe focus-visible border-0"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
@@ -144,11 +144,11 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Show when mobile OR when auth is hidden on desktop */}
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="nav-compact:hidden absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
+            className="nav-compact:hidden nav-full:block absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
           >
               <div className="container mx-auto px-6 py-4 space-y-4">
                 {navLinks.map(({ to, label }) => (
