@@ -76,23 +76,32 @@ export function BackgroundFog({
 
   return (
     <div
-      ref={fogRef}
-      className={`
-        fog-background
-        ${getIntensityClass()}
-        ${shouldUseStatic ? 'fog-static' : getSpeedClass()}
-        ${getTintClass()}
-        ${!isVisible ? 'fog-paused' : ''}
-      `}
       style={{
         position: 'absolute',
         inset: 0,
         pointerEvents: 'none',
-        zIndex: 0,
-        contain: 'paint',
-        '--mouse-x': '50%',
-        '--mouse-y': '50%',
-      } as React.CSSProperties}
-    />
+        zIndex: -1,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        ref={fogRef}
+        className={`
+          fog-background
+          ${getIntensityClass()}
+          ${shouldUseStatic ? 'fog-static' : getSpeedClass()}
+          ${getTintClass()}
+          ${!isVisible ? 'fog-paused' : ''}
+        `}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          contain: 'paint',
+          '--mouse-x': '50%',
+          '--mouse-y': '50%',
+        } as React.CSSProperties}
+      />
+    </div>
   );
 }

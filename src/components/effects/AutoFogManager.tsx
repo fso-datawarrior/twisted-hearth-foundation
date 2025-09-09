@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { BackgroundFog } from "@/components/effects/BackgroundFog";
 
 const SELECTORS = [
-  ".bg-background",
   ".bg-black", 
   ".section-black",
   '[data-bg="black"]',
@@ -36,6 +35,9 @@ function isEligible(el: Element) {
     const [r, g, b] = [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
     const isDark = r < 30 && g < 30 && b < 30;
     if (!isDark && !SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
+  } else {
+    // If no background color detected, only allow explicit selectors
+    if (!SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
   }
 
   return true;
@@ -61,8 +63,8 @@ export default function AutoFogManager() {
       // Query by selectors first - be more specific
       const explicit = SELECTORS.flatMap(sel => Array.from(document.querySelectorAll(sel)));
 
-      // Also try opportunistic matches: specific sections only
-      const candidates = Array.from(document.querySelectorAll("section, header, main > section, .bg-card"));
+      // Also try opportunistic matches: limited to specific containers
+      const candidates = Array.from(document.querySelectorAll("section:not(.min-h-screen), header:not(.min-h-screen)"));
       const targets = new Set<Element>([...explicit, ...candidates]);
 
       targets.forEach(el => {
