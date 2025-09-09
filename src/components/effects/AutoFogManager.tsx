@@ -4,13 +4,10 @@ import { BackgroundFog } from "@/components/effects/BackgroundFog";
 
 const SELECTORS = [
   ".bg-background",
-  ".bg-black",
-  ".band--black", 
+  ".bg-black", 
   ".section-black",
   '[data-bg="black"]',
   "section.hero--black",
-  "main",
-  "body",
 ];
 
 function isEligible(el: Element) {
@@ -18,18 +15,26 @@ function isEligible(el: Element) {
   if ((el as HTMLElement).closest(".fog-opt-out")) return false;
   if ((el as HTMLElement).querySelector(":scope > .fog-mount")) return false;
 
-  // Be conservative: ensure it's not a nav/dialog, and is "blocky"
+  // Be conservative: ensure it's not a nav/dialog/body/html, and is "blocky"
   const tag = el.tagName.toLowerCase();
-  if (["nav", "dialog"].includes(tag)) return false;
+  if (["nav", "dialog", "body", "html"].includes(tag)) return false;
 
-  // If computed bg is truly near-black or matches our dark theme, allow even without class
+  // Skip if it would affect page scrolling
+  if (el === document.body || el === document.documentElement) return false;
+
+  // Only target specific elements, not the whole page background
+  if (el.classList.contains('min-h-screen') && tag === 'div') {
+    // This is likely a page wrapper, skip it to avoid scroll issues
+    return false;
+  }
+
+  // If computed bg is dark or matches our selectors
   const cs = getComputedStyle(el as HTMLElement);
   const bg = cs.backgroundColor;
-  // rgba(11, 11, 12, x) or rgb(0..50) - more permissive for dark themes
   const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
   if (m) {
     const [r, g, b] = [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
-    const isDark = r < 50 && g < 50 && b < 50; // more permissive threshold
+    const isDark = r < 30 && g < 30 && b < 30;
     if (!isDark && !SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
   }
 
@@ -53,11 +58,11 @@ export default function AutoFogManager() {
     if (document.documentElement.dataset.fog === "off") return;
 
     const scan = () => {
-      // Query by selectors first
+      // Query by selectors first - be more specific
       const explicit = SELECTORS.flatMap(sel => Array.from(document.querySelectorAll(sel)));
 
-      // Also try opportunistic matches: top-level bands with near-black backgrounds
-      const candidates = Array.from(document.querySelectorAll("section, header, footer, main > div, .band, .panel"));
+      // Also try opportunistic matches: specific sections only
+      const candidates = Array.from(document.querySelectorAll("section, header, main > section, .bg-card"));
       const targets = new Set<Element>([...explicit, ...candidates]);
 
       targets.forEach(el => {
