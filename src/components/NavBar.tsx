@@ -23,9 +23,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${x}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${y}%`);
+    };
     
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
   }, []);
 
   const navLinks = [
@@ -43,7 +54,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe ${
-        isScrolled ? "bg-accent-purple/95 backdrop-blur-md shadow-lg" : "bg-transparent"
+        isScrolled ? "backdrop-blur-md shadow-lg smoky-fog" : "bg-transparent"
       }`}
       role="navigation"
       aria-label="Main navigation"
@@ -67,7 +78,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                 to={to}
                 className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe focus-visible ${
                   location.pathname === to
-                    ? "text-accent-gold border-b-2 border-accent-gold"
+                    ? "text-accent-gold"
                     : "text-ink hover:text-accent-gold"
                 }`}
               >
