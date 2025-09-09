@@ -239,7 +239,6 @@ const Index = () => {
                 <Card
                   key={highlight.id}
                   variant="vignette"
-                  image={highlight.image}
                   video={highlight.video}
                   videoPosition={highlight.id === 2 ? "top" : "center"}
                   title={highlight.title}

@@ -23,9 +23,18 @@ const SmokeMaterial = shaderMaterial(
 // Extend Three.js so we can use <smokeMaterial> JSX element
 extend({ SmokeMaterial });
 
+// TypeScript declarations for the extended material
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      smokeMaterial: any;
+    }
+  }
+}
+
 // Component for the smoke plane
 const SmokePlane = () => {
-  const materialRef = useRef();
+  const materialRef = useRef<any>();
   const { viewport } = useThree();
 
   // Update uTime and uResolution every frame

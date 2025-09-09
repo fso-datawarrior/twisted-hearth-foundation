@@ -10,7 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
-import { getPreviewImagePaths } from "@/config/previewImages";
+import { getAllPreviewImages, PREVIEW_CATEGORIES } from "@/config/previewImages";
+import MultiPreviewCarousel from "@/components/MultiPreviewCarousel";
 
 const Gallery = () => {
   const [images, setImages] = useState<string[]>([]);
@@ -45,19 +46,18 @@ const Gallery = () => {
 
   const loadPreviewImages = async () => {
     try {
-      // Get preview image paths from configuration
-      const imagePaths = getPreviewImagePaths();
+      // Get all preview image paths from all categories
+      const imagePaths = getAllPreviewImages();
       
       // Test which images actually exist by trying to load them
       const existingImages: string[] = [];
       
       for (const imagePath of imagePaths) {
         try {
-          // Test if image exists by creating a new Image object
           await new Promise((resolve, reject) => {
             const img = new Image();
-            img.onload = () => resolve(imagePath);
-            img.onerror = () => reject(new Error('Image not found'));
+            img.onload = resolve;
+            img.onerror = reject;
             img.src = imagePath;
           });
           existingImages.push(imagePath);
@@ -68,6 +68,7 @@ const Gallery = () => {
       }
       
       setPreviewImages(existingImages);
+      console.log(`Loaded ${existingImages.length} preview images across ${PREVIEW_CATEGORIES.length} categories`);
     } catch (error) {
       console.error('Error loading preview images:', error);
       // Fallback to empty array if there's an error
@@ -230,21 +231,18 @@ const Gallery = () => {
               </div>
             </div>
             
-            {/* Preview Carousel */}
+            {/* Multi-Category Preview */}
             <div className="mb-16">
               <h2 className="font-subhead text-2xl text-center mb-8 text-accent-gold">
-                Preview: Atmospheric Inspiration
+                Event Preview Gallery
               </h2>
-              <div className="max-w-2xl mx-auto">
-                <ImageCarousel 
-                  images={previewImages}
-                  autoPlay={true}
-                  autoPlayInterval={5000}
-                  showControls={true}
-                  showIndicators={true}
-                  className="motion-safe hover-tilt"
-                />
-              </div>
+              <MultiPreviewCarousel 
+                defaultCategory="vignettes"
+                showCategoryTabs={true}
+                autoPlay={true}
+                autoPlayInterval={6000}
+                className="motion-safe hover-tilt"
+              />
             </div>
             
             {/* Photo Guidelines */}
