@@ -3,11 +3,14 @@ import { createRoot } from "react-dom/client";
 import { BackgroundFog } from "@/components/effects/BackgroundFog";
 
 const SELECTORS = [
+  ".bg-background",
   ".bg-black",
   ".band--black", 
   ".section-black",
   '[data-bg="black"]',
   "section.hero--black",
+  "main",
+  "body",
 ];
 
 function isEligible(el: Element) {
@@ -19,15 +22,15 @@ function isEligible(el: Element) {
   const tag = el.tagName.toLowerCase();
   if (["nav", "dialog"].includes(tag)) return false;
 
-  // If computed bg is truly near-black, allow even without class
+  // If computed bg is truly near-black or matches our dark theme, allow even without class
   const cs = getComputedStyle(el as HTMLElement);
   const bg = cs.backgroundColor;
-  // rgba(11, 11, 12, x) or rgb(0..20)
+  // rgba(11, 11, 12, x) or rgb(0..50) - more permissive for dark themes
   const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
   if (m) {
     const [r, g, b] = [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
-    const nearBlack = r < 24 && g < 24 && b < 24; // threshold
-    if (!nearBlack && !SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
+    const isDark = r < 50 && g < 50 && b < 50; // more permissive threshold
+    if (!isDark && !SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
   }
 
   return true;
