@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-import CSSFogBackground from "@/components/CSSFogBackground";
+// import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -131,7 +131,7 @@ const Feast = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <main className="pt-20 relative z-10">
-        <CSSFogBackground />
+        {/* <CSSFogBackground /> */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">

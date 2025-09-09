@@ -8,7 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
-import CSSFogBackground from "@/components/CSSFogBackground";
+// import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
   "A cottage too cozy to trust… where the meal is already waiting.",
@@ -159,7 +159,7 @@ const Index = () => {
       {/* Main Content */}
       <main id="main" className="py-16 px-6 relative z-10">
         {/* GLSL animated smoke effect for main content areas only */}
-        <CSSFogBackground />
+        {/* <CSSFogBackground /> */}
         <div className="container mx-auto max-w-6xl relative z-10">
           
           {/* Past Vignettes Section */}

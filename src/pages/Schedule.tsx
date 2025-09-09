@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import CSSFogBackground from "@/components/CSSFogBackground";
+// import CSSFogBackground from "@/components/CSSFogBackground";
 import { formatEventTime } from "@/lib/event";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
@@ -65,7 +65,7 @@ const Schedule = () => {
   return (
     <div className="min-h-screen bg-background relative">
       {/* GLSL animated smoke effect */}
-      <CSSFogBackground />
+      {/* <CSSFogBackground /> */}
       
       <main className="pt-20 relative z-10">
         <section className="py-16 px-6">

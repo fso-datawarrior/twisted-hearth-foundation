@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Footer from "@/components/Footer";
-import CSSFogBackground from "@/components/CSSFogBackground";
+// import CSSFogBackground from "@/components/CSSFogBackground";
 import Carousel from "@/components/Carousel";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -87,7 +87,7 @@ const Costumes = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <main className="pt-20 relative z-10">
-        <CSSFogBackground />
+        {/* <CSSFogBackground /> */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
