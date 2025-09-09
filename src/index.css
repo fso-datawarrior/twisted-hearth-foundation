@@ -242,6 +242,16 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 
 /* --- Smoky Fog Effect --- */
 .smoky-fog {
+  position: relative;
+}
+
+.smoky-fog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: 
     radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
       rgba(139, 69, 19, 0.15), 
@@ -251,24 +261,21 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       transparent 40%),
     rgba(0, 0, 0, 0.4);
   animation: smokeDrift 20s ease-in-out infinite;
+  z-index: -1;
 }
 
 @keyframes smokeDrift {
   0%, 100% { 
     background-position: 0% 0%, 100% 100%;
-    filter: blur(1px);
   }
   25% { 
     background-position: 100% 0%, 0% 100%;
-    filter: blur(1.5px);
   }
   50% { 
     background-position: 100% 100%, 0% 0%;
-    filter: blur(2px);
   }
   75% { 
     background-position: 0% 100%, 100% 0%;
-    filter: blur(1.5px);
   }
 }
 
@@ -280,7 +287,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .smoky-fog { 
+  .smoky-fog::before { 
     animation: none !important; 
     background: rgba(0, 0, 0, 0.4);
   }
