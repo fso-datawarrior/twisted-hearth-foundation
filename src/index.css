@@ -56,12 +56,16 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   
   body {
     @apply bg-background text-foreground font-body;
-    /* Smooth scrolling for better UX */
-  scroll-behavior: smooth;
-  
-  /* Text shadows for hero overlay */
-  --text-shadow-gothic: 2px 2px 4px hsl(var(--bg) / 0.8), 
-                        0 0 8px hsl(var(--accent-purple) / 0.6);
+    /* Smooth scrolling for better UX - with fallback */
+    scroll-behavior: smooth;
+    
+    /* Remove webkit-specific properties that cause crashes */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Text shadows for hero overlay */
+    --text-shadow-gothic: 2px 2px 4px hsl(var(--bg) / 0.8), 
+                          0 0 8px hsl(var(--accent-purple) / 0.6);
   }
   
   /* Typography scale */
@@ -88,20 +92,21 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     outline-offset: 2px;
   }
   
-  /* Motion system - respects user preferences */
+  /* Motion system - respects user preferences and fixes performance issues */
   .motion-safe {
-    transition: all 0.2s ease-out;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
   }
   
   @media (prefers-reduced-motion: reduce) {
     .motion-safe {
-      transition: none;
+      transition: none !important;
     }
     
     * {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
@@ -146,18 +151,22 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
   }
   
-  /* Hover tilt effect */
+  /* Hover tilt effect - performance optimized */
   .hover-tilt {
     transition: transform 0.2s ease-out;
+    will-change: transform;
   }
   
   .hover-tilt:hover {
-    transform: rotate(-2deg) scale(1.02);
+    transform: rotate(-1deg) scale(1.01);
   }
   
   @media (prefers-reduced-motion: reduce) {
     .hover-tilt:hover {
-      transform: none;
+      transform: none !important;
+    }
+    .hover-tilt {
+      will-change: auto;
     }
   }
   
@@ -249,7 +258,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   }
 }
 
-/* --- Thick Fog with Mouse Clearing Effect --- */
+/* --- Lightweight Fog Effect (Performance Optimized) --- */
 .smoky-fog::before {
   content: '';
   position: absolute;
@@ -259,100 +268,33 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   bottom: 0;
   pointer-events: none;
   z-index: -1;
+  /* Simplified fog with only 3 layers for performance */
   background: 
-    /* Mouse clearing effect - creates transparent "windows" */
-    radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-      transparent, 
-      rgba(255, 255, 255, 0.1) 100%),
-    /* Additional mouse clearing for larger area */
-    radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-      transparent, 
-      rgba(255, 255, 255, 0.05) 80%),
-    /* White swirling fog patches - layer 1 */
-    radial-gradient(600px circle at 20% 30%, 
-      rgba(255, 255, 255, 0.3), 
-      rgba(255, 255, 255, 0.3) 30%,
-      transparent 70%),
-    /* White swirling fog patches - layer 2 */
-    radial-gradient(800px circle at 80% 70%, 
-      rgba(255, 255, 255, 0.25), 
-      rgba(255, 255, 255, 0.25) 25%,
-      transparent 65%),
-    /* White swirling fog patches - layer 3 */
-    radial-gradient(500px circle at 50% 10%, 
-      rgba(255, 255, 255, 0.35), 
-      rgba(255, 255, 255, 0.35) 20%,
-      transparent 60%),
-    /* White swirling fog patches - layer 4 */
-    radial-gradient(700px circle at 10% 80%, 
-      rgba(255, 255, 255, 0.2), 
-      rgba(255, 255, 255, 0.2) 15%,
-      transparent 55%),
-    /* White swirling fog patches - layer 5 */
-    radial-gradient(900px circle at 90% 20%, 
+    /* Base fog layer */
+    radial-gradient(600px circle at 25% 25%, 
       rgba(255, 255, 255, 0.15), 
-      rgba(255, 255, 255, 0.15) 10%,
-      transparent 50%),
-    /* White swirling fog patches - layer 6 */
-    radial-gradient(400px circle at 60% 40%, 
-      rgba(255, 255, 255, 0.4), 
-      rgba(255, 255, 255, 0.4) 25%,
-      transparent 60%),
-    /* White swirling fog patches - layer 7 */
-    radial-gradient(550px circle at 30% 60%, 
-      rgba(255, 255, 255, 0.28), 
-      rgba(255, 255, 255, 0.28) 20%,
-      transparent 55%),
-    /* Base white mist layer */
-    rgba(255, 255, 255, 0.2);
-  animation: thickFogDrift 15s ease-in-out infinite;
+      transparent 70%),
+    radial-gradient(800px circle at 75% 75%, 
+      rgba(255, 255, 255, 0.1), 
+      transparent 70%),
+    radial-gradient(400px circle at 50% 50%, 
+      rgba(255, 255, 255, 0.08), 
+      transparent 60%);
+  /* Slower, less intensive animation */
+  animation: simpleFogDrift 20s linear infinite;
+  will-change: transform;
 }
 
-@keyframes thickFogDrift {
+/* Simplified fog animation to prevent crashes */
+@keyframes simpleFogDrift {
   0% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      20% 30%, 80% 70%, 50% 10%, 10% 80%, 90% 20%, 60% 40%, 30% 60%; /* White fog patches (7) */
-  }
-  12.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      30% 25%, 70% 60%, 45% 15%, 15% 75%, 85% 25%, 55% 35%, 25% 55%; /* White fog patches (7) */
-  }
-  25% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      40% 20%, 60% 50%, 70% 30%, 30% 60%, 80% 40%, 20% 70%, 50% 30%; /* White fog patches (7) */
-  }
-  37.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      50% 35%, 50% 45%, 75% 25%, 25% 55%, 75% 35%, 25% 65%, 45% 40%; /* White fog patches (7) */
+    transform: translate(0, 0) scale(1);
   }
   50% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      60% 40%, 40% 30%, 90% 50%, 50% 40%, 70% 60%, 80% 20%, 70% 80%; /* White fog patches (7) */
-  }
-  62.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      70% 50%, 30% 25%, 85% 60%, 40% 35%, 65% 45%, 75% 35%, 60% 70%; /* White fog patches (7) */
-  }
-  75% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      80% 60%, 20% 80%, 10% 70%, 70% 20%, 50% 80%, 40% 10%, 10% 40%; /* White fog patches (7) */
-  }
-  87.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      70% 45%, 30% 75%, 20% 60%, 60% 30%, 40% 70%, 30% 20%, 20% 50%; /* White fog patches (7) */
+    transform: translate(1%, 0.5%) scale(1.02);
   }
   100% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      20% 30%, 80% 70%, 50% 10%, 10% 80%, 90% 20%, 60% 40%, 30% 60%; /* White fog patches (7) */
+    transform: translate(0, 0) scale(1);
   }
 }
 
@@ -367,49 +309,20 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   --mouse-y: 50%;
 }
 
-/* Respect reduced motion */
+/* Respect reduced motion - simplified static fog */
 @media (prefers-reduced-motion: reduce) {
   .smoky-fog::before { 
     animation: none !important; 
+    transform: none !important;
+    will-change: auto;
     background: 
-      /* Mouse clearing effect - static */
-      radial-gradient(400px circle at 50% 50%, 
-        transparent, 
-        rgba(255, 255, 255, 0.1) 100%),
-      radial-gradient(300px circle at 50% 50%, 
-        transparent, 
-        rgba(255, 255, 255, 0.05) 80%),
-      /* Static white fog patches - all 7 layers */
-      radial-gradient(600px circle at 20% 30%, 
-        rgba(255, 255, 255, 0.15), 
-        rgba(255, 255, 255, 0.15) 30%,
-        transparent 70%),
-      radial-gradient(800px circle at 80% 70%, 
-        rgba(255, 255, 255, 0.12), 
-        rgba(255, 255, 255, 0.12) 25%,
-        transparent 65%),
-      radial-gradient(500px circle at 50% 10%, 
-        rgba(255, 255, 255, 0.18), 
-        rgba(255, 255, 255, 0.18) 20%,
-        transparent 60%),
-      radial-gradient(700px circle at 10% 80%, 
-        rgba(255, 255, 255, 0.1), 
-        rgba(255, 255, 255, 0.1) 15%,
-        transparent 55%),
-      radial-gradient(900px circle at 90% 20%, 
+      /* Simple static fog - only 2 layers */
+      radial-gradient(600px circle at 30% 30%, 
         rgba(255, 255, 255, 0.08), 
-        rgba(255, 255, 255, 0.08) 10%,
-        transparent 50%),
-      radial-gradient(400px circle at 60% 40%, 
-        rgba(255, 255, 255, 0.2), 
-        rgba(255, 255, 255, 0.2) 25%,
         transparent 60%),
-      radial-gradient(550px circle at 30% 60%, 
-        rgba(255, 255, 255, 0.14), 
-        rgba(255, 255, 255, 0.14) 20%,
-        transparent 55%),
-      /* Base white mist layer */
-      rgba(255, 255, 255, 0.05);
+      radial-gradient(400px circle at 70% 70%, 
+        rgba(255, 255, 255, 0.05), 
+        transparent 50%);
   }
 }
 
