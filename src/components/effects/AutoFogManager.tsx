@@ -7,6 +7,7 @@ const SELECTORS = [
   ".section-black",
   '[data-bg="black"]',
   "section.hero--black",
+  "main", // Include main element
 ];
 
 function isEligible(el: Element) {
@@ -36,8 +37,13 @@ function isEligible(el: Element) {
     const isDark = r < 30 && g < 30 && b < 30;
     if (!isDark && !SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
   } else {
-    // If no background color detected, only allow explicit selectors
-    if (!SELECTORS.some(sel => (el as HTMLElement).matches(sel))) return false;
+    // Allow transparent/no background for certain element types
+    const tag = el.tagName.toLowerCase();
+    if (['section', 'header', 'main'].includes(tag)) {
+      // Allow these even with transparent backgrounds
+    } else if (!SELECTORS.some(sel => (el as HTMLElement).matches(sel))) {
+      return false;
+    }
   }
 
   return true;
@@ -64,15 +70,21 @@ export default function AutoFogManager() {
       const explicit = SELECTORS.flatMap(sel => Array.from(document.querySelectorAll(sel)));
 
       // Also try opportunistic matches: limited to specific containers
-      const candidates = Array.from(document.querySelectorAll("section:not(.min-h-screen), header:not(.min-h-screen)"));
+      const candidates = Array.from(document.querySelectorAll("section:not(.min-h-screen), header:not(.min-h-screen), main"));
       const targets = new Set<Element>([...explicit, ...candidates]);
+      
+      console.log(`🌫️ Fog scan found ${targets.size} potential targets:`, Array.from(targets).map(el => el.tagName + (el.className ? '.' + el.className.split(' ').join('.') : '')));
 
       targets.forEach(el => {
         try { 
-          if (isEligible(el)) attachFog(el); 
+          if (isEligible(el)) {
+            console.log(`🌫️ Attaching fog to:`, el.tagName, el.className);
+            attachFog(el);
+          } else {
+            console.log(`🌫️ Skipping (not eligible):`, el.tagName, el.className);
+          }
         } catch (error) {
-          // Silently ignore errors to prevent crashes
-          console.debug('Fog attachment failed for element:', el, error);
+          console.error('Fog attachment failed for element:', el, error);
         }
       });
     };

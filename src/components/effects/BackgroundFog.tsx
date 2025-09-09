@@ -74,13 +74,17 @@ export function BackgroundFog({
     }
   };
 
+  useEffect(() => {
+    console.log(`🌫️ BackgroundFog mounted with intensity: ${intensity}, speed: ${speed}, tint: ${tint}`);
+  }, []);
+
   return (
     <div
       style={{
         position: 'absolute',
         inset: 0,
         pointerEvents: 'none',
-        zIndex: -1,
+        zIndex: 1,
         overflow: 'hidden',
       }}
     >
@@ -98,6 +102,7 @@ export function BackgroundFog({
           inset: 0,
           pointerEvents: 'none',
           contain: 'paint',
+          zIndex: 1,
           '--mouse-x': '50%',
           '--mouse-y': '50%',
         } as React.CSSProperties}
