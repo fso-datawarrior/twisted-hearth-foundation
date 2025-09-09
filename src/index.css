@@ -241,10 +241,6 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 }
 
 /* --- Smoky Fog Effect --- */
-.smoky-fog {
-  position: relative;
-}
-
 .smoky-fog::before {
   content: '';
   position: absolute;
@@ -252,6 +248,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   left: 0;
   right: 0;
   bottom: 0;
+  pointer-events: none;
   background: 
     radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
       rgba(139, 69, 19, 0.15), 
