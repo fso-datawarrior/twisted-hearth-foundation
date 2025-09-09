@@ -148,9 +148,9 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
+            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
           >
-              <div className="container mx-auto px-6 py-4 space-y-4">
+              <div className="px-6 py-4 space-y-4">
                 {navLinks.map(({ to, label }) => (
                   <Link
                     key={to}
