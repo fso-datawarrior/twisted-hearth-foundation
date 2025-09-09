@@ -95,7 +95,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   };
 
   return (
-    <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
+    <div className="bg-black/90 backdrop-blur-sm p-6 rounded-lg border border-accent-purple/30">
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="h-5 w-5 text-accent-gold" />
         <h3 className="font-subhead text-lg text-accent-gold">

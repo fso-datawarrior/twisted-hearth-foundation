@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="flex justify-center items-center space-x-8 mb-8">
             <Crown className="w-8 h-8 text-accent-gold" aria-hidden="true" />
             <Flame className="w-8 h-8 text-accent-red" aria-hidden="true" />
-            <Star className="w-8 h-8 text-accent-purple" aria-hidden="true" />
+            <Star className="w-8 h-8 text-accent-gold" aria-hidden="true" />
           </div>
           
           {/* Event Title */}
@@ -28,7 +28,7 @@ const Footer = () => {
           <div className="mb-6">
             <a 
               href="https://partytillyou.rip" 
-              className="font-body text-accent-purple hover:text-accent-gold transition-colors motion-safe focus-visible"
+              className="font-body text-accent-gold hover:text-accent-red transition-colors motion-safe no-underline focus:no-underline"
             >
               partytillyou.rip
             </a>

@@ -101,7 +101,7 @@ const EmojiReactions: React.FC<EmojiReactionsProps> = ({ postId }) => {
             disabled={isLoading}
             className={`h-8 px-2 text-sm border-accent-purple/20 hover:border-accent-gold/50 ${
               userReacted 
-                ? 'bg-accent-purple/20 text-accent-purple border-accent-purple/40' 
+                ? 'bg-accent-purple/20 text-accent-gold border-accent-purple/40' 
                 : 'hover:bg-accent-gold/10'
             }`}
           >

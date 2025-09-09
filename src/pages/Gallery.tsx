@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
+import ImageCarousel from "@/components/ImageCarousel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,15 +10,18 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
+import { getPreviewImagePaths } from "@/config/previewImages";
 
 const Gallery = () => {
   const [images, setImages] = useState<string[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
     loadImages();
+    loadPreviewImages();
   }, []);
 
   const loadImages = async () => {
@@ -35,6 +40,38 @@ const Gallery = () => {
       setImages(imageUrls);
     } catch (error) {
       console.error('Error loading images:', error);
+    }
+  };
+
+  const loadPreviewImages = async () => {
+    try {
+      // Get preview image paths from configuration
+      const imagePaths = getPreviewImagePaths();
+      
+      // Test which images actually exist by trying to load them
+      const existingImages: string[] = [];
+      
+      for (const imagePath of imagePaths) {
+        try {
+          // Test if image exists by creating a new Image object
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(imagePath);
+            img.onerror = () => reject(new Error('Image not found'));
+            img.src = imagePath;
+          });
+          existingImages.push(imagePath);
+        } catch (error) {
+          // Image doesn't exist, skip it
+          console.log(`Preview image not found: ${imagePath}`);
+        }
+      }
+      
+      setPreviewImages(existingImages);
+    } catch (error) {
+      console.error('Error loading preview images:', error);
+      // Fallback to empty array if there's an error
+      setPreviewImages([]);
     }
   };
 
@@ -76,19 +113,11 @@ const Gallery = () => {
       event.target.value = '';
     }
   };
-  const placeholderImages = [
-    "https://images.unsplash.com/photo-1509557965043-e78fcf5299ad?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&h=400&fit=crop"
-  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="pt-20">
+    <div className="min-h-screen bg-background relative">
+      <main className="pt-20 relative z-10">
+        <CSSFogBackground />
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
@@ -113,8 +142,8 @@ const Gallery = () => {
                   <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Share Your Photos</h2>
                   <Label htmlFor="image-upload" className="cursor-pointer">
                     <div className="border-2 border-dashed border-accent-purple/50 rounded-lg p-8 hover:border-accent-gold/50 transition-colors">
-                      <Upload className="mx-auto mb-4 text-accent-purple" size={48} />
-                      <p className="font-subhead text-accent-purple mb-2">Click to upload images</p>
+                      <Upload className="mx-auto mb-4 text-accent-gold" size={48} />
+                      <p className="font-subhead text-accent-gold mb-2">Click to upload images</p>
                       <p className="font-body text-sm text-muted-foreground">
                         Multiple files supported. By uploading, you confirm you have permission to share these images.
                       </p>
@@ -201,24 +230,20 @@ const Gallery = () => {
               </div>
             </div>
             
-            {/* Placeholder Gallery Grid */}
+            {/* Preview Carousel */}
             <div className="mb-16">
               <h2 className="font-subhead text-2xl text-center mb-8 text-accent-gold">
                 Preview: Atmospheric Inspiration
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {placeholderImages.map((image, index) => (
-                  <div 
-                    key={index}
-                    className="aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe hover-tilt"
-                  >
-                    <img 
-                      src={image}
-                      alt={`Gallery preview ${index + 1}`}
-                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all motion-safe"
-                    />
-                  </div>
-                ))}
+              <div className="max-w-2xl mx-auto">
+                <ImageCarousel 
+                  images={previewImages}
+                  autoPlay={true}
+                  autoPlayInterval={5000}
+                  showControls={true}
+                  showIndicators={true}
+                  className="motion-safe hover-tilt"
+                />
               </div>
             </div>
             
@@ -229,7 +254,7 @@ const Gallery = () => {
               </h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="font-subhead text-lg mb-4 text-accent-purple">During the Event</h3>
+                  <h3 className="font-subhead text-lg mb-4 text-accent-gold text-center">During the Event</h3>
                   <ul className="font-body text-sm text-muted-foreground space-y-2">
                     <li>• Photography encouraged during designated times</li>
                     <li>• Respect others' privacy and consent</li>
@@ -238,7 +263,7 @@ const Gallery = () => {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-subhead text-lg mb-4 text-accent-purple">Share Your Photos</h3>
+                  <h3 className="font-subhead text-lg mb-4 text-accent-gold text-center">Share Your Photos</h3>
                   <ul className="font-body text-sm text-muted-foreground space-y-2">
                     <li>• Email your best shots for the gallery</li>
                     <li>• Professional portrait station available</li>

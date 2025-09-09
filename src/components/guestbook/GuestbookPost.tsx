@@ -129,10 +129,10 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
   };
 
   return (
-    <div className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+    <div className="bg-black/90 backdrop-blur-sm p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-subhead text-lg text-accent-purple">
+          <h3 className="font-subhead text-lg text-accent-gold">
             {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
           </h3>
           <p className="font-body text-xs text-muted-foreground">
@@ -236,7 +236,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowReplies(!showReplies)}
-                  className="text-muted-foreground hover:text-accent-purple"
+                  className="text-muted-foreground hover:text-accent-gold"
                 >
                   {showReplies ? 'Hide' : 'Show'} {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
                 </Button>
@@ -263,7 +263,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
               <div key={reply.id} className="bg-bg-2 p-4 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="font-subhead text-sm text-accent-purple">
+                    <h4 className="font-subhead text-sm text-accent-gold">
                       {reply.is_anonymous ? 'Anonymous Guest' : reply.display_name}
                     </h4>
                     <p className="font-body text-xs text-muted-foreground">

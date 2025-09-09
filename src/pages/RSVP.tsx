@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -149,9 +150,9 @@ const RSVP = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="pt-20">
+    <div className="min-h-screen bg-background relative">
+      <main className="pt-20 relative z-10">
+        <CSSFogBackground />
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-3xl">
             <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
@@ -276,15 +277,15 @@ const RSVP = () => {
               </h3>
               <div className="grid md:grid-cols-3 gap-4 text-center font-body text-sm">
                 <div>
-                  <span className="block font-subhead text-accent-purple">Date</span>
+                  <span className="block font-subhead text-accent-gold">Date</span>
                   <span className="text-muted-foreground">{formatEventShort()}</span>
                 </div>
                 <div>
-                  <span className="block font-subhead text-accent-purple">Time</span>
+                  <span className="block font-subhead text-accent-gold">Time</span>
                   <span className="text-muted-foreground">{formatEventTime()} - Late</span>
                 </div>
                 <div>
-                  <span className="block font-subhead text-accent-purple">Attire</span>
+                  <span className="block font-subhead text-accent-gold">Attire</span>
                   <span className="text-muted-foreground">Twisted Fairytale Costumes</span>
                 </div>
               </div>

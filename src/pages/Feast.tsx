@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,9 +129,9 @@ const Feast = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="pt-20">
+    <div className="min-h-screen bg-background relative">
+      <main className="pt-20 relative z-10">
+        <CSSFogBackground />
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
@@ -213,7 +214,7 @@ const Feast = () => {
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Contribution Form */}
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
-                  <h3 className="font-subhead text-xl mb-4 text-accent-purple">Add Your Contribution</h3>
+                  <h3 className="font-subhead text-xl mb-4 text-accent-gold">Add Your Contribution</h3>
                   
                   {user ? (
                     <form onSubmit={handleSubmitItem} className="space-y-4">
@@ -277,7 +278,7 @@ const Feast = () => {
                 
                 {/* Current Contributions List */}
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
-                  <h3 className="font-subhead text-xl mb-4 text-accent-purple">Current Contributions</h3>
+                  <h3 className="font-subhead text-xl mb-4 text-accent-gold">Current Contributions</h3>
                   
                   <div className="space-y-4 max-h-96 overflow-y-auto" role="region" aria-label="Potluck contributions list">
                     {potluckItems.length > 0 ? (
@@ -320,7 +321,7 @@ const Feast = () => {
                     key={index}
                     className="bg-card p-6 rounded-lg border border-accent-purple/30"
                   >
-                    <h3 className="font-subhead text-xl mb-4 text-accent-purple">
+                    <h3 className="font-subhead text-xl mb-4 text-accent-gold">
                       {category.category}
                     </h3>
                     <ul className="space-y-2">
@@ -341,7 +342,7 @@ const Feast = () => {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-subhead text-lg mb-3 text-accent-purple">Food Safety</h4>
+                    <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety</h4>
                     <ul className="font-body text-sm text-muted-foreground space-y-1">
                       <li>• Include ingredient list for allergens</li>
                       <li>• Keep hot foods hot, cold foods cold</li>
@@ -350,7 +351,7 @@ const Feast = () => {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-subhead text-lg mb-3 text-accent-purple">Presentation</h4>
+                    <h4 className="font-subhead text-lg mb-3 text-accent-gold">Presentation</h4>
                     <ul className="font-body text-sm text-muted-foreground space-y-1">
                       <li>• Bring serving utensils</li>
                       <li>• Include a small card explaining your dish's story</li>

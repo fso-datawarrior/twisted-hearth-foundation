@@ -104,7 +104,7 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
       <div
         ref={modalRef}
         className={cn(
-          "relative bg-card border border-accent-purple/30 rounded-lg shadow-2xl max-w-2xl max-h-[90vh] overflow-auto m-4 animate-scale-in",
+          "relative bg-black/90 backdrop-blur-sm border border-accent-purple/30 rounded-lg shadow-2xl max-w-2xl max-h-[90vh] overflow-auto m-4 animate-scale-in",
           className
         )}
         tabIndex={-1}

@@ -96,7 +96,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-subhead text-accent-purple">
+            <Label htmlFor="email" className="font-subhead text-accent-gold">
               Email Address
             </Label>
             <Input
@@ -147,7 +147,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               variant="secondary"
               onClick={handleDevSignIn}
               disabled={isLoading || !email.trim()}
-              className="w-full bg-accent-purple/20 hover:bg-accent-purple/30 text-accent-purple border-accent-purple/40"
+              className="w-full bg-accent-purple/20 hover:bg-accent-purple/30 text-accent-gold border-accent-purple/40"
             >
               {isLoading ? "Signing in..." : "🚀 Dev Sign In (No Email)"}
             </Button>

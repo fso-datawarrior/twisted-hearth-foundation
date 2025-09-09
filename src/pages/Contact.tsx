@@ -1,11 +1,12 @@
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
 import { Mail, MessageCircle, Calendar } from "lucide-react";
 
 const Contact = () => {
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="pt-20">
+    <div className="min-h-screen bg-background relative">
+      <main className="pt-20 relative z-10">
+        <CSSFogBackground />
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
@@ -32,11 +33,11 @@ const Contact = () => {
                   every guest's journey into darkness is perfectly orchestrated.
                 </p>
                 <a 
-                  href="mailto:jamie@partytillyou.rip"
-                  className="inline-flex items-center font-subhead text-accent-purple hover:text-accent-gold transition-colors motion-safe focus-visible"
+                  href="mailto:data.warrior2023@gmail.com"
+                  className="inline-flex items-center font-subhead text-accent-gold hover:text-accent-gold transition-colors motion-safe no-underline focus:no-underline"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  jamie@partytillyou.rip
+                  data.warrior2023@gmail.com
                 </a>
               </div>
               
@@ -53,11 +54,11 @@ const Contact = () => {
                   and transforming spaces into otherworldly realms.
                 </p>
                 <a 
-                  href="mailto:kat@partytillyou.rip"
-                  className="inline-flex items-center font-subhead text-accent-purple hover:text-accent-gold transition-colors motion-safe focus-visible"
+                  href="mailto:kat_crouch@hotmail.com"
+                  className="inline-flex items-center font-subhead text-accent-gold hover:text-accent-gold transition-colors motion-safe no-underline focus:no-underline"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  kat@partytillyou.rip
+                  kat_crouch@hotmail.com
                 </a>
               </div>
             </div>
@@ -70,16 +71,16 @@ const Contact = () => {
               
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-bg-2 p-6 rounded-lg border border-accent-purple/30 text-center">
-                  <Mail className="w-12 h-12 text-accent-purple mx-auto mb-4" />
+                  <Mail className="w-12 h-12 text-accent-gold mx-auto mb-4" />
                   <h3 className="font-subhead text-lg mb-2 text-accent-gold">Email</h3>
                   <p className="font-body text-sm text-muted-foreground mb-4">
                     Best for detailed questions, costume consultations, or sharing your twisted tale concepts.
                   </p>
                   <a 
-                    href="mailto:hosts@partytillyou.rip"
-                    className="font-subhead text-accent-purple hover:text-accent-gold transition-colors motion-safe focus-visible"
+                    href="mailto:fso@data-warrior.com"
+                    className="font-subhead text-accent-gold hover:text-accent-gold transition-colors motion-safe no-underline focus:no-underline"
                   >
-                    hosts@partytillyou.rip
+                    fso@data-warrior.com
                   </a>
                 </div>
                 
@@ -115,7 +116,7 @@ const Contact = () => {
               
               <div className="space-y-4">
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
-                  <h3 className="font-subhead text-lg mb-2 text-accent-purple">
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">
                     What if I can't think of a costume idea?
                   </h3>
                   <p className="font-body text-muted-foreground">
@@ -126,7 +127,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
-                  <h3 className="font-subhead text-lg mb-2 text-accent-purple">
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">
                     How interactive are the performances?
                   </h3>
                   <p className="font-body text-muted-foreground">
@@ -137,7 +138,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
-                  <h3 className="font-subhead text-lg mb-2 text-accent-purple">
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">
                     Can I bring additional guests not on my RSVP?
                   </h3>
                   <p className="font-body text-muted-foreground">

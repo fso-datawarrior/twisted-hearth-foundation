@@ -54,7 +54,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe ${
-        isScrolled ? "backdrop-blur-md shadow-lg smoky-fog" : "bg-transparent"
+        isScrolled ? "backdrop-blur-md shadow-lg bg-bg-2/20" : "bg-transparent"
       }`}
       role="navigation"
       aria-label="Main navigation"
@@ -102,7 +102,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-card border-accent-purple/30">
+                  <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
                     <DropdownMenuItem 
                       onClick={() => signOut()}
                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"

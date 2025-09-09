@@ -72,15 +72,15 @@ const Carousel = ({
               className="flex-shrink-0 px-2"
               style={{ width: `${100 / visible}%` }}
             >
-              <div className="bg-card rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe">
-                <div className="aspect-video overflow-hidden">
+              <div className="bg-black/90 backdrop-blur-sm rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe">
+                <div className="aspect-[3/4] overflow-hidden">
                   <img 
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform motion-safe"
+                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform motion-safe"
                   />
                 </div>
-                <div className="p-4">
+                <div className="p-4 bg-black/95 backdrop-blur-sm">
                   <h3 className="font-subhead text-lg mb-2 text-accent-gold">
                     {item.title}
                   </h3>

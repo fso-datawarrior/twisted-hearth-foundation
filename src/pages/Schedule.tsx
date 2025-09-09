@@ -1,4 +1,5 @@
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
 import { formatEventTime } from "@/lib/event";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 
@@ -52,7 +53,7 @@ const Schedule = () => {
     switch (type) {
       case "arrival": return "text-accent-gold border-accent-gold";
       case "social": return "text-accent-green border-accent-green";
-      case "performance": return "text-accent-purple border-accent-purple";
+      case "performance": return "text-accent-gold border-accent-gold";
       case "feast": return "text-accent-red border-accent-red";
       case "contest": return "text-accent-gold border-accent-gold";
       case "dance": return "text-accent-green border-accent-green";
@@ -62,9 +63,11 @@ const Schedule = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* GLSL animated smoke effect */}
+      <CSSFogBackground />
       
-      <main className="pt-20">
+      <main className="pt-20 relative z-10">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="relative">
@@ -149,7 +152,9 @@ const Schedule = () => {
         </section>
       </main>
       
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 };

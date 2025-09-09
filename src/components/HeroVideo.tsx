@@ -30,7 +30,9 @@ export default function HeroVideo({
 
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) return;
+    if (!v) {
+      return;
+    }
     const onMeta = () => setReady(true);
     const onData = () => setReady(true);
     v.addEventListener("loadedmetadata", onMeta);
@@ -42,7 +44,7 @@ export default function HeroVideo({
   }, []);
 
   return (
-    <section className="relative isolate min-h-[80vh] overflow-hidden" aria-busy={!ready}>
+    <section className="relative isolate min-h-[80vh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black" {...(!ready && { "aria-busy": "true" })}>
       <div className="sr-only" aria-live="polite">
         {ready ? "Hero ready" : "Loading hero…"}
       </div>
@@ -56,6 +58,11 @@ export default function HeroVideo({
         }`}
         decoding="async"
         fetchPriority="high"
+        onError={(e) => {
+          console.log('Poster image failed to load:', e);
+          // Fallback to a dark background if poster fails
+          e.currentTarget.style.display = 'none';
+        }}
       />
 
       {!prefersReducedMotion && (
@@ -84,14 +91,14 @@ export default function HeroVideo({
       )}
 
       {/* Text overlay */}
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-4 py-20 text-center text-[--ink]">
-        <h1 className="font-[Cinzel] text-4xl sm:text-6xl md:text-7xl leading-tight drop-shadow">
+      <div className="relative z-20 mx-auto flex max-w-5xl flex-col items-center px-4 py-20 text-center text-ink">
+        <h1 className="font-[Cinzel] text-4xl sm:text-6xl md:text-7xl leading-tight text-white drop-shadow-lg hero-title-shadow">
           {headline}
         </h1>
-        <p className="mt-4 text-lg sm:text-xl opacity-90">{tagline}</p>
+        <p className="mt-4 text-lg sm:text-xl text-white opacity-95 hero-text-shadow">{tagline}</p>
 
         {/* Rotator injected by parent */}
-        <div className="mt-3 w-full max-w-[60ch]">{children}</div>
+        <div className="mt-3 w-full max-w-[60ch] text-white hero-text-shadow">{children}</div>
 
         <button
           onClick={onCta}
