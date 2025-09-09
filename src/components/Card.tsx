@@ -55,25 +55,13 @@ const Card = ({
               autoPlay
               loop
               muted
-              playsInline={true}
+              playsInline
               className={cn(
                 "w-full h-full object-cover transition-all motion-safe hover:scale-110",
                 videoPosition === "top" && "object-top",
                 videoPosition === "bottom" && "object-bottom"
               )}
               aria-label={title}
-              onError={(e) => {
-                console.log('Card video failed to load:', e);
-                // Hide video element if it fails to load
-                e.currentTarget.style.display = 'none';
-              }}
-              onLoadStart={(e) => {
-                // Fallback for older browsers
-                const video = e.currentTarget as HTMLVideoElement;
-                if (video && typeof video.setAttribute === 'function') {
-                  video.setAttribute('webkit-playsinline', 'true');
-                }
-              }}
             />
           ) : (
             <>
