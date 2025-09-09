@@ -168,12 +168,12 @@ const Gallery = () => {
               )}
             </div>
             <div className="text-center mb-16">
-              <div className="bg-card p-12 rounded-lg border border-accent-purple/30 max-w-3xl mx-auto">
-                <div className="font-heading text-6xl mb-6 text-accent-gold">🖼️</div>
-                <h2 className="font-subhead text-3xl mb-6 text-accent-red">
+              <div className="bg-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-lg border border-accent-purple/30 max-w-3xl mx-auto">
+                <div className="font-heading text-4xl sm:text-5xl md:text-6xl mb-4 sm:mb-5 md:mb-6 text-accent-gold">🖼️</div>
+                <h2 className="font-subhead text-2xl sm:text-3xl mb-4 sm:mb-5 md:mb-6 text-accent-red tracking-tight text-balance">
                   Gallery Opening Soon
                 </h2>
-                <p className="font-body text-muted-foreground mb-8 text-lg">
+                <p className="font-body text-muted-foreground mb-6 sm:mb-7 md:mb-8 text-base sm:text-lg">
                   Our photographers are still developing the film from last year's celebration. 
                   Some images are too dark to process... others refuse to develop at all.
                 </p>

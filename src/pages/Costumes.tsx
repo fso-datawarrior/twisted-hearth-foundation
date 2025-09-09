@@ -2,9 +2,19 @@ import { useState } from "react";
 import Footer from "@/components/Footer";
 import Carousel from "@/components/Carousel";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Costumes = () => {
   const [activeFilter, setActiveFilter] = useState("All");
+  const isMobile = useIsMobile();
+  
+  // Responsive carousel visible count
+  const getVisibleCount = () => {
+    if (typeof window === 'undefined') return 3;
+    if (window.innerWidth < 640) return 1;  // Mobile: 1 card
+    if (window.innerWidth < 1024) return 2; // Tablet: 2 cards  
+    return 3; // Desktop: 3 cards
+  };
   
   const filterCategories = ["All", "Royalty", "Creatures", "Cursed", "Woodland"];
   
@@ -176,7 +186,7 @@ const Costumes = () => {
               </h2>
               <Carousel 
                 items={filteredCostumes}
-                visible={3}
+                visible={getVisibleCount()}
                 auto={true}
                 interval={5000}
                 className="mb-8"

@@ -142,18 +142,18 @@ const Discussion = () => {
             {/* Authentication Check */}
             {!user ? (
               <div className="text-center mb-12">
-                <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
-                  <div className="font-heading text-5xl mb-4 text-accent-gold">📖</div>
-                  <h2 className="font-subhead text-2xl mb-4 text-accent-red">
+                <div className="bg-card p-4 sm:p-6 md:p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
+                  <div className="font-heading text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 text-accent-gold">📖</div>
+                  <h2 className="font-subhead text-lg sm:text-xl md:text-2xl mb-3 sm:mb-4 text-accent-red tracking-tight text-balance">
                     Sign In to Share Your Tale
                   </h2>
-                  <p className="font-body text-muted-foreground mb-6">
+                  <p className="font-body text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                     Ready to add your voice to the guestbook? Sign in to share your twisted tales, 
                     theories, and connect with fellow adventurers.
                   </p>
                   <Button 
                     onClick={() => setShowAuthModal(true)}
-                    className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead px-8 py-3"
+                    className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 text-sm sm:text-base"
                   >
                     Sign In to Post
                   </Button>
