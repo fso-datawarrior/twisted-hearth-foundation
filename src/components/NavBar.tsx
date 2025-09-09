@@ -64,7 +64,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           {/* Logo/Title */}
           <Link 
             to="/" 
-            className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
+            className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 mr-8"
             aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
           >
             The Ruths' Bash
