@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-import CSSFogBackground from "@/components/CSSFogBackground";
+// import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 import { useAuth } from "@/lib/auth";
@@ -121,7 +121,7 @@ const Discussion = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <main className="pt-20 relative z-10">
-        <CSSFogBackground />
+        {/* <CSSFogBackground /> */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="flex justify-between items-center mb-8">
