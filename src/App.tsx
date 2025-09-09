@@ -33,16 +33,16 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <HuntProvider>
-          <SkipLink />
-          <NavBar />
-          <main>
-            <Toaster />
-            <Sonner />
-            <ErrorBoundary>
-              <Suspense fallback={
-                <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-              }>
-                <BrowserRouter>
+          <BrowserRouter>
+            <SkipLink />
+            <NavBar />
+            <main>
+              <Toaster />
+              <Sonner />
+              <ErrorBoundary>
+                <Suspense fallback={
+                  <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+                }>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/about" element={<About />} />
@@ -58,14 +58,14 @@ const App = () => (
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </BrowserRouter>
-              </Suspense>
-            </ErrorBoundary>
-          </main>
-          
-          {/* Hunt UI overlays */}
-          <HuntProgress />
-          <HuntReward />
+                </Suspense>
+              </ErrorBoundary>
+            </main>
+            
+            {/* Hunt UI overlays */}
+            <HuntProgress />
+            <HuntReward />
+          </BrowserRouter>
         </HuntProvider>
       </AuthProvider>
     </TooltipProvider>
