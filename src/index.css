@@ -240,23 +240,48 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   }
 }
 
-/* --- Secret Nav: scroll-driven hint --- */
-@supports (animation-timeline: scroll()) {
-  @scroll-timeline pageScroll {
-    source: auto;
-    orientation: block;
+/* --- Smoky Fog Effect --- */
+.smoky-fog {
+  background: 
+    radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+      rgba(139, 69, 19, 0.15), 
+      transparent 40%),
+    radial-gradient(800px circle at calc(var(--mouse-x, 50%) - 200px) calc(var(--mouse-y, 50%) + 100px), 
+      rgba(75, 0, 130, 0.1), 
+      transparent 40%),
+    rgba(0, 0, 0, 0.4);
+  animation: smokeDrift 20s ease-in-out infinite;
+}
+
+@keyframes smokeDrift {
+  0%, 100% { 
+    background-position: 0% 0%, 100% 100%;
+    filter: blur(1px);
   }
-  .nav-glow {
-    animation: mirrorGlow 1.2s linear both;
-    animation-timeline: pageScroll;
+  25% { 
+    background-position: 100% 0%, 0% 100%;
+    filter: blur(1.5px);
   }
-  @keyframes mirrorGlow {
-    0%   { filter: drop-shadow(0 0 0 rgba(255, 200, 255, 0)); }
-    100% { filter: drop-shadow(0 0 12px rgba(255, 200, 255, 0.35)); }
+  50% { 
+    background-position: 100% 100%, 0% 0%;
+    filter: blur(2px);
   }
+  75% { 
+    background-position: 0% 100%, 100% 0%;
+    filter: blur(1.5px);
+  }
+}
+
+/* Track mouse for interactive fog */
+:root {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .nav-glow { animation: none !important; }
+  .smoky-fog { 
+    animation: none !important; 
+    background: rgba(0, 0, 0, 0.4);
+  }
 }

@@ -10,7 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
-import { SecretNav } from "@/components/nav/SecretNav";
+import NavBar from "@/components/NavBar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -34,32 +34,34 @@ const App = () => (
       <AuthProvider>
         <HuntProvider>
           <SkipLink />
-          <SecretNav />
-          <Toaster />
-          <Sonner />
-          <ErrorBoundary>
-            <Suspense fallback={
-              <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-            }>
-              <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/vignettes" element={<Vignettes />} />
-              <Route path="/schedule" element={<Schedule />} />
-              <Route path="/costumes" element={<Costumes />} />
-              <Route path="/feast" element={<Feast />} />
-              <Route path="/rsvp" element={<RSVP />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/discussion" element={<Discussion />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/auth" element={<AuthCallback />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </Suspense>
-          </ErrorBoundary>
+          <NavBar />
+          <main>
+            <Toaster />
+            <Sonner />
+            <ErrorBoundary>
+              <Suspense fallback={
+                <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+              }>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/vignettes" element={<Vignettes />} />
+                    <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/costumes" element={<Costumes />} />
+                    <Route path="/feast" element={<Feast />} />
+                    <Route path="/rsvp" element={<RSVP />} />
+                    <Route path="/gallery" element={<Gallery />} />
+                    <Route path="/discussion" element={<Discussion />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/auth" element={<AuthCallback />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </Suspense>
+            </ErrorBoundary>
+          </main>
           
           {/* Hunt UI overlays */}
           <HuntProgress />
