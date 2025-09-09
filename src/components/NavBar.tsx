@@ -71,7 +71,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden nav-compact:flex items-center space-x-8">
             {navLinks.map(({ to, label }) => (
               <Link
                 key={to}
@@ -86,53 +86,55 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               </Link>
             ))}
             
-            {/* Auth Section */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent-purple/10">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-accent-purple text-background text-sm">
-                        {user.email?.charAt(0)?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-subhead text-ink">
-                      {user.email?.split("@")[0] || "User"}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-card border-accent-purple/30">
-                  <DropdownMenuItem 
-                    onClick={() => signOut()}
-                    className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
-                  >
-                    <LogOut size={16} />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                onClick={() => setShowAuthModal(true)}
-                variant="ghost"
-                className="hover:bg-accent-purple/10 font-subhead text-ink"
+            {/* Auth Section - Hidden below 1875px */}
+            <div className="hidden nav-full:flex items-center space-x-8">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent-purple/10">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-accent-purple text-background text-sm">
+                          {user.email?.charAt(0)?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-subhead text-ink">
+                        {user.email?.split("@")[0] || "User"}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-card border-accent-purple/30">
+                    <DropdownMenuItem 
+                      onClick={() => signOut()}
+                      className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
+                    >
+                      <LogOut size={16} />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  variant="ghost"
+                  className="hover:bg-accent-purple/10 font-subhead text-ink"
+                >
+                  Sign In
+                </Button>
+              )}
+              
+              <Button 
+                asChild 
+                variant="destructive" 
+                className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead"
               >
-                Sign In
+                <Link to="/rsvp">{ctaLabel}</Link>
               </Button>
-            )}
-            
-            <Button 
-              asChild 
-              variant="destructive" 
-              className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead"
-            >
-              <Link to="/rsvp">{ctaLabel}</Link>
-            </Button>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
+            className="nav-compact:hidden p-2 text-ink hover:text-accent-gold transition-colors motion-safe focus-visible"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
@@ -146,7 +148,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="lg:hidden absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
+            className="nav-compact:hidden absolute top-full left-0 right-0 bg-bg-2/95 backdrop-blur-md border-t border-accent-purple/30"
           >
               <div className="container mx-auto px-6 py-4 space-y-4">
                 {navLinks.map(({ to, label }) => (

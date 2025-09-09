@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      screens: {
+        "nav-full": "1875px", // Show full nav with auth/RSVP
+        "nav-compact": "1391px", // Switch to mobile hamburger
+      },
       fontFamily: {
         heading: ['Cinzel Decorative', 'serif'],
         subhead: ['IM Fell English SC', 'serif'],
