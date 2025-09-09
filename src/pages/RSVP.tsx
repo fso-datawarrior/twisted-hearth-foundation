@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import NavBar from "@/components/NavBar";
+
 import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
@@ -151,8 +151,6 @@ const RSVP = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
-      
       <main className="pt-20">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-3xl">

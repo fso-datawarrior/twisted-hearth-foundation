@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import NavBar from "@/components/NavBar";
+
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,8 +88,6 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
-      
       <main className="pt-20">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">

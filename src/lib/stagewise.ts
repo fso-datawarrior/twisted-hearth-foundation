@@ -36,7 +36,7 @@ export interface StagewiseConfig {
  * Default Stagewise configuration for staging environment
  */
 export const stagewiseConfig: StagewiseConfig = {
-  enabled: import.meta.env.VITE_STAGING_MODE === 'true' || import.meta.env.DEV,
+  enabled: false, // DISABLED - was: import.meta.env.VITE_STAGING_MODE === 'true' || import.meta.env.DEV,
   environment: import.meta.env.VITE_APP_ENV as 'development' | 'staging' | 'production',
   features: {
     componentInspector: true,
