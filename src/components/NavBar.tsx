@@ -53,16 +53,12 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe relative ${
-        isScrolled ? "shadow-lg" : ""
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe ${
+        isScrolled ? "backdrop-blur-md shadow-lg smoky-fog" : "bg-transparent"
       }`}
       role="navigation"
       aria-label="Main navigation"
     >
-      {/* Backdrop blur layer */}
-      {isScrolled && (
-        <div className="absolute inset-0 backdrop-blur-md smoky-fog -z-10" />
-      )}
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Title */}
@@ -118,8 +114,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             ) : (
               <Button
                 onClick={() => setShowAuthModal(true)}
-                variant="outline"
-                className="hover:bg-accent-purple/10 font-subhead text-ink border-ink/30 hover:border-accent-gold"
+                variant="ghost"
+                className="hover:bg-accent-purple/10 font-subhead text-ink"
               >
                 Sign In
               </Button>
@@ -183,8 +179,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                     </div>
                     <Button
                       onClick={() => { signOut(); setIsMenuOpen(false); }}
-                      variant="outline"
-                      className="w-full text-accent-red hover:bg-accent-red/10 font-subhead border-ink/30 hover:border-accent-red"
+                      variant="ghost"
+                      className="w-full text-accent-red hover:bg-accent-red/10 font-subhead"
                     >
                       <LogOut size={16} className="mr-2" />
                       Sign out
@@ -193,8 +189,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                 ) : (
                   <Button
                     onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }}
-                    variant="outline"
-                    className="w-full hover:bg-accent-purple/10 font-subhead text-ink border-ink/30 hover:border-accent-gold"
+                    variant="ghost"
+                    className="w-full hover:bg-accent-purple/10 font-subhead text-ink"
                   >
                     Sign In
                   </Button>
