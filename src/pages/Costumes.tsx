@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Footer from "@/components/Footer";
+import CSSFogBackground from "@/components/CSSFogBackground";
 import Carousel from "@/components/Carousel";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,88 +21,39 @@ const Costumes = () => {
   
   const costumeInspiration = [
     {
-      id: 1,
-      title: "Ragged Queen of Thorns",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop",
-      description: "Crown of twisted vines, torn royal robes, ruling from ruins.",
+      id: 1, 
+      title: "Cursed Cinderella & Blood Prince",
+      image: "/img/costumes/Cinderella.png",
+      description: "A tattered ballgown soaked in crimson and a cracked glass slipper mark Cinderella's midnight bargain. Her Prince wears a tarnished crown and velvet doublet, his hands dripping red as he claims his bride in blood.",
       category: "Royalty"
     },
     {
-      id: 2, 
-      title: "Wolf-Worn Hunter",
-      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=600&fit=crop",
-      description: "Red cloak stained with secrets, eyes that have seen too much.",
-      category: "Cursed"
+      id: 2,
+      title: "Red Riding Hood & The Wolf",
+      image: "/img/costumes/LittleRedRidingHood2.png",
+      description: "Red cloaked in rags carries a basket of bones and black bread, her arms scarred with bite marks. At her side snarls the Wolf, claws and muzzle dripping red, cloaked in tattered furs from the deep woods.",
+      category: "Woodland"
     },
     {
       id: 3,
-      title: "Moss-Eaten Dryad", 
-      image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=600&fit=crop",
-      description: "Ancient tree spirit, bark for skin, leaves for hair.",
-      category: "Woodland"
+      title: "Pinocchio & Geppetto the Butcher",
+      image: "/img/costumes/Pinocchio.png",
+      description: "Pinocchio appears as a cracked wooden puppet with a grotesque nose like a bloody stake, clutching a basket of bones. At his side, Geppetto looms in a bloodstained apron, chisel in hand, eyes cold as a butcher of his own creations.",
+      category: "Cursed"
     },
     {
       id: 4,
-      title: "Poisoned Princess",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=600&fit=crop",
-      description: "Beauty preserved by toxins, apple-red lips that kill with a kiss.",
-      category: "Royalty"
+      title: "Hansel & Gretel — Witch's Apprentices",
+      image: "/img/costumes/hanselGetel.png",
+      description: "Hansel and Gretel stand in grimy peasant garb, aprons streaked with soot and blood. Gretel clutches a tray of gingerbread shaped like human limbs while Hansel grips a cleaver and oven door, their faces hardened by the witch's cruel lessons.",
+      category: "Cursed"
     },
     {
       id: 5,
-      title: "Spectral Swan",
-      image: "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=400&h=600&fit=crop", 
-      description: "Cursed to dance forever, feathers falling like snow.",
+      title: "Snow White & Goblin Dwarf",
+      image: "/img/costumes/snow-white.png",
+      description: "Snow White laughs with crimson on her lips, a poisoned apple clutched in her hand. At her side, a grotesque dwarf grins wide, raising a mug brimming with brains, both reveling in their wicked feast as if it were a party toast.",
       category: "Cursed"
-    },
-    {
-      id: 6,
-      title: "Bear King's Heir",
-      image: "https://images.unsplash.com/photo-1485062934645-5c8021e4b5b5?w=400&h=600&fit=crop",
-      description: "Royal beast with crown of bone, civilized but wild.",
-      category: "Creatures"
-    },
-    {
-      id: 7,
-      title: "Thorn Witch of the Briar",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
-      description: "Guardian of sleeping curses, spinner of endless dreams.",
-      category: "Woodland"
-    },
-    {
-      id: 8,
-      title: "Shadow Court Jester",
-      image: "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=400&h=600&fit=crop",
-      description: "Entertainer of the damned, jokes that cut like knives.",
-      category: "Royalty"
-    },
-    {
-      id: 9,
-      title: "Raven Parliament Speaker",
-      image: "https://images.unsplash.com/photo-1455218873509-8097305ee378?w=400&h=600&fit=crop",
-      description: "Collector of secrets, keeper of dark prophecies.",
-      category: "Creatures"
-    },
-    {
-      id: 10,
-      title: "Mushroom Circle Keeper",
-      image: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=600&fit=crop",
-      description: "Guardian of fairy rings, dealer in dangerous bargains.",
-      category: "Woodland"
-    },
-    {
-      id: 11,
-      title: "Mirror Shard Collector",
-      image: "https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&h=600&fit=crop",
-      description: "Seven reflections, each showing a different truth.",
-      category: "Cursed"
-    },
-    {
-      id: 12,
-      title: "Bone Crown Emperor",
-      image: "https://images.unsplash.com/photo-1509557965043-e78fcf5299ad?w=400&h=600&fit=crop",
-      description: "Ruler of forgotten kingdoms, crowned with the past.",
-      category: "Royalty"
     }
   ];
 
@@ -133,9 +85,9 @@ const Costumes = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      
-      <main className="pt-20">
+    <div className="min-h-screen bg-background relative">
+      <main className="pt-20 relative z-10">
+        <CSSFogBackground />
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
@@ -204,7 +156,7 @@ const Costumes = () => {
                     key={index}
                     className="bg-card p-8 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe"
                   >
-                    <h3 className="font-subhead text-xl mb-4 text-accent-purple">
+                    <h3 className="font-subhead text-xl mb-4 text-accent-gold">
                       {category.title}
                     </h3>
                     <p className="font-body text-muted-foreground mb-4">

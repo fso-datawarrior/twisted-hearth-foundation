@@ -61,7 +61,7 @@ export default function HuntProgress() {
         >
           <div
             className="
-              bg-card rounded-lg border border-accent-green/30 p-6 max-w-md w-full
+              bg-black/90 backdrop-blur-sm rounded-lg border border-accent-green/30 p-6 max-w-md w-full
               max-h-[80vh] overflow-y-auto shadow-xl
             "
             onClick={(e) => e.stopPropagation()}
@@ -97,7 +97,7 @@ export default function HuntProgress() {
             </div>
 
             <div className="space-y-2">
-              <h4 className="font-subhead text-sm text-accent-purple mb-3">
+              <h4 className="font-subhead text-sm text-accent-gold mb-3">
                 Secrets Found:
               </h4>
               {Object.entries(hintDescriptions).map(([id, description]) => (

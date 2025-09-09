@@ -15,4 +15,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['date-fns', '@radix-ui/react-checkbox'],
+    force: true
+  },
 }));

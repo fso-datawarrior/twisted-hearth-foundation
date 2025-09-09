@@ -25,6 +25,7 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const Discussion = lazy(() => import("./pages/Discussion"));
 const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const TestPage = lazy(() => import("./pages/TestPage"));
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
                     <Route path="/discussion" element={<Discussion />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/auth" element={<AuthCallback />} />
+                    <Route path="/test" element={<TestPage />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

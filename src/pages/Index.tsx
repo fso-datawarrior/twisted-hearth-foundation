@@ -8,6 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
   "A cottage too cozy to trust… where the meal is already waiting.",
@@ -27,9 +28,13 @@ function OneLinerRotator() {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion) {
+      return;
+    }
     const id = setInterval(() => {
-      if (paused.current) return;
+      if (paused.current) {
+        return;
+      }
       setFade(false);
       setTimeout(() => {
         setI((n) => (n + 1) % LINES.length);
@@ -92,26 +97,26 @@ const Index = () => {
   const featuredHighlights = [
     {
       id: 1,
-      title: "Interactive Storytelling",
-      hook: "You're not just watching the story unfold - you're living it. Every choice shapes the narrative.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop"
+      title: "Cursed Pong Tournament",
+      hook: "The annual battle where every miss is a step closer to the underworld. Will you survive the cursed cups?",
+      video: "/pongCupsTrophy.mp4"
     },
     {
       id: 2,
       title: "Twisted Fairytale Costumes",
       hook: "From corporate Cinderella to surveillance Red Riding Hood - reimagine classic characters for the modern world.",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"
+      video: "/costumeWalk.mp4"
     },
     {
       id: 3,
       title: "Feast of Dark Delights",
       hook: "Potluck with a twist. Bring a dish inspired by your favorite (or most feared) fairytale.",
-      image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop"
+      video: "/twistedTailsFood.mp4"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       {/* Hunt triggers positioned absolutely */}
       <div className="relative">
         <HuntHintTrigger 
@@ -152,8 +157,10 @@ const Index = () => {
       </div>
       
       {/* Main Content */}
-      <main id="main" className="py-16 px-6">
-        <div className="container mx-auto max-w-6xl">
+      <main id="main" className="py-16 px-6 relative z-10">
+        {/* GLSL animated smoke effect for main content areas only */}
+        <CSSFogBackground />
+        <div className="container mx-auto max-w-6xl relative z-10">
           
           {/* Past Vignettes Section */}
           <section ref={vigRef as any} className={`mb-16 reveal ${vigShown ? "reveal--shown" : ""}`}>
@@ -205,7 +212,7 @@ const Index = () => {
             </p>
             <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
               <div className="text-center">
-                <div className="font-heading text-3xl mb-2 text-accent-purple">🕰️</div>
+                <div className="font-heading text-3xl mb-2 text-accent-gold">🕰️</div>
                 <h3 className="font-subhead text-lg mb-1 text-accent-gold">7:00 PM Start</h3>
                 <p className="font-body text-sm text-muted-foreground">Gates open at twilight</p>
               </div>
@@ -233,6 +240,8 @@ const Index = () => {
                   key={highlight.id}
                   variant="vignette"
                   image={highlight.image}
+                  video={highlight.video}
+                  videoPosition={highlight.id === 2 ? "top" : "center"}
                   title={highlight.title}
                   hook={highlight.hook}
                   className="hover-tilt motion-safe"
@@ -251,7 +260,7 @@ const Index = () => {
                 <Button 
                   asChild 
                   variant="outline" 
-                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-purple text-accent-purple hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
+                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-purple text-accent-gold hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
                 >
                   <Link to="/costumes">Costume Ideas</Link>
                 </Button>

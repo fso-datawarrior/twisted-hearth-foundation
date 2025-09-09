@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 interface CardProps {
   variant?: "vignette" | "costume" | "default";
   image?: string;
+  video?: string;
+  videoPosition?: "top" | "center" | "bottom";
   title: string;
   hook?: string;
   onClick?: () => void;
@@ -14,6 +16,8 @@ interface CardProps {
 const Card = ({ 
   variant = "default", 
   image, 
+  video,
+  videoPosition = "center",
   title, 
   hook, 
   onClick, 
@@ -21,7 +25,7 @@ const Card = ({
   children 
 }: CardProps) => {
   const [imgReady, setImgReady] = useState(false);
-  const baseClasses = "group relative rounded-2xl bg-[--bg-2] shadow/50 transition cursor-pointer overflow-hidden";
+  const baseClasses = "group relative rounded-2xl bg-black/90 backdrop-blur-sm shadow/50 transition cursor-pointer overflow-hidden";
   
   const variantClasses = {
     vignette: "border border-accent-purple/30 hover:shadow-[0_0_30px_rgba(59,110,71,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]",
@@ -43,28 +47,46 @@ const Card = ({
       } : undefined}
       aria-label={onClick ? `View details for ${title}` : undefined}
     >
-      {image && (
+      {(image || video) && (
         <div className="aspect-video overflow-hidden relative">
-          <img 
-            src={image} 
-            alt={title}
-            loading="lazy"
-            decoding="async"
-            width="400"
-            height="225"
-            onLoad={() => setImgReady(true)}
-            className={cn(
-              "w-full h-full object-cover transition-all motion-safe hover:scale-110",
-              imgReady ? "opacity-100" : "opacity-0"
-            )}
-          />
-          {!imgReady && (
-            <div className="absolute inset-0 animate-pulse rounded bg-white/5" aria-hidden="true" />
+          {video ? (
+            <video 
+              src={video} 
+              autoPlay
+              loop
+              muted
+              playsInline
+              className={cn(
+                "w-full h-full object-cover transition-all motion-safe hover:scale-110",
+                videoPosition === "top" && "object-top",
+                videoPosition === "bottom" && "object-bottom"
+              )}
+              aria-label={title}
+            />
+          ) : (
+            <>
+              <img 
+                src={image} 
+                alt={title}
+                loading="lazy"
+                decoding="async"
+                width="400"
+                height="225"
+                onLoad={() => setImgReady(true)}
+                className={cn(
+                  "w-full h-full object-cover transition-all motion-safe hover:scale-110",
+                  imgReady ? "opacity-100" : "opacity-0"
+                )}
+              />
+              {!imgReady && (
+                <div className="absolute inset-0 animate-pulse rounded bg-white/5" aria-hidden="true" />
+              )}
+            </>
           )}
         </div>
       )}
       
-      <div className="p-6">
+      <div className="p-6 bg-black/95 backdrop-blur-sm">
         <h3 className="font-subhead text-xl mb-3 text-accent-gold">
           {title}
         </h3>
