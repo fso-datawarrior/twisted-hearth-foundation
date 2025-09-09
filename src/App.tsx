@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import SafeErrorBoundary from "@/components/SafeErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
@@ -42,11 +41,10 @@ const App = () => (
               <Toaster />
               <Sonner />
               <ErrorBoundary>
-                <SafeErrorBoundary>
-                  <Suspense fallback={
-                    <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-                  }>
-                    <Routes>
+                <Suspense fallback={
+                  <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+                }>
+                  <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/vignettes" element={<Vignettes />} />
@@ -61,9 +59,8 @@ const App = () => (
                     <Route path="/test" element={<TestPage />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </SafeErrorBoundary>
+                  </Routes>
+                </Suspense>
               </ErrorBoundary>
             </main>
             

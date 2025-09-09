@@ -75,21 +75,10 @@ export default function HeroVideo({
           poster={poster}
           preload="metadata"
           muted={muted}
-          playsInline={true}
+          playsInline
           autoPlay
           loop
           aria-label={headline}
-          onError={(e) => {
-            console.log('Video failed to load:', e);
-            setReady(false);
-          }}
-          onLoadStart={(e) => {
-            // Fallback for older browsers
-            const video = e.currentTarget as HTMLVideoElement;
-            if (video && typeof video.setAttribute === 'function') {
-              video.setAttribute('webkit-playsinline', 'true');
-            }
-          }}
         >
           <track
             kind="captions"
@@ -97,11 +86,6 @@ export default function HeroVideo({
             srcLang="en"
             label="English captions"
             default
-            onError={(e) => {
-              console.log('Captions track failed to load:', e);
-              // Remove track element if it fails to load
-              e.currentTarget.remove();
-            }}
           />
         </video>
       )}
