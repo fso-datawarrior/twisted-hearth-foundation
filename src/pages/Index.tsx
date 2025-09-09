@@ -243,36 +243,36 @@ const Index = () => {
           
           {/* Quick Links */}
           <section ref={prepRef as any} className={`mb-16 reveal ${prepShown ? "reveal--shown" : ""}`}>
-            <div className="bg-card p-8 rounded-lg border border-accent-purple/30">
-              <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
+            <div className="bg-card p-6 sm:p-8 rounded-lg border border-accent-purple/30">
+              <h2 className="font-subhead text-2xl sm:text-3xl text-center mb-6 sm:mb-8 text-accent-gold tracking-tight text-balance">
                 Prepare for Your Twisted Tale
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Button 
                   asChild 
                   variant="outline" 
-                  className="border-accent-purple text-accent-purple hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
+                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-purple text-accent-purple hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
                 >
                   <Link to="/costumes">Costume Ideas</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
-                  className="border-accent-green text-accent-green hover:bg-accent-green/20 hover:text-accent-gold font-subhead"
+                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-green text-accent-green hover:bg-accent-green/20 hover:text-accent-gold font-subhead"
                 >
                   <Link to="/schedule">Event Schedule</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
-                  className="border-accent-gold text-accent-gold hover:bg-accent-gold/20 hover:text-ink font-subhead"
+                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-gold text-accent-gold hover:bg-accent-gold/20 hover:text-ink font-subhead"
                 >
                   <Link to="/feast">Feast Details</Link>
                 </Button>
                 <Button 
                   asChild 
                   variant="outline" 
-                  className="border-accent-red text-accent-red hover:bg-accent-red/20 hover:text-accent-gold font-subhead"
+                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-red text-accent-red hover:bg-accent-red/20 hover:text-accent-gold font-subhead"
                 >
                   <Link to="/vignettes">Past Stories</Link>
                 </Button>
@@ -282,11 +282,11 @@ const Index = () => {
           
           {/* Call to Action */}
           <section ref={ctaRef as any} className={`text-center reveal ${ctaShown ? "reveal--shown" : ""}`}>
-            <div className="bg-bg-2 p-12 rounded-lg border border-accent-red/50 max-w-3xl mx-auto">
-              <h2 className="font-heading text-4xl mb-6 text-accent-red">
+            <div className="bg-bg-2 p-6 sm:p-8 md:p-12 rounded-lg border border-accent-red/50 max-w-3xl mx-auto">
+              <h2 className="font-heading text-3xl sm:text-4xl mb-4 sm:mb-6 text-accent-red tracking-tight text-balance">
                 Your Story Awaits
               </h2>
-              <p className="font-body text-lg text-muted-foreground mb-8">
+              <p className="font-body text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8">
                 Every fairytale needs its characters. Will you be the hero, the villain, 
                 or something entirely unexpected? The choice is yours, but choose wisely - 
                 not all who enter leave unchanged.
@@ -294,12 +294,12 @@ const Index = () => {
               <Button 
                 asChild 
                 size="lg"
-                className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-xl px-16 py-6 glow-gold motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
+                className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-base sm:text-lg md:text-xl px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 glow-gold motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
               >
                 <Link to="/rsvp">Join the Tale</Link>
               </Button>
               
-              <p className="font-body text-sm text-muted-foreground mt-6 italic">
+              <p className="font-body text-sm text-muted-foreground mt-4 sm:mt-6 italic">
                 "Once upon a time is now. What happens next is up to you."
               </p>
             </div>
