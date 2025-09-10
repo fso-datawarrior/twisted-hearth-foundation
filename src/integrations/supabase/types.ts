@@ -273,25 +273,19 @@ export type Database = {
         }
       }
       submit_rsvp: {
-        Args:
-          | {
-              p_contributions: string
-              p_costume_idea: string
-              p_dietary: string
-              p_email: string
-              p_idempotency?: string
-              p_name: string
-              p_num_guests: number
-            }
-          | {
-              p_contributions: string
-              p_costume_idea: string
-              p_dietary: string
-              p_email: string
-              p_name: string
-              p_num_guests: number
-            }
-        Returns: string
+        Args: {
+          p_contributions: string
+          p_costume_idea: string
+          p_dietary: string
+          p_email: string
+          p_idempotency?: string
+          p_name: string
+          p_num_guests: number
+        }
+        Returns: {
+          rsvp_id: string
+          updated: boolean
+        }[]
       }
     }
     Enums: {
