@@ -21,6 +21,7 @@ export default function AuthCallback() {
       try {
         console.log('🔐 AuthCallback: Starting authentication process...');
         console.log('Current URL:', window.location.href);
+        console.log('Loading state:', loading, 'User state:', !!user);
         
         // Parse URL hash parameters (Supabase uses hash fragments, not search params)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -139,24 +140,21 @@ export default function AuthCallback() {
       }
     };
 
-    if (!loading) {
-      console.log('🔍 Auth loading complete. User status:', !!user);
-      
-      if (user) {
-        // User is already authenticated, redirect them
-        console.log('✅ User already authenticated:', user.email);
-        toast({
-          title: "Already signed in",
-          description: "You're already authenticated!",
-          duration: 3000,
-        });
-        navigate('/discussion', { replace: true });
-      } else {
-        console.log('🔄 No authenticated user, processing callback...');
-        handleAuthCallback();
-      }
+    // Always handle the callback, even if loading
+    console.log('🔍 Auth state - Loading:', loading, 'User:', !!user);
+    
+    if (user && !loading) {
+      // User is already authenticated, redirect them
+      console.log('✅ User already authenticated:', user.email);
+      toast({
+        title: "Already signed in",
+        description: "You're already authenticated!",
+        duration: 3000,
+      });
+      navigate('/discussion', { replace: true });
     } else {
-      console.log('⏳ Auth still loading...');
+      console.log('🔄 Processing auth callback...');
+      handleAuthCallback();
     }
   }, [searchParams, navigate, user, loading, toast]);
 
@@ -200,7 +198,7 @@ export default function AuthCallback() {
     }
   };
 
-  if (loading || status === 'checking') {
+  if (status === 'checking') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -211,6 +209,9 @@ export default function AuthCallback() {
                 <h2 className="font-heading text-xl mb-2">Signing you in...</h2>
                 <p className="font-body text-muted-foreground">
                   Please wait while we authenticate your magic link.
+                </p>
+                <p className="font-body text-xs text-muted-foreground mt-2">
+                  Debug: Loading={loading ? 'true' : 'false'}, Status={status}
                 </p>
               </div>
             </div>
