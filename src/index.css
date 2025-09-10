@@ -140,6 +140,16 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   .glow-gold {
     box-shadow: 0 0 20px var(--glow-gold);
   }
+
+  /* Sparkle effect for form inputs */
+  .shadow-sparkle {
+    box-shadow: 
+      0 0 20px hsl(var(--accent-gold) / 0.6),
+      0 0 40px hsl(var(--accent-gold) / 0.4),
+      0 0 60px hsl(var(--accent-gold) / 0.2),
+      inset 0 1px 0 hsl(var(--accent-gold) / 0.3);
+    animation: sparkle 2s ease-in-out infinite;
+  }
   
   /* Gothic text shadow for headings */
   .text-shadow-gothic {
@@ -246,6 +256,23 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(var(--accent-gold) / 0.6),
+      0 0 40px hsl(var(--accent-gold) / 0.4),
+      0 0 60px hsl(var(--accent-gold) / 0.2),
+      inset 0 1px 0 hsl(var(--accent-gold) / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px hsl(var(--accent-gold) / 0.8),
+      0 0 60px hsl(var(--accent-gold) / 0.6),
+      0 0 90px hsl(var(--accent-gold) / 0.4),
+      inset 0 1px 0 hsl(var(--accent-gold) / 0.5);
   }
 }
 
