@@ -32,7 +32,7 @@ const FormField = ({
   rows = 3,
   className
 }: FormFieldProps) => {
-  const baseClasses = "bg-input border-accent-purple/30 text-foreground placeholder:text-muted-foreground focus:border-accent-gold focus:ring-accent-gold/20";
+  const baseClasses = "bg-input border-4 border-accent-gold/80 text-foreground placeholder:text-muted-foreground focus:border-accent-gold focus:ring-4 focus:ring-accent-gold/30 focus:shadow-sparkle transition-all duration-300";
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onChange(e.target.value);
