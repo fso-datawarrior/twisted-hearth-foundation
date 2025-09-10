@@ -302,7 +302,7 @@ const Index = () => {
               <Button 
                 asChild 
                 size="lg"
-                className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-base sm:text-lg md:text-xl px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 glow-red-pulse motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
+                className="bg-[--accent-red] hover:bg-[--accent-red]/80 text-ink font-subhead text-base sm:text-lg md:text-xl px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 glow-red-pulse motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
               >
                 <Link to="/rsvp">Join the Tale</Link>
               </Button>

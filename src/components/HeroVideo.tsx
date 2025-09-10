@@ -102,7 +102,7 @@ export default function HeroVideo({
 
         <button
           onClick={onCta}
-          className="mt-6 rounded-lg bg-[--accent-red] px-6 py-3 text-base font-semibold text-white shadow-[0_0_20px_rgba(139,0,0,0.5)] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent-gold]"
+          className="mt-6 rounded-lg bg-[--accent-red] px-6 py-3 text-base font-semibold text-white shadow-[0_0_20px_hsl(var(--accent-red)/0.8)] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent-gold]"
           aria-label="Go to RSVP page"
         >
           {ctaLabel}
