@@ -95,7 +95,7 @@ export default function AuthCallback() {
                 if (fallbackData?.session?.user) {
                   console.log('✅ Fallback successful:', fallbackData.session.user.email);
                   setStatus('success');
-                  navigate('/discussion', { replace: true });
+                  navigate('/', { replace: true });
                 }
               }, 1000);
               
@@ -108,10 +108,10 @@ export default function AuthCallback() {
                 duration: 5000,
               });
               
-              // Redirect to discussion page after successful auth
+              // Redirect to homepage after successful auth
               setTimeout(() => {
-                console.log('🔄 Redirecting to discussion...');
-                navigate('/discussion', { replace: true });
+                console.log('🔄 Redirecting to homepage...');
+                navigate('/', { replace: true });
               }, 2000);
             } else {
               console.warn('⚠️ Session set but no user data received');
@@ -151,7 +151,7 @@ export default function AuthCallback() {
         description: "You're already authenticated!",
         duration: 3000,
       });
-      navigate('/discussion', { replace: true });
+      navigate('/', { replace: true });
     } else {
       console.log('🔄 Processing auth callback...');
       handleAuthCallback();
