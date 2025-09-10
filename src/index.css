@@ -150,6 +150,16 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       inset 0 1px 0 hsl(var(--accent-gold) / 0.3);
     animation: sparkle 2s ease-in-out infinite;
   }
+
+  /* Bright pulsing red haze for RSVP button */
+  .glow-red-pulse {
+    box-shadow: 
+      0 0 30px hsl(var(--accent-red) / 0.8),
+      0 0 60px hsl(var(--accent-red) / 0.6),
+      0 0 90px hsl(var(--accent-red) / 0.4),
+      0 0 120px hsl(var(--accent-red) / 0.2);
+    animation: redPulse 2.5s ease-in-out infinite;
+  }
   
   /* Gothic text shadow for headings */
   .text-shadow-gothic {
@@ -273,6 +283,23 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       0 0 60px hsl(var(--accent-gold) / 0.6),
       0 0 90px hsl(var(--accent-gold) / 0.4),
       inset 0 1px 0 hsl(var(--accent-gold) / 0.5);
+  }
+}
+
+@keyframes redPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px hsl(var(--accent-red) / 0.8),
+      0 0 60px hsl(var(--accent-red) / 0.6),
+      0 0 90px hsl(var(--accent-red) / 0.4),
+      0 0 120px hsl(var(--accent-red) / 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 50px hsl(var(--accent-red) / 1.0),
+      0 0 100px hsl(var(--accent-red) / 0.8),
+      0 0 150px hsl(var(--accent-red) / 0.6),
+      0 0 200px hsl(var(--accent-red) / 0.3);
   }
 }
 
