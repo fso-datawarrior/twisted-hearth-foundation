@@ -49,7 +49,14 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
     { to: "/gallery", label: "Gallery" },
     { to: "/discussion", label: "Discussion" },
     { to: "/contact", label: "Contact" },
+    { to: "/rsvp", label: "RSVP" },
   ];
+
+  // Get current page name for mobile display
+  const getCurrentPageName = () => {
+    const currentLink = navLinks.find(link => link.to === location.pathname);
+    return currentLink ? currentLink.label : "Home";
+  };
 
   return (
     <nav 
@@ -133,15 +140,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <button
-            className="block nav-full:hidden p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex nav-full:hidden items-center gap-4">
+            <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider">
+              {getCurrentPageName()}
+            </span>
+            <button
+              className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation - Show when mobile OR when auth is hidden on desktop */}
