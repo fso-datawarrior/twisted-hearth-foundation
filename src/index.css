@@ -290,19 +290,19 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 @keyframes redPulse {
   0%, 100% {
     box-shadow: 
-      0 0 20px hsl(var(--accent-red) / 1.0),
-      0 0 40px hsl(var(--accent-red) / 0.8),
-      0 0 80px hsl(var(--accent-red) / 0.6),
-      0 0 120px hsl(var(--accent-red) / 0.4),
-      0 0 160px hsl(var(--accent-red) / 0.3);
+      0 0 20px hsl(var(--accent-red) / 0.8),
+      0 0 40px hsl(var(--accent-red) / 0.6),
+      0 0 80px hsl(var(--accent-red) / 0.4),
+      0 0 120px hsl(var(--accent-red) / 0.3),
+      0 0 160px hsl(var(--accent-red) / 0.2);
   }
   50% {
     box-shadow: 
-      0 0 30px hsl(var(--accent-red) / 1.0),
-      0 0 60px hsl(var(--accent-red) / 1.0),
-      0 0 120px hsl(var(--accent-red) / 0.8),
-      0 0 180px hsl(var(--accent-red) / 0.6),
-      0 0 240px hsl(var(--accent-red) / 0.4);
+      0 0 40px hsl(var(--accent-red) / 1.0),
+      0 0 80px hsl(var(--accent-red) / 0.9),
+      0 0 160px hsl(var(--accent-red) / 0.7),
+      0 0 240px hsl(var(--accent-red) / 0.5),
+      0 0 320px hsl(var(--accent-red) / 0.3);
   }
 }
 
