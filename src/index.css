@@ -16,7 +16,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     /* Fairytale Accent Palette */
     --accent-purple: 285 46% 21%; /* #3B1F4A - Enchanted purple */
     --accent-green: 142 25% 33%; /* #3B6E47 - Forest green */
-    --accent-red: 0 100% 27%; /* #8B0000 - Blood red */
+    --accent-red: 0 100% 45%; /* #E60000 - Bright blood red */
     --accent-gold: 44 35% 57%; /* #C5A45D - Ancient gold */
     
     /* Semantic Mappings */
@@ -154,11 +154,12 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   /* Bright pulsing red haze for RSVP button */
   .glow-red-pulse {
     box-shadow: 
-      0 0 30px hsl(var(--accent-red) / 0.8),
-      0 0 60px hsl(var(--accent-red) / 0.6),
-      0 0 90px hsl(var(--accent-red) / 0.4),
-      0 0 120px hsl(var(--accent-red) / 0.2);
-    animation: redPulse 2.5s ease-in-out infinite;
+      0 0 20px hsl(var(--accent-red) / 1.0),
+      0 0 40px hsl(var(--accent-red) / 0.8),
+      0 0 80px hsl(var(--accent-red) / 0.6),
+      0 0 120px hsl(var(--accent-red) / 0.4),
+      0 0 160px hsl(var(--accent-red) / 0.3);
+    animation: redPulse 1.8s ease-in-out infinite;
   }
   
   /* Gothic text shadow for headings */
@@ -289,17 +290,19 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 @keyframes redPulse {
   0%, 100% {
     box-shadow: 
-      0 0 30px hsl(var(--accent-red) / 0.8),
-      0 0 60px hsl(var(--accent-red) / 0.6),
-      0 0 90px hsl(var(--accent-red) / 0.4),
-      0 0 120px hsl(var(--accent-red) / 0.2);
+      0 0 20px hsl(var(--accent-red) / 1.0),
+      0 0 40px hsl(var(--accent-red) / 0.8),
+      0 0 80px hsl(var(--accent-red) / 0.6),
+      0 0 120px hsl(var(--accent-red) / 0.4),
+      0 0 160px hsl(var(--accent-red) / 0.3);
   }
   50% {
     box-shadow: 
-      0 0 50px hsl(var(--accent-red) / 1.0),
-      0 0 100px hsl(var(--accent-red) / 0.8),
-      0 0 150px hsl(var(--accent-red) / 0.6),
-      0 0 200px hsl(var(--accent-red) / 0.3);
+      0 0 30px hsl(var(--accent-red) / 1.0),
+      0 0 60px hsl(var(--accent-red) / 1.0),
+      0 0 120px hsl(var(--accent-red) / 0.8),
+      0 0 180px hsl(var(--accent-red) / 0.6),
+      0 0 240px hsl(var(--accent-red) / 0.4);
   }
 }
 
