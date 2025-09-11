@@ -3,9 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2 } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth";
+import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 
 interface NavBarProps {
   variant?: "public";
@@ -18,6 +19,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,13 +71,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Title */}
-          <Link 
-            to="/" 
-            className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 mr-8"
-            aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
-          >
-            The Ruths' Bash
-          </Link>
+          <div className="flex items-center gap-3 mr-8">
+            <Link 
+              to="/" 
+              className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0"
+              aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
+            >
+              The Ruths' Bash
+            </Link>
+            {isDeveloperMode && (
+              <span className="text-xs text-ink/50 font-mono">
+                v{import.meta.env.VITE_APP_VERSION || '0.0.0'}
+              </span>
+            )}
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden nav-compact:flex items-center space-x-8">
@@ -95,6 +104,19 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             
             {/* Auth Section - Hidden below 1875px */}
             <div className="hidden nav-full:flex items-center space-x-8">
+              {/* Developer Mode Toggle */}
+              <Button
+                onClick={toggleDeveloperMode}
+                variant="ghost"
+                size="sm"
+                className={`hover:bg-accent-purple/10 font-subhead transition-colors ${
+                  isDeveloperMode ? 'text-accent-gold' : 'text-ink/60'
+                }`}
+                title={`Developer Mode ${isDeveloperMode ? 'ON' : 'OFF'} (Ctrl+Shift+D)`}
+              >
+                {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
+              </Button>
+
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -147,7 +169,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             <button
               className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-expanded={isMenuOpen}
+              aria-expanded={isMenuOpen ? "true" : "false"}
               aria-controls="mobile-menu"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
@@ -178,6 +200,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                   </Link>
                 ))}
                 
+                {/* Mobile Developer Mode Toggle */}
+                <div className="pt-2 border-t border-accent-purple/30">
+                  <Button
+                    onClick={() => { toggleDeveloperMode(); setIsMenuOpen(false); }}
+                    variant="ghost"
+                    className={`w-full font-subhead transition-colors ${
+                      isDeveloperMode ? 'text-accent-gold hover:bg-accent-gold/10' : 'text-ink hover:bg-accent-purple/10'
+                    }`}
+                  >
+                    {isDeveloperMode ? <Code2 size={16} className="mr-2" /> : <Code size={16} className="mr-2" />}
+                    Developer Mode {isDeveloperMode ? 'ON' : 'OFF'}
+                  </Button>
+                </div>
+
                 {/* Mobile Auth */}
                 {user ? (
                   <div className="space-y-3 pt-2 border-t border-accent-purple/30">
