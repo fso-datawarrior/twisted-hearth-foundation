@@ -7,6 +7,7 @@ import { Menu, X, LogOut, Code, Code2 } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
+import packageJson from "../../package.json";
 
 interface NavBarProps {
   variant?: "public";
@@ -81,7 +82,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             </Link>
             {isDeveloperMode && (
               <span className="text-xs text-ink/50 font-mono">
-                v{import.meta.env.VITE_APP_VERSION || '0.0.0'}
+                v{packageJson.version}
               </span>
             )}
           </div>
@@ -112,9 +113,16 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                 className={`hover:bg-accent-purple/10 font-subhead transition-colors ${
                   isDeveloperMode ? 'text-accent-gold' : 'text-ink/60'
                 }`}
-                title={`Developer Mode ${isDeveloperMode ? 'ON' : 'OFF'} (Ctrl+Shift+D)`}
+                title={`Developer Mode ${isDeveloperMode ? 'ON' : 'OFF'} - v${packageJson.version} (Ctrl+Shift+D)`}
               >
-                {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
+                <div className="flex items-center gap-1">
+                  {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
+                  {isDeveloperMode && (
+                    <span className="text-xs font-mono">
+                      v{packageJson.version}
+                    </span>
+                  )}
+                </div>
               </Button>
 
               {user ? (
@@ -209,8 +217,15 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       isDeveloperMode ? 'text-accent-gold hover:bg-accent-gold/10' : 'text-ink hover:bg-accent-purple/10'
                     }`}
                   >
-                    {isDeveloperMode ? <Code2 size={16} className="mr-2" /> : <Code size={16} className="mr-2" />}
-                    Developer Mode {isDeveloperMode ? 'ON' : 'OFF'}
+                    <div className="flex items-center justify-center gap-2">
+                      {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
+                      <span>Developer Mode {isDeveloperMode ? 'ON' : 'OFF'}</span>
+                      {isDeveloperMode && (
+                        <span className="text-xs font-mono text-ink/60">
+                          v{packageJson.version}
+                        </span>
+                      )}
+                    </div>
                   </Button>
                 </div>
 
