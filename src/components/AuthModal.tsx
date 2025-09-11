@@ -123,8 +123,17 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <p className="font-body text-sm text-muted-foreground">
                 We've sent a magic link to <strong>{email}</strong>
               </p>
+              <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+                <p className="font-medium mb-1">⚠️ Important Tips:</p>
+                <ul className="space-y-1">
+                  <li>• Check your spam/junk folder if you don't see it</li>
+                  <li>• Click the link immediately when you receive it</li>
+                  <li>• Corporate emails may have security scanners that consume links</li>
+                  <li>• Consider using a personal email (Gmail, etc.) if issues persist</li>
+                </ul>
+              </div>
               <p className="font-body text-xs text-muted-foreground">
-                Click the link in your email to sign in. This window will close automatically.
+                This window will close automatically in a few seconds.
               </p>
             </div>
           </div>
@@ -206,7 +215,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               We'll send you a secure sign-in link. No passwords required.
             </p>
             <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
-              Make sure to check your spam folder if you don't see the email.
+              Corporate email users: If links don't work, try a personal email to avoid security scanners.
             </p>
           </div>
         )}

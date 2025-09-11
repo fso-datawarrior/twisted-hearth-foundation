@@ -28,7 +28,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - serve from cache when available
+// Fetch event - serve from cache when available, network first for auth
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') {
@@ -40,6 +40,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  
+  // Network first for auth routes to avoid token consumption issues
+  if (url.pathname.includes('/auth') || url.pathname.includes('/verify') || url.pathname.includes('/callback')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Don't cache auth responses
+          return response;
+        })
+        .catch(() => {
+          // Return offline page if available
+          return caches.match('/');
+        })
+    );
+    return;
+  }
+
+  // Cache first for other requests
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
