@@ -145,7 +145,7 @@ const Index = () => {
         />
         
         <HeroVideo
-          src="/hero.mp4"
+          src="/costumeWalk.mp4"
           poster="/hero-poster.jpg"
           headline="The Ruths' Twisted Fairytale Halloween Bash"
           tagline="Grimm, gruesome, and just the right amount of wrong."
@@ -331,6 +331,7 @@ const Index = () => {
               width="600"
               height="256"
               decoding="async"
+              loading="lazy"
             />
             <h3 
               className="font-heading text-2xl md:text-3xl mb-4 text-accent-gold"

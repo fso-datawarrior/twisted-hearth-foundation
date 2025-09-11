@@ -22,4 +22,21 @@ export default defineConfig(({ mode }) => ({
     include: ['date-fns', '@radix-ui/react-checkbox'],
     force: true
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip'],
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          'query-vendor': ['@tanstack/react-query'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase limit to 1MB for now
+  },
 }));

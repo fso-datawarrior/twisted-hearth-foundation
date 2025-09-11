@@ -20,17 +20,28 @@ export default function HeroVideo({
   children,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   const prefersReducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Load video automatically after a short delay to improve initial page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldLoadVideo(true);
+    }, 1000); // Load video after 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) {
+    if (!v || !shouldLoadVideo) {
       return;
     }
     const onMeta = () => setReady(true);
@@ -41,10 +52,14 @@ export default function HeroVideo({
       v.removeEventListener("loadedmetadata", onMeta);
       v.removeEventListener("loadeddata", onData);
     };
-  }, []);
+  }, [shouldLoadVideo]);
 
   return (
-    <section className="relative isolate min-h-[80vh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black" {...(!ready && { "aria-busy": "true" })}>
+    <section 
+      ref={sectionRef}
+      className="relative isolate min-h-[80vh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black" 
+      {...(!ready && { "aria-busy": "true" })}
+    >
       <div className="sr-only" aria-live="polite">
         {ready ? "Hero ready" : "Loading hero…"}
       </div>
@@ -52,12 +67,12 @@ export default function HeroVideo({
       {/* Poster shows immediately; fades out once video is ready */}
       <img
         src={poster}
-        alt=""
+        alt="Halloween party scene with pumpkins, trees, and a cozy house"
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
           ready && !prefersReducedMotion ? "opacity-0" : "opacity-100"
         }`}
         decoding="async"
-        fetchPriority="high"
+        fetchpriority="high"
         onError={(e) => {
           console.log('Poster image failed to load:', e);
           // Fallback to a dark background if poster fails
@@ -65,7 +80,7 @@ export default function HeroVideo({
         }}
       />
 
-      {!prefersReducedMotion && (
+      {!prefersReducedMotion && shouldLoadVideo && (
         <video
           ref={videoRef}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
@@ -90,6 +105,7 @@ export default function HeroVideo({
         </video>
       )}
 
+
       {/* Text overlay */}
       <div className="relative z-20 mx-auto flex max-w-5xl flex-col items-center px-4 py-20 text-center text-ink">
         <h1 className="font-[Cinzel] text-4xl sm:text-6xl md:text-7xl leading-tight text-white drop-shadow-lg hero-title-shadow">
@@ -109,7 +125,7 @@ export default function HeroVideo({
         </button>
 
         {/* Small mute/unmute control */}
-        {!prefersReducedMotion && (
+        {!prefersReducedMotion && shouldLoadVideo && (
           <button
             onClick={() => setMuted((m) => !m)}
             className="absolute right-4 top-4 rounded-md bg-black/40 px-3 py-1 text-xs backdrop-blur transition hover:bg-black/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
