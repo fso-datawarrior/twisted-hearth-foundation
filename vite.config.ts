@@ -1,3 +1,6 @@
+// 🚨 CRITICAL: DO NOT MODIFY THIS FILE
+// This file contains Lovable AI's componentTagger plugin
+// Modifying this will break Lovable AI integration
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
