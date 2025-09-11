@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,15 +17,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, devSignIn } = useAuth();
   const { toast } = useToast();
-
-  // Check if we're in development (preview or localhost)
-  const isDev = window.location.hostname.includes('preview--') || 
-               window.location.hostname.includes('localhost') ||
-               window.location.hostname.includes('127.0.0.1');
+  const { isDeveloperMode } = useDeveloperMode();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -61,7 +60,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleDevSignIn = async () => {
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -130,7 +131,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </Button>
           </div>
 
-          {isDev && (
+          {isDeveloperMode && (
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-accent-purple/20" />
@@ -141,7 +142,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
           )}
 
-          {isDev && (
+          {isDeveloperMode && (
             <Button
               type="button"
               variant="secondary"
