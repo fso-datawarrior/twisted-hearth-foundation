@@ -22,6 +22,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
 
+  const handleClose = () => {
+    onClose();
+    // Reset form state when modal closes
+    setTimeout(() => {
+      setEmail("");
+      setAuthState('form');
+      setErrorMessage(null);
+    }, 200);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -41,13 +51,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         description: "Check your email and click the link to sign in. The link expires in 1 hour.",
         duration: 8000,
       });
-      
-      // Auto-close after showing success
-      setTimeout(() => {
-        onClose();
-        setEmail("");
-        setAuthState('form');
-      }, 3000);
     } catch (error: any) {
       console.error('Sign-in error:', error);
       
@@ -88,7 +91,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         description: "You're now signed in (dev mode - no email required)",
         duration: 4000,
       });
-      onClose();
+      handleClose();
       setEmail("");
     } catch (error) {
       console.error('Dev sign-in error:', error);
@@ -103,7 +106,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl text-accent-gold">
@@ -132,9 +135,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <li>• Consider using a personal email (Gmail, etc.) if issues persist</li>
                 </ul>
               </div>
-              <p className="font-body text-xs text-muted-foreground">
-                This window will close automatically in a few seconds.
-              </p>
+              <Button
+                onClick={handleClose}
+                variant="outline"
+                className="mt-4 w-full border-accent-purple/30 hover:bg-accent-purple/10"
+              >
+                Close
+              </Button>
             </div>
           </div>
         ) : (
@@ -162,7 +169,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={loading}
                 className="flex-1 border-accent-purple/30 hover:bg-accent-purple/10"
               >
