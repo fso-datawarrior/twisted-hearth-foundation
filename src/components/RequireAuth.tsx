@@ -37,32 +37,34 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
     
     return (
       <>
-        {/* Full screen overlay */}
-        <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-background border border-accent/30 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-            <h2 className="text-2xl font-semibold mb-4 text-foreground">Please sign in to continue</h2>
-            <p className="mb-6 text-muted-foreground">
-              This feature requires authentication to ensure a personalized experience.
-            </p>
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => setShowAuthModal(true)}
-                className="w-full"
-                size="lg"
-              >
-                Sign In
-              </Button>
-              <Button
-                onClick={handleCancel}
-                variant="outline"
-                className="w-full"
-                size="lg"
-              >
-                Cancel
-              </Button>
+        {/* Full screen overlay - hide when auth modal is open */}
+        {!showAuthModal && (
+          <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-background border border-accent/30 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+              <h2 className="text-2xl font-semibold mb-4 text-foreground">Please sign in to continue</h2>
+              <p className="mb-6 text-muted-foreground">
+                This feature requires authentication to ensure a personalized experience.
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <AuthModal 
           isOpen={showAuthModal} 
           onClose={() => setShowAuthModal(false)} 
