@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import RequireAuth from "@/components/RequireAuth";
 
 const RSVP = () => {
@@ -90,7 +90,10 @@ const RSVP = () => {
           throw new Error("Failed to save RSVP");
         }
 
-        const rsvpId = (data?.rsvp_id ?? data?.[0]?.rsvp_id) as string;
+        const rsvpId = Array.isArray(data) ? data[0]?.rsvp_id : (data as any)?.rsvp_id;
+        if (!rsvpId) {
+          throw new Error("Invalid RSVP response");
+        }
         console.log("RSVP saved successfully:", rsvpId);
 
         // Send confirmation email via Edge Function
