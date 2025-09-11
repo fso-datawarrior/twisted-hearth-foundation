@@ -5,7 +5,8 @@ import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
+import RequireAuth from "@/components/RequireAuth";
 
 const RSVP = () => {
   const { toast } = useToast();
@@ -89,7 +90,10 @@ const RSVP = () => {
           throw new Error("Failed to save RSVP");
         }
 
-        const rsvpId = (data?.rsvp_id ?? data?.[0]?.rsvp_id) as string;
+        const rsvpId = Array.isArray(data) ? data[0]?.rsvp_id : (data as any)?.rsvp_id;
+        if (!rsvpId) {
+          throw new Error("Invalid RSVP response");
+        }
         console.log("RSVP saved successfully:", rsvpId);
 
         // Send confirmation email via Edge Function
@@ -150,14 +154,15 @@ const RSVP = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <main className="pt-20 relative z-10">
-        {/* <CSSFogBackground /> */}
-        <section className="py-16 px-6">
-          <div className="container mx-auto max-w-3xl">
-            <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
-              Join the Twisted Tale
-            </h1>
+    <RequireAuth>
+      <div className="min-h-screen bg-background relative">
+        <main className="pt-20 relative z-10">
+          {/* <CSSFogBackground /> */}
+          <section className="py-16 px-6">
+            <div className="container mx-auto max-w-3xl">
+              <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
+                Join the Twisted Tale
+              </h1>
             
             <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-2xl mx-auto">
               Secure your place at the most anticipated Halloween event of the year. 
@@ -300,6 +305,7 @@ const RSVP = () => {
       
       <Footer />
     </div>
+    </RequireAuth>
   );
 };
 

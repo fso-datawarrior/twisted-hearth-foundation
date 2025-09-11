@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
+import { isPartyOver } from './event';
 
 type SessionUser = { id: string; email: string | null };
 type AuthCtx = { 
@@ -39,6 +40,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Auto sign-out after party ends
+  useEffect(() => {
+    const checkPartyEnd = () => {
+      if (isPartyOver() && session) {
+        console.log('🎉 Party is over! Auto-signing out...');
+        supabase.auth.signOut();
+      }
+    };
+
+    // Check immediately
+    checkPartyEnd();
+
+    // Check every minute
+    const interval = setInterval(checkPartyEnd, 60_000);
+    
+    return () => clearInterval(interval);
+  }, [session]);
 
   const signIn = async (email: string) => {
     // Always use the auth callback route for better error handling
