@@ -10,7 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import SkipLink from "@/components/SkipLink";
-// import StagewiseToolbar from "@/components/StagewiseToolbar";
+import { StagewiseToolbar } from "@/components/StagewiseToolbar";
 import { SecretNav } from "@/components/nav/SecretNav";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -66,8 +66,8 @@ const App = () => (
           <HuntProgress />
           <HuntReward />
           
-          {/* Stagewise Development Toolbar - DISABLED */}
-          {/* <StagewiseToolbar /> */}
+          {/* Stagewise Development Toolbar */}
+          <StagewiseToolbar />
         </HuntProvider>
       </AuthProvider>
     </TooltipProvider>

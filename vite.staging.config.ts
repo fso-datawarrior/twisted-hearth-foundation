@@ -1,37 +1,39 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// Staging-specific Vite configuration
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8081, // Different port for staging
-    open: true, // Auto-open browser
-  },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    port: 8081,
+    host: true,
+    open: true,
+  },
   build: {
-    outDir: "dist-staging",
-    sourcemap: true, // Enable source maps for staging
-    minify: false, // Disable minification for easier debugging
+    outDir: 'dist-staging',
+    sourcemap: true,
+    minify: false,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          supabase: ['@supabase/supabase-js'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu']
-        }
-      }
-    }
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        },
+      },
+    },
   },
   define: {
     __STAGING__: true,
-    __DEV__: mode === 'development'
-  }
-}));
+    __DEV__: true,
+  },
+  envPrefix: 'VITE_',
+  envDir: '.',
+  env: {
+    NODE_ENV: 'staging',
+  },
+});
