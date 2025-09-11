@@ -1,7 +1,6 @@
 // Service Worker for Twisted Fairytale Halloween Bash
-const CACHE_NAME = 'twisted-halloween-v1';
+const CACHE_NAME = 'twisted-halloween-v2';
 const STATIC_ASSETS = [
-  '/',
   '/hero-poster.jpg',
   '/costumeWalk.mp4',
   '/pongCupsTrophy.mp4',
@@ -16,6 +15,7 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -28,7 +28,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - serve from cache when available, network first for auth
+// Fetch event - enhanced SPA handling and auth-safe network-first
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') {
@@ -41,19 +41,21 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(event.request.url);
+
+  // For navigations (HTML), use network-first to avoid stale app shells
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
   
-  // Network first for auth routes to avoid token consumption issues
+  // Network first for auth routes to avoid token consumption issues and caching
   if (url.pathname.includes('/auth') || url.pathname.includes('/verify') || url.pathname.includes('/callback')) {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          // Don't cache auth responses
-          return response;
-        })
-        .catch(() => {
-          // Return offline page if available
-          return caches.match('/');
-        })
+        .then((response) => response)
+        .catch(() => caches.match(event.request))
     );
     return;
   }
@@ -62,32 +64,26 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
-        // Return cached version if available
         if (cachedResponse) {
           return cachedResponse;
         }
 
-        // Otherwise fetch from network
         return fetch(event.request)
           .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+            // Only cache successful, same-origin, non-HTML responses
+            const contentType = response.headers.get('content-type') || '';
+            if (response && response.status === 200 && response.type === 'basic' && !contentType.includes('text/html')) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
             }
-
-            // Clone the response for caching
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
             return response;
           })
           .catch(() => {
-            // Return offline page if available
-            return caches.match('/');
+            // Fallback: try cache match
+            return caches.match(event.request);
           });
       })
   );
@@ -96,15 +92,12 @@ self.addEventListener('fetch', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((cacheName) => (cacheName !== CACHE_NAME ? caches.delete(cacheName) : Promise.resolve()))
       );
-    })
+      await self.clients.claim();
+    })()
   );
 });
