@@ -665,6 +665,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_hunt_stats: {
+        Args: { p_user_id?: string }
+        Returns: {
+          completion_percentage: number
+          found_hints: number
+          hunt_status: string
+          total_hints: number
+          total_points: number
+        }[]
+      }
       guestbook_insert_message: {
         Args: {
           p_display_name: string
@@ -686,6 +696,56 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      mark_hint_found: {
+        Args: { p_hint_id: number; p_hunt_run_id?: string }
+        Returns: {
+          created_at: string
+          found_at: string
+          hint_id: number
+          hunt_run_id: string
+          id: string
+          points_earned: number
+          user_id: string
+        }
+      }
+      moderate_photo: {
+        Args: { p_approve: boolean; p_featured?: boolean; p_photo_id: string }
+        Returns: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          file_size: number | null
+          filename: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          mime_type: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      register_team: {
+        Args: {
+          p_contact_info?: string
+          p_special_requirements?: string
+          p_team_name: string
+          p_tournament_name: string
+        }
+        Returns: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          special_requirements: string | null
+          status: string
+          team_name: string | null
+          tournament_name: string
+          updated_at: string
+          user_id: string
+        }
+      }
       submit_rsvp: {
         Args: {
           p_contributions: string
@@ -700,6 +760,58 @@ export type Database = {
           rsvp_id: string
           updated: boolean
         }[]
+      }
+      toggle_photo_reaction: {
+        Args: { p_photo_id: string; p_reaction_type?: string }
+        Returns: boolean
+      }
+      upload_photo: {
+        Args: {
+          p_caption?: string
+          p_category?: string
+          p_filename: string
+          p_storage_path: string
+          p_tags?: string[]
+        }
+        Returns: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          file_size: number | null
+          filename: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          mime_type: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      upsert_rsvp: {
+        Args: {
+          p_attending: boolean
+          p_contributions?: string
+          p_costume_idea?: string
+          p_dietary_restrictions?: string
+          p_guests?: number
+          p_notes?: string
+        }
+        Returns: {
+          contributions: string | null
+          costume_idea: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          email_sent_at: string | null
+          idempotency_token: string | null
+          num_guests: number
+          rsvp_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
       }
     }
     Enums: {
