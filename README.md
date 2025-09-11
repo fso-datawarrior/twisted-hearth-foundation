@@ -2,6 +2,10 @@
 
 A dark, immersive Halloween event website featuring twisted fairytale themes, interactive storytelling, and gothic design.
 
+## 🚨 IMPORTANT: Lovable AI Integration
+
+This project is integrated with **Lovable AI** and has specific components that **MUST NOT** be modified. See [LOVABLE_AI_RULES.md](./LOVABLE_AI_RULES.md) for detailed guidelines on which files are protected.
+
 **Event Domain**: [partytillyou.rip](https://partytillyou.rip)
 **Hosts**: Jamie & Kat Ruth  
 **Event Date**: Saturday, October 18, 2025 — 7:00 PM (America/Denver)

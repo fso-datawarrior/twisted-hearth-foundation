@@ -1,0 +1,43 @@
+# CURSOR AI RULES - Lovable AI Project
+# This project uses Lovable AI and has specific components that MUST NOT be modified
+
+## 🚨 CRITICAL: DO NOT MODIFY THESE FILES/DIRECTORIES
+
+### Core Lovable AI Infrastructure (NEVER MODIFY)
+- vite.config.ts (contains componentTagger plugin)
+- components.json (shadcn/ui configuration)
+- package.json (Lovable AI dependencies)
+- tsconfig.json (path aliases)
+- eslint.config.js
+- postcss.config.js
+- src/main.tsx
+- src/App.tsx
+
+### shadcn/ui Component Library (NEVER MODIFY)
+- src/components/ui/ (ENTIRE DIRECTORY)
+- src/lib/utils.ts (cn() function)
+
+### Lovable AI Dependencies (NEVER MODIFY)
+- lovable-tagger package
+- @radix-ui/* packages
+- class-variance-authority
+- tailwind-merge
+
+## ✅ SAFE TO MODIFY
+- src/pages/ (all page components)
+- src/components/ (except ui/ subdirectory)
+- src/lib/ (except utils.ts)
+- src/hooks/
+- src/integrations/
+- public/ directory
+- Custom styling in src/index.css (beyond Lovable AI variables)
+
+## 🎯 DEVELOPMENT GUIDELINES
+1. Always use @/ path aliases for imports
+2. Never modify files in src/components/ui/
+3. Never modify core configuration files
+4. Keep the cn() utility function intact
+5. Don't modify the Lovable AI plugin in vite.config.ts
+
+## ⚠️ WARNING
+Modifying the protected files will break Lovable AI integration and may cause the project to stop working in the Lovable AI environment.
