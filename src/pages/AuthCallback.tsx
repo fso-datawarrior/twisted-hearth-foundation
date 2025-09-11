@@ -5,14 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, Mail, ArrowLeft } from "lucide-react";
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  const [status, setStatus] = useState<'checking' | 'success' | 'error' | 'expired'>('checking');
+  const [status, setStatus] = useState<'checking' | 'success' | 'error' | 'expired' | 'consumed'>('checking');
   const [errorMessage, setErrorMessage] = useState('');
   const [isResending, setIsResending] = useState(false);
 
@@ -40,9 +40,13 @@ export default function AuthCallback() {
           // Clear URL hash immediately to prevent reprocessing
           window.history.replaceState({}, document.title, window.location.pathname);
           
+          // Specific handling for different error types
           if (error === 'access_denied' && (hashParams.get('error_code') === 'otp_expired' || urlSearchParams.get('error_code') === 'otp_expired')) {
             setStatus('expired');
             setErrorMessage('The magic link has expired or been used already.');
+          } else if (errorDescription?.includes('not found') || errorDescription?.includes('consumed') || errorDescription?.includes('invalid')) {
+            setStatus('consumed');
+            setErrorMessage('This magic link has been consumed by an email security scanner or used multiple times.');
           } else {
             setStatus('error');
             setErrorMessage(errorDescription || 'Authentication failed. Please try again.');
@@ -85,8 +89,15 @@ export default function AuthCallback() {
             
             if (sessionError) {
               console.error('❌ Error setting session:', sessionError);
-              setStatus('error');
-              setErrorMessage('Failed to authenticate. Please try again.');
+              
+              // Check if this is a token consumption issue
+              if (sessionError.message?.includes('not found') || sessionError.message?.includes('expired') || sessionError.message?.includes('invalid')) {
+                setStatus('consumed');
+                setErrorMessage('This magic link has been consumed by an email security scanner.');
+              } else {
+                setStatus('error');
+                setErrorMessage('Failed to authenticate. Please try again.');
+              }
               
               // Defensive fallback - try to get session from storage
               setTimeout(async () => {
@@ -128,8 +139,15 @@ export default function AuthCallback() {
           // Clear URL hash anyway
           window.history.replaceState({}, document.title, window.location.pathname);
           
-          setStatus('error');
-          setErrorMessage('Invalid authentication link. Please request a new magic link.');
+          // Check if this looks like a consumed token scenario
+          const token = urlSearchParams.get('token') || hashParams.get('token');
+          if (token) {
+            setStatus('consumed');
+            setErrorMessage('This magic link appears to have been consumed by an email security scanner.');
+          } else {
+            setStatus('expired');
+            setErrorMessage('Invalid authentication link. Please request a new magic link.');
+          }
         }
       } catch (outerError) {
         console.error('💥 Critical error in AuthCallback:', outerError);
@@ -180,10 +198,12 @@ export default function AuthCallback() {
         });
       } else {
         toast({
-          title: "Magic link sent! ✨",
-          description: "Check your email and click the new link to sign in.",
-          duration: 8000,
+          title: "New magic link sent! ✨",
+          description: "Check your email. If using corporate email, also check spam folder and click the link immediately.",
+          duration: 10000,
         });
+        // Navigate back to home after successful resend
+        setTimeout(() => navigate('/', { replace: true }), 2000);
       }
     } catch (error) {
       console.error('Error resending magic link:', error);
@@ -250,7 +270,9 @@ export default function AuthCallback() {
           <div className="flex items-center space-x-2">
             <AlertCircle className="h-6 w-6 text-destructive" />
             <CardTitle className="font-heading text-xl">
-              {status === 'expired' ? 'Link Expired' : 'Authentication Failed'}
+              {status === 'expired' ? 'Link Expired' : 
+               status === 'consumed' ? 'Link Already Used' : 
+               'Authentication Failed'}
             </CardTitle>
           </div>
           <CardDescription className="font-body">
@@ -258,6 +280,20 @@ export default function AuthCallback() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {status === 'consumed' && (
+            <div className="p-3 bg-muted rounded-lg text-sm">
+              <p className="font-medium text-foreground mb-2">💡 This commonly happens when:</p>
+              <ul className="space-y-1 text-muted-foreground text-xs">
+                <li>• Corporate email security scanners click links automatically</li>
+                <li>• Email preview panes load the link content</li>
+                <li>• The same link is opened multiple times</li>
+              </ul>
+              <p className="mt-2 text-xs font-medium text-foreground">
+                <strong>Tip:</strong> Try using a personal email (Gmail, Yahoo, etc.) to avoid security scanners.
+              </p>
+            </div>
+          )}
+          
           <div className="flex flex-col space-y-3">
             <Button
               onClick={handleResendLink}
@@ -289,7 +325,10 @@ export default function AuthCallback() {
           <div className="text-center">
             <p className="font-body text-xs text-muted-foreground">
               Magic links expire after 1 hour and can only be used once. 
-              Email scanners sometimes "use" links automatically, causing them to expire.
+              {status === 'consumed' ? 
+                ' Email scanners sometimes consume links before you can click them.' :
+                ' Request a new link if this one has expired.'
+              }
             </p>
           </div>
         </CardContent>
