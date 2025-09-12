@@ -3,10 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2 } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
+import { useAdmin } from "@/contexts/AdminContext";
 import HuntNavIndicator from "@/components/hunt/HuntNavIndicator";
 import packageJson from "../../package.json";
 
@@ -22,6 +23,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
+  const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,6 +56,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
     { to: "/discussion", label: "Discussion" },
     { to: "/contact", label: "Contact" },
     { to: "/rsvp", label: "RSVP" },
+    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ];
 
   // Get current page name for mobile display
@@ -141,7 +144,22 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
+                   <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuItem 
+                          onClick={toggleAdminView}
+                          className="flex items-center gap-2 font-subhead hover:bg-accent-purple/10 cursor-pointer"
+                        >
+                          <Shield size={16} />
+                          {isAdminView ? 'Switch to User View' : 'Switch to Admin View'}
+                        </DropdownMenuItem>
+                        <div className="px-2 py-1 text-xs text-ink/60 bg-accent-purple/10 rounded m-1">
+                          Current: {isAdminView ? 'Admin' : 'User'} View
+                        </div>
+                        <div className="w-full h-px bg-accent-purple/30 my-1"></div>
+                      </>
+                    )}
                     <DropdownMenuItem 
                       onClick={() => signOut()}
                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
@@ -244,6 +262,23 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                         {user.email?.split("@")[0] || "User"}
                       </span>
                     </div>
+                    
+                    {isAdmin && (
+                      <>
+                        <Button
+                          onClick={() => { toggleAdminView(); setIsMenuOpen(false); }}
+                          variant="ghost"
+                          className="w-full hover:bg-accent-purple/10 font-subhead"
+                        >
+                          <Shield size={16} className="mr-2" />
+                          {isAdminView ? 'Switch to User View' : 'Switch to Admin View'}
+                        </Button>
+                        <div className="px-2 py-1 text-xs text-ink/60 bg-accent-purple/10 rounded text-center">
+                          Current: {isAdminView ? 'Admin' : 'User'} View
+                        </div>
+                      </>
+                    )}
+                    
                     <Button
                       onClick={() => { signOut(); setIsMenuOpen(false); }}
                       variant="ghost"

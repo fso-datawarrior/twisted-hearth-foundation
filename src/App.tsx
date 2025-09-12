@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { DeveloperModeProvider } from "@/contexts/DeveloperModeContext";
+import { AdminProvider } from "@/contexts/AdminContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import HuntNotification from "@/components/hunt/HuntNotification";
@@ -39,7 +40,8 @@ function App() {
       <>
         <DeveloperModeProvider>
           <AuthProvider>
-            <HuntProvider>
+            <AdminProvider>
+              <HuntProvider>
               <BrowserRouter
               future={{
                 v7_startTransition: true,
@@ -83,7 +85,8 @@ function App() {
                 <HuntReward />
                 <HuntNotification />
               </BrowserRouter>
-            </HuntProvider>
+              </HuntProvider>
+            </AdminProvider>
           </AuthProvider>
         </DeveloperModeProvider>
       </>
