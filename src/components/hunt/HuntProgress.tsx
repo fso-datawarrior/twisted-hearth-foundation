@@ -2,13 +2,17 @@ import { useState } from "react";
 import { useHunt as useHuntDatabase } from "@/hooks/use-hunt";
 import { HUNT_ENABLED } from "./hunt-config";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Code2 } from "lucide-react";
+import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 
 export default function HuntProgress() {
   const { isFound, foundCount, totalCount, hints, loading, error } = useHuntDatabase();
   const [showPanel, setShowPanel] = useState(false);
-
-  if (!HUNT_ENABLED || loading || foundCount === 0) return null;
+  const { isDeveloperMode } = useDeveloperMode();
+  
+  if (!HUNT_ENABLED || loading || foundCount === 0) {
+    return null;
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -43,104 +47,90 @@ export default function HuntProgress() {
         Hunt: {foundCount} / {totalCount}
       </button>
 
-      {/* Progress panel */}
+      {/* Modal */}
       {showPanel && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowPanel(false)}
-          onKeyDown={handleKeyDown}
         >
-          <div
-            className="
-              bg-black/90 backdrop-blur-sm rounded-lg border border-accent-green/30 p-6 max-w-md w-full
-              max-h-[80vh] overflow-y-auto shadow-xl
-            "
+          <div 
+            className="bg-background rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleKeyDown}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-subhead text-xl text-accent-gold">
-                Hunt Progress
-              </h3>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-muted/30">
+              <h2 className="text-lg font-heading text-ink">Hunt Progress</h2>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPanel(false)}
                 className="h-8 w-8 p-0"
-                aria-label="Close progress panel"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="mb-4">
-              <div className="text-center mb-2">
-                <span className="font-subhead text-2xl text-accent-green">
-                  {foundCount}
-                </span>
-                <span className="text-muted-foreground"> / {totalCount}</span>
+            {/* Content */}
+            <div className="p-4 space-y-4 overflow-y-auto max-h-[60vh]">
+              {/* Progress Bar */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-mono">{foundCount} / {totalCount}</span>
+                </div>
+                <div className="w-full bg-muted/20 rounded-full h-2">
+                  <div 
+                    className="bg-accent-green h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(foundCount / totalCount) * 100}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-bg-2 rounded-full h-2">
-                <div
-                  className="bg-accent-green h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(foundCount / totalCount) * 100}%` }}
-                />
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <h4 className="font-subhead text-sm text-accent-gold mb-3">
-                Secrets Found:
-              </h4>
-              {Object.entries(hintDescriptions).map(([id, hint]) => (
-                <div
-                  key={id}
-                  className={`
-                    flex flex-col gap-1 text-sm p-3 rounded border
-                    ${
-                      isFound(parseInt(id, 10))
-                        ? "text-accent-green bg-accent-green/10 border-accent-green/20"
-                        : "text-muted-foreground border-muted/20"
-                    }
-                  `}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono">
-                      {isFound(parseInt(id, 10)) ? "✓" : "○"}
-                    </span>
-                    <span className="font-medium">{hint.title}</span>
+              {/* Found Runes List */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-subhead text-ink">Found Runes</h3>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {hints
+                    .filter(hint => isFound(hint.id.toString()))
+                    .map(hint => (
+                      <div key={hint.id} className="flex items-center gap-2 p-2 bg-accent-green/10 rounded border border-accent-green/20">
+                        <div className="w-2 h-2 bg-accent-green rounded-full" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-ink truncate">
+                            {hint.title}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {hint.category} • {hint.points} pts
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Developer Mode Notice */}
+              {isDeveloperMode && (
+                <div className="p-3 bg-accent-purple/10 rounded border border-accent-purple/20">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Code2 className="w-4 h-4 text-accent-purple" />
+                    <span className="text-accent-purple font-medium">Developer Mode Active</span>
                   </div>
-                  <div className="ml-5 text-xs opacity-80">
-                    {hint.description}
-                  </div>
-                  <div className="ml-5 text-xs opacity-60 font-mono">
-                    {hint.meta}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All runes are visible. Toggle developer mode in the navigation bar to hide them.
+                  </p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <div className="p-3 bg-destructive/10 rounded border border-destructive/20">
+                  <div className="text-sm text-destructive">
+                    Error loading hunt data: {error}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-
-            {error && (
-              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
-                Error: {error}
-              </div>
-            )}
-
-            {import.meta.env.DEV && (
-              <div className="mt-6 pt-4 border-t border-accent-purple/30">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // In database mode, reset just refreshes data
-                    window.location.reload();
-                    setShowPanel(false);
-                  }}
-                  className="w-full text-xs opacity-60 hover:opacity-100"
-                >
-                  Refresh Hunt Data (Dev Only)
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       )}

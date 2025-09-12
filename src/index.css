@@ -63,45 +63,18 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   --text-shadow-gothic: 2px 2px 4px hsl(var(--bg) / 0.8), 
                         0 0 8px hsl(var(--accent-purple) / 0.6);
   }
-  
-  /* Typography scale */
-  .font-heading {
-    font-family: 'Cinzel Decorative', serif;
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
-  
-  .font-subhead {
-    font-family: 'IM Fell English SC', serif;
-  }
-  
-  .font-body {
-    font-family: 'Inter', sans-serif;
-  }
-  
-  /* Focus visible for accessibility */
-  .focus-visible {
-    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-background;
-  }
-  
-  /* Global consistent focus ring */
-  :where(button, [href], input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid hsl(var(--accent-gold));
-    outline-offset: 2px;
-  }
-  
-  /* Motion system - respects user preferences */
-  .motion-safe {
-    transition: all 0.2s ease-out;
-  }
-  
+
+  /* Motion preferences */
   @media (prefers-reduced-motion: reduce) {
-    .motion-safe {
-      transition: none;
-    }
-    
-    * {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
@@ -161,6 +134,124 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       0 0 160px hsl(var(--accent-red) / 0.3);
     animation: redPulse 1.8s ease-in-out infinite;
   }
+
+  /* Bright pulsing purple haze for witch hat rune */
+  .glow-purple-pulse {
+    box-shadow: 
+      0 0 20px hsl(285 100% 60% / 1.0),
+      0 0 40px hsl(285 100% 60% / 0.9),
+      0 0 80px hsl(285 100% 60% / 0.8),
+      0 0 120px hsl(285 100% 60% / 0.6),
+      0 0 160px hsl(285 100% 60% / 0.4);
+    animation: purplePulse 1.8s ease-in-out infinite;
+  }
+
+  /* Additional pulse colors for rune hints */
+  .glow-blue-pulse {
+    box-shadow: 
+      0 0 20px hsl(210 100% 60% / 1.0),
+      0 0 40px hsl(210 100% 60% / 0.9),
+      0 0 80px hsl(210 100% 60% / 0.8),
+      0 0 120px hsl(210 100% 60% / 0.6),
+      0 0 160px hsl(210 100% 60% / 0.4);
+    animation: bluePulse 1.8s ease-in-out infinite;
+  }
+
+  .glow-gold-pulse {
+    box-shadow: 
+      0 0 20px hsl(45 100% 60% / 1.0),
+      0 0 40px hsl(45 100% 60% / 0.9),
+      0 0 80px hsl(45 100% 60% / 0.8),
+      0 0 120px hsl(45 100% 60% / 0.6),
+      0 0 160px hsl(45 100% 60% / 0.4);
+    animation: goldPulse 1.8s ease-in-out infinite;
+  }
+
+  .glow-green-pulse {
+    box-shadow: 
+      0 0 20px hsl(120 100% 60% / 1.0),
+      0 0 40px hsl(120 100% 60% / 0.9),
+      0 0 80px hsl(120 100% 60% / 0.8),
+      0 0 120px hsl(120 100% 60% / 0.6),
+      0 0 160px hsl(120 100% 60% / 0.4);
+    animation: greenPulse 1.8s ease-in-out infinite;
+  }
+
+  .glow-silver-pulse {
+    box-shadow: 
+      0 0 20px hsl(0 0% 70% / 1.0),
+      0 0 40px hsl(0 0% 70% / 0.9),
+      0 0 80px hsl(0 0% 70% / 0.8),
+      0 0 120px hsl(0 0% 70% / 0.6),
+      0 0 160px hsl(0 0% 70% / 0.4);
+    animation: silverPulse 1.8s ease-in-out infinite;
+  }
+
+  .glow-orange-pulse {
+    box-shadow: 
+      0 0 20px hsl(30 100% 60% / 1.0),
+      0 0 40px hsl(30 100% 60% / 0.9),
+      0 0 80px hsl(30 100% 60% / 0.8),
+      0 0 120px hsl(30 100% 60% / 0.6),
+      0 0 160px hsl(30 100% 60% / 0.4);
+    animation: orangePulse 1.8s ease-in-out infinite;
+  }
+
+  .glow-pink-pulse {
+    box-shadow: 
+      0 0 20px hsl(320 100% 60% / 1.0),
+      0 0 40px hsl(320 100% 60% / 0.9),
+      0 0 80px hsl(320 100% 60% / 0.8),
+      0 0 120px hsl(320 100% 60% / 0.6),
+      0 0 160px hsl(320 100% 60% / 0.4);
+    animation: pinkPulse 1.8s ease-in-out infinite;
+  }
+
+  /* Size classes for hint dots */
+  .hint-size-small {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+
+  .hint-size-medium {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .hint-size-large {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Shape classes for hint dots */
+  .hint-shape-circle {
+    border-radius: 50%;
+  }
+
+  .hint-shape-oval {
+    border-radius: 50%;
+    width: 1.5rem;
+  }
+
+  .hint-shape-square {
+    border-radius: 0.25rem;
+  }
+
+  /* Pulse intensity classes */
+  .pulse-intensity-subtle {
+    animation-duration: 2.5s;
+    opacity: 0.6;
+  }
+
+  .pulse-intensity-medium {
+    animation-duration: 1.8s;
+    opacity: 0.8;
+  }
+
+  .pulse-intensity-bright {
+    animation-duration: 1.2s;
+    opacity: 1.0;
+  }
   
   /* Gothic text shadow for headings */
   .text-shadow-gothic {
@@ -188,7 +279,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   }
   
   .motion-safe\:active\:scale-\[0\.99\]:active {
-    transform: scale(0.99);
+    
   }
   
   .motion-safe\:hover\:-translate-y-0\.5:hover {
@@ -273,16 +364,16 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 @keyframes sparkle {
   0%, 100% {
     box-shadow: 
-      0 0 20px hsl(var(--accent-gold) / 0.6),
-      0 0 40px hsl(var(--accent-gold) / 0.4),
-      0 0 60px hsl(var(--accent-gold) / 0.2),
+      0 0 20px hsl(var(--accent-gold) / 0.4),
+      0 0 40px hsl(var(--accent-gold) / 0.2),
+      0 0 60px hsl(var(--accent-gold) / 0.1),
       inset 0 1px 0 hsl(var(--accent-gold) / 0.3);
   }
   50% {
     box-shadow: 
-      0 0 30px hsl(var(--accent-gold) / 0.8),
-      0 0 60px hsl(var(--accent-gold) / 0.6),
-      0 0 90px hsl(var(--accent-gold) / 0.4),
+      0 0 30px hsl(var(--accent-gold) / 0.6),
+      0 0 60px hsl(var(--accent-gold) / 0.4),
+      0 0 90px hsl(var(--accent-gold) / 0.2),
       inset 0 1px 0 hsl(var(--accent-gold) / 0.5);
   }
 }
@@ -306,6 +397,139 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   }
 }
 
+@keyframes purplePulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(285 100% 60% / 0.9),
+      0 0 40px hsl(285 100% 60% / 0.8),
+      0 0 80px hsl(285 100% 60% / 0.6),
+      0 0 120px hsl(285 100% 60% / 0.4),
+      0 0 160px hsl(285 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(285 100% 60% / 1.0),
+      0 0 80px hsl(285 100% 60% / 0.9),
+      0 0 160px hsl(285 100% 60% / 0.8),
+      0 0 240px hsl(285 100% 60% / 0.6),
+      0 0 320px hsl(285 100% 60% / 0.4);
+  }
+}
+
+@keyframes bluePulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(210 100% 60% / 0.9),
+      0 0 40px hsl(210 100% 60% / 0.8),
+      0 0 80px hsl(210 100% 60% / 0.6),
+      0 0 120px hsl(210 100% 60% / 0.4),
+      0 0 160px hsl(210 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(210 100% 60% / 1.0),
+      0 0 80px hsl(210 100% 60% / 0.9),
+      0 0 160px hsl(210 100% 60% / 0.8),
+      0 0 240px hsl(210 100% 60% / 0.6),
+      0 0 320px hsl(210 100% 60% / 0.4);
+  }
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(45 100% 60% / 0.9),
+      0 0 40px hsl(45 100% 60% / 0.8),
+      0 0 80px hsl(45 100% 60% / 0.6),
+      0 0 120px hsl(45 100% 60% / 0.4),
+      0 0 160px hsl(45 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(45 100% 60% / 1.0),
+      0 0 80px hsl(45 100% 60% / 0.9),
+      0 0 160px hsl(45 100% 60% / 0.8),
+      0 0 240px hsl(45 100% 60% / 0.6),
+      0 0 320px hsl(45 100% 60% / 0.4);
+  }
+}
+
+@keyframes greenPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(120 100% 60% / 0.9),
+      0 0 40px hsl(120 100% 60% / 0.8),
+      0 0 80px hsl(120 100% 60% / 0.6),
+      0 0 120px hsl(120 100% 60% / 0.4),
+      0 0 160px hsl(120 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(120 100% 60% / 1.0),
+      0 0 80px hsl(120 100% 60% / 0.9),
+      0 0 160px hsl(120 100% 60% / 0.8),
+      0 0 240px hsl(120 100% 60% / 0.6),
+      0 0 320px hsl(120 100% 60% / 0.4);
+  }
+}
+
+@keyframes silverPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(0 0% 70% / 0.9),
+      0 0 40px hsl(0 0% 70% / 0.8),
+      0 0 80px hsl(0 0% 70% / 0.6),
+      0 0 120px hsl(0 0% 70% / 0.4),
+      0 0 160px hsl(0 0% 70% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(0 0% 70% / 1.0),
+      0 0 80px hsl(0 0% 70% / 0.9),
+      0 0 160px hsl(0 0% 70% / 0.8),
+      0 0 240px hsl(0 0% 70% / 0.6),
+      0 0 320px hsl(0 0% 70% / 0.4);
+  }
+}
+
+@keyframes orangePulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(30 100% 60% / 0.9),
+      0 0 40px hsl(30 100% 60% / 0.8),
+      0 0 80px hsl(30 100% 60% / 0.6),
+      0 0 120px hsl(30 100% 60% / 0.4),
+      0 0 160px hsl(30 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(30 100% 60% / 1.0),
+      0 0 80px hsl(30 100% 60% / 0.9),
+      0 0 160px hsl(30 100% 60% / 0.8),
+      0 0 240px hsl(30 100% 60% / 0.6),
+      0 0 320px hsl(30 100% 60% / 0.4);
+  }
+}
+
+@keyframes pinkPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(320 100% 60% / 0.9),
+      0 0 40px hsl(320 100% 60% / 0.8),
+      0 0 80px hsl(320 100% 60% / 0.6),
+      0 0 120px hsl(320 100% 60% / 0.4),
+      0 0 160px hsl(320 100% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px hsl(320 100% 60% / 1.0),
+      0 0 80px hsl(320 100% 60% / 0.9),
+      0 0 160px hsl(320 100% 60% / 0.8),
+      0 0 240px hsl(320 100% 60% / 0.6),
+      0 0 320px hsl(320 100% 60% / 0.4);
+  }
+}
+
 /* --- Thick Fog with Mouse Clearing Effect --- */
 .smoky-fog::before {
   content: '';
@@ -314,279 +538,36 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   left: 0;
   right: 0;
   bottom: 0;
-  pointer-events: none;
-  z-index: -1;
   background: 
-    /* Mouse clearing effect - creates transparent "windows" */
-    radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-      transparent, 
-      rgba(255, 255, 255, 0.1) 100%),
-    /* Additional mouse clearing for larger area */
-    radial-gradient(300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-      transparent, 
-      rgba(255, 255, 255, 0.05) 80%),
-    /* White swirling fog patches - layer 1 */
-    radial-gradient(600px circle at 20% 30%, 
-      rgba(255, 255, 255, 0.3), 
-      rgba(255, 255, 255, 0.3) 30%,
-      transparent 70%),
-    /* White swirling fog patches - layer 2 */
-    radial-gradient(800px circle at 80% 70%, 
-      rgba(255, 255, 255, 0.25), 
-      rgba(255, 255, 255, 0.25) 25%,
-      transparent 65%),
-    /* White swirling fog patches - layer 3 */
-    radial-gradient(500px circle at 50% 10%, 
-      rgba(255, 255, 255, 0.35), 
-      rgba(255, 255, 255, 0.35) 20%,
-      transparent 60%),
-    /* White swirling fog patches - layer 4 */
-    radial-gradient(700px circle at 10% 80%, 
-      rgba(255, 255, 255, 0.2), 
-      rgba(255, 255, 255, 0.2) 15%,
-      transparent 55%),
-    /* White swirling fog patches - layer 5 */
-    radial-gradient(900px circle at 90% 20%, 
-      rgba(255, 255, 255, 0.15), 
-      rgba(255, 255, 255, 0.15) 10%,
-      transparent 50%),
-    /* White swirling fog patches - layer 6 */
-    radial-gradient(400px circle at 60% 40%, 
-      rgba(255, 255, 255, 0.4), 
-      rgba(255, 255, 255, 0.4) 25%,
-      transparent 60%),
-    /* White swirling fog patches - layer 7 */
-    radial-gradient(550px circle at 30% 60%, 
-      rgba(255, 255, 255, 0.28), 
-      rgba(255, 255, 255, 0.28) 20%,
-      transparent 55%),
-    /* Base white mist layer */
-    rgba(255, 255, 255, 0.2);
-  animation: thickFogDrift 15s ease-in-out infinite;
-}
-
-@keyframes thickFogDrift {
-  0% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      20% 30%, 80% 70%, 50% 10%, 10% 80%, 90% 20%, 60% 40%, 30% 60%; /* White fog patches (7) */
-  }
-  12.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      30% 25%, 70% 60%, 45% 15%, 15% 75%, 85% 25%, 55% 35%, 25% 55%; /* White fog patches (7) */
-  }
-  25% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      40% 20%, 60% 50%, 70% 30%, 30% 60%, 80% 40%, 20% 70%, 50% 30%; /* White fog patches (7) */
-  }
-  37.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      50% 35%, 50% 45%, 75% 25%, 25% 55%, 75% 35%, 25% 65%, 45% 40%; /* White fog patches (7) */
-  }
-  50% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      60% 40%, 40% 30%, 90% 50%, 50% 40%, 70% 60%, 80% 20%, 70% 80%; /* White fog patches (7) */
-  }
-  62.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      70% 50%, 30% 25%, 85% 60%, 40% 35%, 65% 45%, 75% 35%, 60% 70%; /* White fog patches (7) */
-  }
-  75% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      80% 60%, 20% 80%, 10% 70%, 70% 20%, 50% 80%, 40% 10%, 10% 40%; /* White fog patches (7) */
-  }
-  87.5% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      70% 45%, 30% 75%, 20% 60%, 60% 30%, 40% 70%, 30% 20%, 20% 50%; /* White fog patches (7) */
-  }
-  100% { 
-    background-position: 
-      0% 0%, 0% 0%,  /* Mouse clearing layers (2) */
-      20% 30%, 80% 70%, 50% 10%, 10% 80%, 90% 20%, 60% 40%, 30% 60%; /* White fog patches (7) */
-  }
-}
-
-/* Track mouse for interactive fog */
-:root {
-  --mouse-x: 50%;
-  --mouse-y: 50%;
+    radial-gradient(circle at 20% 50%, rgba(59, 31, 74, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 110, 71, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(197, 164, 93, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+  animation: fogOpacityPulse 8s ease-in-out infinite;
 }
 
 .smoky-fog {
-  --mouse-x: 50%;
-  --mouse-y: 50%;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .smoky-fog::before { 
-    animation: none !important; 
-    background: 
-      /* Mouse clearing effect - static */
-      radial-gradient(400px circle at 50% 50%, 
-        transparent, 
-        rgba(255, 255, 255, 0.1) 100%),
-      radial-gradient(300px circle at 50% 50%, 
-        transparent, 
-        rgba(255, 255, 255, 0.05) 80%),
-      /* Static white fog patches - all 7 layers */
-      radial-gradient(600px circle at 20% 30%, 
-        rgba(255, 255, 255, 0.15), 
-        rgba(255, 255, 255, 0.15) 30%,
-        transparent 70%),
-      radial-gradient(800px circle at 80% 70%, 
-        rgba(255, 255, 255, 0.12), 
-        rgba(255, 255, 255, 0.12) 25%,
-        transparent 65%),
-      radial-gradient(500px circle at 50% 10%, 
-        rgba(255, 255, 255, 0.18), 
-        rgba(255, 255, 255, 0.18) 20%,
-        transparent 60%),
-      radial-gradient(700px circle at 10% 80%, 
-        rgba(255, 255, 255, 0.1), 
-        rgba(255, 255, 255, 0.1) 15%,
-        transparent 55%),
-      radial-gradient(900px circle at 90% 20%, 
-        rgba(255, 255, 255, 0.08), 
-        rgba(255, 255, 255, 0.08) 10%,
-        transparent 50%),
-      radial-gradient(400px circle at 60% 40%, 
-        rgba(255, 255, 255, 0.2), 
-        rgba(255, 255, 255, 0.2) 25%,
-        transparent 60%),
-      radial-gradient(550px circle at 30% 60%, 
-        rgba(255, 255, 255, 0.14), 
-        rgba(255, 255, 255, 0.14) 20%,
-        transparent 55%),
-      /* Base white mist layer */
-      rgba(255, 255, 255, 0.05);
-  }
+.smoky-fog::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 60% 30%, rgba(0, 0, 0, 0.4) 0%, transparent 70%),
+    radial-gradient(circle at 30% 70%, rgba(59, 31, 74, 0.2) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 2;
+  animation: fogOpacityPulse 12s ease-in-out infinite reverse;
 }
 
-/* CSS Fog Animations */
-@keyframes fogDrift {
-  0%, 100% {
-    transform: translateX(0) translateY(0) scale(1);
-  }
-  25% {
-    transform: translateX(-1%) translateY(-0.5%) scale(1.01);
-  }
-  50% {
-    transform: translateX(1%) translateY(0.5%) scale(0.99);
-  }
-  75% {
-    transform: translateX(-0.5%) translateY(1%) scale(1.02);
-  }
-}
-
-@keyframes fogSwirl1 {
-  0%, 100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
-  }
-  25% {
-    transform: translateX(2%) translateY(-1%) rotate(5deg) scale(1.05);
-  }
-  50% {
-    transform: translateX(-1%) translateY(2%) rotate(-3deg) scale(0.95);
-  }
-  75% {
-    transform: translateX(1%) translateY(1%) rotate(8deg) scale(1.08);
-  }
-}
-
-@keyframes fogSwirl2 {
-  0%, 100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
-  }
-  30% {
-    transform: translateX(-1.5%) translateY(1.5%) rotate(-7deg) scale(1.03);
-  }
-  60% {
-    transform: translateX(2%) translateY(-1%) rotate(4deg) scale(0.97);
-  }
-  90% {
-    transform: translateX(-0.5%) translateY(2%) rotate(-2deg) scale(1.06);
-  }
-}
-
-@keyframes fogSwirl3 {
-  0%, 100% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
-  }
-  25% {
-    transform: translateX(1%) translateY(-2%) rotate(6deg) scale(1.04);
-  }
-  50% {
-    transform: translateX(-2%) translateY(1%) rotate(-4deg) scale(0.96);
-  }
-  75% {
-    transform: translateX(1.5%) translateY(0.5%) rotate(3deg) scale(1.02);
-  }
-}
-
-/* Fog Swirl 4 - Fast swirl animation for 5 large circles */
-@keyframes fogSwirl4 {
-  0% {
-    transform: translate(0%, 0%) rotate(0deg) scale(1.0);
-  }
-  25% {
-    transform: translate(5%, -3%) rotate(90deg) scale(1.1);
-  }
-  50% {
-    transform: translate(-2%, 4%) rotate(180deg) scale(0.9);
-  }
-  75% {
-    transform: translate(3%, -2%) rotate(270deg) scale(1.05);
-  }
-  100% {
-    transform: translate(0%, 0%) rotate(360deg) scale(1.0);
-  }
-}
-
-/* Fog Swirl 5 - Very slow swirl animation for massive circle */
-@keyframes fogSwirl5 {
-  0% {
-    transform: translate(0%, 0%) rotate(0deg) scale(1.0);
-  }
-  25% {
-    transform: translate(2%, -1%) rotate(90deg) scale(1.05);
-  }
-  50% {
-    transform: translate(-1%, 2%) rotate(180deg) scale(0.95);
-  }
-  75% {
-    transform: translate(1%, -1%) rotate(270deg) scale(1.02);
-  }
-  100% {
-    transform: translate(0%, 0%) rotate(360deg) scale(1.0);
-  }
-}
-
-@keyframes fogQuadrantRotate {
-  0% {
-    transform: translate(0%, 0%) rotate(0deg) scale(1.0);
-  }
-  25% {
-    transform: translate(50%, 0%) rotate(90deg) scale(1.05);
-  }
-  50% {
-    transform: translate(50%, 50%) rotate(180deg) scale(0.95);
-  }
-  75% {
-    transform: translate(0%, 50%) rotate(270deg) scale(1.02);
-  }
-  100% {
-    transform: translate(0%, 0%) rotate(360deg) scale(1.0);
-  }
-}
-
+/* Fog animation */
 @keyframes fogOpacityPulse {
   0% {
     opacity: 1;
@@ -603,4 +584,36 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   100% {
     opacity: 1;
   }
+}
+
+/* Hunt Rune Styles - Artwork Display */
+.rune-image {
+  /* Better white background removal */
+  filter: contrast(1.2) saturate(1.1) brightness(1.1);
+  /* Alternative blend modes for different image types */
+  mix-blend-mode: multiply;
+  /* Fallback for images that don't work with multiply */
+  background: transparent;
+  /* Crisp image rendering */
+  image-rendering: -webkit-optimize-contrast; /* Edge support */
+  image-rendering: crisp-edges;
+}
+
+/* Specific handling for different image formats */
+.rune-image[src$=".png"] {
+  mix-blend-mode: normal; /* PNGs often have proper transparency */
+}
+
+.rune-image[src$=".jpeg"], 
+.rune-image[src$=".jpg"] {
+  mix-blend-mode: multiply; /* JPEGs need background removal */
+}
+
+/* Ensure runes display as artwork, not icons */
+.hunt-rune {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Remove circular constraint for artwork display */
+  border-radius: 0.5rem;
 }
