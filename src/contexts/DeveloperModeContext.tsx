@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 interface DeveloperModeContextType {
   isDeveloperMode: boolean;
@@ -30,13 +30,13 @@ export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ ch
     }
   }, []);
 
-  const toggleDeveloperMode = () => {
+  const toggleDeveloperMode = useCallback(() => {
     setIsDeveloperMode(prev => {
       const newValue = !prev;
       localStorage.setItem('developerMode', newValue.toString());
       return newValue;
     });
-  };
+  }, []);
 
   // Add keyboard shortcut for toggling dev mode (Ctrl+Shift+D)
   useEffect(() => {
@@ -49,7 +49,7 @@ export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ ch
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [toggleDeveloperMode]);
 
   return (
     <DeveloperModeContext.Provider value={{ isDeveloperMode, toggleDeveloperMode }}>
