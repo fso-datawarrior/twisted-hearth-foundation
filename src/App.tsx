@@ -10,6 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { DeveloperModeProvider } from "@/contexts/DeveloperModeContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
+import HuntNotification from "@/components/hunt/HuntNotification";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
@@ -78,6 +79,7 @@ function App() {
                 {/* Hunt UI overlays */}
                 <HuntProgress />
                 <HuntReward />
+                <HuntNotification />
               </BrowserRouter>
             </HuntProvider>
           </AuthProvider>
