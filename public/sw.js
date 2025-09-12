@@ -1,5 +1,5 @@
 // Service Worker for Twisted Fairytale Halloween Bash
-const CACHE_NAME = 'twisted-halloween-v2';
+const CACHE_NAME = 'twisted-halloween-v3';
 const STATIC_ASSETS = [
   '/hero-poster.jpg',
   '/costumeWalk.mp4',

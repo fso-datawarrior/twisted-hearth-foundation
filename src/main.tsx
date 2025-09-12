@@ -21,7 +21,7 @@ if ('serviceWorker' in navigator) {
           console.log('SW unregister failed:', err);
         });
     } else {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('/sw.js?v=1.0.5')
         .then((registration) => {
           console.log('SW registered: ', registration);
         })
