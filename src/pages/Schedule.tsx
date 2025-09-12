@@ -1,7 +1,7 @@
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import { formatEventTime } from "@/lib/event";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 
 const Schedule = () => {
   const scheduleItems = [
@@ -71,8 +71,8 @@ const Schedule = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="relative">
-              <HuntHintTrigger 
-                id="schedule.date" 
+              <HuntRune 
+                id="13" 
                 label="Time keeps darker promises"
                 className="absolute top-0 right-4"
               />
@@ -95,8 +95,8 @@ const Schedule = () => {
                   >
                     {/* Add bonus hunt rune to the final toast */}
                     {item.type === "finale" && (
-                      <HuntHintTrigger 
-                        id="schedule.late" 
+                      <HuntRune 
+                        id="14" 
                         label="Midnight keeps its own time"
                         bonus={true}
                         className="absolute top-4 right-4"

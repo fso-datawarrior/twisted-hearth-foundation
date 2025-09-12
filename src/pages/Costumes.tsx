@@ -2,7 +2,7 @@ import { useState } from "react";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import Carousel from "@/components/Carousel";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Costumes = () => {
@@ -91,8 +91,8 @@ const Costumes = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
-              <HuntHintTrigger 
-                id="costumes.header" 
+              <HuntRune 
+                id="5" 
                 label="Masks within masks"
                 className="absolute top-0 right-4"
               />
@@ -109,8 +109,8 @@ const Costumes = () => {
             {/* Filter Chips */}
             <div className="mb-8">
               <div className="flex flex-wrap justify-center gap-3" id="costumes.filter">
-                <HuntHintTrigger 
-                  id="costumes.filter" 
+                <HuntRune 
+                  id="9" 
                   label="Choose your mask wisely"
                   bonus={true}
                   className="absolute -top-2 -right-2"
@@ -180,8 +180,8 @@ const Costumes = () => {
             
             {/* Contest Info */}
             <div className="relative bg-bg-2 p-8 rounded-lg border border-accent-red/50">
-              <HuntHintTrigger
-                id="costumes.cta"
+              <HuntRune
+                id="10"
                 label="Seams stitched with secrets"
                 className="absolute bottom-4 right-4"
               />

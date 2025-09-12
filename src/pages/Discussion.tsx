@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import MessageComposer from "@/components/guestbook/MessageComposer";
@@ -128,8 +128,8 @@ const Discussion = () => {
               <h1 className="font-heading text-4xl md:text-6xl text-shadow-gothic">
                 The Dark Guestbook
               </h1>
-              <HuntHintTrigger 
-                id="guestbook-hint" 
+              <HuntRune 
+                id="8" 
                 label="Hidden Message"
                 hint="Look for messages that reveal more than they say..."
               />
