@@ -3,17 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Users, Calendar } from 'lucide-react';
-
-interface TournamentRegistration {
-  id: string;
-  user_id: string;
-  tournament_name: string;
-  team_name: string;
-  contact_info?: string;
-  special_requirements?: string;
-  status: string;
-  created_at: string;
-}
+import { TournamentRegistration } from '@/lib/tournament-api';
 
 interface TournamentManagementProps {
   tournaments: TournamentRegistration[];

@@ -52,8 +52,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         duration: 8000,
       });
     } catch (error: any) {
-      console.error('Sign-in error:', error);
-      
       let errorMsg = "Please try again or contact support.";
       
       if (error?.message?.includes('rate')) {
@@ -93,11 +91,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       });
       handleClose();
       setEmail("");
-    } catch (error) {
-      console.error('Dev sign-in error:', error);
+    } catch (error: any) {
       toast({
         title: "Dev sign-in failed",
-        description: "Something went wrong with dev mode sign-in",
+        description: error?.message || "Something went wrong with dev mode sign-in",
         variant: "destructive",
       });
     } finally {
