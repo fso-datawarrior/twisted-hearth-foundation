@@ -662,33 +662,7 @@ export type Database = {
       }
     }
     Views: {
-      tournament_registrations_public: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          status: string | null
-          team_name: string | null
-          tournament_name: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          status?: string | null
-          team_name?: string | null
-          tournament_name?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          status?: string | null
-          team_name?: string | null
-          tournament_name?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       admin_update_rsvp_status: {
