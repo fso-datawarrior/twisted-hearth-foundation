@@ -10,6 +10,7 @@ import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
+import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { 
   Users, 
   Trophy, 
@@ -41,16 +42,11 @@ export default function AdminDashboard() {
     }
   });
 
-  // Tournament registrations query using existing API
+  // Tournament registrations query using admin API
   const { data: tournamentRegs, isLoading: tournamentLoading } = useQuery({
     queryKey: ['admin-tournament'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tournament_registrations')
-        .select(`
-          *
-        `)
-        .order('created_at', { ascending: false });
+      const { data, error } = await getTournamentRegistrationsAdmin();
       
       if (error) throw error;
       return data;

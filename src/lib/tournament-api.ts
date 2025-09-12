@@ -8,7 +8,7 @@ export interface TournamentRegistration {
   id: string;
   user_id: string;
   tournament_name: string;
-  team_name?: string;
+  team_name: string;
   contact_info?: string;
   special_requirements?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
@@ -60,9 +60,21 @@ export const registerForTournament = async (
 };
 
 /**
- * Get all tournament registrations (public)
+ * Get all tournament registrations (public - safe fields only)
  */
-export const getTournamentRegistrations = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
+export const getTournamentRegistrations = async (): Promise<{ data: Omit<TournamentRegistration, 'contact_info' | 'special_requirements'>[] | null; error: any }> => {
+  const { data, error } = await supabase
+    .from('tournament_registrations')
+    .select('id, user_id, tournament_name, team_name, status, created_at, updated_at')
+    .order('created_at', { ascending: false });
+
+  return { data: data as Omit<TournamentRegistration, 'contact_info' | 'special_requirements'>[] | null, error };
+};
+
+/**
+ * Get all tournament registrations with sensitive data (admin only)
+ */
+export const getTournamentRegistrationsAdmin = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('tournament_registrations')
     .select('*')
