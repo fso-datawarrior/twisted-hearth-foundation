@@ -113,6 +113,16 @@ export default function AuthCallback() {
             } else if (data?.user) {
               console.log('✅ Successfully authenticated user:', data.user.email);
               setStatus('success');
+              
+              // Ensure admins are seeded after successful login
+              try {
+                console.log('🔐 AuthCallback: Seeding admins after login...');
+                await supabase.rpc('ensure_admins_seeded');
+                console.log('✅ AuthCallback: Admin seeding completed');
+              } catch (seedError) {
+                console.warn('⚠️ AuthCallback: Admin seeding failed:', seedError);
+              }
+              
               toast({
                 title: "Welcome back! 🎉",
                 description: `Successfully signed in as ${data.user.email}`,
