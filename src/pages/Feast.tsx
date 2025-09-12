@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -135,8 +135,8 @@ const Feast = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
-              <HuntHintTrigger 
-                id="feast.header" 
+              <HuntRune 
+                id="11" 
                 label="Flavor sharp as a blade"
                 className="absolute top-0 right-4"
               />
@@ -163,8 +163,8 @@ const Feast = () => {
                     className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
                   >
                     {index === 0 && (
-                      <HuntHintTrigger 
-                        id="feast.board" 
+                      <HuntRune 
+                        id="12" 
                         label="A diced confession"
                         className="absolute top-2 right-2"
                       />
@@ -197,8 +197,8 @@ const Feast = () => {
             
             {/* Potluck Contributions Panel */}
             <div className="mb-16 relative">
-              <HuntHintTrigger 
-                id="feast.potluck" 
+              <HuntRune 
+                id="13" 
                 label="What's shared tastes sweeter"
                 bonus={true}
                 className="absolute -top-2 -right-2 z-10"

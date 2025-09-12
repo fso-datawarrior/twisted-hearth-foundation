@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
@@ -119,13 +119,13 @@ const Index = () => {
     <div className="min-h-screen bg-background relative">
       {/* Hunt triggers positioned absolutely */}
       <div className="relative">
-        <HuntHintTrigger 
-          id="home.logo" 
+        <HuntRune 
+          id="1" 
           label="Hidden mark near the crest" 
           className="absolute top-4 left-4 z-50" 
         />
-        <HuntHintTrigger 
-          id="home.moon" 
+        <HuntRune 
+          id="2" 
           label="Something stirs beneath the moon"
           className="absolute top-6 right-6 z-50"
         />
@@ -133,13 +133,13 @@ const Index = () => {
       
       {/* Hero Section */}
       <div className="relative">
-        <HuntHintTrigger 
-          id="home.path" 
+        <HuntRune 
+          id="3" 
           label="Footsteps that don't belong"
           className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50"
         />
-        <HuntHintTrigger 
-          id="home.cta" 
+        <HuntRune 
+          id="4" 
           label="A whisper urging you forward"
           className="absolute bottom-6 right-8 z-50"
         />
@@ -348,8 +348,8 @@ const Index = () => {
       
       {/* Footer with hunt trigger */}
       <div className="relative">
-        <HuntHintTrigger 
-          id="home.footer.icon" 
+        <HuntRune 
+          id="15" 
           label="A faint crown in the dark"
           className="absolute top-2 left-8 z-50"
         />

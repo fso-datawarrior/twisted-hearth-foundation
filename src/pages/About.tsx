@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const About = () => {
@@ -79,8 +79,8 @@ const About = () => {
       </main>
       
       <div className="relative z-10">
-        <HuntHintTrigger 
-          id="about.sig" 
+        <HuntRune 
+          id="14" 
           label="Ink that won't dry"
           className="absolute top-4 left-8"
         />

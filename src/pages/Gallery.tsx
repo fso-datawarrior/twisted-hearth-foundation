@@ -5,7 +5,7 @@ import ImageCarousel from "@/components/ImageCarousel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
@@ -132,8 +132,8 @@ const Gallery = () => {
               
               {/* Upload Section */}
               <div className="mb-12 text-center relative">
-                <HuntHintTrigger 
-                  id="gallery.upload" 
+                <HuntRune 
+                  id="7" 
                   label="A picture is a promise"
                   bonus={true}
                   className="absolute -top-2 -right-2"
