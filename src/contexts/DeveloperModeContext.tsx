@@ -22,8 +22,15 @@ interface DeveloperModeProviderProps {
 export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ children }) => {
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
 
-  // Initialize from localStorage after component mounts
+  // Initialize from localStorage after component mounts - only in development
   useEffect(() => {
+    // Security: Only allow developer mode in development environment
+    if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+      setIsDeveloperMode(false);
+      localStorage.removeItem('developerMode');
+      return;
+    }
+    
     const saved = localStorage.getItem('developerMode');
     if (saved === 'true') {
       setIsDeveloperMode(true);
@@ -31,6 +38,11 @@ export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ ch
   }, []);
 
   const toggleDeveloperMode = useCallback(() => {
+    // Security: Only allow toggle in development environment
+    if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+      return;
+    }
+    
     setIsDeveloperMode(prev => {
       const newValue = !prev;
       localStorage.setItem('developerMode', newValue.toString());

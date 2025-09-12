@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST to catch magic link auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
         setLoading(false);
@@ -45,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkPartyEnd = () => {
       if (isPartyOver() && session) {
-        console.log('🎉 Party is over! Auto-signing out...');
         supabase.auth.signOut();
       }
     };
@@ -80,8 +78,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut(); 
   };
 
-  // Dev mode: Create a mock session for testing (bypasses email)
+  // Dev mode: Create a mock session for testing (bypasses email) - DEVELOPMENT ONLY
   const devSignIn = async (email: string) => {
+    // Security: Only allow in development environment
+    if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+      throw new Error('Developer authentication is disabled in production');
+    }
+    
     // Create a mock user session for development
     const mockUser = {
       id: 'dev-user-' + Date.now(),
