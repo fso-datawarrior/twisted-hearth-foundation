@@ -1,4 +1,6 @@
-export const HUNT_TOTAL = 15;
+import { getTotalRuneCount } from './rune-mapping';
+
+export const HUNT_TOTAL = getTotalRuneCount(); // 16 runes available
 export const HUNT_ENABLED = true;
 
 export const REWARD_MESSAGES = [

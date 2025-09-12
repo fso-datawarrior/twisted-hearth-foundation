@@ -4,6 +4,7 @@ import { useProximity } from "@/hooks/use-proximity";
 import { cn } from "@/lib/utils";
 import { HUNT_ENABLED } from "./hunt-config";
 import { useToast } from "@/hooks/use-toast";
+import { getRuneInfo } from "./rune-mapping";
 
 type Props = {
   id: string;
@@ -18,6 +19,7 @@ export default function HuntHintTrigger({ id, label, hint, className, bonus = fa
   const { ref, near, prefersReduced, isTouch } = useProximity(120);
   const [localToast, setLocalToast] = useState(false);
   const { toast } = useToast();
+  const runeInfo = getRuneInfo(id);
 
   const DEBUG = import.meta.env.DEV && import.meta.env.VITE_HUNT_DEBUG === "1";
   const found = isFound(id);
@@ -30,7 +32,9 @@ export default function HuntHintTrigger({ id, label, hint, className, bonus = fa
     ? "bg-[--accent-gold]/40 ring-[--accent-gold] shadow-[0_0_10px_rgba(197,164,93,0.6)]"
     : "bg-[--accent-green]/40 ring-[--accent-green]/70 shadow-[0_0_10px_rgba(59,110,71,0.55)]";
 
-  if (!HUNT_ENABLED) return null;
+  if (!HUNT_ENABLED) {
+    return null;
+  }
 
   const handle = () => {
     if (!found) {
@@ -52,8 +56,8 @@ export default function HuntHintTrigger({ id, label, hint, className, bonus = fa
       <button
         ref={ref as any}
         type="button"
-        aria-label={label}
-        aria-pressed={found}
+        aria-label={runeInfo?.name || label}
+        aria-pressed={found ? "true" : "false"}
         onClick={handle}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handle(); }
@@ -65,7 +69,7 @@ export default function HuntHintTrigger({ id, label, hint, className, bonus = fa
           "hover:opacity-100 focus-visible:opacity-100",
           className
         )}
-        title={hint}
+        title={runeInfo?.description || hint || runeInfo?.name}
       />
       {localToast && (
         <div className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-2 py-1 text-xs text-white shadow-md">
