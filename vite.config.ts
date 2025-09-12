@@ -35,6 +35,13 @@ export default defineConfig(({ mode }) => ({
           'supabase-vendor': ['@supabase/supabase-js'],
           'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
         },
+        // Add version to chunk names for better cache busting
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+          return `js/[name]-[hash].js`;
+        },
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       },
     },
     chunkSizeWarningLimit: 1000, // Increase limit to 1MB for now

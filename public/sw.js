@@ -98,6 +98,12 @@ self.addEventListener('activate', (event) => {
         cacheNames.map((cacheName) => (cacheName !== CACHE_NAME ? caches.delete(cacheName) : Promise.resolve()))
       );
       await self.clients.claim();
+      
+      // Notify all clients about the new service worker
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({ type: 'SW_UPDATED', cacheName: CACHE_NAME });
+      });
     })()
   );
 });
