@@ -37,18 +37,30 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const checkAdminStatus = async () => {
     try {
       if (user) {
-        const { data, error } = await supabase.rpc('is_admin');
-        if (!error && data) {
+        console.log('🔐 AdminContext: Checking admin status for user:', user.email);
+        
+        // First, ensure admins are seeded
+        await supabase.rpc('ensure_admins_seeded');
+        
+        // Check admin status using the enhanced function
+        const { data: isAdminResult, error: adminError } = await supabase.rpc('check_admin_status');
+        
+        console.log('🔐 AdminContext: Admin check result:', { isAdminResult, adminError });
+        
+        if (!adminError && isAdminResult === true) {
+          console.log('✅ AdminContext: User is confirmed admin');
           setIsAdmin(true);
         } else {
+          console.log('❌ AdminContext: User is not admin or error occurred');
           setIsAdmin(false);
         }
       } else {
+        console.log('🔐 AdminContext: No user, resetting admin state');
         setIsAdmin(false);
         setIsAdminView(false);
       }
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      console.error('💥 AdminContext: Error checking admin status:', error);
       setIsAdmin(false);
     } finally {
       setLoading(false);

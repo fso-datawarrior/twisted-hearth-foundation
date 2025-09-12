@@ -665,6 +665,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_admin_status: {
+        Args: { p_user_id?: string }
+        Returns: boolean
+      }
+      ensure_admins_seeded: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_hunt_stats: {
         Args: { p_user_id?: string }
         Returns: {
