@@ -20,11 +20,15 @@ interface DeveloperModeProviderProps {
 }
 
 export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ children }) => {
-  const [isDeveloperMode, setIsDeveloperMode] = useState(() => {
-    // Check localStorage for saved developer mode preference
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
+
+  // Initialize from localStorage after component mounts
+  useEffect(() => {
     const saved = localStorage.getItem('developerMode');
-    return saved === 'true';
-  });
+    if (saved === 'true') {
+      setIsDeveloperMode(true);
+    }
+  }, []);
 
   const toggleDeveloperMode = () => {
     setIsDeveloperMode(prev => {

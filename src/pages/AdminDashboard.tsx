@@ -6,6 +6,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import RequireAdmin from '@/components/RequireAdmin';
 import RSVPManagement from '@/components/admin/RSVPManagement';
+import TournamentManagement from '@/components/admin/TournamentManagement';
+import GalleryManagement from '@/components/admin/GalleryManagement';
+import HuntManagement from '@/components/admin/HuntManagement';
 import { 
   Users, 
   Trophy, 
@@ -102,7 +105,7 @@ export default function AdminDashboard() {
     <RequireAdmin>
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
+          <div className="mb-8 mt-16">
             <h1 className="text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
             <p className="text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
           </div>
@@ -179,15 +182,27 @@ export default function AdminDashboard() {
                       <Calendar className="h-6 w-6" />
                       <span className="text-sm">Export RSVPs</span>
                     </Button>
-                    <Button variant="outline" className="h-16 flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-16 flex-col space-y-2"
+                      onClick={() => setActiveTab('tournament')}
+                    >
                       <Trophy className="h-6 w-6" />
                       <span className="text-sm">Tournament Bracket</span>
                     </Button>
-                    <Button variant="outline" className="h-16 flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-16 flex-col space-y-2"
+                      onClick={() => setActiveTab('gallery')}
+                    >
                       <Images className="h-6 w-6" />
                       <span className="text-sm">Approve Photos</span>
                     </Button>
-                    <Button variant="outline" className="h-16 flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-16 flex-col space-y-2"
+                      onClick={() => setActiveTab('hunt')}
+                    >
                       <Map className="h-6 w-6" />
                       <span className="text-sm">Hunt Stats</span>
                     </Button>
@@ -226,22 +241,13 @@ export default function AdminDashboard() {
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
             )}
             {activeTab === 'tournament' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Tournament Management</h2>
-                <p className="text-muted-foreground">Tournament bracket and team management coming next...</p>
-              </div>
+              <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
             )}
             {activeTab === 'gallery' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Gallery Moderation</h2>
-                <p className="text-muted-foreground">Photo approval and gallery management coming next...</p>
-              </div>
+              <GalleryManagement photos={photos} isLoading={photosLoading} />
             )}
             {activeTab === 'hunt' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Scavenger Hunt</h2>
-                <p className="text-muted-foreground">Hunt progress tracking and rune management coming next...</p>
-              </div>
+              <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
             )}
             {activeTab === 'guestbook' && (
               <div>

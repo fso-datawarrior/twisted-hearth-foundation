@@ -665,6 +665,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_rsvp_status: {
+        Args: { p_rsvp_id: string; p_status: string }
+        Returns: {
+          contributions: string | null
+          costume_idea: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          email_sent_at: string | null
+          idempotency_token: string | null
+          num_guests: number
+          rsvp_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+      }
       check_admin_status: {
         Args: { p_user_id?: string }
         Returns: boolean

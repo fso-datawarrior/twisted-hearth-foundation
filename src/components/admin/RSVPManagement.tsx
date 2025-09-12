@@ -53,10 +53,10 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
 
   // Update RSVP status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ rsvpId, status, numGuests }: { rsvpId: string; status: 'confirmed' | 'cancelled'; numGuests: number }) => {
-      const { data, error } = await supabase.rpc('upsert_rsvp', {
-        p_attending: status === 'confirmed',
-        p_guests: numGuests
+    mutationFn: async ({ rsvpId, status }: { rsvpId: string; status: 'confirmed' | 'cancelled' }) => {
+      const { data, error } = await supabase.rpc('admin_update_rsvp_status', {
+        p_rsvp_id: rsvpId,
+        p_status: status
       });
       
       if (error) throw error;
@@ -342,8 +342,7 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
                             variant="outline"
                             onClick={() => updateStatusMutation.mutate({
                               rsvpId: rsvp.rsvp_id,
-                              status: 'confirmed',
-                              numGuests: rsvp.num_guests
+                              status: 'confirmed'
                             })}
                             disabled={updateStatusMutation.isPending}
                             className="h-8 px-2"
@@ -357,8 +356,7 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
                             variant="outline"
                             onClick={() => updateStatusMutation.mutate({
                               rsvpId: rsvp.rsvp_id,
-                              status: 'cancelled',
-                              numGuests: rsvp.num_guests
+                              status: 'cancelled'
                             })}
                             disabled={updateStatusMutation.isPending}
                             className="h-8 px-2 text-destructive hover:text-destructive"
