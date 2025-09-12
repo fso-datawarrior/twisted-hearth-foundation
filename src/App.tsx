@@ -29,6 +29,7 @@ const Discussion = lazy(() => import("./pages/Discussion"));
 const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ function App() {
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/auth" element={<AuthCallback />} />
                           <Route path="/test" element={<TestPage />} />
+                          <Route path="/admin" element={<AdminDashboard />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
