@@ -6,6 +6,7 @@ import { useProximity } from "@/hooks/use-proximity";
 import { cn } from "@/lib/utils";
 import { HUNT_ENABLED } from "./hunt-config";
 import { useToast } from "@/hooks/use-toast";
+import { getRunePath, getRuneInfo } from "./rune-mapping";
 
 type Props = {
   id: string;
@@ -15,22 +16,24 @@ type Props = {
   bonus?: boolean;
 };
 
-// Map hint IDs to rune image paths
-const getRunePath = (id: string): string => {
-  return `/img/runes/${id}.png`;
-};
+// Rune image paths are now handled by the rune-mapping module
 
 export default function HuntRune({ id, label, hint, className, bonus = false }: Props) {
   const { user } = useAuth();
   const { isFound, markFound, progress, total } = useHunt();
   const { ref, near, prefersReduced, isTouch } = useProximity(120);
   const [localToast, setLocalToast] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { toast } = useToast();
 
   const DEBUG = import.meta.env.DEV && import.meta.env.VITE_HUNT_DEBUG === "1";
   const found = isFound(id);
+  const runeInfo = getRuneInfo(id);
+  const runePath = getRunePath(id);
 
-  if (!HUNT_ENABLED) return null;
+  if (!HUNT_ENABLED) {
+    return null;
+  }
 
   // Don't render runes for unauthenticated users
   if (!user) {
@@ -97,12 +100,12 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
         title={hint}
         initial={{ opacity: 0 }}
         animate={
-          !prefersReduced ? {
+          prefersReduced ? {
+            opacity: found ? 0.6 : (near ? 0.3 : 0)
+          } : {
             opacity: found 
               ? [0.6, 0.8, 0.6] 
               : [0, 0.3, 0],
-          } : {
-            opacity: found ? 0.6 : (near ? 0.3 : 0)
           }
         }
         transition={{
@@ -112,21 +115,31 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
           delay: animationDelay,
         }}
       >
-        <img 
-          src={getRunePath(id)}
-          alt=""
-          className={cn(
-            "w-full h-full object-contain pointer-events-none",
-            found 
-              ? "filter drop-shadow-[0_0_4px_rgba(197,164,93,0.8)]" 
-              : "filter drop-shadow-[0_0_4px_rgba(59,110,71,0.6)]"
-          )}
-          style={{
-            filter: found 
-              ? 'brightness(1.2) drop-shadow(0 0 4px rgba(197,164,93,0.8))'
-              : 'brightness(0.9) drop-shadow(0 0 4px rgba(59,110,71,0.6))'
-          }}
-        />
+        {!imageError ? (
+          <img 
+            src={runePath}
+            alt={runeInfo?.name || `Rune ${id}`}
+            className={cn(
+              "w-full h-full object-contain pointer-events-none",
+              found 
+                ? "brightness-120 drop-shadow-[0_0_4px_rgba(197,164,93,0.8)]" 
+                : "brightness-90 drop-shadow-[0_0_4px_rgba(59,110,71,0.6)]"
+            )}
+            onError={() => setImageError(true)}
+            onLoad={() => setImageError(false)}
+          />
+        ) : (
+          <div 
+            className={cn(
+              "w-full h-full flex items-center justify-center text-xs font-mono",
+              "bg-muted/20 rounded-full border border-dashed border-muted/40",
+              found ? "text-accent-gold" : "text-muted-foreground"
+            )}
+            title={runeInfo?.name || `Rune ${id} (image failed to load)`}
+          >
+            {runeInfo?.name?.charAt(0) || id}
+          </div>
+        )}
       </motion.button>
       
       {localToast && (
