@@ -1,12 +1,13 @@
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useHunt } from "./HuntProvider";
 import { useProximity } from "@/hooks/use-proximity";
-import { cn } from "@/lib/utils";
-import { HUNT_ENABLED } from "./hunt-config";
 import { useToast } from "@/hooks/use-toast";
-import { getRunePath, getRuneInfo } from "./rune-mapping";
+import { cn } from "@/lib/utils";
+import { HUNT_ENABLED, HUNT_DEBUG_MODE, HUNT_PROXIMITY } from "./hunt-config";
+import { getRunePath, getRuneInfo, getRuneHint } from "./rune-mapping";
 
 type Props = {
   id: string;
@@ -20,45 +21,99 @@ type Props = {
 
 export default function HuntRune({ id, label, hint, className, bonus = false }: Props) {
   const { user } = useAuth();
+  const { isDeveloperMode } = useDeveloperMode();
   const { isFound, markFound, progress, total } = useHunt();
-  const { ref, near, prefersReduced, isTouch } = useProximity(120);
+  const { ref, near, prefersReduced, isTouch } = useProximity(HUNT_PROXIMITY.RADIUS);
   const [localToast, setLocalToast] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [hasBeenSeen, setHasBeenSeen] = useState(false);
+  const [isCurrentlyVisible, setIsCurrentlyVisible] = useState(false);
+  const [shouldTriggerSinglePulse, setShouldTriggerSinglePulse] = useState(false);
   const { toast } = useToast();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const singlePulseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const DEBUG = import.meta.env.DEV && import.meta.env.VITE_HUNT_DEBUG === "1";
-  const found = isFound(id);
   const runeInfo = getRuneInfo(id);
+  const runeHint = getRuneHint(id);
   const runePath = getRunePath(id);
+  const found = isFound(id);
 
-  if (!HUNT_ENABLED) {
-    return null;
-  }
+  // Enhanced visibility logic - Use developer mode context
+  const getBaseVisibility = () => {
+    if (isDeveloperMode) {
+      return "opacity-100"; // Show all runes when developer mode is on
+    }
+    if (HUNT_DEBUG_MODE) {
+      return "opacity-80"; // Debug mode - slightly visible
+    }
+    if (isTouch) {
+      return "opacity-40"; // Touch devices
+    }
+    if (near) {
+      return "opacity-100"; // Near proximity
+    }
+    return "opacity-0"; // Hidden
+  };
 
-  // Don't render runes for unauthenticated users
-  if (!user) {
-    return (
-      <div 
-        ref={ref as any}
-        className={cn(
-          "hunt-rune-placeholder h-5 w-5 rounded-full opacity-20 cursor-pointer",
-          "hover:opacity-60 transition-opacity",
-          className
-        )}
-        onClick={() => {
-          toast({
-            title: "Sign in to join the hunt",
-            description: "Create an account to discover the hidden secrets",
-          });
-        }}
-        title="Sign in required"
-      />
-    );
-  }
+  const baseVis = getBaseVisibility();
 
-  const baseVis = DEBUG ? "opacity-80"
-    : isTouch ? "opacity-40"
-    : near ? "opacity-100" : "opacity-0";
+  // Track visibility changes for first-time detection
+  useEffect(() => {
+    const isVisible = baseVis !== "opacity-0";
+    const wasVisible = isCurrentlyVisible;
+    
+    setIsCurrentlyVisible(isVisible);
+    
+    // First time becoming visible
+    if (isVisible && !wasVisible && !hasBeenSeen && !found) {
+      setHasBeenSeen(true);
+      setShouldTriggerSinglePulse(true);
+      
+      // Clear single pulse after animation
+      singlePulseTimeoutRef.current = setTimeout(() => {
+        setShouldTriggerSinglePulse(false);
+      }, 2000);
+    }
+  }, [baseVis, isCurrentlyVisible, hasBeenSeen, found]);
+
+  // 5-second interval pulse for unfound runes
+  useEffect(() => {
+    if (found || !isCurrentlyVisible) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+
+    // Start interval for regular pulsing
+    intervalRef.current = setInterval(() => {
+      if (isCurrentlyVisible && !found) {
+        // Trigger pulse animation
+        setShouldTriggerSinglePulse(true);
+        setTimeout(() => setShouldTriggerSinglePulse(false), 2000);
+      }
+    }, 5000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [found, isCurrentlyVisible]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (singlePulseTimeoutRef.current) {
+        clearTimeout(singlePulseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handle = () => {
     if (!found && user) {
@@ -77,12 +132,93 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
 
   const animationDelay = parseInt(id, 10) * 0.3; // Stagger animations
 
+  // Get hint dot classes
+  const getHintClasses = () => {
+    if (!runeHint) {
+      return "";
+    }
+    
+    return cn(
+      "absolute inset-0 flex items-center justify-center",
+      runeHint.shape === 'circle' && "hint-shape-circle",
+      runeHint.shape === 'oval' && "hint-shape-oval", 
+      runeHint.shape === 'square' && "hint-shape-square",
+      runeHint.size === 'small' && "hint-size-small",
+      runeHint.size === 'medium' && "hint-size-medium",
+      runeHint.size === 'large' && "hint-size-large",
+      runeHint.color,
+      runeHint.pulseIntensity === 'subtle' && "pulse-intensity-subtle",
+      runeHint.pulseIntensity === 'medium' && "pulse-intensity-medium",
+      runeHint.pulseIntensity === 'bright' && "pulse-intensity-bright"
+    );
+  };
+
+  // Animation states
+  const getAnimationProps = () => {
+    // Developer mode - show all runes statically (no pulsing)
+    if (isDeveloperMode) {
+      return {
+        opacity: HUNT_PROXIMITY.OPACITY.DEBUG,
+      };
+    }
+    
+    // Normal behavior - static display
+    if (prefersReduced) {
+      return {
+        opacity: found ? 1 : (near ? HUNT_PROXIMITY.OPACITY.NEAR * 0.3 : 0)
+      };
+    }
+    
+    // Found runes - static display
+    if (found) {
+      return {
+        opacity: 1,
+      };
+    }
+    
+    // Unfound runes - proximity-based static display
+    const baseOpacity = near ? HUNT_PROXIMITY.OPACITY.NEAR : 0;
+    return {
+      opacity: baseOpacity,
+    };
+  };
+
+  // Don't render runes for unauthenticated users
+  if (!user) {
+    return (
+      <div 
+        ref={ref as React.RefObject<HTMLDivElement>}
+        className={cn(
+          "hunt-rune-placeholder h-10 w-10 rounded-full opacity-20 cursor-pointer",
+          "hover:opacity-60 transition-opacity",
+          className
+        )}
+        onClick={() => {
+          toast({
+            title: "Authentication Required",
+            description: "Please sign in to discover runes",
+            variant: "destructive",
+          });
+        }}
+        title="Sign in to discover runes"
+      >
+        <div className="w-full h-full flex items-center justify-center text-xs font-mono text-muted-foreground">
+          ?
+        </div>
+      </div>
+    );
+  }
+
+  if (!HUNT_ENABLED) {
+    return null;
+  }
+
   return (
     <div className="relative">
       <motion.button
-        ref={ref as any}
+        ref={ref as React.RefObject<HTMLButtonElement>}
         type="button"
-        aria-label={label}
+        aria-label={runeInfo?.name || label}
         aria-pressed={found}
         onClick={handle}
         onKeyDown={(e) => {
@@ -92,35 +228,30 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
           }
         }}
         className={cn(
-          "hunt-rune h-5 w-5 rounded-full transition outline-none motion-reduce:transition-none",
+          "hunt-rune transition outline-none motion-reduce:transition-none",
           "hover:opacity-100 focus-visible:opacity-100",
           baseVis,
           className
         )}
-        title={hint}
+        title={runeInfo?.description || hint || runeInfo?.name}
         initial={{ opacity: 0 }}
-        animate={
-          prefersReduced ? {
-            opacity: found ? 0.6 : (near ? 0.3 : 0)
-          } : {
-            opacity: found 
-              ? [0.6, 0.8, 0.6] 
-              : [0, 0.3, 0],
-          }
-        }
+        animate={getAnimationProps()}
         transition={{
-          duration: 1.5,
-          repeat: found ? 0 : Infinity,
-          repeatDelay: 4.5,
           delay: animationDelay,
         }}
       >
-        {!imageError ? (
+        {/* Hint dot - always present when visible and not found, or in developer mode */}
+        {!found && (baseVis !== "opacity-0" || isDeveloperMode) && runeHint && (
+          <div className={getHintClasses()} />
+        )}
+        
+        {/* Rune image - only when found */}
+        {found && !imageError && (
           <img 
             src={runePath}
             alt={runeInfo?.name || `Rune ${id}`}
             className={cn(
-              "w-full h-full object-contain pointer-events-none",
+              "pointer-events-none rune-image max-w-16 max-h-16 relative z-10",
               found 
                 ? "brightness-120 drop-shadow-[0_0_4px_rgba(197,164,93,0.8)]" 
                 : "brightness-90 drop-shadow-[0_0_4px_rgba(59,110,71,0.6)]"
@@ -128,10 +259,13 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
             onError={() => setImageError(true)}
             onLoad={() => setImageError(false)}
           />
-        ) : (
+        )}
+        
+        {/* Fallback placeholder */}
+        {imageError && (
           <div 
             className={cn(
-              "w-full h-full flex items-center justify-center text-xs font-mono",
+              "min-h-10 min-w-10 flex items-center justify-center text-xs font-mono",
               "bg-muted/20 rounded-full border border-dashed border-muted/40",
               found ? "text-accent-gold" : "text-muted-foreground"
             )}

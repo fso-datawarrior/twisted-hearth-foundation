@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useHunt } from "./HuntProvider";
 import { useProximity } from "@/hooks/use-proximity";
 import { cn } from "@/lib/utils";
-import { HUNT_ENABLED } from "./hunt-config";
+import { HUNT_ENABLED, HUNT_DEBUG_MODE, HUNT_PROXIMITY } from "./hunt-config";
 import { useToast } from "@/hooks/use-toast";
 import { getRuneInfo } from "./rune-mapping";
 
@@ -15,18 +16,33 @@ type Props = {
 };
 
 export default function HuntHintTrigger({ id, label, hint, className, bonus = false }: Props) {
+  const { isDeveloperMode } = useDeveloperMode();
   const { isFound, markFound, progress, total } = useHunt();
-  const { ref, near, prefersReduced, isTouch } = useProximity(120);
+  const { ref, near, prefersReduced, isTouch } = useProximity(HUNT_PROXIMITY.RADIUS);
   const [localToast, setLocalToast] = useState(false);
   const { toast } = useToast();
   const runeInfo = getRuneInfo(id);
 
-  const DEBUG = import.meta.env.DEV && import.meta.env.VITE_HUNT_DEBUG === "1";
   const found = isFound(id);
 
-  const baseVis = DEBUG ? "opacity-80"
-    : isTouch ? "opacity-40"
-    : near ? "opacity-100" : "opacity-0";
+  // Enhanced visibility logic - Use developer mode context
+  const getBaseVisibility = () => {
+    if (isDeveloperMode) {
+      return "opacity-100"; // Show all runes when developer mode is on
+    }
+    if (HUNT_DEBUG_MODE) {
+      return "opacity-80"; // Debug mode - slightly visible
+    }
+    if (isTouch) {
+      return "opacity-40"; // Touch devices
+    }
+    if (near) {
+      return "opacity-100"; // Near proximity
+    }
+    return "opacity-0"; // Hidden
+  };
+
+  const baseVis = getBaseVisibility();
 
   const glow = found
     ? "bg-[--accent-gold]/40 ring-[--accent-gold] shadow-[0_0_10px_rgba(197,164,93,0.6)]"
@@ -54,16 +70,15 @@ export default function HuntHintTrigger({ id, label, hint, className, bonus = fa
   return (
     <div className="relative">
       <button
-        ref={ref as any}
+        ref={ref as React.RefObject<HTMLButtonElement>}
         type="button"
         aria-label={runeInfo?.name || label}
-        aria-pressed={found ? "true" : "false"}
         onClick={handle}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handle(); }
         }}
         className={cn(
-          "hunt-rune h-5 w-5 rounded-full ring-1 transition outline-none motion-reduce:transition-none",
+          "hunt-rune ring-1 transition outline-none motion-reduce:transition-none",
           glow,
           baseVis,
           "hover:opacity-100 focus-visible:opacity-100",
