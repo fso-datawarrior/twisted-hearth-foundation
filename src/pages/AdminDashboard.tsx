@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import RequireAdmin from '@/components/RequireAdmin';
+import RSVPManagement from '@/components/admin/RSVPManagement';
 import { 
   Users, 
   Trophy, 
@@ -170,7 +171,11 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Button variant="outline" className="h-16 flex-col space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="h-16 flex-col space-y-2"
+                      onClick={() => setActiveTab('rsvps')}
+                    >
                       <Calendar className="h-6 w-6" />
                       <span className="text-sm">Export RSVPs</span>
                     </Button>
@@ -218,10 +223,7 @@ export default function AdminDashboard() {
           {/* Tab Content Placeholders */}
           <div className="bg-card rounded-lg border p-6">
             {activeTab === 'rsvps' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">RSVP Management</h2>
-                <p className="text-muted-foreground">RSVP management interface coming next...</p>
-              </div>
+              <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
             )}
             {activeTab === 'tournament' && (
               <div>
