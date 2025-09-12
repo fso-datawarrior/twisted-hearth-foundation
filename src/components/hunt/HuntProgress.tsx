@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useHunt } from "./HuntProvider";
+import { useHunt as useHuntDatabase } from "@/hooks/use-hunt";
 import { HUNT_ENABLED } from "./hunt-config";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 export default function HuntProgress() {
-  const { isFound, progress, total, reset } = useHunt();
+  const { isFound, foundCount, totalCount, hints, loading, error } = useHuntDatabase();
   const [showPanel, setShowPanel] = useState(false);
 
-  if (!HUNT_ENABLED || progress === 0) return null;
+  if (!HUNT_ENABLED || loading || foundCount === 0) return null;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -16,24 +16,15 @@ export default function HuntProgress() {
     }
   };
 
-  // Sample hint descriptions for the progress panel
-  const hintDescriptions: Record<string, string> = {
-    "home.logo": "Hidden mark near the crest",
-    "home.moon": "Something stirs beneath the moon",
-    "home.path": "Footsteps that don't belong",
-    "home.cta": "A whisper urging you forward",
-    "home.footer.icon": "A faint crown in the dark",
-    "vig.goldilocks": "Knives gleam where spoons should lie",
-    "vig.jack": "Coins seldom tell a clean story",
-    "vig.snowwhite": "Glass remembers every breath",
-    "vig.link": "Stories have roots",
-    "costumes.header": "Masks within masks",
-    "costumes.cta": "Seams stitched with secrets",
-    "feast.header": "Flavor sharp as a blade",
-    "feast.board": "A diced confession",
-    "schedule.date": "Time keeps darker promises",
-    "about.sig": "Ink that won't dry",
-  };
+  // Create hint descriptions from database hints
+  const hintDescriptions: Record<string, { title: string; description: string; meta: string }> = {};
+  hints.forEach(hint => {
+    hintDescriptions[hint.id.toString()] = {
+      title: hint.title,
+      description: hint.hint_text,
+      meta: `${hint.category} • ${hint.difficulty_level} • ${hint.points} pts`
+    };
+  });
 
   return (
     <>
@@ -49,7 +40,7 @@ export default function HuntProgress() {
         onClick={() => setShowPanel(true)}
         aria-label="Open hunt progress"
       >
-        Hunt: {progress} / {total}
+        Hunt: {foundCount} / {totalCount}
       </button>
 
       {/* Progress panel */}
@@ -84,14 +75,14 @@ export default function HuntProgress() {
             <div className="mb-4">
               <div className="text-center mb-2">
                 <span className="font-subhead text-2xl text-accent-green">
-                  {progress}
+                  {foundCount}
                 </span>
-                <span className="text-muted-foreground"> / {total}</span>
+                <span className="text-muted-foreground"> / {totalCount}</span>
               </div>
               <div className="w-full bg-bg-2 rounded-full h-2">
                 <div
                   className="bg-accent-green h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(progress / total) * 100}%` }}
+                  style={{ width: `${(foundCount / totalCount) * 100}%` }}
                 />
               </div>
             </div>
@@ -100,25 +91,39 @@ export default function HuntProgress() {
               <h4 className="font-subhead text-sm text-accent-gold mb-3">
                 Secrets Found:
               </h4>
-              {Object.entries(hintDescriptions).map(([id, description]) => (
+              {Object.entries(hintDescriptions).map(([id, hint]) => (
                 <div
                   key={id}
                   className={`
-                    flex items-center gap-2 text-sm p-2 rounded
+                    flex flex-col gap-1 text-sm p-3 rounded border
                     ${
-                      isFound(id)
-                        ? "text-accent-green bg-accent-green/10"
-                        : "text-muted-foreground"
+                      isFound(parseInt(id, 10))
+                        ? "text-accent-green bg-accent-green/10 border-accent-green/20"
+                        : "text-muted-foreground border-muted/20"
                     }
                   `}
                 >
-                  <span className="text-xs">
-                    {isFound(id) ? "✓" : "○"}
-                  </span>
-                  <span className="flex-1">{description}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono">
+                      {isFound(parseInt(id, 10)) ? "✓" : "○"}
+                    </span>
+                    <span className="font-medium">{hint.title}</span>
+                  </div>
+                  <div className="ml-5 text-xs opacity-80">
+                    {hint.description}
+                  </div>
+                  <div className="ml-5 text-xs opacity-60 font-mono">
+                    {hint.meta}
+                  </div>
                 </div>
               ))}
             </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
+                Error: {error}
+              </div>
+            )}
 
             {import.meta.env.DEV && (
               <div className="mt-6 pt-4 border-t border-accent-purple/30">
@@ -126,12 +131,13 @@ export default function HuntProgress() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    reset();
+                    // In database mode, reset just refreshes data
+                    window.location.reload();
                     setShowPanel(false);
                   }}
                   className="w-full text-xs opacity-60 hover:opacity-100"
                 >
-                  Reset Hunt (Dev Only)
+                  Refresh Hunt Data (Dev Only)
                 </Button>
               </div>
             )}

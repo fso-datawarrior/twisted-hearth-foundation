@@ -7,6 +7,7 @@ import { Menu, X, LogOut, Code, Code2 } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
+import HuntNavIndicator from "@/components/hunt/HuntNavIndicator";
 import packageJson from "../../package.json";
 
 interface NavBarProps {
@@ -80,6 +81,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             >
               The Ruths' Bash
             </Link>
+            <HuntNavIndicator />
             {isDeveloperMode && (
               <span className="text-xs text-ink/50 font-mono">
                 v{packageJson.version}

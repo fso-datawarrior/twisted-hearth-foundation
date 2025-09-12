@@ -1,103 +1,51 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { HUNT_TOTAL } from "./hunt-config";
+import { createContext, useContext, ReactNode } from "react";
+import { useHunt as useHuntDatabase, type UseHuntReturn } from "@/hooks/use-hunt";
 
-type HuntState = {
-  found: Record<string, string>; // id -> ISO timestamp
-  completedAt?: string; // when all found
-};
-
+// Re-export the hook interface for backward compatibility
 type HuntAPI = {
   isFound: (id: string) => boolean;
   markFound: (id: string) => void;
   reset: () => void;
   progress: number; // number of found
-  total: number; // from config
+  total: number; // total hints available
   completed: boolean;
+  loading?: boolean;
+  error?: string | null;
 };
 
 const HuntContext = createContext<HuntAPI | null>(null);
 
-const STORAGE_KEY = "TF_HUNT_V1";
-
-const initialState: HuntState = {
-  found: {},
-};
-
 export function HuntProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<HuntState>(initialState);
+  const hunt = useHuntDatabase();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setState(parsed);
-      }
-    } catch (error) {
-      console.warn("Failed to load hunt progress:", error);
-    }
-  }, []);
-
-  // Save to localStorage on state change
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.warn("Failed to save hunt progress:", error);
-    }
-  }, [state]);
-
-  // Dev-only diagnostic logging
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.table({
-        total: HUNT_TOTAL,
-        progress: Object.keys(state.found).length,
-        completed: !!state.completedAt,
-        completedAt: state.completedAt || "null",
-        foundIds: Object.keys(state.found),
-      });
-    }
-  }, [state]);
-
+  // Convert hint IDs to string for backward compatibility
   const isFound = (id: string): boolean => {
-    return id in state.found;
+    const hintId = parseInt(id, 10);
+    return !isNaN(hintId) && hunt.isFound(hintId);
   };
 
   const markFound = (id: string): void => {
-    if (isFound(id)) return; // idempotent
-
-    const timestamp = new Date().toISOString();
-    const newFound = { ...state.found, [id]: timestamp };
-    const newState: HuntState = { found: newFound };
-
-    // Check if completed
-    if (Object.keys(newFound).length === HUNT_TOTAL) {
-      newState.completedAt = timestamp;
+    const hintId = parseInt(id, 10);
+    if (!isNaN(hintId)) {
+      hunt.markFound(hintId);
     }
-
-    setState(newState);
   };
 
   const reset = (): void => {
-    setState(initialState);
+    // In database mode, reset is handled by admin functions
+    // For dev purposes, we can refresh the data
+    hunt.refreshData();
   };
-
-  // Dev hook for testing
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      (window as any).hunt = { reset };
-    }
-  }, []);
 
   const api: HuntAPI = {
     isFound,
     markFound,
     reset,
-    progress: Object.keys(state.found).length,
-    total: HUNT_TOTAL,
-    completed: !!state.completedAt,
+    progress: hunt.foundCount,
+    total: hunt.totalCount,
+    completed: hunt.completed,
+    loading: hunt.loading,
+    error: hunt.error,
   };
 
   return <HuntContext.Provider value={api}>{children}</HuntContext.Provider>;

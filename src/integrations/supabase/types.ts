@@ -149,6 +149,244 @@ export type Database = {
           },
         ]
       }
+      hunt_hints: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          difficulty_level: string
+          hint_text: string
+          id: number
+          is_active: boolean
+          points: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          difficulty_level: string
+          hint_text: string
+          id?: never
+          is_active?: boolean
+          points?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty_level?: string
+          hint_text?: string
+          id?: never
+          is_active?: boolean
+          points?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hunt_progress: {
+        Row: {
+          created_at: string
+          found_at: string
+          hint_id: number
+          hunt_run_id: string
+          id: string
+          points_earned: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          found_at?: string
+          hint_id: number
+          hunt_run_id: string
+          id?: string
+          points_earned?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          found_at?: string
+          hint_id?: number
+          hunt_run_id?: string
+          id?: string
+          points_earned?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hunt_progress_hint_id_fkey"
+            columns: ["hint_id"]
+            isOneToOne: false
+            referencedRelation: "hunt_hints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hunt_progress_hunt_run_id_fkey"
+            columns: ["hunt_run_id"]
+            isOneToOne: false
+            referencedRelation: "hunt_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hunt_rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          earned_at: string
+          hunt_run_id: string
+          id: string
+          reward_name: string
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          earned_at?: string
+          hunt_run_id: string
+          id?: string
+          reward_name: string
+          reward_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          earned_at?: string
+          hunt_run_id?: string
+          id?: string
+          reward_name?: string
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hunt_rewards_hunt_run_id_fkey"
+            columns: ["hunt_run_id"]
+            isOneToOne: false
+            referencedRelation: "hunt_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hunt_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          started_at: string
+          status: string
+          total_points: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          started_at?: string
+          status?: string
+          total_points?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          started_at?: string
+          status?: string
+          total_points?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      photo_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          photo_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_reactions_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          file_size: number | null
+          filename: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          mime_type: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          file_size?: number | null
+          filename: string
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          likes_count?: number
+          mime_type?: string | null
+          storage_path: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          file_size?: number | null
+          filename?: string
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          likes_count?: number
+          mime_type?: string | null
+          storage_path?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       potluck_items: {
         Row: {
           created_at: string
@@ -223,6 +461,142 @@ export type Database = {
           },
         ]
       }
+      tournament_matches: {
+        Row: {
+          created_at: string
+          id: string
+          match_date: string | null
+          score: string | null
+          status: string
+          team1_id: string | null
+          team2_id: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_date?: string | null
+          score?: string | null
+          status?: string
+          team1_id?: string | null
+          team2_id?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_date?: string | null
+          score?: string | null
+          status?: string
+          team1_id?: string | null
+          team2_id?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_matches_team1_id_fkey"
+            columns: ["team1_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_team2_id_fkey"
+            columns: ["team2_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_registrations: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          special_requirements: string | null
+          status: string
+          team_name: string | null
+          tournament_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          special_requirements?: string | null
+          status?: string
+          team_name?: string | null
+          tournament_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          special_requirements?: string | null
+          status?: string
+          team_name?: string | null
+          tournament_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tournament_teams: {
+        Row: {
+          captain_id: string | null
+          created_at: string
+          id: string
+          members: string[] | null
+          status: string
+          team_name: string
+        }
+        Insert: {
+          captain_id?: string | null
+          created_at?: string
+          id?: string
+          members?: string[] | null
+          status?: string
+          team_name: string
+        }
+        Update: {
+          captain_id?: string | null
+          created_at?: string
+          id?: string
+          members?: string[] | null
+          status?: string
+          team_name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           auth_provider_id: string | null
@@ -250,11 +624,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vignettes: {
+        Row: {
+          author: string | null
+          content: string
+          created_at: string
+          event_year: number | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          content: string
+          created_at?: string
+          event_year?: number | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          content?: string
+          created_at?: string
+          event_year?: number | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_hunt_stats: {
+        Args: { p_user_id?: string }
+        Returns: {
+          completion_percentage: number
+          found_hints: number
+          hunt_status: string
+          total_hints: number
+          total_points: number
+        }[]
+      }
       guestbook_insert_message: {
         Args: {
           p_display_name: string
@@ -272,6 +692,60 @@ export type Database = {
           user_id: string
         }
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      mark_hint_found: {
+        Args: { p_hint_id: number; p_hunt_run_id?: string }
+        Returns: {
+          created_at: string
+          found_at: string
+          hint_id: number
+          hunt_run_id: string
+          id: string
+          points_earned: number
+          user_id: string
+        }
+      }
+      moderate_photo: {
+        Args: { p_approve: boolean; p_featured?: boolean; p_photo_id: string }
+        Returns: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          file_size: number | null
+          filename: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          mime_type: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      register_team: {
+        Args: {
+          p_contact_info?: string
+          p_special_requirements?: string
+          p_team_name: string
+          p_tournament_name: string
+        }
+        Returns: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          special_requirements: string | null
+          status: string
+          team_name: string | null
+          tournament_name: string
+          updated_at: string
+          user_id: string
+        }
+      }
       submit_rsvp: {
         Args: {
           p_contributions: string
@@ -286,6 +760,58 @@ export type Database = {
           rsvp_id: string
           updated: boolean
         }[]
+      }
+      toggle_photo_reaction: {
+        Args: { p_photo_id: string; p_reaction_type?: string }
+        Returns: boolean
+      }
+      upload_photo: {
+        Args: {
+          p_caption?: string
+          p_category?: string
+          p_filename: string
+          p_storage_path: string
+          p_tags?: string[]
+        }
+        Returns: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          file_size: number | null
+          filename: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          likes_count: number
+          mime_type: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      upsert_rsvp: {
+        Args: {
+          p_attending: boolean
+          p_contributions?: string
+          p_costume_idea?: string
+          p_dietary_restrictions?: string
+          p_guests?: number
+          p_notes?: string
+        }
+        Returns: {
+          contributions: string | null
+          costume_idea: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          email_sent_at: string | null
+          idempotency_token: string | null
+          num_guests: number
+          rsvp_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
       }
     }
     Enums: {

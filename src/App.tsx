@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
@@ -10,6 +10,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { DeveloperModeProvider } from "@/contexts/DeveloperModeContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
+import HuntNotification from "@/components/hunt/HuntNotification";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
@@ -28,13 +29,14 @@ const Discussion = lazy(() => import("./pages/Discussion"));
 const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+      <>
         <DeveloperModeProvider>
           <AuthProvider>
             <HuntProvider>
@@ -67,6 +69,7 @@ function App() {
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/auth" element={<AuthCallback />} />
                           <Route path="/test" element={<TestPage />} />
+                          <Route path="/admin" element={<AdminDashboard />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
@@ -78,11 +81,12 @@ function App() {
                 {/* Hunt UI overlays */}
                 <HuntProgress />
                 <HuntReward />
+                <HuntNotification />
               </BrowserRouter>
             </HuntProvider>
           </AuthProvider>
         </DeveloperModeProvider>
-      </TooltipProvider>
+      </>
     </QueryClientProvider>
   );
 }

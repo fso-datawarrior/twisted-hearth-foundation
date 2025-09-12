@@ -1,7 +1,7 @@
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import Card from "@/components/Card";
-import HuntHintTrigger from "@/components/hunt/HuntHintTrigger";
+import HuntRune from "@/components/hunt/HuntRune";
 
 const Vignettes = () => {
   const pastVignettes = [
@@ -50,8 +50,8 @@ const Vignettes = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {pastVignettes.map((vignette) => (
                 <div key={vignette.id} className="relative">
-                  <HuntHintTrigger
-                    id={`vig.${vignette.id === 1 ? 'goldilocks' : vignette.id === 2 ? 'jack' : 'snowwhite'}`}
+                  <HuntRune
+                    id={vignette.id === 1 ? "5" : vignette.id === 2 ? "6" : "7"}
                     label={
                       vignette.id === 1 ? "Knives gleam where spoons should lie" :
                       vignette.id === 2 ? "Coins seldom tell a clean story" :
@@ -90,8 +90,8 @@ const Vignettes = () => {
                   "Not all who wander are lost... but some should be."
                 </div>
               </div>
-              <HuntHintTrigger 
-                id="vig.link" 
+              <HuntRune 
+                id="8" 
                 label="Stories have roots"
                 className="absolute bottom-4 right-4"
               />
