@@ -9,6 +9,7 @@ import RSVPManagement from '@/components/admin/RSVPManagement';
 import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
+import GuestbookManagement from '@/components/admin/GuestbookManagement';
 import { 
   Users, 
   Trophy, 
@@ -105,7 +106,7 @@ export default function AdminDashboard() {
     <RequireAdmin>
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8 mt-16">
+          <div className="mb-8 mt-24">
             <h1 className="text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
             <p className="text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
           </div>
@@ -250,10 +251,7 @@ export default function AdminDashboard() {
               <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
             )}
             {activeTab === 'guestbook' && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">Guestbook Moderation</h2>
-                <p className="text-muted-foreground">Message moderation and guestbook management coming next...</p>
-              </div>
+              <GuestbookManagement />
             )}
           </div>
         </div>
