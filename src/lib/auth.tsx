@@ -60,8 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const signIn = async (email: string) => {
-    // Always use the auth callback route for better error handling
-    const redirectUrl = `${window.location.origin}/auth`;
+    // Use custom domain for production or current origin for development
+    const isProduction = window.location.hostname === '2025.partytillyou.rip';
+    const redirectUrl = isProduction 
+      ? 'https://2025.partytillyou.rip/auth'
+      : `${window.location.origin}/auth`;
       
     const { error } = await supabase.auth.signInWithOtp({ 
       email, 

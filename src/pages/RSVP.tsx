@@ -170,7 +170,7 @@ const RSVP = () => {
             </p>
             
             <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-6" aria-busy={String(isSubmitting)}>
+              <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
                 {/* Honeypot field - anti-spam */}
                 <input 
                   type="text" 
