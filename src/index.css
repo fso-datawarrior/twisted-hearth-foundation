@@ -142,7 +142,9 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       0 0 40px hsl(285 100% 60% / 0.9),
       0 0 80px hsl(285 100% 60% / 0.8),
       0 0 120px hsl(285 100% 60% / 0.6),
-      0 0 160px hsl(285 100% 60% / 0.4);
+      0 0 160px hsl(285 100% 60% / 0.4),
+      0 0 200px hsl(285 100% 60% / 0.3),
+      0 0 240px hsl(285 100% 60% / 0.2);
     animation: purplePulse 1.8s ease-in-out infinite;
   }
 
@@ -161,8 +163,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     box-shadow: 
       0 0 20px hsl(45 100% 60% / 1.0),
       0 0 40px hsl(45 100% 60% / 0.9),
-      0 0 80px hsl(45 100% 60% / 0.8),
-      0 0 120px hsl(45 100% 60% / 0.6),
+      0 0 80px hsl(45 100% 60% / 0.8),he rewrote the entire fucking vast CSS
       0 0 160px hsl(45 100% 60% / 0.4);
     animation: goldPulse 1.8s ease-in-out infinite;
   }
@@ -207,31 +208,14 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     animation: pinkPulse 1.8s ease-in-out infinite;
   }
 
-  /* Size classes for hint dots */
-  .hint-size-small {
-    width: 0.5rem;
-    height: 0.5rem;
-  }
-
-  .hint-size-medium {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-
-  .hint-size-large {
-    width: 1rem;
-    height: 1rem;
-  }
+  /* Size classes for hint dots - moved to bottom for better organization */
 
   /* Shape classes for hint dots */
   .hint-shape-circle {
     border-radius: 50%;
   }
 
-  .hint-shape-oval {
-    border-radius: 50%;
-    width: 1.5rem;
-  }
+  /* Oval class moved to bottom for better organization */
 
   .hint-shape-square {
     border-radius: 0.25rem;
@@ -404,7 +388,9 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       0 0 40px hsl(285 100% 60% / 0.8),
       0 0 80px hsl(285 100% 60% / 0.6),
       0 0 120px hsl(285 100% 60% / 0.4),
-      0 0 160px hsl(285 100% 60% / 0.3);
+      0 0 160px hsl(285 100% 60% / 0.3),
+      0 0 200px hsl(285 100% 60% / 0.2),
+      0 0 240px hsl(285 100% 60% / 0.1);
   }
   50% {
     box-shadow: 
@@ -412,7 +398,9 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
       0 0 80px hsl(285 100% 60% / 0.9),
       0 0 160px hsl(285 100% 60% / 0.8),
       0 0 240px hsl(285 100% 60% / 0.6),
-      0 0 320px hsl(285 100% 60% / 0.4);
+      0 0 320px hsl(285 100% 60% / 0.4),
+      0 0 400px hsl(285 100% 60% / 0.3),
+      0 0 480px hsl(285 100% 60% / 0.2);
   }
 }
 
@@ -616,4 +604,42 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   justify-content: center;
   /* Remove circular constraint for artwork display */
   border-radius: 0.5rem;
+}
+
+/* Hint dot positioning and sizing improvements */
+.hint-size-small {
+  width: 2rem;
+  height: 2rem;
+  background-color: hsl(285 100% 60% / 0.8);
+}
+
+.hint-size-medium {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.hint-size-large {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Larger pulse area for better visibility */
+.hint-shape-oval {
+  border-radius: 50%;
+  width: 0.25rem; /* Small oval dot - same as hint-size-small */
+  height: 0.25rem; /* Small oval dot - same as hint-size-small */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* Debug Mode - Show All Runes */
+.hunt-debug-show-all .hunt-rune {
+  opacity: 1 !important;
+}
+
+.hunt-debug-show-all .hunt-rune-placeholder {
+  opacity: 1 !important;
 }

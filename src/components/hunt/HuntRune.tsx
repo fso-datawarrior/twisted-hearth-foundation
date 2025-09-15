@@ -40,6 +40,10 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
 
   // Enhanced visibility logic - Use developer mode context
   const getBaseVisibility = () => {
+    // Check for debug mode first
+    if (typeof window !== 'undefined' && document.body.classList.contains('hunt-debug-show-all')) {
+      return "opacity-100"; // Show all runes when debug mode is on
+    }
     if (isDeveloperMode) {
       return "opacity-100"; // Show all runes when developer mode is on
     }
@@ -139,7 +143,7 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
     }
     
     return cn(
-      "absolute inset-0 flex items-center justify-center",
+      "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0",
       runeHint.shape === 'circle' && "hint-shape-circle",
       runeHint.shape === 'oval' && "hint-shape-oval", 
       runeHint.shape === 'square' && "hint-shape-square",
@@ -183,8 +187,8 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
     };
   };
 
-  // Don't render runes for unauthenticated users
-  if (!user) {
+  // Don't render runes for unauthenticated users (unless in debug mode)
+  if (!user && !document.body.classList.contains('hunt-debug-show-all')) {
     return (
       <div 
         ref={ref as React.RefObject<HTMLDivElement>}
@@ -240,18 +244,18 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
           delay: animationDelay,
         }}
       >
-        {/* Hint dot - always present when visible and not found, or in developer mode */}
+        {/* Hint dot - always present when visible and not found, OR in debug mode */}
         {!found && (baseVis !== "opacity-0" || isDeveloperMode) && runeHint && (
           <div className={getHintClasses()} />
         )}
         
-        {/* Rune image - only when found */}
-        {found && !imageError && (
+        {/* Rune image - when found OR in debug mode */}
+        {(found || (typeof window !== 'undefined' && document.body.classList.contains('hunt-debug-show-all'))) && !imageError && (
           <img 
             src={runePath}
             alt={runeInfo?.name || `Rune ${id}`}
             className={cn(
-              "pointer-events-none rune-image max-w-16 max-h-16 relative z-10",
+              "pointer-events-none rune-image max-w-16 max-h-16 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10",
               found 
                 ? "brightness-120 drop-shadow-[0_0_4px_rgba(197,164,93,0.8)]" 
                 : "brightness-90 drop-shadow-[0_0_4px_rgba(59,110,71,0.6)]"

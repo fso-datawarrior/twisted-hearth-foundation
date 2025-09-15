@@ -26,8 +26,8 @@ export const RUNE_MAPPING: Record<string, RuneInfo> = {
     hint: {
       shape: 'circle',
       color: 'glow-blue-pulse',
-      size: 'medium',
-      pulseIntensity: 'medium'
+      size: 'small',
+      pulseIntensity: 'bright'
     }
   },
   '2': {
@@ -48,102 +48,58 @@ export const RUNE_MAPPING: Record<string, RuneInfo> = {
     hint: {
       shape: 'square',
       color: 'glow-green-pulse',
-      size: 'medium',
-      pulseIntensity: 'bright'
+      size: 'small',
+      pulseIntensity: 'medium'
     }
   },
   '4': {
-    filename: 'animalSkullVine-Rune.png',
-    name: 'Animal Skull Vine',
-    description: 'Ancient skull entwined with mystical vines',
+    filename: 'moonCrescent-Rune.png',
+    name: 'Moon Crescent',
+    description: 'A silver crescent moon, guardian of the night',
     hint: {
       shape: 'oval',
-      color: 'glow-red-pulse',
-      size: 'large',
-      pulseIntensity: 'bright'
+      color: 'glow-silver-pulse',
+      size: 'medium',
+      pulseIntensity: 'subtle'
     }
   },
   '5': {
-    filename: 'blackRose-Rune.jpeg',
-    name: 'Black Rose',
-    description: 'A dark rose blooming in shadowed gardens',
+    filename: 'owlWise-Rune.png',
+    name: 'Owl Wise',
+    description: 'An ancient owl, keeper of wisdom and secrets',
     hint: {
       shape: 'circle',
-      color: 'glow-purple-pulse',
-      size: 'medium',
+      color: 'glow-amber-pulse',
+      size: 'large',
       pulseIntensity: 'medium'
     }
   },
   '6': {
-    filename: 'brokenMoon-Rune.jpeg',
-    name: 'Broken Moon',
-    description: 'A fractured moon casting eerie light',
+    filename: 'phoenixFlame-Rune.png',
+    name: 'Phoenix Flame',
+    description: 'The eternal flame of rebirth and renewal',
     hint: {
-      shape: 'oval',
-      color: 'glow-silver-pulse',
-      size: 'large',
-      pulseIntensity: 'subtle'
+      shape: 'circle',
+      color: 'glow-red-pulse',
+      size: 'medium',
+      pulseIntensity: 'bright'
     }
   },
   '7': {
-    filename: 'crownThirdEye-Rune.jpeg',
-    name: 'Crown Third Eye',
-    description: 'A royal crown with a mystical third eye',
+    filename: 'ravenDark-Rune.png',
+    name: 'Raven Dark',
+    description: 'A mysterious raven, messenger between worlds',
     hint: {
-      shape: 'square',
-      color: 'glow-gold-pulse',
-      size: 'large',
-      pulseIntensity: 'bright'
+      shape: 'circle',
+      color: 'glow-purple-pulse',
+      size: 'small',
+      pulseIntensity: 'medium'
     }
   },
   '8': {
-    filename: 'evilLaterns-Ruen.png',
-    name: 'Evil Lanterns',
-    description: 'Sinister lanterns glowing with malevolent light',
-    hint: {
-      shape: 'circle',
-      color: 'glow-orange-pulse',
-      size: 'medium',
-      pulseIntensity: 'medium'
-    }
-  },
-  '9': {
-    filename: 'magicPostion-Rune.png',
-    name: 'Magic Potion',
-    description: 'A bubbling cauldron of mysterious brew',
-    hint: {
-      shape: 'circle',
-      color: 'glow-green-pulse',
-      size: 'medium',
-      pulseIntensity: 'bright'
-    }
-  },
-  '10': {
-    filename: 'meltingClock-Rune.png',
-    name: 'Melting Clock',
-    description: 'Time itself bends and flows like liquid',
-    hint: {
-      shape: 'oval',
-      color: 'glow-blue-pulse',
-      size: 'large',
-      pulseIntensity: 'subtle'
-    }
-  },
-  '11': {
-    filename: 'mysticTree-Rune.jpeg',
-    name: 'Mystic Tree',
-    description: 'An ancient tree with roots in other realms',
-    hint: {
-      shape: 'oval',
-      color: 'glow-green-pulse',
-      size: 'large',
-      pulseIntensity: 'medium'
-    }
-  },
-  '12': {
-    filename: 'pinkMushroom-Rune.jpeg',
-    name: 'Pink Mushroom',
-    description: 'A whimsical mushroom from fairy realms',
+    filename: 'roseThorn-Rune.png',
+    name: 'Rose Thorn',
+    description: 'A beautiful rose with sharp thorns, beauty and danger',
     hint: {
       shape: 'circle',
       color: 'glow-pink-pulse',
@@ -151,24 +107,68 @@ export const RUNE_MAPPING: Record<string, RuneInfo> = {
       pulseIntensity: 'subtle'
     }
   },
-  '13': {
-    filename: 'portalMirror-Rune.jpeg',
-    name: 'Portal Mirror',
-    description: 'A mirror that reflects other dimensions',
+  '9': {
+    filename: 'skullBone-Rune.png',
+    name: 'Skull Bone',
+    description: 'A weathered skull, reminder of mortality and mystery',
     hint: {
-      shape: 'square',
-      color: 'glow-purple-pulse',
-      size: 'large',
+      shape: 'circle',
+      color: 'glow-silver-pulse',
+      size: 'medium',
+      pulseIntensity: 'medium'
+    }
+  },
+  '10': {
+    filename: 'spiderWeb-Rune.png',
+    name: 'Spider Web',
+    description: 'A delicate web spun by fate itself',
+    hint: {
+      shape: 'circle',
+      color: 'glow-cyan-pulse',
+      size: 'small',
+      pulseIntensity: 'subtle'
+    }
+  },
+  '11': {
+    filename: 'starTwinkle-Rune.png',
+    name: 'Star Twinkle',
+    description: 'A twinkling star, hope in the darkness',
+    hint: {
+      shape: 'circle',
+      color: 'glow-yellow-pulse',
+      size: 'small',
       pulseIntensity: 'bright'
     }
   },
-  '14': {
-    filename: 'sandsOfTime-Rune.png',
-    name: 'Sands of Time',
-    description: 'Eternal sands flowing through an hourglass',
+  '12': {
+    filename: 'swordAncient-Rune.png',
+    name: 'Sword Ancient',
+    description: 'An ancient blade, forged in forgotten times',
     hint: {
       shape: 'oval',
-      color: 'glow-gold-pulse',
+      color: 'glow-bronze-pulse',
+      size: 'medium',
+      pulseIntensity: 'medium'
+    }
+  },
+  '13': {
+    filename: 'treeAncient-Rune.png',
+    name: 'Tree Ancient',
+    description: 'An ancient tree, rooted in time and memory',
+    hint: {
+      shape: 'circle',
+      color: 'glow-emerald-pulse',
+      size: 'large',
+      pulseIntensity: 'subtle'
+    }
+  },
+  '14': {
+    filename: 'wolfHowl-Rune.png',
+    name: 'Wolf Howl',
+    description: 'A lone wolf howling at the moon',
+    hint: {
+      shape: 'oval',
+      color: 'glow-silver-pulse',
       size: 'medium',
       pulseIntensity: 'medium'
     }
@@ -178,9 +178,9 @@ export const RUNE_MAPPING: Record<string, RuneInfo> = {
     name: 'Witch Hat',
     description: 'A pointed hat worn by wise enchantresses',
     hint: {
-      shape: 'oval',
+      shape: 'circle',
       color: 'glow-purple-pulse',
-      size: 'large',
+      size: 'small',
       pulseIntensity: 'bright'
     }
   },
@@ -189,50 +189,37 @@ export const RUNE_MAPPING: Record<string, RuneInfo> = {
     name: 'Wolf Key Thorns',
     description: 'A key guarded by thorns and wolf spirits',
     hint: {
-      shape: 'oval',
-      color: 'glow-red-pulse',
-      size: 'large',
-      pulseIntensity: 'bright'
+      shape: 'circle',
+      color: 'glow-copper-pulse',
+      size: 'small',
+      pulseIntensity: 'medium'
     }
   }
 };
 
-/**
- * Get the rune image path for a given hint ID
- */
-export function getRunePath(id: string): string {
-  const rune = RUNE_MAPPING[id];
-  if (!rune) {
-    console.warn(`No rune mapping found for ID: ${id}`);
-    return '/img/runes/compass-Rune.png'; // Fallback to first rune
-  }
-  return `/img/runes/${rune.filename}`;
-}
-
-/**
- * Get rune information for a given hint ID
- */
-export function getRuneInfo(id: string): RuneInfo | null {
-  return RUNE_MAPPING[id] || null;
-}
-
-/**
- * Get rune hint configuration for a given hint ID
- */
-export function getRuneHint(id: string): RuneHint | null {
-  return RUNE_MAPPING[id]?.hint || null;
-}
-
-/**
- * Get all available rune IDs
- */
-export function getAllRuneIds(): string[] {
-  return Object.keys(RUNE_MAPPING);
-}
-
-/**
- * Get total number of runes
- */
-export function getTotalRuneCount(): number {
+// Helper function to get total rune count
+export const getTotalRuneCount = (): number => {
   return Object.keys(RUNE_MAPPING).length;
-}
+};
+
+// Helper function to get rune path
+export const getRunePath = (id: string): string => {
+  const runeInfo = RUNE_MAPPING[id];
+  return runeInfo ? `/img/runes/${runeInfo.filename}` : `/img/runes/rune-${id}.png`;
+};
+
+// Helper function to get rune info
+export const getRuneInfo = (id: string): RuneInfo | undefined => {
+  return RUNE_MAPPING[id];
+};
+
+// Helper function to get rune hint
+export const getRuneHint = (id: string): RuneHint | undefined => {
+  const runeInfo = RUNE_MAPPING[id];
+  return runeInfo?.hint;
+};
+
+// Helper function to get all rune IDs
+export const getAllRuneIds = (): string[] => {
+  return Object.keys(RUNE_MAPPING);
+};

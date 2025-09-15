@@ -8,6 +8,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import HuntRune from "@/components/hunt/HuntRune";
+import HuntDebug from "@/components/hunt/HuntDebug";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
@@ -117,33 +118,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Hunt triggers positioned absolutely */}
-      <div className="relative">
-        <HuntRune 
-          id="1" 
-          label="Hidden mark near the crest" 
-          className="absolute top-4 left-4 z-50" 
-        />
-        <HuntRune 
-          id="2" 
-          label="Something stirs beneath the moon"
-          className="absolute top-6 right-6 z-50"
-        />
-      </div>
+      {/* Debug component for showing all runes */}
+      <HuntDebug />
       
-      {/* Hero Section */}
+      {/* Hunt triggers moved below hero to avoid hero overlay */}
+      
+      {/* Hero Section (no runes on hero) */}
       <div className="relative">
-        <HuntRune 
-          id="3" 
-          label="Footsteps that don't belong"
-          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50"
-        />
-        <HuntRune 
-          id="4" 
-          label="A whisper urging you forward"
-          className="absolute bottom-6 right-8 z-50"
-        />
-        
         <HeroVideo
           src="/costumeWalk.mp4"
           poster="/hero-poster.jpg"
@@ -158,12 +139,22 @@ const Index = () => {
       
       {/* Main Content */}
       <main id="main" className="py-16 px-6 relative z-10">
+        {/* Positioned hunt triggers below hero and away from page edges */}
+        <div className="container mx-auto max-w-6xl relative">
+          <div className="relative h-24">
+            <HuntRune 
+              id="1" 
+              label="Hidden mark near the crest" 
+              className="absolute top-4 left-1/4 z-30" 
+            />
+          </div>
+        </div>
         {/* GLSL animated smoke effect for main content areas only */}
         {/* <CSSFogBackground /> */}
         <div className="container mx-auto max-w-6xl relative z-10">
           
           {/* Past Vignettes Section */}
-          <section ref={vigRef as any} className={`mb-16 reveal ${vigShown ? "reveal--shown" : ""}`}>
+          <section ref={vigRef as any} className={`mb-16 reveal ${vigShown ? "reveal--shown" : ""} relative`}>
             <h2 className="font-heading text-4xl md:text-5xl text-center mb-4 text-accent-gold">
               Twisted Tales of Years Past
             </h2>
@@ -188,17 +179,31 @@ const Index = () => {
             
             <div className="text-center">
               <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent-purple to-transparent mx-auto mb-4" />
-              <Link 
-                to="/about" 
-                className="font-subhead text-accent-gold hover:text-ink transition-colors inline-flex items-center gap-2"
-              >
-                See more about the theme <span aria-hidden="true">→</span>
-              </Link>
+              <div className="inline-flex items-center gap-2 relative">
+                <Link 
+                  to="/about" 
+                  className="font-subhead text-accent-gold hover:text-ink transition-colors inline-flex items-center gap-2"
+                >
+                  See more about the theme <span aria-hidden="true">→</span>
+                </Link>
+                {/* Feather rune inline for small screens */}
+                <HuntRune 
+                  id="2" 
+                  label="Something stirs beneath the moon"
+                  className="ml-2 align-middle md:hidden"
+                />
+              </div>
             </div>
+            {/* Feather rune positioned under the third card (desktop and up) */}
+            <HuntRune 
+              id="2" 
+              label="Something stirs beneath the moon"
+              className="hidden md:block absolute -bottom-6 right-[10%] z-30"
+            />
           </section>
 
           {/* Event Overview */}
-          <section className="text-center mb-16">
+          <section className="text-center mb-16 relative">
             <h2 className="font-heading text-4xl md:text-5xl mb-6 text-accent-gold uppercase tracking-wide">
               {formatEventLong()}
             </h2>
@@ -351,7 +356,7 @@ const Index = () => {
         <HuntRune 
           id="15" 
           label="A faint crown in the dark"
-          className="absolute top-2 left-8 z-50"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
         />
         <Footer />
       </div>
