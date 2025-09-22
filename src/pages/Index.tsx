@@ -218,13 +218,16 @@ const Index = () => {
             <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
               <div className="text-center">
                 <div className="font-heading text-3xl mb-2 text-accent-gold">🕰️</div>
-                <h3 className="font-subhead text-lg mb-1 text-accent-gold">7:00 PM Start</h3>
+                <h3 className="font-subhead text-lg mb-1 text-accent-gold">6:30 PM Start</h3>
                 <p className="font-body text-sm text-muted-foreground">Gates open at twilight</p>
               </div>
               <div className="text-center">
-                <div className="font-heading text-3xl mb-2 text-accent-red">🎭</div>
-                <h3 className="font-subhead text-lg mb-1 text-accent-gold">Interactive Experience</h3>
-                <p className="font-body text-sm text-muted-foreground">You shape the story</p>
+                <div className="font-heading text-3xl mb-2 text-accent-red">🍺</div>
+                <h3 className="font-subhead text-lg mb-1 text-accent-gold">Interactive Experience — Beer Pong Tournament</h3>
+                <p className="font-body text-sm text-muted-foreground">
+                  <strong className="text-accent-red">The Tournament Returns — Faster Than Ever!</strong><br/>
+                  Last year's epic showdown went late into the witching hour. This year, we've crafted a new fast-play format so games keep flowing and fun never stalls. Shorter rounds, tighter rules, more chances for everyone to play — the competition will be fierce, but the laughs will be louder.
+                </p>
               </div>
               <div className="text-center">
                 <div className="font-heading text-3xl mb-2 text-accent-green">🍷</div>

@@ -1,8 +1,8 @@
 export const EVENT = {
   // Local time for the party start
-  startISO: "2025-10-18T19:00:00-06:00", // America/Denver is UTC-6 on this date
+  startISO: "2025-11-01T18:30:00-06:00", // America/Denver is UTC-6 on this date
   // Party ends at 3am next day (witching hour)
-  endISO: "2025-10-19T03:00:00-06:00",
+  endISO: "2025-11-02T03:00:00-06:00",
   timezone: "America/Denver",
   title: "The Ruths' Twisted Fairytale Halloween Bash",
 };
