@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useHunt as useHuntDatabase, type UseHuntReturn } from "@/hooks/use-hunt";
+import { HUNT_ENABLED } from "./hunt-config";
 
 // Re-export the hook interface for backward compatibility
 type HuntAPI = {
@@ -16,6 +17,21 @@ type HuntAPI = {
 const HuntContext = createContext<HuntAPI | null>(null);
 
 export function HuntProvider({ children }: { children: ReactNode }) {
+  // Early return when hunt is disabled - provide no-op API
+  if (!HUNT_ENABLED) {
+    const noOpApi: HuntAPI = {
+      isFound: () => false,
+      markFound: () => {},
+      reset: () => {},
+      progress: 0,
+      total: 0,
+      completed: false,
+      loading: false,
+      error: null,
+    };
+    return <HuntContext.Provider value={noOpApi}>{children}</HuntContext.Provider>;
+  }
+
   const hunt = useHuntDatabase();
 
   // Convert hint IDs to string for backward compatibility

@@ -1,7 +1,8 @@
 import { getTotalRuneCount } from './rune-mapping';
+import { HUNT_ENABLED } from '../../settings/hunt-settings';
 
 export const HUNT_TOTAL = getTotalRuneCount(); // 16 runes available
-export const HUNT_ENABLED = true;
+export { HUNT_ENABLED };
 
 // Debug and visibility controls - Use existing developer mode context
 export const HUNT_DEBUG_MODE = import.meta.env.DEV || (
@@ -99,5 +100,8 @@ export const HUNT_DEBUG_UTILS = {
       localStorage.removeItem('hunt-debug');
       window.location.reload();
     }
-  }
+  },
+
+  // Note: Hunt system is now controlled via src/settings/hunt-settings.ts
+  // To enable/disable hunt, edit the HUNT_ENABLED value in that file
 };

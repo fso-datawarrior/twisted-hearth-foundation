@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { HUNT_ENABLED } from "./hunt-config";
 
 export default function HuntDebug() {
   const [showAllRunes, setShowAllRunes] = useState(false);
+
+  if (!HUNT_ENABLED) {
+    return null;
+  }
 
   // Add global CSS class to body when showing all runes
   useEffect(() => {
