@@ -18,3 +18,10 @@
 - Add job to fail if hardcoded Supabase URL/key detected by regex.
 - Add job to compare dist size vs budget; warn on regression.
 - Run `lhci autorun` on PRs.
+
+### Lighthouse (desktop) – current
+- Performance: 0.67
+- Accessibility: 1.00
+- Best Practices: 1.00
+- SEO: 1.00
+- PWA: n/a

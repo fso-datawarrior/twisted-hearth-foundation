@@ -83,7 +83,10 @@ const Gallery = () => {
     try {
       for (const file of Array.from(files)) {
         const fileExt = file.name.split('.').pop();
-        const filePath = `user-uploads/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user) throw new Error('Not authenticated');
+        const userId = userData.user.id;
+        const filePath = `user-uploads/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
         const { error } = await supabase.storage
           .from('gallery')
@@ -172,6 +175,8 @@ const Gallery = () => {
                     <img 
                       src={url}
                       alt={`Gallery image ${index + 1}`}
+                      width="600"
+                      height="600"
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"

@@ -77,6 +77,10 @@ const Carousel = ({
                   <img 
                     src={item.image}
                     alt={item.title}
+                    width="600"
+                    height="800"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover object-top hover:scale-105 transition-transform motion-safe"
                   />
                 </div>

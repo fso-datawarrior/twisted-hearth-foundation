@@ -32,7 +32,7 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('rsvps')
         .select(`
-          *,
+          rsvp_id, user_id, status, num_guests, created_at, updated_at,
           users!inner(name, email)
         `)
         .order('created_at', { ascending: false });
@@ -59,7 +59,9 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('photos')
-        .select('*')
+        .select(`
+          id, user_id, filename, storage_path, is_approved, is_featured, created_at, likes_count
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -74,10 +76,11 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('hunt_progress')
         .select(`
-          *,
+          id, user_id, hint_id, found_at, points_earned,
           hunt_runs(user_id, status),
           hunt_hints(title, points)
-        `);
+        `)
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data;

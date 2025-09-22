@@ -69,6 +69,8 @@ const ImageCarousel = ({
         <img 
           src={images[currentIndex]}
           alt={`Gallery preview ${currentIndex + 1}`}
+          width="800"
+          height="800"
           className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all motion-safe"
           loading="lazy"
           decoding="async"

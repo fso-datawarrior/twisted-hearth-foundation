@@ -102,4 +102,14 @@ OUTPUT RULES
 - If something is speculative due to missing files, mark as “Assumption” and propose the check/command to confirm.
 
 BEGIN by listing detected project structure, key configs, and security posture in a 20-line synopsis, then deliver A–E in order.
+
+NEXT STEPS (EXECUTION ORDER)
+1. Run repo scan: inventory folders, configs, env usage, Supabase policies.
+2. Generate 20-line synopsis of structure + posture.
+3. Create “PRIORITIZED_FINDINGS.md” table sorted by severity/likelihood.
+4. Write exact patch files under “PATCHES/”.
+5. Expand each finding in “DETAILS.md” with fixes, tests, rollback.
+6. Summarize into actionable “CHECKLIST.md”.
+7. Capture metrics before vs. after in “METRICS_BEFORE_AFTER.md”.
+8. Deliver patches + docs in PR-ready bundle.
 ```

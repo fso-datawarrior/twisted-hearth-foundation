@@ -77,7 +77,17 @@ export const getTournamentRegistrations = async (): Promise<{ data: Omit<Tournam
 export const getTournamentRegistrationsAdmin = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('tournament_registrations')
-    .select('*')
+    .select(`
+      id,
+      user_id,
+      tournament_name,
+      team_name,
+      contact_info,
+      special_requirements,
+      status,
+      created_at,
+      updated_at
+    `)
     .order('created_at', { ascending: false });
 
   return { data: data as TournamentRegistration[] | null, error };
