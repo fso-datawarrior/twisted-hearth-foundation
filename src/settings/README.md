@@ -2,6 +2,46 @@
 
 This directory contains configuration files for various system features.
 
+## Developer Mode Settings
+
+**File**: `dev-mode-settings.ts`
+
+Controls the developer mode system and version number display. This determines whether version numbers are shown in the navigation bar.
+
+### Quick Usage
+
+1. Open `src/settings/dev-mode-settings.ts`
+2. Change `DEV_MODE_ENABLED: false` to `DEV_MODE_ENABLED: true` to show version numbers
+3. Change `DEV_MODE_ENABLED: true` to `DEV_MODE_ENABLED: false` to hide version numbers
+4. Restart the application
+
+### Configuration Options
+
+```typescript
+export const DEV_MODE_SETTINGS = {
+  // Main developer mode control
+  DEV_MODE_ENABLED: false, // Change this to true/false to show/hide version numbers
+  
+  // Optional: Override environment variable
+  FORCE_OVERRIDE: false, // Set to true to use the DEV_MODE_ENABLED value above
+  
+  // Optional: Development mode overrides
+  DEV_OVERRIDE: false, // Set to true to allow localStorage overrides in dev mode
+}
+```
+
+### Examples
+
+**Hide Version Numbers (Default)**:
+```typescript
+DEV_MODE_ENABLED: false
+```
+
+**Show Version Numbers**:
+```typescript
+DEV_MODE_ENABLED: true
+```
+
 ## Hunt System Settings
 
 **File**: `hunt-settings.ts`
