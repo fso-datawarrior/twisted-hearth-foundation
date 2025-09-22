@@ -126,7 +126,7 @@ const Index = () => {
       {/* Hero Section (no runes on hero) */}
       <div className="relative">
         <HeroVideo
-          src="/costumeWalk.mp4"
+          src="/hero-video.mp4"
           poster="/hero-poster.jpg"
           headline="The Ruths' Twisted Fairytale Halloween Bash"
           tagline="Grimm, gruesome, and just the right amount of wrong."
@@ -306,8 +306,7 @@ const Index = () => {
               </p>
               <Button 
                 asChild 
-                size="lg"
-                className="bg-[--accent-red] hover:bg-[--accent-red]/80 text-ink font-subhead text-base sm:text-lg md:text-xl px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 glow-red-pulse motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none"
+                className="rsvp-button-cta"
               >
                 <Link to="/rsvp">Join the Tale</Link>
               </Button>

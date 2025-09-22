@@ -135,6 +135,39 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     animation: redPulse 1.8s ease-in-out infinite;
   }
 
+  /* Base RSVP button styling - transparent background with glow */
+  .rsvp-button-base {
+    background-color: transparent;
+    color: white;
+    @apply font-subhead glow-red-pulse;
+    @apply motion-safe:hover:scale-105 motion-safe:active:scale-[0.99] transition-all motion-reduce:transition-none;
+    @apply rounded-lg font-semibold focus:outline-none;
+    transition: all 0.3s ease;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6);
+  }
+  
+  .rsvp-button-base:hover {
+    background-color: transparent;
+    transform: scale(1.05);
+  }
+  
+  .rsvp-button-base:focus-visible {
+    outline: 2px solid hsl(var(--accent-gold));
+    outline-offset: 2px;
+  }
+
+  /* Hero RSVP button - smaller size */
+  .rsvp-button-hero {
+    @apply rsvp-button-base;
+    @apply text-base px-6 py-3;
+  }
+
+  /* CTA RSVP button - larger size */
+  .rsvp-button-cta {
+    @apply rsvp-button-base;
+    @apply text-base sm:text-lg md:text-xl px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6;
+  }
+
   /* Bright pulsing purple haze for witch hat rune */
   .glow-purple-pulse {
     box-shadow: 
