@@ -1,0 +1,89 @@
+diff --git a/src/pages/AdminDashboard.tsx b/src/pages/AdminDashboard.tsx
+--- a/src/pages/AdminDashboard.tsx
++++ b/src/pages/AdminDashboard.tsx
+@@ -30,12 +30,14 @@
+   const { data: rsvps, isLoading: rsvpsLoading } = useQuery({
+     queryKey: ['admin-rsvps'],
+     queryFn: async () => {
+       const { data, error } = await supabase
+         .from('rsvps')
+-        .select(`
+-          *,
+-          users!inner(name, email)
+-        `)
++        .select(`
++          rsvp_id, user_id, status, num_guests, created_at, updated_at,
++          users!inner(name, email)
++        `)
+         .order('created_at', { ascending: false });
+       
+       if (error) throw error;
+       return data;
+     }
+@@ -58,8 +60,14 @@
+   const { data: photos, isLoading: photosLoading } = useQuery({
+     queryKey: ['admin-photos'],
+     queryFn: async () => {
+       const { data, error } = await supabase
+         .from('photos')
+-        .select('*')
++        .select(`
++          id,
++          user_id,
++          filename,
++          storage_path,
++          is_approved,
++          is_featured,
++          created_at,
++          likes_count
++        `)
+         .order('created_at', { ascending: false });
+       
+       if (error) throw error;
+       return data;
+     }
+@@ -72,11 +80,13 @@
+   const { data: huntStats, isLoading: huntLoading } = useQuery({
+     queryKey: ['admin-hunt'],
+     queryFn: async () => {
+       const { data, error } = await supabase
+         .from('hunt_progress')
+-        .select(`
+-          *,
+-          hunt_runs(user_id, status),
+-          hunt_hints(title, points)
+-        `);
++        .select(`
++          id, user_id, hint_id, found_at, points_earned,
++          hunt_runs(user_id, status),
++          hunt_hints(title, points)
++        `)
++        .order('created_at', { ascending: false });
+       
+       if (error) throw error;
+       return data;
+     }
+   });
+ diff --git a/src/lib/tournament-api.ts b/src/lib/tournament-api.ts
+--- a/src/lib/tournament-api.ts
++++ b/src/lib/tournament-api.ts
+@@ -76,9 +76,13 @@
+ export const getTournamentRegistrationsAdmin = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
+   const { data, error } = await supabase
+     .from('tournament_registrations')
+-    .select('*')
++    .select(`
++      id,
++      user_id,
++      tournament_name,
++      team_name,
++      contact_info,
++      special_requirements,
++      status,
++      created_at,
++      updated_at
++    `)
+     .order('created_at', { ascending: false });
+ 
+   return { data: data as TournamentRegistration[] | null, error };
+ };

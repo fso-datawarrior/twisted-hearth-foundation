@@ -1,0 +1,14 @@
+diff --git a/supabase/migrations/20250922000000_add_indexes.sql b/supabase/migrations/20250922000000_add_indexes.sql
+new file mode 100644
+--- /dev/null
++++ b/supabase/migrations/20250922000000_add_indexes.sql
+@@ -0,0 +1,9 @@
++-- Add helpful indexes for common filters/sorts
++create index concurrently if not exists idx_rsvps_user_id on public.rsvps(user_id);
++create index concurrently if not exists idx_rsvps_created_at on public.rsvps(created_at desc);
++create index concurrently if not exists idx_photos_user_id on public.photos(user_id);
++create index concurrently if not exists idx_photos_created_at on public.photos(created_at desc);
++create index concurrently if not exists idx_hunt_progress_user_id on public.hunt_progress(user_id);
++create index concurrently if not exists idx_hunt_progress_hint_id on public.hunt_progress(hint_id);
++create index concurrently if not exists idx_tournament_regs_created_at on public.tournament_registrations(created_at desc);
++create index concurrently if not exists idx_tournament_matches_date on public.tournament_matches(match_date);
