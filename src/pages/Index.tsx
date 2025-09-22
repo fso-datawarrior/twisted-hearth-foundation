@@ -9,6 +9,7 @@ import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import HuntRune from "@/components/hunt/HuntRune";
 import HuntDebug from "@/components/hunt/HuntDebug";
+import PrepLinks from "@/components/PrepLinks";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
@@ -68,7 +69,6 @@ const Index = () => {
   
   // Section reveals
   const { ref: vigRef, shown: vigShown } = useReveal();
-  const { ref: prepRef, shown: prepShown } = useReveal();
   const { ref: ctaRef, shown: ctaShown } = useReveal();
 
   const pastVignettes = [
@@ -257,44 +257,8 @@ const Index = () => {
             </div>
           </section>
           
-          {/* Quick Links */}
-          <section ref={prepRef as any} className={`mb-16 reveal ${prepShown ? "reveal--shown" : ""}`}>
-            <div className="bg-card p-6 sm:p-8 rounded-lg border border-accent-purple/30">
-              <h2 className="font-subhead text-2xl sm:text-3xl text-center mb-6 sm:mb-8 text-accent-gold tracking-tight text-balance">
-                Prepare for Your Twisted Tale
-              </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-purple text-accent-gold hover:bg-accent-purple/20 hover:text-accent-gold font-subhead"
-                >
-                  <Link to="/costumes">Costume Ideas</Link>
-                </Button>
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-green text-accent-green hover:bg-accent-green/20 hover:text-accent-gold font-subhead"
-                >
-                  <Link to="/schedule">Event Schedule</Link>
-                </Button>
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-gold text-accent-gold hover:bg-accent-gold/20 hover:text-ink font-subhead"
-                >
-                  <Link to="/feast">Feast Details</Link>
-                </Button>
-                <Button 
-                  asChild 
-                  variant="outline" 
-                  className="h-9 sm:h-10 md:h-11 text-sm sm:text-base px-3 sm:px-4 border-accent-red text-accent-red hover:bg-accent-red/20 hover:text-accent-gold font-subhead"
-                >
-                  <Link to="/vignettes">Past Stories</Link>
-                </Button>
-              </div>
-            </div>
-          </section>
+          {/* Quick Links / Prepare section */}
+          <PrepLinks />
           
           {/* Call to Action */}
           <section ref={ctaRef as any} className={`text-center reveal ${ctaShown ? "reveal--shown" : ""}`}>

@@ -82,7 +82,7 @@ export default function HeroVideo({
           ready && !prefersReducedMotion && !videoError ? "opacity-0" : "opacity-100"
         }`}
         decoding="async"
-        fetchPriority="high"
+        fetchpriority="high"
         onError={(e) => {
           console.log('Poster image failed to load:', e);
           // Fallback to a dark background if poster fails
