@@ -24,14 +24,24 @@ const Footer = () => {
             Hosted by Jamie & Kat Ruth
           </p>
           
-          {/* Domain */}
-          <div className="mb-6">
-            <a 
-              href="https://partytillyou.rip" 
-              className="font-body text-accent-gold hover:text-accent-red transition-colors motion-safe no-underline focus:no-underline"
-            >
-              partytillyou.rip
-            </a>
+          {/* Domain and Contact */}
+          <div className="mb-6 space-y-2">
+            <div>
+              <a 
+                href="https://partytillyou.rip" 
+                className="font-body text-accent-gold hover:text-accent-red transition-colors motion-safe no-underline focus:no-underline"
+              >
+                partytillyou.rip
+              </a>
+            </div>
+            <div>
+              <a 
+                href="/contact" 
+                className="font-body text-muted-foreground hover:text-accent-gold transition-colors motion-safe no-underline focus:no-underline"
+              >
+                Contact Us
+              </a>
+            </div>
           </div>
           
           {/* Copyright */}

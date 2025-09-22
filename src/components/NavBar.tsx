@@ -55,8 +55,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
     { to: "/feast", label: "Feast" },
     { to: "/gallery", label: "Gallery" },
     { to: "/discussion", label: "Discussion" },
-    { to: "/contact", label: "Contact" },
-    { to: "/rsvp", label: "RSVP" },
     ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ];
 
@@ -75,8 +73,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       aria-label="Main navigation"
     >
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo/Title */}
+        <div className="flex items-center justify-center">
+          {/* Logo/Title - Positioned just to the left of nav links */}
           <div className="flex items-center gap-3 mr-8">
             <Link 
               to="/" 
@@ -93,7 +91,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             )}
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Centered Desktop Navigation */}
           <div className="hidden nav-compact:flex items-center space-x-8">
             {navLinks.map(({ to, label }) => (
               <Link
@@ -108,9 +106,10 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                 {label}
               </Link>
             ))}
+          </div>
             
-            {/* Auth Section - Hidden below 1875px */}
-            <div className="hidden nav-full:flex items-center space-x-8">
+          {/* Auth Section - Positioned just to the right of nav links */}
+          <div className="hidden nav-full:flex items-center space-x-8 ml-8">
               {/* Developer Mode Toggle - Only show when dev mode is enabled */}
               {DEV_MODE_ENABLED && (
                 <Button
@@ -189,12 +188,11 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               >
                 <Link to="/rsvp">{ctaLabel}</Link>
               </Button>
-            </div>
           </div>
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex nav-full:hidden items-center gap-4">
-            <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider">
+          <div className="flex nav-full:hidden items-center space-x-8">
+            <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden">
               {getCurrentPageName()}
             </span>
             <button
