@@ -70,7 +70,7 @@ export default function PrepLinks() {
           Prepare for Your Twisted Tale
         </h2>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {tiles.map(({ to, title, subtitle, icon: Icon, accent, hintKey, testId }) => {
             const MotionDiv = reduce ? "div" : motion.div;
             return (
@@ -108,7 +108,7 @@ export default function PrepLinks() {
                   ].join(" ")}
                 >
                   {reduce ? (
-                    <div className="flex items-start gap-4">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left">
                       <span className={`flex h-12 w-12 items-center justify-center rounded-full border-2 bg-gradient-to-br from-black/50 to-black/30 shadow-lg flex-shrink-0 ${
                         accent === 'purple' ? 'border-purple-400 shadow-purple-500/30' :
                         accent === 'green' ? 'border-green-400 shadow-green-500/30' :
@@ -123,7 +123,7 @@ export default function PrepLinks() {
                         }`} aria-hidden="true" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-subhead text-xl text-[color:var(--accent-gold)] tracking-tight drop-shadow-lg">
+                        <h3 className="font-subhead text-lg sm:text-xl text-[color:var(--accent-gold)] tracking-tight drop-shadow-lg">
                           {title}
                         </h3>
                         <p id={`${testId}-sub`} className="text-sm/5 opacity-90 text-white/90">
@@ -135,7 +135,7 @@ export default function PrepLinks() {
                     <motion.div
                       whileHover={{ scale: 1.05, rotateX: 3, rotateY: -3, y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-start gap-4"
+                      className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-left"
                     >
                       <motion.span 
                         className={`flex h-12 w-12 items-center justify-center rounded-full border-2 bg-gradient-to-br from-black/50 to-black/30 shadow-lg transition-all duration-300 flex-shrink-0 ${
@@ -155,7 +155,7 @@ export default function PrepLinks() {
                         }`} aria-hidden="true" />
                       </motion.span>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-subhead text-xl text-[color:var(--accent-gold)] tracking-tight drop-shadow-lg group-hover:text-yellow-300 transition-colors duration-300">
+                        <h3 className="font-subhead text-lg sm:text-xl text-[color:var(--accent-gold)] tracking-tight drop-shadow-lg group-hover:text-yellow-300 transition-colors duration-300">
                           {title}
                         </h3>
                         <p id={`${testId}-sub`} className="text-sm/5 opacity-90 text-white/90 group-hover:text-white transition-colors duration-300">

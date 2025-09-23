@@ -26,6 +26,18 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
 
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
+    { to: "/vignettes", label: "Vignettes" },
+    { to: "/schedule", label: "Schedule" },
+    { to: "/costumes", label: "Costumes" },
+    { to: "/feast", label: "Feast" },
+    { to: "/gallery", label: "Gallery" },
+    { to: "/discussion", label: "Discussion" },
+    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
+  ];
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -45,18 +57,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
-
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
-    { to: "/vignettes", label: "Vignettes" },
-    { to: "/schedule", label: "Schedule" },
-    { to: "/costumes", label: "Costumes" },
-    { to: "/feast", label: "Feast" },
-    { to: "/gallery", label: "Gallery" },
-    { to: "/discussion", label: "Discussion" },
-    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
-  ];
 
   // Get current page name for mobile display
   const getCurrentPageName = () => {
@@ -78,7 +78,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           <div className="flex items-center gap-3 mr-8">
             <Link 
               to="/" 
-              className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0"
+              className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive"
               aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
             >
               The Ruths' Bash

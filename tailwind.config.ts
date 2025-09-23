@@ -14,8 +14,10 @@ export default {
     },
     extend: {
       screens: {
+        "xs": "475px", // Extra small screens
+        "logo-small": "625px", // Logo font size reduction
         "nav-full": "1875px", // Show full nav with auth/RSVP
-        "nav-compact": "1391px", // Switch to mobile hamburger
+        "nav-compact": "1570px", // Switch to mobile hamburger
       },
       fontFamily: {
         heading: ['Cinzel Decorative', 'serif'],

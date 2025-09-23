@@ -47,6 +47,60 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     --glow-purple: rgba(197, 164, 93, 0.3);
     --glow-gold: rgba(197, 164, 93, 0.5);
   }
+
+}
+
+/* Logo responsive font sizing */
+.logo-responsive {
+  font-size: 1.5rem; /* text-2xl = 24px */
+}
+
+@media (max-width: 625px) {
+  .logo-responsive {
+    font-size: 1.25rem; /* 20px - 15% smaller than 1.5rem */
+  }
+}
+
+@media (max-width: 575px) {
+  .logo-responsive {
+    font-size: 1.0625rem; /* 17px - 15% smaller than 1.25rem */
+  }
+}
+
+@media (max-width: 525px) {
+  .logo-responsive {
+    font-size: 0.90625rem; /* 14.5px - 15% smaller than 1.0625rem */
+  }
+}
+
+@media (max-width: 500px) {
+  .logo-responsive {
+    font-size: 0.7703125rem; /* 12.3px - 15% smaller than 0.90625rem */
+  }
+}
+
+@media (max-width: 475px) {
+  .logo-responsive {
+    font-size: 0.654765625rem; /* 10.5px - 15% smaller than 0.7703125rem */
+  }
+}
+
+@media (max-width: 450px) {
+  .logo-responsive {
+    font-size: 0.556546875rem; /* 8.9px - 15% smaller than 0.654765625rem */
+  }
+}
+
+@media (max-width: 425px) {
+  .logo-responsive {
+    font-size: 0.47306484375rem; /* 7.6px - 15% smaller than 0.556546875rem */
+  }
+}
+
+@media (max-width: 400px) {
+  .logo-responsive {
+    font-size: 0.4021051171875rem; /* 6.4px - 15% smaller than 0.47306484375rem */
+  }
 }
 
 @layer base {
