@@ -34,7 +34,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     mutationFn: async ({ photoId, approve, featured = false }: { photoId: string; approve: boolean; featured?: boolean }) => {
       const { data, error } = await supabase.rpc('moderate_photo', {
         p_photo_id: photoId,
-        p_approve: approve,
+        p_approved: approve,
         p_featured: featured
       });
       

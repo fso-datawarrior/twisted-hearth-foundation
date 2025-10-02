@@ -22,8 +22,8 @@ const Feast = () => {
   useEffect(() => {
     const loadPotluckItems = async () => {
       const { data, error } = await supabase
-        .from('potluck_items')
-        .select('id, user_id, item_name, notes, created_at')
+        .from('potluck_items' as any)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
       
@@ -44,7 +44,7 @@ const Feast = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('potluck_items')
+        .from('potluck_items' as any)
         .insert({
           user_id: user.id,
           item_name: itemName.trim(),

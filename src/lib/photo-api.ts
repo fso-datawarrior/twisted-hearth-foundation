@@ -68,7 +68,7 @@ export const uploadPhotoMetadata = async (
   tags: string[] = [],
   category: string = 'general'
 ): Promise<{ data: Photo | null; error: any }> => {
-  const { data, error } = await supabase.rpc('upload_photo', {
+  const { data, error } = await (supabase.rpc as any)('upload_photo', {
     p_storage_path: storagePath,
     p_filename: filename,
     p_caption: caption || null,
@@ -76,7 +76,7 @@ export const uploadPhotoMetadata = async (
     p_category: category
   });
 
-  return { data: data as Photo | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -117,7 +117,7 @@ export const moderatePhoto = async (
 ): Promise<{ data: Photo | null; error: any }> => {
   const { data, error } = await supabase.rpc('moderate_photo', {
     p_photo_id: photoId,
-    p_approve: approve,
+    p_approved: approve,
     p_featured: featured
   });
 

@@ -65,35 +65,35 @@ export interface HuntStats {
  */
 export const getHuntHints = async (): Promise<{ data: HuntHint[] | null; error: any }> => {
   const { data, error } = await supabase
-    .from('hunt_hints')
-    .select('id, title, description, hint_text, difficulty_level, category, points, is_active, created_at, updated_at')
+    .from('hunt_hints' as any)
+    .select('*')
     .eq('is_active', true)
     .order('id');
 
-  return { data: data as HuntHint[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
  * Mark a hint as found - creates or updates hunt progress
  */
 export const markHintFound = async (hintId: number, huntRunId?: string): Promise<{ data: HuntProgress | null; error: any }> => {
-  const { data, error } = await supabase.rpc('mark_hint_found', {
+  const { data, error } = await (supabase.rpc as any)('mark_hint_found', {
     p_hint_id: hintId,
     p_hunt_run_id: huntRunId || null
   });
 
-  return { data, error };
+  return { data: data as any, error };
 };
 
 /**
  * Get current user's hunt statistics
  */
 export const getHuntStats = async (userId?: string): Promise<{ data: HuntStats[] | null; error: any }> => {
-  const { data, error } = await supabase.rpc('get_hunt_stats', {
+  const { data, error } = await (supabase.rpc as any)('get_hunt_stats', {
     p_user_id: userId || null
   });
 
-  return { data, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -101,14 +101,14 @@ export const getHuntStats = async (userId?: string): Promise<{ data: HuntStats[]
  */
 export const getActiveHuntRun = async (): Promise<{ data: HuntRun | null; error: any }> => {
   const { data, error } = await supabase
-    .from('hunt_runs')
-    .select('id, user_id, started_at, completed_at, total_points, status, created_at')
+    .from('hunt_runs' as any)
+    .select('*')
     .eq('status', 'active')
     .order('started_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  return { data: data as HuntRun | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -116,8 +116,8 @@ export const getActiveHuntRun = async (): Promise<{ data: HuntRun | null; error:
  */
 export const getHuntProgress = async (huntRunId?: string): Promise<{ data: HuntProgress[] | null; error: any }> => {
   let query = supabase
-    .from('hunt_progress')
-    .select('id, user_id, hunt_run_id, hint_id, found_at, points_earned, created_at')
+    .from('hunt_progress' as any)
+    .select('*')
     .order('found_at');
 
   if (huntRunId) {
@@ -132,7 +132,7 @@ export const getHuntProgress = async (huntRunId?: string): Promise<{ data: HuntP
   }
 
   const { data, error } = await query;
-  return { data, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -140,8 +140,8 @@ export const getHuntProgress = async (huntRunId?: string): Promise<{ data: HuntP
  */
 export const getHuntRewards = async (huntRunId?: string): Promise<{ data: HuntReward[] | null; error: any }> => {
   let query = supabase
-    .from('hunt_rewards')
-    .select('id, user_id, hunt_run_id, reward_type, reward_name, description, earned_at, created_at')
+    .from('hunt_rewards' as any)
+    .select('*')
     .order('earned_at', { ascending: false });
 
   if (huntRunId) {
@@ -149,7 +149,7 @@ export const getHuntRewards = async (huntRunId?: string): Promise<{ data: HuntRe
   }
 
   const { data, error } = await query;
-  return { data: data as HuntReward[] | null, error };
+  return { data: data as any, error };
 };
 
 /**

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -20,30 +20,30 @@ export type Database = {
           deleted_at: string | null
           display_name: string
           id: string
-          is_anonymous: boolean
+          is_anonymous: boolean | null
           message: string
-          updated_at: string | null
-          user_id: string
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           deleted_at?: string | null
           display_name: string
           id?: string
-          is_anonymous?: boolean
+          is_anonymous?: boolean | null
           message: string
-          updated_at?: string | null
-          user_id: string
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           deleted_at?: string | null
           display_name?: string
           id?: string
-          is_anonymous?: boolean
+          is_anonymous?: boolean | null
           message?: string
-          updated_at?: string | null
-          user_id?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -52,21 +52,21 @@ export type Database = {
           created_at: string
           emoji: string
           id: string
-          post_id: string | null
+          post_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           emoji: string
           id?: string
-          post_id?: string | null
+          post_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           emoji?: string
           id?: string
-          post_id?: string | null
+          post_id?: string
           user_id?: string
         }
         Relationships: [
@@ -84,28 +84,28 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
-          is_anonymous: boolean
+          is_anonymous: boolean | null
           message: string
-          post_id: string | null
-          user_id: string
+          post_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           display_name: string
           id?: string
-          is_anonymous?: boolean
+          is_anonymous?: boolean | null
           message: string
-          post_id?: string | null
-          user_id: string
+          post_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           display_name?: string
           id?: string
-          is_anonymous?: boolean
+          is_anonymous?: boolean | null
           message?: string
-          post_id?: string | null
-          user_id?: string
+          post_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -121,23 +121,23 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          post_id: string | null
-          reason: string | null
-          reporter_id: string
+          post_id: string
+          reason: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          post_id?: string | null
-          reason?: string | null
-          reporter_id: string
+          post_id: string
+          reason: string
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          post_id?: string | null
-          reason?: string | null
-          reporter_id?: string
+          post_id?: string
+          reason?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -151,69 +151,57 @@ export type Database = {
       }
       hunt_hints: {
         Row: {
-          category: string
           created_at: string
-          description: string
-          difficulty_level: string
           hint_text: string
           id: number
-          is_active: boolean
-          points: number
-          title: string
-          updated_at: string
+          is_active: boolean | null
+          location: string | null
+          points: number | null
+          rune_id: string
         }
         Insert: {
-          category: string
           created_at?: string
-          description: string
-          difficulty_level: string
           hint_text: string
-          id?: never
-          is_active?: boolean
-          points?: number
-          title: string
-          updated_at?: string
+          id?: number
+          is_active?: boolean | null
+          location?: string | null
+          points?: number | null
+          rune_id: string
         }
         Update: {
-          category?: string
           created_at?: string
-          description?: string
-          difficulty_level?: string
           hint_text?: string
-          id?: never
-          is_active?: boolean
-          points?: number
-          title?: string
-          updated_at?: string
+          id?: number
+          is_active?: boolean | null
+          location?: string | null
+          points?: number | null
+          rune_id?: string
         }
         Relationships: []
       }
       hunt_progress: {
         Row: {
-          created_at: string
           found_at: string
           hint_id: number
           hunt_run_id: string
           id: string
-          points_earned: number
+          points_earned: number | null
           user_id: string
         }
         Insert: {
-          created_at?: string
           found_at?: string
           hint_id: number
           hunt_run_id: string
           id?: string
-          points_earned?: number
+          points_earned?: number | null
           user_id: string
         }
         Update: {
-          created_at?: string
           found_at?: string
           hint_id?: number
           hunt_run_id?: string
           id?: string
-          points_earned?: number
+          points_earned?: number | null
           user_id?: string
         }
         Relationships: [
@@ -235,32 +223,26 @@ export type Database = {
       }
       hunt_rewards: {
         Row: {
-          created_at: string
-          description: string | null
-          earned_at: string
+          claimed_at: string
           hunt_run_id: string
           id: string
-          reward_name: string
+          reward_data: Json | null
           reward_type: string
           user_id: string
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          earned_at?: string
+          claimed_at?: string
           hunt_run_id: string
           id?: string
-          reward_name: string
+          reward_data?: Json | null
           reward_type: string
           user_id: string
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          earned_at?: string
+          claimed_at?: string
           hunt_run_id?: string
           id?: string
-          reward_name?: string
+          reward_data?: Json | null
           reward_type?: string
           user_id?: string
         }
@@ -277,29 +259,23 @@ export type Database = {
       hunt_runs: {
         Row: {
           completed_at: string | null
-          created_at: string
           id: string
           started_at: string
-          status: string
-          total_points: number
+          total_points: number | null
           user_id: string
         }
         Insert: {
           completed_at?: string | null
-          created_at?: string
           id?: string
           started_at?: string
-          status?: string
-          total_points?: number
+          total_points?: number | null
           user_id: string
         }
         Update: {
           completed_at?: string | null
-          created_at?: string
           id?: string
           started_at?: string
-          status?: string
-          total_points?: number
+          total_points?: number | null
           user_id?: string
         }
         Relationships: []
@@ -316,7 +292,7 @@ export type Database = {
           created_at?: string
           id?: string
           photo_id: string
-          reaction_type: string
+          reaction_type?: string
           user_id: string
         }
         Update: {
@@ -341,13 +317,11 @@ export type Database = {
           caption: string | null
           category: string | null
           created_at: string
-          file_size: number | null
           filename: string
           id: string
-          is_approved: boolean
-          is_featured: boolean
-          likes_count: number
-          mime_type: string | null
+          is_approved: boolean | null
+          is_featured: boolean | null
+          likes_count: number | null
           storage_path: string
           tags: string[] | null
           updated_at: string
@@ -357,13 +331,11 @@ export type Database = {
           caption?: string | null
           category?: string | null
           created_at?: string
-          file_size?: number | null
           filename: string
           id?: string
-          is_approved?: boolean
-          is_featured?: boolean
-          likes_count?: number
-          mime_type?: string | null
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          likes_count?: number | null
           storage_path: string
           tags?: string[] | null
           updated_at?: string
@@ -373,13 +345,11 @@ export type Database = {
           caption?: string | null
           category?: string | null
           created_at?: string
-          file_size?: number | null
           filename?: string
           id?: string
-          is_approved?: boolean
-          is_featured?: boolean
-          likes_count?: number
-          mime_type?: string | null
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          likes_count?: number | null
           storage_path?: string
           tags?: string[] | null
           updated_at?: string
@@ -387,87 +357,76 @@ export type Database = {
         }
         Relationships: []
       }
-      potluck_items: {
+      profiles: {
         Row: {
           created_at: string
+          display_name: string | null
+          email: string | null
           id: string
-          item_name: string
-          notes: string | null
-          user_id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          item_name: string
-          notes?: string | null
-          user_id: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          display_name?: string | null
+          email?: string | null
           id?: string
-          item_name?: string
-          notes?: string | null
-          user_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
       rsvps: {
         Row: {
-          contributions: string | null
-          costume_idea: string | null
           created_at: string
           dietary_restrictions: string | null
-          email_sent_at: string | null
-          idempotency_token: string | null
+          email: string
+          id: string
+          is_approved: boolean | null
+          name: string
           num_guests: number
-          rsvp_id: string
-          status: string
+          status: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
-          contributions?: string | null
-          costume_idea?: string | null
           created_at?: string
           dietary_restrictions?: string | null
-          email_sent_at?: string | null
-          idempotency_token?: string | null
+          email: string
+          id?: string
+          is_approved?: boolean | null
+          name: string
           num_guests?: number
-          rsvp_id?: string
-          status?: string
+          status?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
-          contributions?: string | null
-          costume_idea?: string | null
           created_at?: string
           dietary_restrictions?: string | null
-          email_sent_at?: string | null
-          idempotency_token?: string | null
+          email?: string
+          id?: string
+          is_approved?: boolean | null
+          name?: string
           num_guests?: number
-          rsvp_id?: string
-          status?: string
+          status?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "rsvps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       tournament_matches: {
         Row: {
           created_at: string
           id: string
-          match_date: string | null
-          score: string | null
-          status: string
+          match_time: string | null
+          round: number | null
+          status: string | null
           team1_id: string | null
           team2_id: string | null
           winner_id: string | null
@@ -475,9 +434,9 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          match_date?: string | null
-          score?: string | null
-          status?: string
+          match_time?: string | null
+          round?: number | null
+          status?: string | null
           team1_id?: string | null
           team2_id?: string | null
           winner_id?: string | null
@@ -485,9 +444,9 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          match_date?: string | null
-          score?: string | null
-          status?: string
+          match_time?: string | null
+          round?: number | null
+          status?: string | null
           team1_id?: string | null
           team2_id?: string | null
           winner_id?: string | null
@@ -522,10 +481,8 @@ export type Database = {
           created_at: string
           id: string
           special_requirements: string | null
-          status: string
-          team_name: string | null
+          team_name: string
           tournament_name: string
-          updated_at: string
           user_id: string
         }
         Insert: {
@@ -533,10 +490,8 @@ export type Database = {
           created_at?: string
           id?: string
           special_requirements?: string | null
-          status?: string
-          team_name?: string | null
+          team_name: string
           tournament_name: string
-          updated_at?: string
           user_id: string
         }
         Update: {
@@ -544,10 +499,8 @@ export type Database = {
           created_at?: string
           id?: string
           special_requirements?: string | null
-          status?: string
-          team_name?: string | null
+          team_name?: string
           tournament_name?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -557,106 +510,49 @@ export type Database = {
           captain_id: string | null
           created_at: string
           id: string
-          members: string[] | null
-          status: string
+          losses: number | null
+          members: Json | null
           team_name: string
+          wins: number | null
         }
         Insert: {
           captain_id?: string | null
           created_at?: string
           id?: string
-          members?: string[] | null
-          status?: string
+          losses?: number | null
+          members?: Json | null
           team_name: string
+          wins?: number | null
         }
         Update: {
           captain_id?: string | null
           created_at?: string
           id?: string
-          members?: string[] | null
-          status?: string
+          losses?: number | null
+          members?: Json | null
           team_name?: string
+          wins?: number | null
         }
         Relationships: []
       }
       user_roles: {
         Row: {
           created_at: string
-          role: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          role: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          role?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          auth_provider_id: string | null
-          created_at: string
-          email: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          auth_provider_id?: string | null
-          created_at?: string
-          email: string
-          name: string
-          updated_at?: string
-          user_id?: string
-        }
-        Update: {
-          auth_provider_id?: string | null
-          created_at?: string
-          email?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      vignettes: {
-        Row: {
-          author: string | null
-          content: string
-          created_at: string
-          event_year: number | null
           id: string
-          is_featured: boolean
-          is_published: boolean
-          title: string
-          updated_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Insert: {
-          author?: string | null
-          content: string
           created_at?: string
-          event_year?: number | null
           id?: string
-          is_featured?: boolean
-          is_published?: boolean
-          title: string
-          updated_at?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Update: {
-          author?: string | null
-          content?: string
           created_at?: string
-          event_year?: number | null
           id?: string
-          is_featured?: boolean
-          is_published?: boolean
-          title?: string
-          updated_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -666,23 +562,11 @@ export type Database = {
     }
     Functions: {
       admin_update_rsvp_status: {
-        Args: { p_rsvp_id: string; p_status: string }
-        Returns: {
-          contributions: string | null
-          costume_idea: string | null
-          created_at: string
-          dietary_restrictions: string | null
-          email_sent_at: string | null
-          idempotency_token: string | null
-          num_guests: number
-          rsvp_id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
+        Args: { p_is_approved?: boolean; p_rsvp_id: string; p_status: string }
+        Returns: undefined
       }
       check_admin_status: {
-        Args: { p_user_id?: string }
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       ensure_admins_seeded: {
@@ -692,10 +576,8 @@ export type Database = {
       get_hunt_stats: {
         Args: { p_user_id?: string }
         Returns: {
-          completion_percentage: number
-          found_hints: number
-          hunt_status: string
-          total_hints: number
+          completed_runs: number
+          total_hints_found: number
           total_points: number
         }[]
       }
@@ -705,16 +587,14 @@ export type Database = {
           p_is_anonymous?: boolean
           p_message: string
         }
-        Returns: {
-          created_at: string
-          deleted_at: string | null
-          display_name: string
-          id: string
-          is_anonymous: boolean
-          message: string
-          updated_at: string | null
-          user_id: string
+        Returns: string
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
+        Returns: boolean
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -722,34 +602,11 @@ export type Database = {
       }
       mark_hint_found: {
         Args: { p_hint_id: number; p_hunt_run_id?: string }
-        Returns: {
-          created_at: string
-          found_at: string
-          hint_id: number
-          hunt_run_id: string
-          id: string
-          points_earned: number
-          user_id: string
-        }
+        Returns: Json
       }
       moderate_photo: {
-        Args: { p_approve: boolean; p_featured?: boolean; p_photo_id: string }
-        Returns: {
-          caption: string | null
-          category: string | null
-          created_at: string
-          file_size: number | null
-          filename: string
-          id: string
-          is_approved: boolean
-          is_featured: boolean
-          likes_count: number
-          mime_type: string | null
-          storage_path: string
-          tags: string[] | null
-          updated_at: string
-          user_id: string
-        }
+        Args: { p_approved: boolean; p_featured?: boolean; p_photo_id: string }
+        Returns: undefined
       }
       register_team: {
         Args: {
@@ -758,32 +615,7 @@ export type Database = {
           p_team_name: string
           p_tournament_name: string
         }
-        Returns: {
-          contact_info: string | null
-          created_at: string
-          id: string
-          special_requirements: string | null
-          status: string
-          team_name: string | null
-          tournament_name: string
-          updated_at: string
-          user_id: string
-        }
-      }
-      submit_rsvp: {
-        Args: {
-          p_contributions: string
-          p_costume_idea: string
-          p_dietary: string
-          p_email: string
-          p_idempotency?: string
-          p_name: string
-          p_num_guests: number
-        }
-        Returns: {
-          rsvp_id: string
-          updated: boolean
-        }[]
+        Returns: string
       }
       toggle_photo_reaction: {
         Args: { p_photo_id: string; p_reaction_type?: string }
@@ -797,49 +629,11 @@ export type Database = {
           p_storage_path: string
           p_tags?: string[]
         }
-        Returns: {
-          caption: string | null
-          category: string | null
-          created_at: string
-          file_size: number | null
-          filename: string
-          id: string
-          is_approved: boolean
-          is_featured: boolean
-          likes_count: number
-          mime_type: string | null
-          storage_path: string
-          tags: string[] | null
-          updated_at: string
-          user_id: string
-        }
-      }
-      upsert_rsvp: {
-        Args: {
-          p_attending: boolean
-          p_contributions?: string
-          p_costume_idea?: string
-          p_dietary_restrictions?: string
-          p_guests?: number
-          p_notes?: string
-        }
-        Returns: {
-          contributions: string | null
-          costume_idea: string | null
-          created_at: string
-          dietary_restrictions: string | null
-          email_sent_at: string | null
-          idempotency_token: string | null
-          num_guests: number
-          rsvp_id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
+        Returns: string
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -966,6 +760,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

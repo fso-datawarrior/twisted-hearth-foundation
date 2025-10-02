@@ -92,7 +92,7 @@ export default function HuntProgress() {
                 <h3 className="text-sm font-subhead text-ink">Found Runes</h3>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
                   {hints
-                    .filter(hint => isFound(hint.id.toString()))
+                    .filter(hint => isFound(hint.id))
                     .map(hint => (
                       <div key={hint.id} className="flex items-center gap-2 p-2 bg-accent-green/10 rounded border border-accent-green/20">
                         <div className="w-2 h-2 bg-accent-green rounded-full" />
