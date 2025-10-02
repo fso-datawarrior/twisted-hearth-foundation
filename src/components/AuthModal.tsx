@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
-import { CheckCircle, Mail } from "lucide-react";
+import { CheckCircle, Mail, KeyRound, ArrowLeft } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,9 +18,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { signIn, devSignIn } = useAuth();
+  const [authMethod, setAuthMethod] = useState<'magic-link' | 'otp'>('magic-link');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const { signIn, devSignIn, signInWithOtp, verifyOtp } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
+
+  // Countdown timer for OTP expiration
+  useEffect(() => {
+    if (otpSent && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpSent, countdown]);
 
   const handleClose = () => {
     onClose();
@@ -27,6 +41,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setTimeout(() => {
       setEmail("");
       setSent(false);
+      setOtpSent(false);
+      setOtpCode("");
+      setCountdown(60);
+      setAuthMethod('magic-link');
     }, 200);
   };
 
@@ -39,10 +57,23 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setLoading(true);
     
     try {
-      await signIn(email.trim().toLowerCase());
-      setSent(true);
+      if (authMethod === 'magic-link') {
+        await signIn(email.trim().toLowerCase());
+        setSent(true);
+      } else {
+        await signInWithOtp(email.trim().toLowerCase());
+        setOtpSent(true);
+        setCountdown(60);
+        toast({
+          title: "Code sent!",
+          description: "Check your email for a 6-digit code.",
+          duration: 4000,
+        });
+      }
     } catch (error: any) {
-      let errorMsg = "Unable to send magic link. Please try again.";
+      let errorMsg = authMethod === 'magic-link' 
+        ? "Unable to send magic link. Please try again."
+        : "Unable to send code. Please try again.";
       
       if (error?.message?.includes('rate')) {
         errorMsg = "Too many requests. Please wait a moment before trying again.";
@@ -53,7 +84,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
       
       toast({
-        title: "Failed to send magic link",
+        title: authMethod === 'magic-link' ? "Failed to send magic link" : "Failed to send code",
         description: errorMsg,
         variant: "destructive",
         duration: 6000,
@@ -61,6 +92,74 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      toast({
+        title: "Invalid code",
+        description: "Please enter a 6-digit code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      await verifyOtp(email.trim().toLowerCase(), otpCode);
+      toast({
+        title: "Success!",
+        description: "You're now signed in!",
+        duration: 3000,
+      });
+      handleClose();
+    } catch (error: any) {
+      let errorMsg = "Please check the code and try again.";
+      
+      if (error?.message?.includes('expired')) {
+        errorMsg = "This code has expired. Request a new one.";
+      } else if (error?.message?.includes('invalid')) {
+        errorMsg = "This code is incorrect. Please try again.";
+      }
+      
+      toast({
+        title: "Verification failed",
+        description: errorMsg,
+        variant: "destructive",
+        duration: 5000,
+      });
+      setOtpCode("");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      await signInWithOtp(email.trim().toLowerCase());
+      setCountdown(60);
+      setOtpCode("");
+      toast({
+        title: "New code sent!",
+        description: "Check your email for a new 6-digit code.",
+        duration: 4000,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to resend code",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackToEmail = () => {
+    setOtpSent(false);
+    setOtpCode("");
+    setCountdown(60);
   };
 
   const handleDevSignIn = async () => {
@@ -97,11 +196,82 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             Sign In to the Bash
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Enter your email to receive a magic link for instant access.
+            {otpSent 
+              ? "Enter the 6-digit code sent to your email."
+              : authMethod === 'magic-link'
+              ? "Enter your email to receive a magic link for instant access."
+              : "Enter your email to receive a 6-digit code."
+            }
           </DialogDescription>
         </DialogHeader>
         
-        {sent ? (
+        {otpSent ? (
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <KeyRound className="h-12 w-12 text-accent-gold" />
+              <h3 className="font-heading text-lg text-accent-gold">Enter Verification Code</h3>
+              <p className="text-sm text-muted-foreground">
+                We sent a 6-digit code to <strong className="text-foreground">{email}</strong>
+              </p>
+              
+              <div className="w-full max-w-xs">
+                <InputOTP 
+                  maxLength={6} 
+                  value={otpCode} 
+                  onChange={setOtpCode}
+                  disabled={verifying}
+                >
+                  <InputOTPGroup className="gap-2 mx-auto">
+                    <InputOTPSlot index={0} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={1} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={2} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={3} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={4} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={5} className="border-accent-purple/30 focus:border-accent-gold" />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+
+              <div className="text-center">
+                {countdown > 0 ? (
+                  <p className={`text-sm ${countdown < 10 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    Code expires in {countdown}s
+                  </p>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={handleResendOtp}
+                    disabled={loading}
+                    className="text-accent-gold hover:text-accent-gold/80"
+                  >
+                    Resend code
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBackToEmail}
+                disabled={verifying}
+                className="flex-1 border-accent-purple/30 hover:bg-accent-purple/10"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button
+                onClick={handleVerifyOtp}
+                disabled={verifying || otpCode.length !== 6}
+                className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+              >
+                {verifying ? "Verifying..." : "Verify Code"}
+              </Button>
+            </div>
+          </div>
+        ) : sent ? (
           <div className="space-y-4 py-4">
             <div className="flex flex-col items-center text-center space-y-3">
               <CheckCircle className="h-12 w-12 text-green-500" />
@@ -125,6 +295,34 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
         ) : (
           <>
+            {/* Auth Method Toggle */}
+            <div className="flex gap-2 p-1 bg-accent-purple/10 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setAuthMethod('magic-link')}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  authMethod === 'magic-link'
+                    ? 'bg-accent-gold text-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Mail className="inline h-4 w-4 mr-2" />
+                Magic Link
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthMethod('otp')}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  authMethod === 'otp'
+                    ? 'bg-accent-gold text-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <KeyRound className="inline h-4 w-4 mr-2" />
+                OTP Code
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-subhead text-accent-gold">
@@ -159,11 +357,17 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 >
                   {loading ? (
                     <>
-                      <Mail className="mr-2 h-4 w-4 animate-pulse" />
+                      {authMethod === 'magic-link' ? (
+                        <Mail className="mr-2 h-4 w-4 animate-pulse" />
+                      ) : (
+                        <KeyRound className="mr-2 h-4 w-4 animate-pulse" />
+                      )}
                       Sending...
                     </>
-                  ) : (
+                  ) : authMethod === 'magic-link' ? (
                     "Send Magic Link"
+                  ) : (
+                    "Send Code"
                   )}
                 </Button>
               </div>
@@ -193,12 +397,25 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             )}
             
             <div className="text-center">
-              <p className="font-body text-sm text-muted-foreground">
-                📧 <strong>Magic link sign-in</strong> - Check your email to log in!
-              </p>
-              <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
-                No password needed. Just click the link in your email.
-              </p>
+              {authMethod === 'magic-link' ? (
+                <>
+                  <p className="font-body text-sm text-muted-foreground">
+                    📧 <strong>Magic link sign-in</strong> - Check your email to log in!
+                  </p>
+                  <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
+                    No password needed. Just click the link in your email.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-body text-sm text-muted-foreground">
+                    🔐 <strong>OTP code sign-in</strong> - Enter the code from your email!
+                  </p>
+                  <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
+                    6-digit code • Expires in 60 seconds
+                  </p>
+                </>
+              )}
             </div>
           </>
         )}

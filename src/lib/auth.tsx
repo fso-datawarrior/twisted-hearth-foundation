@@ -10,6 +10,8 @@ type AuthCtx = {
   signIn: (email: string) => Promise<void>; 
   signOut: () => Promise<void>; 
   devSignIn: (email: string) => Promise<void>;
+  signInWithOtp: (email: string) => Promise<void>;
+  verifyOtp: (email: string, token: string) => Promise<void>;
   loading: boolean;
 };
 
@@ -104,8 +106,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const signInWithOtp = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+      }
+    });
+    
+    if (error) {
+      throw error;
+    }
+  };
+
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
+    });
+    
+    if (error) {
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, loading }}>
+    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, loading }}>
       {children}
     </AuthContext.Provider>
   );
