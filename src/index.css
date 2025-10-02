@@ -73,12 +73,6 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   }
 }
 
-@media (max-width: 500px) {
-  .logo-responsive {
-    font-size: 0.7703125rem; /* 12.3px - 15% smaller than 0.90625rem */
-  }
-}
-
 @layer base {
   * {
     @apply border-border;
