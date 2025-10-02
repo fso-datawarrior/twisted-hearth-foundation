@@ -13,10 +13,19 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      console.log('🔐 AuthCallback: Checking authentication status...');
+      console.log('🔐 AuthCallback: Processing magic link authentication...');
       
       try {
-        // Check if user is already authenticated
+        // Parse the hash fragment for token parameters
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken) {
+          console.log('✅ AuthCallback: Found auth tokens in URL, establishing session...');
+        }
+
+        // Get the session (this will process the tokens from the URL automatically)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
@@ -26,7 +35,7 @@ export default function AuthCallback() {
         }
 
         if (session) {
-          console.log('✅ AuthCallback: User is authenticated, redirecting...');
+          console.log('✅ AuthCallback: Magic link authentication successful!');
           setStatus('success');
           
           // Redirect to home page
@@ -34,7 +43,7 @@ export default function AuthCallback() {
             navigate('/', { replace: true });
           }, 1000);
         } else {
-          console.log('❌ AuthCallback: No active session');
+          console.log('❌ AuthCallback: No active session found');
           setStatus('error');
         }
 

@@ -58,27 +58,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const signIn = async (email: string) => {
-    // Try to sign in with password (using email as password for simplicity)
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password: email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+      }
     });
     
-    // If account doesn't exist, create it automatically
-    if (signInError?.message.includes('Invalid')) {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: email,
-      });
-      
-      if (signUpError) {
-        throw signUpError;
-      }
-      return;
-    }
-    
-    if (signInError) {
-      throw signInError;
+    if (error) {
+      throw error;
     }
   };
   
