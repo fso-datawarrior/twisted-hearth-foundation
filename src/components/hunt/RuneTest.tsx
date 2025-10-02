@@ -55,9 +55,13 @@ export default function RuneTest() {
             <img 
               src={runePath}
               alt={runeInfo?.name || `Rune ${selectedRune}`}
+              width="128"
+              height="128"
               className="max-w-full max-h-full object-contain"
               onError={() => setImageError(true)}
               onLoad={() => setImageError(false)}
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <div className="text-center text-muted-foreground">

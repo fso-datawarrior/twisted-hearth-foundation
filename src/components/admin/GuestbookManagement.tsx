@@ -32,7 +32,7 @@ export default function GuestbookManagement({ isLoading = false }: GuestbookMana
     queryFn: async () => {
       const { data, error } = await supabase
         .from('guestbook')
-        .select('*')
+        .select('id, display_name, message, is_anonymous, created_at, deleted_at, user_id')
         .order('created_at', { ascending: false });
       
       if (error) throw error;

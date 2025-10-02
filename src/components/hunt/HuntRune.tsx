@@ -254,6 +254,8 @@ export default function HuntRune({ id, label, hint, className, bonus = false }: 
           <img 
             src={runePath}
             alt={runeInfo?.name || `Rune ${id}`}
+            width="64"
+            height="64"
             className={cn(
               "pointer-events-none rune-image max-w-16 max-h-16 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10",
               found 

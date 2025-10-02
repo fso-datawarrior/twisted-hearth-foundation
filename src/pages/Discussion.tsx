@@ -86,7 +86,7 @@ const Discussion = () => {
     try {
       const { data, error } = await supabase
         .from('guestbook')
-        .select('*')
+        .select('id, user_id, display_name, message, is_anonymous, created_at, updated_at, deleted_at')
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .range(reset ? 0 : posts.length, reset ? PAGE_SIZE - 1 : posts.length + PAGE_SIZE - 1);

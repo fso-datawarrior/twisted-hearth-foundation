@@ -99,7 +99,7 @@ export const getTournamentRegistrationsAdmin = async (): Promise<{ data: Tournam
 export const getTournamentTeams = async (): Promise<{ data: TournamentTeam[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('tournament_teams')
-    .select('*')
+    .select('id, team_name, captain_id, members, status, created_at')
     .order('created_at', { ascending: false });
 
   return { data: data as TournamentTeam[] | null, error };
@@ -128,7 +128,7 @@ export const getTournamentMatches = async (): Promise<{ data: TournamentMatch[] 
 export const getUserTournamentRegistrations = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('tournament_registrations')
-    .select('*')
+    .select('id, user_id, tournament_name, team_name, status, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   return { data: data as TournamentRegistration[] | null, error };

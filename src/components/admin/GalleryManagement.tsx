@@ -147,6 +147,10 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                     <img 
                       src={`${supabase.storage.from('gallery').getPublicUrl(photo.storage_path).data.publicUrl}`}
                       alt={photo.caption || 'Photo'}
+                      width="640"
+                      height="360"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                   </div>

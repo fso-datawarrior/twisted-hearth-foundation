@@ -1,4 +1,5 @@
 import React from "react";
+import { reportError } from "@/lib/error-telemetry";
 
 type State = { hasError: boolean };
 
@@ -11,6 +12,8 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
   
   componentDidCatch(error: unknown, info: unknown) {
     console.error("Error caught by boundary:", error, info);
+    // Best-effort telemetry without PII (no-op if not configured)
+    reportError(error, info);
   }
   
   render() {

@@ -23,7 +23,7 @@ const Feast = () => {
     const loadPotluckItems = async () => {
       const { data, error } = await supabase
         .from('potluck_items')
-        .select('*')
+        .select('id, user_id, item_name, notes, created_at')
         .order('created_at', { ascending: false })
         .limit(50);
       

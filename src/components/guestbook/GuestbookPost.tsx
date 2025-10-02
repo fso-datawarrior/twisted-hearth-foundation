@@ -50,7 +50,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
   const loadReplies = async () => {
     const { data, error } = await supabase
       .from('guestbook_replies')
-      .select('*')
+      .select('id, post_id, user_id, display_name, message, is_anonymous, created_at')
       .eq('post_id', post.id)
       .order('created_at', { ascending: true });
     
