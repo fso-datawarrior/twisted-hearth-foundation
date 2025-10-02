@@ -1,9 +1,8 @@
+import React, { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-// import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
@@ -32,17 +31,24 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
         <DeveloperModeProvider>
           <AuthProvider>
             <AdminProvider>
               <HuntProvider>
-              <BrowserRouter
+                <BrowserRouter
               future={{
                 v7_startTransition: true,
                 v7_relativeSplatPath: true,
@@ -84,13 +90,13 @@ function App() {
                 <HuntProgress />
                 <HuntReward />
                 <HuntNotification />
-              </BrowserRouter>
+                </BrowserRouter>
               </HuntProvider>
             </AdminProvider>
           </AuthProvider>
         </DeveloperModeProvider>
-      </>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 }
 
