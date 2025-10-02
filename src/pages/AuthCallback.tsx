@@ -2,24 +2,60 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+type ErrorType = 'expired' | 'already-used' | 'invalid' | 'generic';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [status, setStatus] = useState<'checking' | 'success' | 'error'>('checking');
+  const { user, signIn } = useAuth();
+  const { toast } = useToast();
+  const [status, setStatus] = useState<'checking' | 'success' | 'error' | 'already-signed-in'>('checking');
+  const [errorType, setErrorType] = useState<ErrorType>('generic');
+  const [email, setEmail] = useState('');
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       console.log('🔐 AuthCallback: Processing magic link authentication...');
       
+      // If user is already authenticated, show friendly message
+      if (user) {
+        console.log('✅ User already authenticated');
+        setStatus('already-signed-in');
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 2000);
+        return;
+      }
+
       try {
         // Parse the hash fragment for token parameters
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+        const errorCode = hashParams.get('error_code');
+        const errorDescription = hashParams.get('error_description');
+        
+        // Check for error in URL params
+        if (errorCode || errorDescription) {
+          console.error('❌ AuthCallback: Error in URL params:', errorCode, errorDescription);
+          
+          // Detect error type
+          if (errorDescription?.includes('expired')) {
+            setErrorType('expired');
+          } else if (errorDescription?.includes('already') || errorCode === 'otp_expired') {
+            setErrorType('already-used');
+          } else {
+            setErrorType('invalid');
+          }
+          
+          setStatus('error');
+          return;
+        }
         
         if (accessToken) {
           console.log('✅ AuthCallback: Found auth tokens in URL, establishing session...');
@@ -30,6 +66,17 @@ export default function AuthCallback() {
 
         if (sessionError) {
           console.error('❌ AuthCallback: Session error:', sessionError);
+          
+          // Detect error type from session error
+          const errorMsg = sessionError.message.toLowerCase();
+          if (errorMsg.includes('expired')) {
+            setErrorType('expired');
+          } else if (errorMsg.includes('invalid') || errorMsg.includes('used')) {
+            setErrorType('already-used');
+          } else {
+            setErrorType('generic');
+          }
+          
           setStatus('error');
           return;
         }
@@ -44,24 +91,73 @@ export default function AuthCallback() {
           }, 1000);
         } else {
           console.log('❌ AuthCallback: No active session found');
+          setErrorType('already-used');
           setStatus('error');
         }
 
       } catch (error) {
         console.error('❌ AuthCallback: Unexpected error:', error);
+        setErrorType('generic');
         setStatus('error');
       }
     };
 
-    // If user is already authenticated, redirect immediately
-    if (user) {
-      console.log('✅ User already authenticated, redirecting...');
-      navigate('/', { replace: true });
+    handleAuthCallback();
+  }, [navigate, user]);
+
+  const handleResendLink = async () => {
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive"
+      });
       return;
     }
 
-    handleAuthCallback();
-  }, [navigate, user]);
+    setIsResending(true);
+    try {
+      await signIn(email);
+      toast({
+        title: "Magic Link Sent!",
+        description: "Check your email for a fresh sign-in link.",
+      });
+      setEmail('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send magic link. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const getErrorMessage = () => {
+    switch (errorType) {
+      case 'expired':
+        return {
+          title: "Link Has Expired",
+          description: "This magic link has expired. Magic links are valid for 60 minutes for security reasons."
+        };
+      case 'already-used':
+        return {
+          title: "Link Already Used",
+          description: "This magic link has already been used. For security, each link only works once."
+        };
+      case 'invalid':
+        return {
+          title: "Invalid Link",
+          description: "This magic link is not valid. It may have been tampered with or is malformed."
+        };
+      default:
+        return {
+          title: "Authentication Issue",
+          description: "Unable to verify your authentication. Please try signing in again."
+        };
+    }
+  };
 
   if (status === 'checking') {
     return (
@@ -74,6 +170,28 @@ export default function AuthCallback() {
                 <h2 className="font-heading text-xl mb-2">Checking authentication...</h2>
                 <p className="font-body text-muted-foreground">
                   Please wait a moment.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (status === 'already-signed-in') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center space-y-4">
+              <CheckCircle className="h-12 w-12 text-green-500" />
+              <div className="text-center">
+                <h2 className="font-heading text-xl mb-2 text-accent-gold">
+                  You're Already Signed In!
+                </h2>
+                <p className="font-body text-muted-foreground">
+                  No need to use this link. Taking you to the app...
                 </p>
               </div>
             </div>
@@ -105,6 +223,8 @@ export default function AuthCallback() {
     );
   }
 
+  const errorMessages = getErrorMessage();
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -112,20 +232,59 @@ export default function AuthCallback() {
           <div className="flex items-center space-x-2">
             <AlertCircle className="h-6 w-6 text-destructive" />
             <CardTitle className="font-heading text-xl">
-              Authentication Issue
+              {errorMessages.title}
             </CardTitle>
           </div>
           <CardDescription className="font-body">
-            Unable to verify your authentication. Please try signing in again.
+            {errorMessages.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Resend Magic Link Section */}
+          <div className="border-t pt-4">
+            <div className="flex items-center space-x-2 mb-3">
+              <Mail className="h-4 w-4 text-accent-gold" />
+              <h3 className="font-subhead text-sm">Need a Fresh Link?</h3>
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleResendLink()}
+                className="font-body"
+              />
+              <Button
+                onClick={handleResendLink}
+                disabled={isResending}
+                className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+              >
+                {isResending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send New Magic Link'
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Return Home Button */}
           <Button
             onClick={() => navigate('/', { replace: true })}
-            className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+            variant="outline"
+            className="w-full font-subhead"
           >
-            Return Home and Sign In
+            Return Home
           </Button>
+
+          {/* Help Text */}
+          <p className="text-xs text-muted-foreground text-center font-body">
+            💡 Tip: After signing in, you'll stay logged in for days — no need to click the link again!
+          </p>
         </CardContent>
       </Card>
     </div>
