@@ -222,12 +222,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   disabled={verifying}
                 >
                   <InputOTPGroup className="gap-2 mx-auto">
-                    <InputOTPSlot index={0} className="border-accent-purple/30 focus:border-accent-gold" />
-                    <InputOTPSlot index={1} className="border-accent-purple/30 focus:border-accent-gold" />
-                    <InputOTPSlot index={2} className="border-accent-purple/30 focus:border-accent-gold" />
-                    <InputOTPSlot index={3} className="border-accent-purple/30 focus:border-accent-gold" />
-                    <InputOTPSlot index={4} className="border-accent-purple/30 focus:border-accent-gold" />
-                    <InputOTPSlot index={5} className="border-accent-purple/30 focus:border-accent-gold" />
+                    <InputOTPSlot index={0} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
+                    <InputOTPSlot index={1} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
+                    <InputOTPSlot index={2} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
+                    <InputOTPSlot index={3} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
+                    <InputOTPSlot index={4} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
+                    <InputOTPSlot index={5} className="border-2 border-accent-gold/60 bg-accent-purple/20 text-accent-gold focus:border-accent-gold focus:ring-2 focus:ring-accent-gold/50" />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
