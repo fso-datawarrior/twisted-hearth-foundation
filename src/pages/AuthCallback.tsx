@@ -117,7 +117,7 @@ export default function AuthCallback() {
               // Ensure admins are seeded after successful login
               try {
                 console.log('🔐 AuthCallback: Seeding admins after login...');
-                await supabase.rpc('ensure_admins_seeded');
+                await (supabase.rpc as any)('ensure_admins_seeded');
                 console.log('✅ AuthCallback: Admin seeding completed');
               } catch (seedError) {
                 console.warn('⚠️ AuthCallback: Admin seeding failed:', seedError);

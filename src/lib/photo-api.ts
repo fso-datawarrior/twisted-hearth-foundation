@@ -39,11 +39,11 @@ export interface PhotoReaction {
 export const getApprovedPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('photos')
-    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, file_size, mime_type, created_at, updated_at')
+    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, created_at, updated_at')
     .eq('is_approved', true)
     .order('created_at', { ascending: false });
 
-  return { data: data as Photo[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -52,10 +52,10 @@ export const getApprovedPhotos = async (): Promise<{ data: Photo[] | null; error
 export const getUserPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('photos')
-    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, file_size, mime_type, created_at, updated_at')
+    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  return { data: data as Photo[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
