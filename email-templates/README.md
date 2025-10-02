@@ -17,6 +17,7 @@ Custom email templates for Supabase authentication with the Twisted Tale theme.
 | **Invite user** | `03-invite-user.html` | `{{ .ConfirmationURL }}` |
 | **Change Email Address** | `04-change-email.html` | `{{ .Email }}`, `{{ .Token }}`, `{{ .ConfirmationURL }}` |
 | **Reset Password** | `05-reset-password.html` | `{{ .ConfirmationURL }}` |
+| **Reauthenticate** | `06-reauthenticate.html` | `{{ .ConfirmationURL }}` |
 
 ## Design Features
 

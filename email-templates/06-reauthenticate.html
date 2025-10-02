@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Identity - Twisted Tale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(26, 15, 46, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.9) 0%, rgba(26, 15, 46, 0.9) 100%);
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #e5c999;
+            font-size: 14px;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        h1 {
+            color: #d4af37;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .message {
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.8;
+        }
+        
+        .security-notice {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid #d4af37;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .security-notice p {
+            color: #ffffff;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .cta-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d47e 100%);
+            color: #1a0f2e;
+            text-decoration: none;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .alternative-link {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .alternative-link p {
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .link-text {
+            color: #d4af37;
+            word-break: break-all;
+            font-size: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            display: block;
+            margin-top: 10px;
+        }
+        
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .footer p {
+            color: #e5c999;
+            font-size: 12px;
+            margin: 5px 0;
+            font-style: italic;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
+            margin: 20px 0;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .logo {
+                font-size: 26px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .cta-button {
+                padding: 14px 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🎭 TWISTED TALE 🎭</div>
+            <div class="subtitle">Where Fairy Tales Take a Dark Turn</div>
+        </div>
+        
+        <div class="content">
+            <h1>🔒 Confirm Your Identity</h1>
+            
+            <p class="message">
+                For your security, we need to verify that it's really you before proceeding with this action.
+            </p>
+
+            <div class="security-notice">
+                <p><strong>🛡️ Security Check:</strong> This verification helps protect your account from unauthorized access.</p>
+            </div>
+            
+            <div class="cta-container">
+                <a href="{{ .ConfirmationURL }}" class="cta-button">VERIFY MY IDENTITY</a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="alternative-link">
+                <p style="color: #ffffff;">If the button doesn't work, copy and paste this link:</p>
+                <span class="link-text">{{ .ConfirmationURL }}</span>
+            </div>
+
+            <div class="security-notice" style="margin-top: 25px;">
+                <p><strong>⚠️ Didn't request this?</strong> If you didn't try to perform a security-sensitive action, please ignore this email or contact support if you have concerns.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>✨ Once upon a twisted time ✨</p>
+            <p>Twisted Tale Foundation</p>
+            <p style="margin-top: 15px; color: #8b7355;">
+                This is an automated security email. Please do not reply.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
