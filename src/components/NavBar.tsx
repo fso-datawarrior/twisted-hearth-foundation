@@ -73,9 +73,9 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       aria-label="Main navigation"
     >
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-between nav-full:justify-center">
           {/* Logo/Title - Positioned just to the left of nav links */}
-          <div className="flex items-center gap-3 mr-8">
+          <div className="flex items-center gap-3 nav-full:mr-8">
             <Link 
               to="/" 
               className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive"
