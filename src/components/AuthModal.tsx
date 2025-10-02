@@ -91,7 +91,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-accent-gold glow-gold-pulse">
+      <DialogContent className="sm:max-w-[425px] border-accent-gold">
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl text-accent-gold">
             Sign In to the Bash
