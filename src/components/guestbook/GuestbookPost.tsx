@@ -115,11 +115,11 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
     try {
       const { error } = await supabase
         .from('guestbook_reports')
-        .insert({
+        .insert([{
           post_id: post.id,
-          reporter_id: user?.id,
-          reason: reason?.trim() || null
-        });
+          user_id: user?.id,
+          reason: reason?.trim() || 'No reason provided'
+        }]);
 
       if (error) throw error;
       toast({ title: "Message reported", description: "Thank you for helping keep our community safe." });

@@ -49,14 +49,14 @@ export const registerForTournament = async (
   contactInfo?: string,
   specialRequirements?: string
 ): Promise<{ data: TournamentRegistration | null; error: any }> => {
-  const { data, error } = await supabase.rpc('register_team', {
+  const { data, error } = await (supabase.rpc as any)('register_team', {
     p_tournament_name: tournamentName,
     p_team_name: teamName,
     p_contact_info: contactInfo || null,
     p_special_requirements: specialRequirements || null
   });
 
-  return { data: data as TournamentRegistration | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -64,11 +64,11 @@ export const registerForTournament = async (
  */
 export const getTournamentRegistrations = async (): Promise<{ data: Omit<TournamentRegistration, 'contact_info' | 'special_requirements'>[] | null; error: any }> => {
   const { data, error } = await supabase
-    .from('tournament_registrations')
+    .from('tournament_registrations' as any)
     .select('id, user_id, tournament_name, team_name, status, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  return { data: data as Omit<TournamentRegistration, 'contact_info' | 'special_requirements'>[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -76,7 +76,7 @@ export const getTournamentRegistrations = async (): Promise<{ data: Omit<Tournam
  */
 export const getTournamentRegistrationsAdmin = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
   const { data, error } = await supabase
-    .from('tournament_registrations')
+    .from('tournament_registrations' as any)
     .select(`
       id,
       user_id,
@@ -90,7 +90,7 @@ export const getTournamentRegistrationsAdmin = async (): Promise<{ data: Tournam
     `)
     .order('created_at', { ascending: false });
 
-  return { data: data as TournamentRegistration[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -98,11 +98,11 @@ export const getTournamentRegistrationsAdmin = async (): Promise<{ data: Tournam
  */
 export const getTournamentTeams = async (): Promise<{ data: TournamentTeam[] | null; error: any }> => {
   const { data, error } = await supabase
-    .from('tournament_teams')
+    .from('tournament_teams' as any)
     .select('*')
     .order('created_at', { ascending: false });
 
-  return { data: data as TournamentTeam[] | null, error };
+  return { data: data as any, error };
 };
 
 /**
@@ -127,11 +127,11 @@ export const getTournamentMatches = async (): Promise<{ data: TournamentMatch[] 
  */
 export const getUserTournamentRegistrations = async (): Promise<{ data: TournamentRegistration[] | null; error: any }> => {
   const { data, error } = await supabase
-    .from('tournament_registrations')
+    .from('tournament_registrations' as any)
     .select('*')
     .order('created_at', { ascending: false });
 
-  return { data: data as TournamentRegistration[] | null, error };
+  return { data: data as any, error };
 };
 
 /**

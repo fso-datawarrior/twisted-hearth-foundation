@@ -75,7 +75,7 @@ const RSVP = () => {
         const idem = crypto?.randomUUID?.() ?? String(Date.now());
         
         // Call Supabase RPC to save RSVP
-        const { data, error: rpcError } = await supabase.rpc("submit_rsvp", {
+        const { data, error: rpcError } = await (supabase.rpc as any)("submit_rsvp", {
           p_name: formData.name,
           p_email: formData.email.toLowerCase().trim(),
           p_num_guests: formData.guestCount,
@@ -90,7 +90,7 @@ const RSVP = () => {
           throw new Error("Failed to save RSVP");
         }
 
-        const rsvpId = Array.isArray(data) ? data[0]?.rsvp_id : (data as any)?.rsvp_id;
+        const rsvpId = data;
         if (!rsvpId) {
           throw new Error("Invalid RSVP response");
         }

@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     queryKey: ['admin-rsvps'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rsvps')
+        .from('rsvps' as any)
         .select(`
           rsvp_id, user_id, status, num_guests, costume_idea, dietary_restrictions, contributions, created_at, updated_at,
           users!inner(name, email)
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as any;
     }
   });
 
@@ -58,14 +58,14 @@ export default function AdminDashboard() {
     queryKey: ['admin-photos'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('photos')
+        .from('photos' as any)
         .select(`
           id, user_id, filename, storage_path, is_approved, is_featured, created_at, likes_count
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as any;
     }
   });
 
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
     queryKey: ['admin-hunt'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('hunt_progress')
+        .from('hunt_progress' as any)
         .select(`
           id, user_id, hunt_run_id, hint_id, found_at, points_earned, created_at,
           hunt_runs(user_id, status),
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as any;
     }
   });
 
