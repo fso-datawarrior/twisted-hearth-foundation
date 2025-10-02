@@ -22,7 +22,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [verifying, setVerifying] = useState(false);
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(300);
   const { signIn, devSignIn, signInWithOtp, verifyOtp } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
@@ -43,7 +43,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setSent(false);
       setOtpSent(false);
       setOtpCode("");
-      setCountdown(60);
+      setCountdown(300);
       setAuthMethod('magic-link');
     }, 200);
   };
@@ -63,7 +63,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       } else {
         await signInWithOtp(email.trim().toLowerCase());
         setOtpSent(true);
-        setCountdown(60);
+        setCountdown(300);
         toast({
           title: "Code sent!",
           description: "Check your email for a 6-digit code.",
@@ -138,7 +138,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setLoading(true);
     try {
       await signInWithOtp(email.trim().toLowerCase());
-      setCountdown(60);
+      setCountdown(300);
       setOtpCode("");
       toast({
         title: "New code sent!",
@@ -159,7 +159,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleBackToEmail = () => {
     setOtpSent(false);
     setOtpCode("");
-    setCountdown(60);
+    setCountdown(300);
   };
 
   const handleDevSignIn = async () => {
@@ -234,8 +234,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
               <div className="text-center">
                 {countdown > 0 ? (
-                  <p className={`text-sm ${countdown < 10 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                    Code expires in {countdown}s
+                  <p className={`text-sm ${countdown < 30 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    Code expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
                   </p>
                 ) : (
                   <Button
@@ -412,7 +412,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     🔐 <strong>OTP code sign-in</strong> - Enter the code from your email!
                   </p>
                   <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
-                    6-digit code • Expires in 60 seconds
+                    6-digit code • Expires in 5 minutes
                   </p>
                 </>
               )}
