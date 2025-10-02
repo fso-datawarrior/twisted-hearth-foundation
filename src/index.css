@@ -87,19 +87,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 
 @media (max-width: 450px) {
   .logo-responsive {
-    font-size: 0.556546875rem; /* 8.9px - 15% smaller than 0.654765625rem */
-  }
-}
-
-@media (max-width: 425px) {
-  .logo-responsive {
-    font-size: 0.47306484375rem; /* 7.6px - 15% smaller than 0.556546875rem */
-  }
-}
-
-@media (max-width: 400px) {
-  .logo-responsive {
-    font-size: 0.4021051171875rem; /* 6.4px - 15% smaller than 0.47306484375rem */
+    font-size: 0.556546875rem; /* 8.9px - minimum size */
   }
 }
 
