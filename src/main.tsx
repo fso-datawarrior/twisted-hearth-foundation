@@ -32,5 +32,26 @@ if (false && 'serviceWorker' in navigator) {
     }
   });
 }
+async function bootstrap() {
+  try {
+    // Aggressively clear any existing SW and caches to avoid stale React chunks
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+    console.log('Service workers and caches cleared.');
+  } catch (e) {
+    console.log('Cleanup error:', e);
+  } finally {
+    const rootEl = document.getElementById('root');
+    if (rootEl) {
+      createRoot(rootEl).render(<App />);
+    }
+  }
+}
 
-createRoot(document.getElementById("root")!).render(<App />);
+bootstrap();
