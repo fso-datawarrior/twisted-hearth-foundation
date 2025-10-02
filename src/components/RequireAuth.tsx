@@ -37,30 +37,32 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
     }
     
     return (
-      <div className="max-w-md mx-auto my-10 p-6 rounded-2xl shadow-lg bg-card border">
-        <h2 className="text-xl font-semibold mb-3 text-foreground">Please sign in to continue</h2>
-        <p className="mb-4 text-muted-foreground">
-          This feature requires authentication to ensure a personalized experience.
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={() => setShowAuthModal(true)}
-            className="flex-1 rounded-xl px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Sign In
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex-1 rounded-xl px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-          >
-            Cancel
-          </button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className="max-w-md w-full mx-4 p-6 rounded-2xl shadow-lg bg-card border border-accent-gold/30">
+          <h2 className="font-heading text-xl font-semibold mb-3 text-accent-gold">Please sign in to continue</h2>
+          <p className="mb-4 text-muted-foreground">
+            This feature requires authentication to ensure a personalized experience.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex-1 rounded-xl px-4 py-2 bg-accent-purple text-primary-foreground hover:bg-accent-purple/90 transition-colors"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex-1 rounded-xl px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+          
+          <AuthModal 
+            isOpen={showAuthModal} 
+            onClose={() => setShowAuthModal(false)} 
+          />
         </div>
-        
-        <AuthModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
-        />
       </div>
     );
   }
