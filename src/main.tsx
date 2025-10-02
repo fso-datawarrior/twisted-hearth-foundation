@@ -4,7 +4,7 @@ import "./index.css";
 
 // Force clean rebuild - v1.0.6
 // Register/Unregister service worker based on route (avoid SW on /auth)
-if ('serviceWorker' in navigator) {
+if (false && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     if (location.pathname.startsWith('/auth')) {
       navigator.serviceWorker.getRegistrations()
