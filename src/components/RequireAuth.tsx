@@ -46,13 +46,13 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
           <div className="flex gap-3">
             <button
               onClick={() => setShowAuthModal(true)}
-              className="flex-1 rounded-xl px-4 py-2 bg-accent-purple text-primary-foreground hover:bg-accent-purple/90 transition-colors"
+              className="flex-1 rounded-xl px-4 py-2 bg-accent-purple text-white hover:bg-accent-purple/90 transition-colors font-subhead"
             >
               Sign In
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 rounded-xl px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              className="flex-1 rounded-xl px-4 py-2 border-2 border-accent-gold/50 text-accent-gold hover:bg-accent-gold/10 transition-colors font-subhead"
             >
               Cancel
             </button>
