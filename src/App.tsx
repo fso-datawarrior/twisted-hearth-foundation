@@ -42,18 +42,17 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <DeveloperModeProvider>
-          <AuthProvider>
-            <AdminProvider>
-              <HuntProvider>
-                <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
+    <QueryClientProvider client={queryClient}>
+      <DeveloperModeProvider>
+        <AuthProvider>
+          <AdminProvider>
+            <HuntProvider>
+              <BrowserRouter
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
+              >
                 <SkipLink />
                 <NavBar />
                 <main>
@@ -90,13 +89,12 @@ function App() {
                 <HuntProgress />
                 <HuntReward />
                 <HuntNotification />
-                </BrowserRouter>
-              </HuntProvider>
-            </AdminProvider>
-          </AuthProvider>
-        </DeveloperModeProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+              </BrowserRouter>
+            </HuntProvider>
+          </AdminProvider>
+        </AuthProvider>
+      </DeveloperModeProvider>
+    </QueryClientProvider>
   );
 }
 
