@@ -32,7 +32,7 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('rsvps')
         .select(`
-          rsvp_id, user_id, status, num_guests, created_at, updated_at,
+          rsvp_id, user_id, status, num_guests, costume_idea, dietary_restrictions, contributions, created_at, updated_at,
           users!inner(name, email)
         `)
         .order('created_at', { ascending: false });
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('hunt_progress')
         .select(`
-          id, user_id, hint_id, found_at, points_earned,
+          id, user_id, hunt_run_id, hint_id, found_at, points_earned, created_at,
           hunt_runs(user_id, status),
           hunt_hints(title, points)
         `)
