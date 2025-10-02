@@ -107,10 +107,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithOtp = async (email: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password: Math.random().toString(36),
       options: {
+        shouldCreateUser: false,
         emailRedirectTo: `${window.location.origin}/auth`,
       }
     });
