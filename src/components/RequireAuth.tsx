@@ -15,12 +15,8 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
 
   const handleCancel = () => {
     setShowAuthModal(false);
-    // Navigate back or to homepage
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    // Always navigate to homepage when canceling auth
+    navigate('/', { replace: true });
   };
 
   if (loading) {
