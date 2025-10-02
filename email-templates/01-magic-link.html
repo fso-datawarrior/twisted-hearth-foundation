@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magic Link - Twisted Tale</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Georgia', serif; background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 100%);">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 100%); min-height: 100vh;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 40px 20px 40px;">
+              <h1 style="margin: 0; color: #d4af37; font-size: 32px; font-weight: 700; text-shadow: 0 2px 8px rgba(212, 175, 55, 0.3); letter-spacing: 1px;">
+                🎭 Twisted Tale
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #e8d4a8; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">
+                The Ruths' Fairytale Halloween Bash
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 20px 40px;">
+              <h2 style="margin: 0 0 20px 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                Your Magic Portal Awaits
+              </h2>
+              
+              <p style="margin: 0 0 24px 0; color: #e0d4f0; font-size: 16px; line-height: 1.6;">
+                Click the enchanted button below to enter the realm, or use the mystical code if you prefer:
+              </p>
+
+              <!-- Magic Link Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 0 0 24px 0;">
+                    <a href="{{ .SiteURL }}/auth/v1/verify?token={{ .TokenHash }}&type=magiclink&redirect_to={{ .RedirectTo }}" 
+                       style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: #1a0f2e; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 18px; box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4); transition: all 0.3s ease;">
+                      ✨ Enter the Realm
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 24px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width: 45%; border-top: 1px solid rgba(212, 175, 55, 0.3);"></td>
+                        <td style="width: 10%; text-align: center;">
+                          <span style="color: #d4af37; font-size: 14px; padding: 0 10px;">OR</span>
+                        </td>
+                        <td style="width: 45%; border-top: 1px solid rgba(212, 175, 55, 0.3);"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- OTP Code -->
+              <p style="margin: 0 0 12px 0; color: #e0d4f0; font-size: 16px; line-height: 1.6;">
+                Enter this 6-digit mystical code:
+              </p>
+              
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 0 0 24px 0;">
+                    <div style="display: inline-block; padding: 20px 40px; background: rgba(212, 175, 55, 0.1); border: 2px solid #d4af37; border-radius: 12px; font-family: 'Courier New', monospace;">
+                      <span style="color: #d4af37; font-size: 32px; font-weight: 700; letter-spacing: 8px; text-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);">
+                        {{ .Token }}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 24px 0 0 0; color: #b8a8c8; font-size: 14px; line-height: 1.6; font-style: italic;">
+                This enchantment expires in 1 hour. If you didn't request this, simply ignore this message.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px 40px; border-top: 1px solid rgba(212, 175, 55, 0.2);">
+              <p style="margin: 0; color: #b8a8c8; font-size: 13px; line-height: 1.6; text-align: center;">
+                November 1st, 2025 • 6:30 PM<br>
+                Denver, Colorado
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
