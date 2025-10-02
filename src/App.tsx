@@ -44,7 +44,8 @@ function App() {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <DeveloperModeProvider>
+        {/* Temporarily disable DeveloperModeProvider to isolate hook issue */}
+        {/* <DeveloperModeProvider> */}
           <AuthProvider>
             <AdminProvider>
               <HuntProvider>
@@ -94,7 +95,7 @@ function App() {
               </HuntProvider>
             </AdminProvider>
           </AuthProvider>
-        </DeveloperModeProvider>
+        
       </QueryClientProvider>
     </React.StrictMode>
   );
