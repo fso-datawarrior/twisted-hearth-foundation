@@ -39,7 +39,9 @@ const Feast = () => {
 
   const handleSubmitItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !itemName.trim()) return;
+      if (!user || !itemName.trim()) {
+        return;
+      }
 
     setIsLoading(true);
     try {
@@ -53,7 +55,9 @@ const Feast = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       // Optimistically add to list
       setPotluckItems([data, ...potluckItems]);
@@ -78,23 +82,33 @@ const Feast = () => {
   const signatureDrinks = [
     {
       name: "Poison Apple Martini",
-      description: "Green apple vodka, sour apple schnapps, and a hint of cinnamon. Garnished with a red wax seal.",
-      ingredients: "Vodka, Apple Schnapps, Lime, Simple Syrup"
+      description: "Green apple vodka, sour apple schnapps, and a hint of cinnamon. Garnished with a red wax seal. <em>Warning: One sip and you'll never want to wake up from this dream.</em>",
+      ingredients: "Vodka, Apple Schnapps, Lime, Simple Syrup, Cinnamon"
     },
     {
       name: "Blood Wine of the Beast", 
-      description: "Deep red wine blend with blackberry and pomegranate. Served in goblets with dry ice.",
-      ingredients: "Cabernet, Blackberry Liqueur, Pomegranate Juice"
+      description: "Deep red wine blend with blackberry and pomegranate. Served in goblets with dry ice. <em>The Beast's curse runs deep - each sip brings you closer to the transformation.</em>",
+      ingredients: "Cabernet, Blackberry Liqueur, Pomegranate Juice, Dry Ice"
     },
     {
       name: "Sleeping Beauty's Nightcap",
-      description: "Lavender-infused gin with butterfly pea flower tea. Changes color when citrus is added.",
-      ingredients: "Gin, Lavender, Butterfly Pea Tea, Lemon"
+      description: "Lavender-infused gin with butterfly pea flower tea. Changes color when citrus is added. <em>Sleep comes easily, but waking up... that's another story entirely.</em>",
+      ingredients: "Gin, Lavender, Butterfly Pea Tea, Lemon, Elderflower"
     },
     {
       name: "Rumpelstiltskin's Gold",
-      description: "Bourbon cocktail with honey and gold leaf. The price of magic in liquid form.",
-      ingredients: "Bourbon, Honey Syrup, Lemon, Gold Leaf"
+      description: "Bourbon cocktail with honey and gold leaf. The price of magic in liquid form. <em>Every drop costs more than you think - are you willing to pay the price?</em>",
+      ingredients: "Bourbon, Honey Syrup, Lemon, Gold Leaf, Angostura Bitters"
+    },
+    {
+      name: "Alice's Mad Tea Party",
+      description: "Earl Grey-infused vodka with chamomile and a splash of absinthe. <em>Down the rabbit hole you go - there's no turning back once you've tasted madness.</em>",
+      ingredients: "Vodka, Earl Grey Tea, Chamomile, Absinthe, Simple Syrup"
+    },
+    {
+      name: "Cheshire Cat's Grin",
+      description: "Smoky mezcal with lime and a mysterious disappearing garnish. <em>The smile remains long after the drink is gone - just like the cat.</em>",
+      ingredients: "Mezcal, Lime, Agave, Smoked Salt, Mystery Garnish"
     }
   ];
 
@@ -156,7 +170,7 @@ const Feast = () => {
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Signature Libations
               </h2>
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {signatureDrinks.map((drink, index) => (
                   <div 
                     key={index}
@@ -172,8 +186,7 @@ const Feast = () => {
                     <h3 className="font-subhead text-xl mb-3 text-accent-red">
                       {drink.name}
                     </h3>
-                    <p className="font-body text-muted-foreground mb-4">
-                      {drink.description}
+                    <p className="font-body text-muted-foreground mb-4" dangerouslySetInnerHTML={{ __html: drink.description }}>
                     </p>
                     <div className="text-sm">
                       <span className="font-subhead text-accent-gold">Ingredients: </span>
@@ -191,6 +204,16 @@ const Feast = () => {
                     Please drink responsibly - we can't guarantee what these brews might reveal 
                     about your true nature.
                   </p>
+                  <div className="mt-4 p-4 bg-accent-red/10 border border-accent-red/30 rounded-lg">
+                    <p className="font-body text-accent-red font-semibold mb-2">
+                      🚗 Don't Drink & Drive - Use Rideshare!
+                    </p>
+                    <p className="font-body text-sm text-muted-foreground">
+                      Uber, Lyft, and other rideshare services are strongly encouraged. 
+                      The madness of Wonderland is best experienced when you can fully indulge 
+                      in our twisted libations without worry.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,10 +326,21 @@ const Feast = () => {
                           No contributions yet. Be the first to add a dish!
                         </p>
                       </div>
-                    )}
-                  </div>
+                  )}
+                </div>
+                
+                {/* RSVP Update Link */}
+                <div className="mt-6 text-center">
+                  <Button 
+                    asChild 
+                    variant="outline"
+                    className="border-accent-purple/30 text-accent-purple hover:bg-accent-purple/10 font-subhead"
+                  >
+                    <a href="/rsvp">Update Your RSVP</a>
+                  </Button>
                 </div>
               </div>
+            </div>
             </div>
             
             {/* Original Potluck Guidelines */}
@@ -340,13 +374,36 @@ const Feast = () => {
                 <h3 className="font-subhead text-2xl mb-4 text-accent-gold text-center">
                   Contribution Requirements
                 </h3>
+                
+                {/* Color-Coded System */}
+                <div className="mb-6 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-lg">
+                  <h4 className="font-subhead text-lg mb-3 text-accent-purple text-center">
+                    🎨 Color-Coded Contribution System
+                  </h4>
+                  <div className="grid md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <span className="text-muted-foreground">Green = Vegan/Vegetarian</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                      <span className="text-muted-foreground">Blue = Gluten-Free</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                      <span className="text-muted-foreground">Red = Contains Allergens</span>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety</h4>
+                    <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety & Dietary Needs</h4>
                     <ul className="font-body text-sm text-muted-foreground space-y-1">
-                      <li>• Include ingredient list for allergens</li>
+                      <li>• <strong className="text-accent-green">Include ingredient list for allergens</strong></li>
+                      <li>• <strong className="text-accent-green">Label vegan/vegetarian options clearly</strong></li>
+                      <li>• <strong className="text-accent-blue">Mark gluten-free items prominently</strong></li>
                       <li>• Keep hot foods hot, cold foods cold</li>
-                      <li>• Label if vegetarian/vegan/gluten-free</li>
                       <li>• No home-canned items please</li>
                     </ul>
                   </div>
@@ -355,6 +412,7 @@ const Feast = () => {
                     <ul className="font-body text-sm text-muted-foreground space-y-1">
                       <li>• Bring serving utensils</li>
                       <li>• Include a small card explaining your dish's story</li>
+                      <li>• <strong className="text-accent-purple">Use color-coded labels for dietary info</strong></li>
                       <li>• Creative presentation encouraged</li>
                       <li>• Consider bringing enough for 8-10 people</li>
                     </ul>

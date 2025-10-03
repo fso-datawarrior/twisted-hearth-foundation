@@ -172,7 +172,11 @@ const Index = () => {
                   title={vignette.title}
                   hook={vignette.hook}
                   onClick={() => setSelectedVignette(vignette)}
-                  className="hover:shadow-lg hover:shadow-accent-green/20 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] transition-all motion-reduce:transition-none cursor-pointer"
+                  className={`hover:shadow-lg motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] transition-all motion-reduce:transition-none cursor-pointer ${
+                    vignette.id === 1 
+                      ? "hover:shadow-accent-green/30 hover:border-accent-green/50" 
+                      : "hover:shadow-accent-green/20"
+                  }`}
                 />
               ))}
             </div>

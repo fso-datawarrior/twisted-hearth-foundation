@@ -18,32 +18,38 @@ const Schedule = () => {
       type: "social"
     },
     {
-      time: "8:00 PM",
-      title: "Vignettes Loop Begins", 
+      time: "7:30 PM",
+      title: "Vignette Loop Begins", 
       description: "Wander room to room; each tale changes on each pass. Interactive storytelling where you shape the narrative. Multiple paths, darker endings.",
       type: "performance"
     },
     {
-      time: "8:45 PM",
+      time: "7:45 PM",
       title: "Feast of the Damned",
       description: "Twisted fairytale potluck dinner begins. Each dish tells its own dark story, each bite a new chapter.",
       type: "feast"
     },
     {
+      time: "8:00 PM",
+      title: "Pong Tournament Begins",
+      description: "The annual battle where every miss is a step closer to the underworld. Will you survive the cursed cups?",
+      type: "contest"
+    },
+    {
       time: "9:00 PM",
-      title: "Costume Court Begins",
+      title: "Costume Court",
       description: "Showcase your twisted fairytale character. Judges evaluate creativity, presentation, and the darkness of your tale.",
       type: "contest"
     },
     {
       time: "10:00 PM",
-      title: "The Midnight Vignettes Continue",
-      description: "The stories grow darker as the night deepens. New scenes unlock, old secrets are revealed.",
+      title: "Scavenger Hunt or Shots Round",
+      description: "The night takes a turn for the adventurous. Will you hunt for hidden treasures or face the consequences of your choices?",
       type: "performance"
     },
     {
       time: "10:45 PM",
-      title: "Final Toast & The Last Dance",
+      title: "Final Toast / Last Dance",
       description: "As midnight approaches, we gather one last time. The music plays, but some dances never end.",
       type: "finale"
     }
@@ -132,8 +138,9 @@ const Schedule = () => {
                 <h2 className="font-subhead text-2xl mb-4 text-accent-red">Important Notes</h2>
                 <ul className="font-body text-muted-foreground space-y-2">
                   <li>• Interactive experiences require participation</li>
-                  <li>• Some content may be intense - 18+ recommended</li>
-                  <li>• Photography encouraged during designated times</li>
+                  <li>• <strong className="text-accent-red">Age 21+ only</strong> - This is an adult-only event</li>
+                  <li>• <strong className="text-accent-red">Risqué costumes & partial nudity</strong> may be present</li>
+                  <li>• <strong className="text-accent-gold">Photography with consent only</strong> - Ask before taking photos</li>
                   <li>• Stay in character for the full experience</li>
                 </ul>
               </div>
@@ -144,7 +151,7 @@ const Schedule = () => {
                   <li>• Your twisted fairytale costume</li>
                   <li>• A potluck dish (fairytale themed preferred)</li>
                   <li>• An open mind and brave heart</li>
-                  <li>• Your story participation cards (provided)</li>
+                  <li>• <em className="text-accent-purple italic">Under development</em> - More surprises await!</li>
                 </ul>
               </div>
             </div>

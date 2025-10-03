@@ -159,7 +159,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead text-ink">
-                        {user.email?.split("@")[0] || "User"}
+                        {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -208,10 +208,21 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex nav-full:hidden items-center space-x-8">
+          <div className="flex nav-full:hidden items-center space-x-4">
             <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden">
               {getCurrentPageName()}
             </span>
+            
+            {/* Mobile RSVP Button - Always visible on mobile */}
+            <Button 
+              asChild 
+              variant="destructive" 
+              size="sm"
+              className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead text-xs px-3 py-1"
+            >
+              <Link to="/rsvp">{ctaLabel}</Link>
+            </Button>
+            
             <button
               className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -302,7 +313,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead">
-                        {user.email?.split("@")[0] || "User"}
+                        {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
                       </span>
                     </div>
                     
@@ -340,16 +351,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                     Sign In
                   </Button>
                 )}
-                
-                <Button 
-                  asChild 
-                  variant="destructive" 
-                  className="w-full bg-accent-red hover:bg-accent-red/80 font-subhead"
-                >
-                  <Link to="/rsvp" onClick={() => setIsMenuOpen(false)}>
-                    {ctaLabel}
-                  </Link>
-                </Button>
               </div>
           </div>
         )}

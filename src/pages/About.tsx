@@ -16,21 +16,22 @@ const About = () => {
             
             <div className="prose prose-invert max-w-none">
               <p className="font-body text-lg text-center mb-12 text-muted-foreground">
-                Step into a world where happily ever after takes a darker turn...
+                Down the rabbit hole we go, where Alice's madness has infected every fairytale...
               </p>
               
               <div className="grid md:grid-cols-2 gap-12">
                 <div className="bg-card p-8 rounded-lg border border-accent-purple/30">
                   <h2 className="font-subhead text-2xl mb-4 text-accent-gold">The Theme</h2>
                   <p className="font-body text-muted-foreground mb-4">
-                    What happens when classic fairytales take a sinister twist? Join us for an evening 
-                    where Snow White's apple is truly poisoned, where Goldilocks faces consequences 
-                    for her breaking and entering, and where the Big Bad Wolf isn't the only predator 
-                    in the woods.
+                    Alice fell down the rabbit hole and never came back the same. Her madness has 
+                    spread like wildfire through Wonderland, corrupting every fairytale it touches. 
+                    Now Snow White's apple carries the Queen of Hearts' curse, Goldilocks finds 
+                    herself trapped in the Mad Hatter's tea party, and the Big Bad Wolf has become 
+                    the Cheshire Cat's latest victim.
                   </p>
                   <p className="font-body text-muted-foreground">
-                    Come dressed as your favorite fairytale character with a dark twist, or create 
-                    an entirely new twisted tale of your own.
+                    Come dressed as your favorite fairytale character, but beware - Alice's influence 
+                    has twisted them all. Will you embrace the madness or fight to restore order?
                   </p>
                 </div>
                 
@@ -43,16 +44,17 @@ const About = () => {
                     various haunted realms.
                   </p>
                   <p className="font-body text-muted-foreground">
-                    This year's twisted fairytale theme promises to be their most ambitious yet, 
+                    This year's Alice-influenced fairytale theme promises to be their most ambitious yet, 
                     complete with interactive storytelling, themed rooms, and surprises around 
-                    every corner.
+                    every corner. Will you find your way out of Wonderland, or will you be lost 
+                    in the madness forever?
                   </p>
                 </div>
               </div>
               
               <div className="mt-12 text-center">
                 <h2 className="font-subhead text-3xl mb-6 text-accent-gold">What to Expect</h2>
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-bg-2 p-6 rounded-lg">
                     <h3 className="font-subhead text-xl mb-3 text-accent-gold">Immersive Storytelling</h3>
                     <p className="font-body text-sm text-muted-foreground">
@@ -66,7 +68,14 @@ const About = () => {
                     </p>
                   </div>
                   <div className="bg-bg-2 p-6 rounded-lg">
-                    <h3 className="font-subhead text-xl mb-3 text-accent-red">Costume Contest</h3>
+                    <h3 className="font-subhead text-xl mb-3 text-accent-red">Cursed Pong Tournament</h3>
+                    <p className="font-body text-sm text-muted-foreground">
+                      The annual battle where every miss is a step closer to the underworld. 
+                      Will you survive the cursed cups?
+                    </p>
+                  </div>
+                  <div className="bg-bg-2 p-6 rounded-lg">
+                    <h3 className="font-subhead text-xl mb-3 text-accent-gold">Costume Contest</h3>
                     <p className="font-body text-sm text-muted-foreground">
                       Prizes for most creative, most twisted, and best original fairytale character
                     </p>
