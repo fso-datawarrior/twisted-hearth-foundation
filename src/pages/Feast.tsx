@@ -39,7 +39,7 @@ const potluckItemSchema = z.object({
 const Feast = () => {
   const [potluckItems, setPotluckItems] = useState<PotluckItem[]>([]);
   const [itemName, setItemName] = useState("");
-  const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [notes, setNotes] = useState("");
   const [isVegan, setIsVegan] = useState(false);
   const [isGlutenFree, setIsGlutenFree] = useState(false);
@@ -48,54 +48,75 @@ const Feast = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Auto-populate email when user logs in
+  // Auto-populate display name from RSVP or email when user logs in
   useEffect(() => {
-    if (user?.email) {
-      setEmail(user.email);
-    }
+    const loadDisplayName = async () => {
+      if (!user?.email) return;
+      
+      // Try to get name from RSVP
+      const { data: rsvpData } = await supabase
+        .from('rsvps')
+        .select('name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (rsvpData?.name) {
+        setDisplayName(rsvpData.name);
+      } else {
+        // Fallback: format email username
+        const emailUsername = user.email.split('@')[0];
+        const formattedName = emailUsername.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        setDisplayName(formattedName);
+      }
+    };
+    
+    loadDisplayName();
   }, [user]);
 
   // Load potluck items with contributor names
   useEffect(() => {
     const loadPotluckItems = async () => {
-      const { data, error } = await supabase
+      // Fetch potluck items
+      const { data: items, error: itemsError } = await supabase
         .from('potluck_items')
-        .select(`
-          *,
-          rsvps!left(name)
-        `)
+        .select('*')
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(50);
       
-      if (error) {
-        console.error("Error loading potluck items:", error);
-      } else {
-        // Map the data to include contributor_name with fallback logic
-        const itemsWithNames = (data || []).map((item: any) => {
-          const rsvpName = item.rsvps?.name;
-          let contributorName = rsvpName;
-          
-          // Fallback: extract name from email if no RSVP name
-          if (!contributorName && item.user_email) {
-            const emailUsername = item.user_email.split('@')[0];
-            contributorName = emailUsername.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          }
-          
-          return {
-            id: item.id,
-            item_name: item.item_name,
-            notes: item.notes,
-            is_vegan: item.is_vegan,
-            is_gluten_free: item.is_gluten_free,
-            created_at: item.created_at,
-            user_email: item.user_email,
-            contributor_name: contributorName
-          };
-        });
-        
-        setPotluckItems(itemsWithNames);
+      if (itemsError) {
+        console.error("Error loading potluck items:", itemsError);
+        return;
       }
+      
+      if (!items || items.length === 0) {
+        setPotluckItems([]);
+        return;
+      }
+      
+      // Map items to include display_name (stored) or fallback to email username
+      const itemsWithNames = items.map((item: any) => {
+        let contributorName = item.display_name;
+        
+        // Fallback: extract name from email if no display name
+        if (!contributorName && item.user_email) {
+          const emailUsername = item.user_email.split('@')[0];
+          contributorName = emailUsername.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        return {
+          id: item.id,
+          item_name: item.item_name,
+          notes: item.notes,
+          is_vegan: item.is_vegan,
+          is_gluten_free: item.is_gluten_free,
+          created_at: item.created_at,
+          user_email: item.user_email,
+          contributor_name: contributorName
+        };
+      });
+      
+      setPotluckItems(itemsWithNames);
     };
     
     loadPotluckItems();
@@ -127,17 +148,6 @@ const Feast = () => {
       return;
     }
 
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       // Insert into database
@@ -150,31 +160,23 @@ const Feast = () => {
             notes: notes.trim() || null,
             is_vegan: isVegan,
             is_gluten_free: isGlutenFree,
-            user_email: email.trim(),
+            user_email: user.email,
+            display_name: displayName.trim(),
           },
         ])
         .select()
         .single();
 
       if (error) throw error;
-
-      // Get contributor name for display
-      const { data: rsvpData } = await supabase
-        .from('rsvps')
-        .select('name')
-        .eq('user_id', user.id)
-        .maybeSingle();
       
-      const contributorName = rsvpData?.name || email.trim().split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      
-      setPotluckItems([{ ...data, contributor_name: contributorName }, ...potluckItems]);
+      setPotluckItems([{ ...data, contributor_name: displayName.trim() }, ...potluckItems]);
 
       // Send confirmation emails
       try {
         const { error: emailError } = await supabase.functions.invoke('send-contribution-confirmation', {
           body: {
-            contributorEmail: email.trim(),
-            contributorName: contributorName,
+            contributorEmail: user.email,
+            contributorName: displayName.trim(),
             dishName: itemName.trim(),
             notes: notes.trim() || undefined,
             isVegan,
@@ -398,21 +400,21 @@ const Feast = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="email" className="font-subhead text-accent-gold">
-                          Your Email
+                        <Label htmlFor="displayName" className="font-subhead text-accent-gold">
+                          Name to Display on Your Contribution
                         </Label>
                         <Input
-                          id="email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="your.email@example.com"
+                          id="displayName"
+                          type="text"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          placeholder="e.g., Chef Alice"
                           required
                           disabled={isLoading}
                           className="bg-background border-accent-purple/30 focus:border-accent-gold"
                         />
                         <div className="text-xs text-muted-foreground mt-1">
-                          We'll send confirmation to this email
+                          This name will appear on your contribution card
                         </div>
                       </div>
                       
@@ -567,7 +569,7 @@ const Feast = () => {
                   <h4 className="font-subhead text-lg mb-3 text-accent-gold font-bold text-center">
                     🎨 Color-Coded Contribution System
                   </h4>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                       <span className="text-gray-200 font-semibold">Green = Vegan/Vegetarian</span>
@@ -580,9 +582,9 @@ const Feast = () => {
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
+                  <div className="text-center md:text-left">
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety & Dietary Needs</h4>
-                    <ul className="font-body text-sm text-gray-200 space-y-1">
+                    <ul className="font-body text-sm text-gray-200 space-y-1 inline-block text-left">
                       <li>• <strong className="text-accent-gold">Include ingredient list for allergens</strong></li>
                       <li>• <strong className="text-accent-gold">Label vegan/vegetarian options clearly</strong></li>
                       <li>• <strong className="text-blue-400">Mark gluten-free items prominently</strong></li>
@@ -590,9 +592,9 @@ const Feast = () => {
                       <li>• No home-canned items please</li>
                     </ul>
                   </div>
-                  <div>
+                  <div className="text-center md:text-left">
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Presentation</h4>
-                    <ul className="font-body text-sm text-gray-200 space-y-1">
+                    <ul className="font-body text-sm text-gray-200 space-y-1 inline-block text-left">
                       <li>• Bring serving utensils</li>
                       <li>• Include a small card explaining your dish's story</li>
                       <li>• <strong className="text-accent-gold font-bold">Use color-coded labels for dietary info</strong></li>

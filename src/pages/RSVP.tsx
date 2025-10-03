@@ -3,6 +3,7 @@ import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import RequireAuth from "@/components/RequireAuth";
@@ -11,7 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, UtensilsCrossed } from "lucide-react";
+import { Pencil, Trash2, UtensilsCrossed, Plus, Minus } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { z } from "zod";
 
 interface PotluckItem {
@@ -32,6 +34,7 @@ const potluckItemSchema = z.object({
 
 const RSVP = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const startRef = useRef(Date.now());
   const [formData, setFormData] = useState({
     name: "",
@@ -41,6 +44,13 @@ const RSVP = () => {
     dietary: "",
     nickname: "" // Honeypot field
   });
+
+  // Auto-populate email when user logs in
+  useEffect(() => {
+    if (user?.email) {
+      setFormData(prev => ({ ...prev, email: user.email || "" }));
+    }
+  }, [user]);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -326,7 +336,12 @@ const RSVP = () => {
     setDishNotes(item.notes || "");
     setIsVegan(item.is_vegan);
     setIsGlutenFree(item.is_gluten_free);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll to contribution form
+    const formElement = document.getElementById('contribution-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleDeleteDish = async (id: string) => {
@@ -416,17 +431,41 @@ const RSVP = () => {
                   />
                 </div>
                 
-                <FormField
-                  label="Number of Guests *"
-                  name="guestCount"
-                  type="number"
-                  value={formData.guestCount}
-                  onChange={(value) => handleInputChange("guestCount", parseInt(value) || 1)}
-                  error={errors.guestCount}
-                  min={1}
-                  max={10}
-                  placeholder="1"
-                />
+                <div>
+                  <Label className="font-subhead text-accent-gold mb-2 block">
+                    Number of Guests <span className="text-accent-red">*</span>
+                  </Label>
+                  <div className="flex items-center justify-center gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleInputChange("guestCount", Math.max(1, formData.guestCount - 1))}
+                      disabled={formData.guestCount <= 1}
+                      className="h-12 w-12 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10"
+                    >
+                      <Minus className="h-5 w-5" />
+                    </Button>
+                    
+                    <div className="flex-shrink-0 w-20 h-12 flex items-center justify-center bg-background border-2 border-accent-purple/30 rounded-lg">
+                      <span className="text-xl font-semibold text-white">{formData.guestCount}</span>
+                    </div>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleInputChange("guestCount", Math.min(10, formData.guestCount + 1))}
+                      disabled={formData.guestCount >= 10}
+                      className="h-12 w-12 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  {errors.guestCount && (
+                    <p className="text-sm text-accent-red mt-1">{errors.guestCount}</p>
+                  )}
+                </div>
                 
                 {/* Optional Fields */}
                 <div className="border-t border-accent-purple/30 pt-6">
@@ -476,7 +515,7 @@ const RSVP = () => {
             </div>
 
             {/* Potluck Contribution Section */}
-            <div className="bg-card p-6 rounded-lg border border-accent-purple/30 shadow-lg mt-8">
+            <div id="contribution-form" className="bg-card p-6 rounded-lg border border-accent-purple/30 shadow-lg mt-8">
               <h2 className="text-2xl font-display text-white mb-4 flex items-center gap-2">
                 <UtensilsCrossed className="h-6 w-6 text-accent-gold" />
                 {editingItem ? "Edit Your Contribution" : "Add Your Contribution"}
