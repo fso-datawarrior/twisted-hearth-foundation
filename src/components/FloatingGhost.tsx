@@ -7,11 +7,11 @@ interface GhostProps {
 
 const Ghost = ({ delay }: GhostProps) => {
   const [trajectory, setTrajectory] = useState({
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0,
-    duration: 0,
+    startX: -10,
+    startY: 50,
+    endX: 110,
+    endY: 50,
+    duration: 15,
   });
 
   useEffect(() => {
@@ -96,37 +96,45 @@ const Ghost = ({ delay }: GhostProps) => {
           stroke="rgba(200, 200, 255, 0.5)"
           strokeWidth="1"
         />
-        {/* Eyes */}
-        <motion.ellipse
-          cx="38"
-          cy="40"
-          rx="5"
-          ry="8"
-          fill="#1a0f2e"
+        {/* Eyes - wrapped in motion.g to animate scaleY */}
+        <motion.g
           animate={{
-            ry: [8, 2, 8],
+            scaleY: [1, 0.2, 1],
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            repeatType: "loop",
+            ease: "easeInOut",
           }}
-        />
-        <motion.ellipse
-          cx="62"
-          cy="40"
-          rx="5"
-          ry="8"
-          fill="#1a0f2e"
+          style={{ transformOrigin: "38px 40px" }}
+        >
+          <ellipse
+            cx="38"
+            cy="40"
+            rx="5"
+            ry="8"
+            fill="#1a0f2e"
+          />
+        </motion.g>
+        <motion.g
           animate={{
-            ry: [8, 2, 8],
+            scaleY: [1, 0.2, 1],
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            repeatType: "loop",
+            ease: "easeInOut",
           }}
-        />
+          style={{ transformOrigin: "62px 40px" }}
+        >
+          <ellipse
+            cx="62"
+            cy="40"
+            rx="5"
+            ry="8"
+            fill="#1a0f2e"
+          />
+        </motion.g>
         {/* Mouth */}
         <ellipse cx="50" cy="60" rx="8" ry="10" fill="#1a0f2e" />
       </svg>

@@ -3,11 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
+import { useAudio } from "@/contexts/AudioContext";
 import HuntNavIndicator from "@/components/hunt/HuntNavIndicator";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
 import packageJson from "../../package.json";
@@ -25,6 +26,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const { user, signOut } = useAuth();
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
+  const { isMuted, toggleMute } = useAudio();
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -109,7 +111,22 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
             
           {/* Auth Section - Positioned just to the right of nav links */}
-          <div className="hidden nav-full:flex items-center space-x-8 ml-8">
+          <div className="hidden nav-full:flex items-center space-x-4 ml-8">
+              {/* Audio Mute Toggle */}
+              <Button
+                onClick={toggleMute}
+                variant="ghost"
+                size="sm"
+                className="hover:bg-accent-purple/10 font-subhead transition-colors"
+                aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+              >
+                {isMuted ? (
+                  <VolumeX className="h-5 w-5 text-ink/60" />
+                ) : (
+                  <Volume2 className="h-5 w-5 text-accent-gold" />
+                )}
+              </Button>
+
               {/* Developer Mode Toggle - Only show when dev mode is enabled */}
               {DEV_MODE_ENABLED && (
                 <Button
@@ -229,6 +246,29 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                   </Link>
                 ))}
                 
+                {/* Mobile Audio Toggle */}
+                <div className="pt-2 border-t border-accent-purple/30">
+                  <Button
+                    onClick={() => { toggleMute(); setIsMenuOpen(false); }}
+                    variant="ghost"
+                    className="w-full font-subhead hover:bg-accent-purple/10"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      {isMuted ? (
+                        <>
+                          <VolumeX size={16} />
+                          <span>Sound OFF</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 size={16} />
+                          <span>Sound ON</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
+                </div>
+
                 {/* Mobile Developer Mode Toggle - Only show when dev mode is enabled */}
                 {DEV_MODE_ENABLED && (
                   <div className="pt-2 border-t border-accent-purple/30">

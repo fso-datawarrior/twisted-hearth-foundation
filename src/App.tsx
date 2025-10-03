@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { DeveloperModeProvider } from "@/contexts/DeveloperModeContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { AudioProvider } from "@/contexts/AudioContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import HuntNotification from "@/components/hunt/HuntNotification";
@@ -46,7 +47,8 @@ function App() {
       <DeveloperModeProvider>
         <AuthProvider>
           <AdminProvider>
-            <HuntProvider>
+            <AudioProvider>
+              <HuntProvider>
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
@@ -90,7 +92,8 @@ function App() {
                 <HuntReward />
                 <HuntNotification />
               </BrowserRouter>
-            </HuntProvider>
+              </HuntProvider>
+            </AudioProvider>
           </AdminProvider>
         </AuthProvider>
       </DeveloperModeProvider>
