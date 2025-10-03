@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { isPartyOver } from './event';
 
-type SessionUser = { id: string; email: string | null };
+type SessionUser = { 
+  id: string; 
+  email: string | null;
+  user_metadata?: { full_name?: string; [key: string]: any };
+};
 type AuthCtx = { 
   user: SessionUser | null; 
   session: Session | null;
@@ -27,7 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
+        setUser(session?.user ? { 
+          id: session.user.id, 
+          email: session.user.email,
+          user_metadata: session.user.user_metadata 
+        } : null);
         setLoading(false);
       }
     );
@@ -35,7 +43,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
+      setUser(session?.user ? { 
+        id: session.user.id, 
+        email: session.user.email,
+        user_metadata: session.user.user_metadata 
+      } : null);
       setLoading(false);
     });
 
@@ -95,7 +107,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       confirmation_sent_at: new Date().toISOString(),
     };
     
-    setUser({ id: mockUser.id, email: mockUser.email });
+    setUser({ 
+      id: mockUser.id, 
+      email: mockUser.email,
+      user_metadata: mockUser.user_metadata 
+    });
     setSession({
       access_token: 'dev-token',
       refresh_token: 'dev-refresh',
