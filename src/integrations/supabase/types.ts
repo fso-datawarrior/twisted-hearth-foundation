@@ -617,6 +617,18 @@ export type Database = {
         }
         Returns: string
       }
+      submit_rsvp: {
+        Args: {
+          p_contributions?: string
+          p_costume_idea?: string
+          p_dietary?: string
+          p_email: string
+          p_idempotency?: string
+          p_name: string
+          p_num_guests: number
+        }
+        Returns: string
+      }
       toggle_photo_reaction: {
         Args: { p_photo_id: string; p_reaction_type?: string }
         Returns: boolean
