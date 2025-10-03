@@ -50,7 +50,7 @@ const Ghost = ({ delay }: GhostProps) => {
       startY,
       endX,
       endY,
-      duration: 18 + Math.random() * 12, // 18-30 seconds (much slower)
+      duration: 10 + Math.random() * 8, // 10-18 seconds (faster to see more at once)
     });
   }, []);
 
@@ -67,7 +67,7 @@ const Ghost = ({ delay }: GhostProps) => {
       animate={{
         left: `${trajectory.endX}%`,
         top: `${trajectory.endY}%`,
-        opacity: [0, 0.85, 0.85, 0],
+        opacity: [0, 0.95, 0.95, 0],
       }}
       transition={{
         duration: trajectory.duration,
@@ -147,12 +147,12 @@ export const FloatingGhosts = () => {
 
     // Spawn ghosts at intervals
     const intervals: NodeJS.Timeout[] = [];
-    const maxGhosts = 7;
+    const maxGhosts = 12;
 
     for (let i = 0; i < maxGhosts; i++) {
       const timeout = setTimeout(() => {
         setGhosts((prev) => [...prev, Date.now() + i]);
-      }, i * 2000); // Spawn every 2 seconds
+      }, i * 1000); // Spawn every 1 second
 
       intervals.push(timeout);
     }
@@ -163,7 +163,7 @@ export const FloatingGhosts = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       {ghosts.map((id, index) => (
         <Ghost key={id} delay={0} />
       ))}
