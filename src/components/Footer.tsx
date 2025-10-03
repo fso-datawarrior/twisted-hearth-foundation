@@ -42,6 +42,14 @@ const Footer = () => {
                 Contact Us
               </a>
             </div>
+            <div className="mt-4">
+              <a 
+                href="/spooky-portal-of-lost-souls" 
+                className="font-body text-xs text-accent-purple hover:text-accent-red transition-colors motion-safe no-underline focus:no-underline italic animate-pulse"
+              >
+                👻 Dare to wander where you shouldn't? Click if you're brave...
+              </a>
+            </div>
           </div>
           
           {/* Copyright */}
