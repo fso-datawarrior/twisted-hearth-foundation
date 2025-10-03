@@ -50,11 +50,11 @@ const Ghost = ({ delay }: GhostProps) => {
       startY,
       endX,
       endY,
-      duration: 8 + Math.random() * 6, // 8-14 seconds
+      duration: 18 + Math.random() * 12, // 18-30 seconds (much slower)
     });
   }, []);
 
-  const size = 40 + Math.random() * 40; // 40-80px
+  const size = 50 + Math.random() * 50; // 50-100px (larger)
 
   return (
     <motion.div
@@ -67,7 +67,7 @@ const Ghost = ({ delay }: GhostProps) => {
       animate={{
         left: `${trajectory.endX}%`,
         top: `${trajectory.endY}%`,
-        opacity: [0, 0.7, 0.7, 0],
+        opacity: [0, 0.85, 0.85, 0],
       }}
       transition={{
         duration: trajectory.duration,

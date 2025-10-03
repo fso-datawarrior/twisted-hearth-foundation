@@ -65,14 +65,14 @@ const NotFound = () => {
         )}
       </button>
 
-      <div className="mx-4 max-w-2xl z-20 relative">
+      <div className="mx-4 max-w-4xl z-20 relative">
         <div className="rounded-xl border border-[rgba(212,175,55,0.4)] bg-card/60 backdrop-blur-sm p-8 md:p-12 text-center shadow-[0_8px_32px_rgba(212,175,55,0.2)]">
           {/* Arcade 404 Image */}
-          <div className="mb-6 flex justify-center">
+          <div className="mb-8 flex justify-center">
             <img 
               src="/img/arcade-404.png" 
               alt="Arcade style 404 error" 
-              className="max-w-full h-auto max-h-48 md:max-h-64 drop-shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+              className="w-full h-auto drop-shadow-[0_0_30px_rgba(212,175,55,0.5)]"
             />
           </div>
           
