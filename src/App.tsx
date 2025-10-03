@@ -47,16 +47,16 @@ function App() {
       <DeveloperModeProvider>
         <AuthProvider>
           <AdminProvider>
-            <AudioProvider>
-              <HuntProvider>
+            <HuntProvider>
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
                   v7_relativeSplatPath: true,
                 }}
               >
-                <SkipLink />
-                <NavBar />
+                <AudioProvider>
+                  <SkipLink />
+                  <NavBar />
                 <main>
                   <SwipeNavigator>
                     <Toaster />
@@ -87,13 +87,13 @@ function App() {
                   </SwipeNavigator>
                 </main>
                 
-                {/* Hunt UI overlays */}
-                <HuntProgress />
-                <HuntReward />
-                <HuntNotification />
+                  {/* Hunt UI overlays */}
+                  <HuntProgress />
+                  <HuntReward />
+                  <HuntNotification />
+                </AudioProvider>
               </BrowserRouter>
-              </HuntProvider>
-            </AudioProvider>
+            </HuntProvider>
           </AdminProvider>
         </AuthProvider>
       </DeveloperModeProvider>
