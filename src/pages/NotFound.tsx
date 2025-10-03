@@ -16,7 +16,7 @@ const NotFound = () => {
     // Note: Audio file needs to be added to public/sounds/howl.mp3
     const audio = new Audio("/sounds/howl.mp3");
     audio.volume = 0.3;
-    audio.loop = false;
+    audio.loop = true;
     audioRef.current = audio;
 
     // Auto-play with user interaction handling
