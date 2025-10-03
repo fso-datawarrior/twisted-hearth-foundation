@@ -27,6 +27,8 @@ interface PotluckItem {
   is_vegan?: boolean;
   is_gluten_free?: boolean;
   created_at: string;
+  contributor_name?: string;
+  user_email?: string;
 }
 
 const potluckItemSchema = z.object({
@@ -37,6 +39,7 @@ const potluckItemSchema = z.object({
 const Feast = () => {
   const [potluckItems, setPotluckItems] = useState<PotluckItem[]>([]);
   const [itemName, setItemName] = useState("");
+  const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [isVegan, setIsVegan] = useState(false);
   const [isGlutenFree, setIsGlutenFree] = useState(false);
@@ -45,19 +48,53 @@ const Feast = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load potluck items
+  // Auto-populate email when user logs in
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
+
+  // Load potluck items with contributor names
   useEffect(() => {
     const loadPotluckItems = async () => {
       const { data, error } = await supabase
         .from('potluck_items')
-        .select('*')
+        .select(`
+          *,
+          rsvps!left(name)
+        `)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(50);
       
       if (error) {
         console.error("Error loading potluck items:", error);
       } else {
-        setPotluckItems(data || []);
+        // Map the data to include contributor_name with fallback logic
+        const itemsWithNames = (data || []).map((item: any) => {
+          const rsvpName = item.rsvps?.name;
+          let contributorName = rsvpName;
+          
+          // Fallback: extract name from email if no RSVP name
+          if (!contributorName && item.user_email) {
+            const emailUsername = item.user_email.split('@')[0];
+            contributorName = emailUsername.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          }
+          
+          return {
+            id: item.id,
+            item_name: item.item_name,
+            notes: item.notes,
+            is_vegan: item.is_vegan,
+            is_gluten_free: item.is_gluten_free,
+            created_at: item.created_at,
+            user_email: item.user_email,
+            contributor_name: contributorName
+          };
+        });
+        
+        setPotluckItems(itemsWithNames);
       }
     };
     
@@ -90,6 +127,17 @@ const Feast = () => {
       return;
     }
 
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Insert into database
@@ -102,7 +150,7 @@ const Feast = () => {
             notes: notes.trim() || null,
             is_vegan: isVegan,
             is_gluten_free: isGlutenFree,
-            user_email: user.email,
+            user_email: email.trim(),
           },
         ])
         .select()
@@ -110,14 +158,23 @@ const Feast = () => {
 
       if (error) throw error;
 
-      setPotluckItems([data, ...potluckItems]);
+      // Get contributor name for display
+      const { data: rsvpData } = await supabase
+        .from('rsvps')
+        .select('name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      const contributorName = rsvpData?.name || email.trim().split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      setPotluckItems([{ ...data, contributor_name: contributorName }, ...potluckItems]);
 
       // Send confirmation emails
       try {
         const { error: emailError } = await supabase.functions.invoke('send-contribution-confirmation', {
           body: {
-            contributorEmail: user.email,
-            contributorName: user.user_metadata?.full_name || user.email.split('@')[0],
+            contributorEmail: email.trim(),
+            contributorName: contributorName,
             dishName: itemName.trim(),
             notes: notes.trim() || undefined,
             isVegan,
@@ -339,6 +396,25 @@ const Feast = () => {
                           {itemName.length}/80 characters
                         </div>
                       </div>
+
+                      <div>
+                        <Label htmlFor="email" className="font-subhead text-accent-gold">
+                          Your Email
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="your.email@example.com"
+                          required
+                          disabled={isLoading}
+                          className="bg-background border-accent-purple/30 focus:border-accent-gold"
+                        />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          We'll send confirmation to this email
+                        </div>
+                      </div>
                       
                       <div>
                         <Label htmlFor="notes" className="font-subhead text-accent-gold">
@@ -421,13 +497,18 @@ const Feast = () => {
                           <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
                             <CardContent className="p-4">
                               <div className="flex items-start justify-between">
-                                <div>
+                                <div className="flex-1">
                                   <h4 className="font-semibold text-white flex items-center gap-2">
                                     {item.item_name}
                                     {item.is_vegan && <span title="Vegan">🌱</span>}
                                     {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
                                   </h4>
-                                  {item.notes && <p className="text-sm text-gray-400 mt-1">{item.notes}</p>}
+                                  {item.contributor_name && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Contributed by: <span className="text-accent-gold font-medium">{item.contributor_name}</span>
+                                    </p>
+                                  )}
+                                  {item.notes && <p className="text-sm text-gray-400 mt-2">{item.notes}</p>}
                                 </div>
                               </div>
                             </CardContent>
