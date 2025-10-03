@@ -1,22 +1,84 @@
 import { useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home, ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { FloatingGhosts } from "@/components/FloatingGhost";
 
 const NotFound = () => {
   const location = useLocation();
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    
+    // Try to play spooky sound (if available)
+    // Note: Audio file needs to be added to public/sounds/howl.mp3
+    const audio = new Audio("/sounds/howl.mp3");
+    audio.volume = 0.3;
+    audio.loop = false;
+    audioRef.current = audio;
+
+    // Auto-play with user interaction handling
+    const playAudio = () => {
+      audio.play().catch(() => {
+        // Browser blocked auto-play, that's okay
+        console.log("Audio auto-play blocked by browser");
+      });
+    };
+
+    playAudio();
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
   }, [location.pathname]);
 
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.volume = 0.3;
+        audioRef.current.play().catch(() => {});
+      } else {
+        audioRef.current.volume = 0;
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="mx-4 max-w-2xl">
+    <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden">
+      {/* Floating Ghosts */}
+      <FloatingGhosts />
+
+      {/* Mute Button */}
+      <button
+        onClick={toggleMute}
+        className="fixed top-4 right-4 z-50 p-3 rounded-full bg-card/60 backdrop-blur-sm border border-accent/40 hover:bg-accent/10 transition-all"
+        aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+      >
+        {isMuted ? (
+          <VolumeX className="h-5 w-5 text-foreground" />
+        ) : (
+          <Volume2 className="h-5 w-5 text-accent" />
+        )}
+      </button>
+
+      <div className="mx-4 max-w-2xl z-20 relative">
         <div className="rounded-xl border border-[rgba(212,175,55,0.4)] bg-card/60 backdrop-blur-sm p-8 md:p-12 text-center shadow-[0_8px_32px_rgba(212,175,55,0.2)]">
+          {/* Arcade 404 Image */}
+          <div className="mb-6 flex justify-center">
+            <img 
+              src="/img/arcade-404.png" 
+              alt="Arcade style 404 error" 
+              className="max-w-full h-auto max-h-48 md:max-h-64 drop-shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+            />
+          </div>
+          
           {/* 404 Number */}
-          <h1 className="mb-4 text-6xl md:text-8xl font-heading font-bold text-accent text-shadow-gothic">
-            404
+          <h1 className="mb-4 text-5xl md:text-7xl font-heading font-bold text-accent text-shadow-gothic">
+            Lost in the Game
           </h1>
           
           {/* Message */}
