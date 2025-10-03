@@ -93,6 +93,21 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             )}
           </div>
 
+          {/* Audio Mute Toggle - Always visible */}
+          <Button
+            onClick={toggleMute}
+            variant="ghost"
+            size="sm"
+            className="hover:bg-accent-purple/10 font-subhead transition-colors ml-4"
+            aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+          >
+            {isMuted ? (
+              <VolumeX className="h-5 w-5 text-ink/60" />
+            ) : (
+              <Volume2 className="h-5 w-5 text-accent-gold" />
+            )}
+          </Button>
+
           {/* Centered Desktop Navigation */}
           <div className="hidden nav-compact:flex items-center space-x-8">
             {navLinks.map(({ to, label }) => (
@@ -112,21 +127,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             
           {/* Auth Section - Positioned just to the right of nav links */}
           <div className="hidden nav-full:flex items-center space-x-4 ml-8">
-              {/* Audio Mute Toggle */}
-              <Button
-                onClick={toggleMute}
-                variant="ghost"
-                size="sm"
-                className="hover:bg-accent-purple/10 font-subhead transition-colors"
-                aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-              >
-                {isMuted ? (
-                  <VolumeX className="h-5 w-5 text-ink/60" />
-                ) : (
-                  <Volume2 className="h-5 w-5 text-accent-gold" />
-                )}
-              </Button>
-
               {/* Developer Mode Toggle - Only show when dev mode is enabled */}
               {DEV_MODE_ENABLED && (
                 <Button
