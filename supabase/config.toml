@@ -1,1 +1,7 @@
 project_id = "dgdeiybuxlqbdfofzxpy"
+
+[functions.send-rsvp-confirmation]
+verify_jwt = false
+
+[functions.send-contribution-confirmation]
+verify_jwt = false

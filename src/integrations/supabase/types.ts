@@ -357,6 +357,42 @@ export type Database = {
         }
         Relationships: []
       }
+      potluck_items: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_gluten_free: boolean | null
+          is_vegan: boolean | null
+          item_name: string
+          notes: string | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_gluten_free?: boolean | null
+          is_vegan?: boolean | null
+          item_name: string
+          notes?: string | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_gluten_free?: boolean | null
+          is_vegan?: boolean | null
+          item_name?: string
+          notes?: string | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

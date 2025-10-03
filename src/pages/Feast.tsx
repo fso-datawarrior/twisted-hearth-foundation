@@ -5,15 +5,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import HuntRune from "@/components/hunt/HuntRune";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+interface PotluckItem {
+  id: string;
+  item_name: string;
+  notes?: string;
+  is_vegan?: boolean;
+  is_gluten_free?: boolean;
+  created_at: string;
+}
+
+const potluckItemSchema = z.object({
+  item_name: z.string().min(1, "Dish name is required").max(80, "Dish name must be less than 80 characters"),
+  notes: z.string().max(140, "Notes must be less than 140 characters").optional(),
+});
 
 const Feast = () => {
-  const [potluckItems, setPotluckItems] = useState<any[]>([]);
+  const [potluckItems, setPotluckItems] = useState<PotluckItem[]>([]);
   const [itemName, setItemName] = useState("");
   const [notes, setNotes] = useState("");
+  const [isVegan, setIsVegan] = useState(false);
+  const [isGlutenFree, setIsGlutenFree] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -22,7 +48,7 @@ const Feast = () => {
   useEffect(() => {
     const loadPotluckItems = async () => {
       const { data, error } = await supabase
-        .from('potluck_items' as any)
+        .from('potluck_items')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
@@ -39,41 +65,94 @@ const Feast = () => {
 
   const handleSubmitItem = async (e: React.FormEvent) => {
     e.preventDefault();
-      if (!user || !itemName.trim()) {
+
+    // Validate input
+    try {
+      potluckItemSchema.parse({ item_name: itemName.trim(), notes: notes.trim() || undefined });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: error.errors[0].message,
+        });
         return;
       }
+    }
+
+    if (!user?.email) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to add a contribution",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
+      // Insert into database
       const { data, error } = await supabase
-        .from('potluck_items' as any)
-        .insert({
-          user_id: user.id,
-          item_name: itemName.trim(),
-          notes: notes.trim() || null
-        })
+        .from("potluck_items")
+        .insert([
+          {
+            user_id: user.id,
+            item_name: itemName.trim(),
+            notes: notes.trim() || null,
+            is_vegan: isVegan,
+            is_gluten_free: isGlutenFree,
+            user_email: user.email,
+          },
+        ])
         .select()
         .single();
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      setPotluckItems([data, ...potluckItems]);
+
+      // Send confirmation emails
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-contribution-confirmation', {
+          body: {
+            contributorEmail: user.email,
+            contributorName: user.user_metadata?.full_name || user.email.split('@')[0],
+            dishName: itemName.trim(),
+            notes: notes.trim() || undefined,
+            isVegan,
+            isGlutenFree,
+          },
+        });
+
+        if (emailError) {
+          console.error('Email error:', emailError);
+          // Don't block the user if email fails
+        }
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
       }
 
-      // Optimistically add to list
-      setPotluckItems([data, ...potluckItems]);
+      // Reset form
       setItemName("");
       setNotes("");
-      
+      setIsVegan(false);
+      setIsGlutenFree(false);
+
+      // Show confirmation dialog if dietary restrictions were selected
+      if (isVegan || isGlutenFree) {
+        setShowConfirmDialog(true);
+      } else {
+        toast({
+          title: "Success!",
+          description: "Your dish has been added to the feast",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error adding item:", error);
       toast({
-        title: "Contribution added!",
-        description: "Your dish has been added to the feast.",
-      });
-    } catch (error) {
-      console.error("Error adding potluck item:", error);
-      toast({
-        title: "Failed to add item",
-        description: "Please try again.",
         variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to add item",
       });
     } finally {
       setIsLoading(false);
@@ -278,6 +357,35 @@ const Feast = () => {
                           {notes.length}/140 characters
                         </div>
                       </div>
+
+                      {/* Dietary Restrictions */}
+                      <div className="space-y-3">
+                        <Label className="font-subhead text-accent-gold">Dietary Information</Label>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="vegan"
+                              checked={isVegan}
+                              onCheckedChange={(checked) => setIsVegan(checked as boolean)}
+                              disabled={isLoading}
+                            />
+                            <Label htmlFor="vegan" className="text-sm cursor-pointer font-body text-muted-foreground">
+                              🌱 This dish is <strong>Vegan</strong>
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="gluten-free"
+                              checked={isGlutenFree}
+                              onCheckedChange={(checked) => setIsGlutenFree(checked as boolean)}
+                              disabled={isLoading}
+                            />
+                            <Label htmlFor="gluten-free" className="text-sm cursor-pointer font-body text-muted-foreground">
+                              🌾 This dish is <strong>Gluten-Free</strong>
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
                       
                       <Button
                         type="submit"
@@ -307,9 +415,23 @@ const Feast = () => {
                     {potluckItems.length > 0 ? (
                       potluckItems.map((item) => (
                         <div key={item.id} className="bg-bg-2 p-4 rounded border border-accent-purple/20">
-                          <h4 className="font-subhead text-accent-gold text-sm">
-                            {item.item_name}
-                          </h4>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h4 className="font-subhead text-accent-gold text-sm flex-1">
+                              {item.item_name}
+                            </h4>
+                            <div className="flex gap-1 flex-shrink-0">
+                              {item.is_vegan && (
+                                <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded-full whitespace-nowrap">
+                                  🌱 Vegan
+                                </span>
+                              )}
+                              {item.is_gluten_free && (
+                                <span className="text-xs px-2 py-0.5 bg-amber-600 text-white rounded-full whitespace-nowrap">
+                                  🌾 GF
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           {item.notes && (
                             <p className="font-body text-xs text-muted-foreground mt-1">
                               {item.notes}
@@ -445,6 +567,53 @@ const Feast = () => {
       </main>
       
       <Footer />
+
+      {/* Dietary Information Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-subhead">✅ Contribution Added Successfully!</DialogTitle>
+            <DialogDescription className="text-base mt-2 font-body">
+              Please review the dietary definitions you selected:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {isVegan && (
+              <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🌱</span>
+                  <h3 className="font-subhead text-lg text-green-800 dark:text-green-200">Vegan</h3>
+                </div>
+                <p className="text-sm font-body text-green-700 dark:text-green-300">
+                  Contains <strong>no animal products</strong> including meat, dairy, eggs, honey, gelatin, or any animal-derived ingredients.
+                </p>
+              </div>
+            )}
+            {isGlutenFree && (
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🌾</span>
+                  <h3 className="font-subhead text-lg text-amber-800 dark:text-amber-200">Gluten-Free</h3>
+                </div>
+                <p className="text-sm font-body text-amber-700 dark:text-amber-300">
+                  Contains <strong>no wheat, barley, rye, or their derivatives</strong>. Safe for those with celiac disease or gluten sensitivities.
+                </p>
+              </div>
+            )}
+            <p className="text-sm font-body text-muted-foreground">
+              By confirming, you acknowledge that your dish meets these dietary requirements.
+            </p>
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button 
+              onClick={() => setShowConfirmDialog(false)} 
+              className="w-full sm:w-auto bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+            >
+              I Understand
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
