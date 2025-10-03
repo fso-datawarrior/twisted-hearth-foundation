@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-// import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -411,58 +412,41 @@ const Feast = () => {
                 <div className="bg-card p-6 rounded-lg border border-accent-purple/30">
                   <h3 className="font-subhead text-xl mb-4 text-accent-gold">Current Contributions</h3>
                   
-                  <div className="space-y-4 max-h-96 overflow-y-auto" role="region" aria-label="Potluck contributions list">
-                    {potluckItems.length > 0 ? (
-                      potluckItems.map((item) => (
-                        <div key={item.id} className="bg-bg-2 p-4 rounded border border-accent-purple/20">
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="font-subhead text-accent-gold text-sm flex-1">
-                              {item.item_name}
-                            </h4>
-                            <div className="flex gap-1 flex-shrink-0">
-                              {item.is_vegan && (
-                                <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded-full whitespace-nowrap">
-                                  🌱 Vegan
-                                </span>
-                              )}
-                              {item.is_gluten_free && (
-                                <span className="text-xs px-2 py-0.5 bg-amber-600 text-white rounded-full whitespace-nowrap">
-                                  🌾 GF
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          {item.notes && (
-                            <p className="font-body text-xs text-muted-foreground mt-1">
-                              {item.notes}
-                            </p>
-                          )}
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Added {new Date(item.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="font-body text-muted-foreground">
-                          No contributions yet. Be the first to add a dish!
-                        </p>
+                  {potluckItems.length === 0 ? (
+                    <p className="text-muted-foreground py-8 text-center">No contributions yet. Be the first to add a dish!</p>
+                  ) : (
+                    <ScrollArea className="max-h-96 pr-4">
+                      <div className="space-y-3">
+                        {potluckItems.map((item) => (
+                          <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h4 className="font-semibold text-white flex items-center gap-2">
+                                    {item.item_name}
+                                    {item.is_vegan && <span title="Vegan">🌱</span>}
+                                    {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
+                                  </h4>
+                                  {item.notes && <p className="text-sm text-gray-400 mt-1">{item.notes}</p>}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
+                    </ScrollArea>
                   )}
-                </div>
-                
-                {/* RSVP Update Link */}
-                <div className="mt-6 text-center">
+                  
+                  {/* Update RSVP Button - Inside Container */}
                   <Button 
                     asChild 
-                    variant="outline"
-                    className="border-accent-purple/30 text-accent-purple hover:bg-accent-purple/10 font-subhead"
+                    variant="destructive"
+                    className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead w-full mt-6"
                   >
                     <a href="/rsvp">Update Your RSVP</a>
                   </Button>
                 </div>
               </div>
-            </div>
             </div>
             
             {/* Original Potluck Guidelines */}
@@ -499,21 +483,17 @@ const Feast = () => {
                 
                 {/* Color-Coded System */}
                 <div className="mb-6 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-lg">
-                  <h4 className="font-subhead text-lg mb-3 text-accent-purple text-center">
+                  <h4 className="font-subhead text-lg mb-3 text-accent-gold font-bold text-center">
                     🎨 Color-Coded Contribution System
                   </h4>
-                  <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Green = Vegan/Vegetarian</span>
+                      <span className="text-gray-200 font-semibold">Green = Vegan/Vegetarian</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Blue = Gluten-Free</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                      <span className="text-muted-foreground">Red = Contains Allergens</span>
+                      <span className="text-gray-200 font-semibold">Blue = Gluten-Free</span>
                     </div>
                   </div>
                 </div>
@@ -521,20 +501,20 @@ const Feast = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety & Dietary Needs</h4>
-                    <ul className="font-body text-sm text-muted-foreground space-y-1">
-                      <li>• <strong className="text-accent-green">Include ingredient list for allergens</strong></li>
-                      <li>• <strong className="text-accent-green">Label vegan/vegetarian options clearly</strong></li>
-                      <li>• <strong className="text-accent-blue">Mark gluten-free items prominently</strong></li>
+                    <ul className="font-body text-sm text-gray-200 space-y-1">
+                      <li>• <strong className="text-accent-gold">Include ingredient list for allergens</strong></li>
+                      <li>• <strong className="text-accent-gold">Label vegan/vegetarian options clearly</strong></li>
+                      <li>• <strong className="text-blue-400">Mark gluten-free items prominently</strong></li>
                       <li>• Keep hot foods hot, cold foods cold</li>
                       <li>• No home-canned items please</li>
                     </ul>
                   </div>
                   <div>
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Presentation</h4>
-                    <ul className="font-body text-sm text-muted-foreground space-y-1">
+                    <ul className="font-body text-sm text-gray-200 space-y-1">
                       <li>• Bring serving utensils</li>
                       <li>• Include a small card explaining your dish's story</li>
-                      <li>• <strong className="text-accent-purple">Use color-coded labels for dietary info</strong></li>
+                      <li>• <strong className="text-accent-gold font-bold">Use color-coded labels for dietary info</strong></li>
                       <li>• Creative presentation encouraged</li>
                       <li>• Consider bringing enough for 8-10 people</li>
                     </ul>
