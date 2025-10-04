@@ -32,12 +32,18 @@ const potluckItemSchema = z.object({
   notes: z.string().max(140, "Notes must be 140 characters or less").optional(),
 });
 
+interface AdditionalGuest {
+  name: string;
+  email: string;
+}
+
 interface ExistingRsvp {
   id: string;
   name: string;
   email: string;
   num_guests: number;
   dietary_restrictions: string | null;
+  additional_guests: AdditionalGuest[] | null;
   created_at: string;
   updated_at: string;
   status: string;
@@ -59,6 +65,7 @@ const RSVP = () => {
   // RSVP state management
   const [existingRsvp, setExistingRsvp] = useState<ExistingRsvp | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [additionalGuests, setAdditionalGuests] = useState<AdditionalGuest[]>([]);
 
   // Load existing RSVP on mount
   useEffect(() => {
@@ -77,7 +84,27 @@ const RSVP = () => {
       }
 
       if (data) {
-        setExistingRsvp(data);
+        // Parse additional guests from JSONB
+        const guestData = data.additional_guests as unknown as AdditionalGuest[] | null;
+        if (guestData && Array.isArray(guestData)) {
+          setAdditionalGuests(guestData);
+        } else {
+          setAdditionalGuests([]);
+        }
+
+        // Cast to ExistingRsvp type
+        setExistingRsvp({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          num_guests: data.num_guests,
+          dietary_restrictions: data.dietary_restrictions,
+          additional_guests: guestData,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          status: data.status,
+        });
+        
         setFormData({
           name: data.name,
           email: data.email,
@@ -135,6 +162,28 @@ const RSVP = () => {
     loadPotluckItems();
   }, []);
 
+  // Auto-adjust additionalGuests array when guestCount changes
+  useEffect(() => {
+    if (formData.guestCount > 2) {
+      const needed = formData.guestCount - 2;
+      setAdditionalGuests(prev => {
+        const current = [...prev];
+        // Add empty slots if needed
+        while (current.length < needed) {
+          current.push({ name: '', email: '' });
+        }
+        // Remove extra slots if guest count decreased
+        if (current.length > needed) {
+          return current.slice(0, needed);
+        }
+        return current;
+      });
+    } else {
+      // Clear additional guests if count is 2 or less
+      setAdditionalGuests([]);
+    }
+  }, [formData.guestCount]);
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -150,6 +199,20 @@ const RSVP = () => {
     
     if (formData.guestCount < 1 || formData.guestCount > 10) {
       newErrors.guestCount = "Guest count must be between 1 and 10";
+    }
+
+    // Validate additional guests (if applicable)
+    if (formData.guestCount > 2) {
+      additionalGuests.forEach((guest, index) => {
+        if (!guest.name.trim()) {
+          newErrors[`guest-${index}-name`] = `Guest ${index + 3} name is required`;
+        }
+        
+        // Validate email format if provided
+        if (guest.email.trim() && !/\S+@\S+\.\S+/.test(guest.email)) {
+          newErrors[`guest-${index}-email`] = `Invalid email format`;
+        }
+      });
     }
     
     setErrors(newErrors);
@@ -182,6 +245,7 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
+              additional_guests: (formData.guestCount > 2 ? additionalGuests : null) as any,
               updated_at: new Date().toISOString(),
               status: 'pending', // Reset to pending on edit
             })
@@ -200,7 +264,18 @@ const RSVP = () => {
             .single();
 
           if (updatedData) {
-            setExistingRsvp(updatedData);
+            const guestData = updatedData.additional_guests as unknown as AdditionalGuest[] | null;
+            setExistingRsvp({
+              id: updatedData.id,
+              name: updatedData.name,
+              email: updatedData.email,
+              num_guests: updatedData.num_guests,
+              dietary_restrictions: updatedData.dietary_restrictions,
+              additional_guests: guestData,
+              created_at: updatedData.created_at,
+              updated_at: updatedData.updated_at,
+              status: updatedData.status,
+            });
           }
 
           toast({
@@ -211,45 +286,46 @@ const RSVP = () => {
 
           setIsEditing(false); // Return to sealed state
         } else {
-          // INSERT new RSVP
-          const idem = crypto?.randomUUID?.() ?? String(Date.now());
-          
-          const { data, error: rpcError } = await (supabase.rpc as any)("submit_rsvp", {
-            p_name: formData.name,
-            p_email: formData.email.toLowerCase().trim(),
-            p_num_guests: formData.guestCount,
-            p_costume_idea: formData.costumeIdea || null,
-            p_dietary: formData.dietary || null,
-            p_contributions: null,
-            p_idempotency: idem,
-          });
+          // INSERT new RSVP - Use direct INSERT for better control
+          const { data, error } = await supabase
+            .from('rsvps')
+            .insert([{
+              user_id: user!.id,
+              name: formData.name,
+              email: formData.email.toLowerCase().trim(),
+              num_guests: formData.guestCount,
+              dietary_restrictions: formData.dietary || null,
+              additional_guests: (formData.guestCount > 2 ? additionalGuests : null) as any,
+              status: 'pending'
+            }])
+            .select()
+            .single();
 
-          if (rpcError) {
-            console.error("RPC Error:", rpcError);
+          if (error) {
+            console.error("Insert Error:", error);
             throw new Error("Failed to save RSVP");
           }
 
-          const rsvpId = data;
-          if (!rsvpId) {
-            throw new Error("Invalid RSVP response");
-          }
-
-          // Load the newly created RSVP
-          const { data: newRsvp } = await supabase
-            .from('rsvps')
-            .select('*')
-            .eq('user_id', user!.id)
-            .single();
-
-          if (newRsvp) {
-            setExistingRsvp(newRsvp);
+          if (data) {
+            const guestData = data.additional_guests as unknown as AdditionalGuest[] | null;
+            setExistingRsvp({
+              id: data.id,
+              name: data.name,
+              email: data.email,
+              num_guests: data.num_guests,
+              dietary_restrictions: data.dietary_restrictions,
+              additional_guests: guestData,
+              created_at: data.created_at,
+              updated_at: data.updated_at,
+              status: data.status,
+            });
           }
 
           // Send confirmation email
           try {
             await supabase.functions.invoke("send-rsvp-confirmation", {
               body: {
-                rsvpId: rsvpId,
+                rsvpId: data.id,
                 name: formData.name,
                 email: formData.email,
                 guests: formData.guestCount,
@@ -296,7 +372,29 @@ const RSVP = () => {
         dietary: existingRsvp.dietary_restrictions || '',
         nickname: ''
       });
-      setIsEditing(false);
+      
+      // Restore additional guests from existing RSVP
+      const guestData = existingRsvp.additional_guests;
+      if (guestData && Array.isArray(guestData)) {
+        setAdditionalGuests(guestData);
+      } else {
+        setAdditionalGuests([]);
+      }
+    }
+    setIsEditing(false);
+  };
+
+  const handleAdditionalGuestChange = (index: number, field: 'name' | 'email', value: string) => {
+    setAdditionalGuests(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+    
+    // Clear error for this field
+    const errorKey = `guest-${index}-${field}`;
+    if (errors[errorKey]) {
+      setErrors(prev => ({ ...prev, [errorKey]: '' }));
     }
   };
 
@@ -519,6 +617,22 @@ const RSVP = () => {
                     <p className="text-white font-medium text-lg">{existingRsvp.num_guests}</p>
                   </div>
 
+                  {existingRsvp.num_guests > 2 && additionalGuests.length > 0 && (
+                    <div>
+                      <Label className="text-accent-gold text-sm mb-2 block">Additional Guests</Label>
+                      <div className="space-y-2">
+                        {additionalGuests.map((guest, index) => (
+                          <div key={index} className="bg-background/30 p-3 rounded border border-accent-purple/20">
+                            <p className="text-white font-medium">
+                              Guest {index + 3}: {guest.name}
+                              {guest.email && <span className="text-muted-foreground text-sm ml-2">({guest.email})</span>}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {existingRsvp.dietary_restrictions && (
                     <div>
                       <Label className="text-accent-gold text-sm mb-1 block">Dietary Restrictions</Label>
@@ -627,6 +741,47 @@ const RSVP = () => {
                     <p className="text-sm text-accent-red mt-1">{errors.guestCount}</p>
                   )}
                 </div>
+
+                {/* Additional Guest Details - Only shown when guests > 2 */}
+                {formData.guestCount > 2 && (
+                  <div className="border-t border-accent-purple/30 pt-6">
+                    <h3 className="font-subhead text-xl mb-4 text-accent-gold">
+                      Additional Guest Details
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 font-body">
+                      Please provide the names of your additional guests (guests 3-{formData.guestCount})
+                    </p>
+                    
+                    <div className="space-y-4">
+                      {additionalGuests.map((guest, index) => (
+                        <div key={index} className="bg-background/50 p-4 rounded-lg border border-accent-purple/20">
+                          <p className="text-accent-gold font-subhead mb-3">Guest {index + 3}</p>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <FormField
+                              label={`Guest ${index + 3} Full Name *`}
+                              name={`guest-${index}-name`}
+                              type="text"
+                              value={guest.name}
+                              onChange={(value) => handleAdditionalGuestChange(index, 'name', value)}
+                              error={errors[`guest-${index}-name`]}
+                              placeholder="Enter guest's full name"
+                            />
+                            
+                            <FormField
+                              label={`Guest ${index + 3} Email`}
+                              name={`guest-${index}-email`}
+                              type="email"
+                              value={guest.email}
+                              onChange={(value) => handleAdditionalGuestChange(index, 'email', value)}
+                              error={errors[`guest-${index}-email`]}
+                              placeholder="guest@example.com (optional)"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 {/* Optional Fields */}
                 <div className="border-t border-accent-purple/30 pt-6">

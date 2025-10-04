@@ -422,6 +422,7 @@ export type Database = {
       }
       rsvps: {
         Row: {
+          additional_guests: Json | null
           created_at: string
           dietary_restrictions: string | null
           email: string
@@ -434,6 +435,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          additional_guests?: Json | null
           created_at?: string
           dietary_restrictions?: string | null
           email: string
@@ -446,6 +448,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          additional_guests?: Json | null
           created_at?: string
           dietary_restrictions?: string | null
           email?: string
