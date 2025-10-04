@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, UtensilsCrossed, Plus, Minus } from "lucide-react";
+import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { z } from "zod";
 
@@ -32,6 +32,17 @@ const potluckItemSchema = z.object({
   notes: z.string().max(140, "Notes must be 140 characters or less").optional(),
 });
 
+interface ExistingRsvp {
+  id: string;
+  name: string;
+  email: string;
+  num_guests: number;
+  dietary_restrictions: string | null;
+  created_at: string;
+  updated_at: string;
+  status: string;
+}
+
 const RSVP = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -45,11 +56,45 @@ const RSVP = () => {
     nickname: "" // Honeypot field
   });
 
-  // Auto-populate email when user logs in
+  // RSVP state management
+  const [existingRsvp, setExistingRsvp] = useState<ExistingRsvp | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Load existing RSVP on mount
   useEffect(() => {
-    if (user?.email) {
-      setFormData(prev => ({ ...prev, email: user.email || "" }));
-    }
+    const loadExistingRsvp = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('rsvps')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading RSVP:', error);
+        return;
+      }
+
+      if (data) {
+        setExistingRsvp(data);
+        setFormData({
+          name: data.name,
+          email: data.email,
+          guestCount: data.num_guests,
+          costumeIdea: '',
+          dietary: data.dietary_restrictions || '',
+          nickname: ''
+        });
+        setIsEditing(false); // Show sealed state
+      } else {
+        // New user, auto-populate email
+        setFormData(prev => ({ ...prev, email: user.email || "" }));
+        setIsEditing(true); // Show form
+      }
+    };
+
+    loadExistingRsvp();
   }, [user]);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -121,15 +166,6 @@ const RSVP = () => {
         description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
         variant: "default"
       });
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        guestCount: 1,
-        costumeIdea: "",
-        dietary: "",
-        nickname: ""
-      });
       return;
     }
     
@@ -137,65 +173,100 @@ const RSVP = () => {
       setIsSubmitting(true);
       
       try {
-        const idem = crypto?.randomUUID?.() ?? String(Date.now());
-        
-        // Call Supabase RPC to save RSVP
-        const { data, error: rpcError } = await (supabase.rpc as any)("submit_rsvp", {
-          p_name: formData.name,
-          p_email: formData.email.toLowerCase().trim(),
-          p_num_guests: formData.guestCount,
-          p_costume_idea: formData.costumeIdea || null,
-          p_dietary: formData.dietary || null,
-          p_contributions: null,
-          p_idempotency: idem,
-        });
-
-        if (rpcError) {
-          console.error("RPC Error:", rpcError);
-          throw new Error("Failed to save RSVP");
-        }
-
-        const rsvpId = data;
-        if (!rsvpId) {
-          throw new Error("Invalid RSVP response");
-        }
-        console.log("RSVP saved successfully:", rsvpId);
-
-        // Send confirmation email via Edge Function
-        try {
-          const { error: emailError } = await supabase.functions.invoke("send-rsvp-confirmation", {
-            body: {
-              rsvpId: rsvpId,
+        if (existingRsvp) {
+          // UPDATE existing RSVP
+          const { error: updateError } = await supabase
+            .from('rsvps')
+            .update({
               name: formData.name,
-              email: formData.email,
-              guests: formData.guestCount,
-            },
+              email: formData.email.toLowerCase().trim(),
+              num_guests: formData.guestCount,
+              dietary_restrictions: formData.dietary || null,
+              updated_at: new Date().toISOString(),
+              status: 'pending', // Reset to pending on edit
+            })
+            .eq('user_id', user!.id);
+
+          if (updateError) {
+            console.error("Update Error:", updateError);
+            throw new Error("Failed to update RSVP");
+          }
+
+          // Reload RSVP data
+          const { data: updatedData } = await supabase
+            .from('rsvps')
+            .select('*')
+            .eq('user_id', user!.id)
+            .single();
+
+          if (updatedData) {
+            setExistingRsvp(updatedData);
+          }
+
+          toast({
+            title: "RSVP Updated!",
+            description: "Your reservation has been updated successfully.",
+            variant: "default"
           });
 
-          if (emailError) {
-            console.warn("Email send failed:", emailError);
-            // Don't fail the RSVP if email fails
+          setIsEditing(false); // Return to sealed state
+        } else {
+          // INSERT new RSVP
+          const idem = crypto?.randomUUID?.() ?? String(Date.now());
+          
+          const { data, error: rpcError } = await (supabase.rpc as any)("submit_rsvp", {
+            p_name: formData.name,
+            p_email: formData.email.toLowerCase().trim(),
+            p_num_guests: formData.guestCount,
+            p_costume_idea: formData.costumeIdea || null,
+            p_dietary: formData.dietary || null,
+            p_contributions: null,
+            p_idempotency: idem,
+          });
+
+          if (rpcError) {
+            console.error("RPC Error:", rpcError);
+            throw new Error("Failed to save RSVP");
           }
-        } catch (emailErr) {
-          console.warn("Email function error:", emailErr);
-          // Email failure doesn't block RSVP success
+
+          const rsvpId = data;
+          if (!rsvpId) {
+            throw new Error("Invalid RSVP response");
+          }
+
+          // Load the newly created RSVP
+          const { data: newRsvp } = await supabase
+            .from('rsvps')
+            .select('*')
+            .eq('user_id', user!.id)
+            .single();
+
+          if (newRsvp) {
+            setExistingRsvp(newRsvp);
+          }
+
+          // Send confirmation email
+          try {
+            await supabase.functions.invoke("send-rsvp-confirmation", {
+              body: {
+                rsvpId: rsvpId,
+                name: formData.name,
+                email: formData.email,
+                guests: formData.guestCount,
+              },
+            });
+          } catch (emailErr) {
+            console.warn("Email function error:", emailErr);
+          }
+          
+          toast({
+            title: "RSVP Received!",
+            description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
+            variant: "default"
+          });
+
+          setIsEditing(false); // Show sealed state
         }
-        
-        toast({
-          title: "RSVP Received!",
-          description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
-          variant: "default"
-        });
-        
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          guestCount: 1,
-          costumeIdea: "",
-          dietary: "",
-          nickname: ""
-        });
       } catch (error) {
         console.error("RSVP Error:", error);
         toast({
@@ -206,6 +277,26 @@ const RSVP = () => {
       } finally {
         setIsSubmitting(false);
       }
+    }
+  };
+
+  const handleEditRsvp = () => {
+    setIsEditing(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    if (existingRsvp) {
+      // Restore original values
+      setFormData({
+        name: existingRsvp.name,
+        email: existingRsvp.email,
+        guestCount: existingRsvp.num_guests,
+        costumeIdea: '',
+        dietary: existingRsvp.dietary_restrictions || '',
+        nickname: ''
+      });
+      setIsEditing(false);
     }
   };
 
@@ -394,8 +485,78 @@ const RSVP = () => {
               But beware - not all who enter leave unchanged...
             </p>
             
-            <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
+            {/* Sealed Invitation Card */}
+            {existingRsvp && !isEditing ? (
+              <div className="bg-card p-8 rounded-lg border-2 border-accent-gold shadow-lg relative overflow-hidden">
+                {/* Decorative seal effect */}
+                <div className="absolute top-4 right-4 bg-accent-red/20 rounded-full p-3">
+                  <Lock className="h-6 w-6 text-accent-red" />
+                </div>
+
+                <h2 className="font-heading text-3xl md:text-4xl text-center mb-2 text-accent-gold">
+                  Your Fate Has Been Sealed
+                </h2>
+                
+                <p className="text-center text-muted-foreground mb-8 font-body">
+                  Your presence at the Twisted Tale is confirmed
+                </p>
+
+                <div className="space-y-6 bg-background/50 p-6 rounded-lg border border-accent-purple/30">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-accent-gold text-sm mb-1 block">Name</Label>
+                      <p className="text-white font-medium text-lg">{existingRsvp.name}</p>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-accent-gold text-sm mb-1 block">Email</Label>
+                      <p className="text-white font-medium text-lg break-all">{existingRsvp.email}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-accent-gold text-sm mb-1 block">Number of Guests</Label>
+                    <p className="text-white font-medium text-lg">{existingRsvp.num_guests}</p>
+                  </div>
+
+                  {existingRsvp.dietary_restrictions && (
+                    <div>
+                      <Label className="text-accent-gold text-sm mb-1 block">Dietary Restrictions</Label>
+                      <p className="text-white font-medium">{existingRsvp.dietary_restrictions}</p>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-accent-purple/30">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Last updated: {new Date(existingRsvp.updated_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 text-center">
+                  <Button
+                    type="button"
+                    onClick={handleEditRsvp}
+                    className="bg-accent-purple hover:bg-accent-purple/80 text-white font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform"
+                  >
+                    <Edit className="h-5 w-5 mr-2" />
+                    Modify Your Fate
+                  </Button>
+                  
+                  <p className="font-body text-xs text-muted-foreground mt-4 max-w-md mx-auto">
+                    Need to update your guest count or dietary restrictions? Click above to make changes.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
+                <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
                 {/* Honeypot field - anti-spam */}
                 <input 
                   type="text" 
@@ -497,22 +658,37 @@ const RSVP = () => {
                 </div>
                 
                 {/* Submit */}
-                <div className="pt-6 text-center">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? "Submitting…" : "Seal Your Fate"}
-                  </Button>
+                <div className="pt-6 text-center space-y-4">
+                  <div className="flex gap-4 justify-center">
+                    {existingRsvp && (
+                      <Button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        variant="outline"
+                        className="border-accent-purple/30 text-accent-purple hover:bg-accent-purple/10 font-subhead text-lg px-8 py-4"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-accent-red hover:bg-accent-red/80 text-ink font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? "Submitting…" : existingRsvp ? "Update Your RSVP" : "Seal Your Fate"}
+                    </Button>
+                  </div>
                   
-                  <p className="font-body text-xs text-muted-foreground mt-4 max-w-md mx-auto">
-                    By submitting this RSVP, you agree to participate in interactive storytelling 
-                    and acknowledge that some content may be intense. 18+ recommended.
+                  <p className="font-body text-xs text-muted-foreground max-w-md mx-auto">
+                    {existingRsvp 
+                      ? "Your changes will be saved and your reservation updated."
+                      : "By submitting this RSVP, you agree to participate in interactive storytelling and acknowledge that some content may be intense. 18+ recommended."
+                    }
                   </p>
                 </div>
               </form>
             </div>
+            )}
 
             {/* Potluck Contribution Section */}
             <div id="contribution-form" className="bg-card p-6 rounded-lg border border-accent-purple/30 shadow-lg mt-8">
