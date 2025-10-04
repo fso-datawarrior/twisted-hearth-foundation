@@ -164,8 +164,8 @@ const RSVP = () => {
 
   // Auto-adjust additionalGuests array when guestCount changes
   useEffect(() => {
-    if (formData.guestCount > 2) {
-      const needed = formData.guestCount - 2;
+    if (formData.guestCount > 1) {
+      const needed = formData.guestCount - 1;
       setAdditionalGuests(prev => {
         const current = [...prev];
         // Add empty slots if needed
@@ -179,7 +179,7 @@ const RSVP = () => {
         return current;
       });
     } else {
-      // Clear additional guests if count is 2 or less
+      // Clear additional guests if count is 1 or less
       setAdditionalGuests([]);
     }
   }, [formData.guestCount]);
@@ -202,10 +202,10 @@ const RSVP = () => {
     }
 
     // Validate additional guests (if applicable)
-    if (formData.guestCount > 2) {
+    if (formData.guestCount > 1) {
       additionalGuests.forEach((guest, index) => {
         if (!guest.name.trim()) {
-          newErrors[`guest-${index}-name`] = `Guest ${index + 3} name is required`;
+          newErrors[`guest-${index}-name`] = `Guest ${index + 2} name is required`;
         }
         
         // Validate email format if provided
@@ -245,7 +245,7 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
-              additional_guests: (formData.guestCount > 2 ? additionalGuests : null) as any,
+              additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               updated_at: new Date().toISOString(),
               status: 'pending', // Reset to pending on edit
             })
@@ -278,9 +278,25 @@ const RSVP = () => {
             });
           }
 
+          // Send update notification emails
+          try {
+            await supabase.functions.invoke("send-rsvp-confirmation", {
+              body: {
+                rsvpId: existingRsvp.id,
+                name: formData.name,
+                email: formData.email,
+                guests: formData.guestCount,
+                isUpdate: true,
+                additionalGuests: formData.guestCount > 1 ? additionalGuests : [],
+              },
+            });
+          } catch (emailErr) {
+            console.warn("Email function error:", emailErr);
+          }
+
           toast({
             title: "RSVP Updated!",
-            description: "Your reservation has been updated successfully.",
+            description: "Your reservation has been updated successfully. Check your email for confirmation.",
             variant: "default"
           });
 
@@ -295,7 +311,7 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
-              additional_guests: (formData.guestCount > 2 ? additionalGuests : null) as any,
+              additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               status: 'pending'
             }])
             .select()
@@ -329,6 +345,8 @@ const RSVP = () => {
                 name: formData.name,
                 email: formData.email,
                 guests: formData.guestCount,
+                isUpdate: false,
+                additionalGuests: formData.guestCount > 1 ? additionalGuests : [],
               },
             });
           } catch (emailErr) {
@@ -479,16 +497,26 @@ const RSVP = () => {
         setPotluckItems(prev => [data, ...prev]);
 
         // Send confirmation email
-        await supabase.functions.invoke('send-contribution-confirmation', {
-          body: {
-            contributorEmail: user.email,
-            contributorName: user.user_metadata?.full_name || user.email?.split('@')[0],
-            dishName,
-            notes: dishNotes || undefined,
-            isVegan,
-            isGlutenFree,
+        try {
+          const emailResponse = await supabase.functions.invoke('send-contribution-confirmation', {
+            body: {
+              contributorEmail: user.email,
+              contributorName: user.user_metadata?.full_name || user.email?.split('@')[0],
+              dishName,
+              notes: dishNotes || undefined,
+              isVegan,
+              isGlutenFree,
+            }
+          });
+          
+          if (emailResponse.error) {
+            console.error('Email error:', emailResponse.error);
+          } else {
+            console.log('Contribution confirmation emails sent successfully');
           }
-        });
+        } catch (emailErr) {
+          console.error('Failed to send contribution confirmation email:', emailErr);
+        }
 
         if (isVegan || isGlutenFree) {
           setShowConfirmDialog(true);
@@ -617,14 +645,14 @@ const RSVP = () => {
                     <p className="text-white font-medium text-lg">{existingRsvp.num_guests}</p>
                   </div>
 
-                  {existingRsvp.num_guests > 2 && additionalGuests.length > 0 && (
+                  {existingRsvp.num_guests > 1 && additionalGuests.length > 0 && (
                     <div>
                       <Label className="text-accent-gold text-sm mb-2 block">Additional Guests</Label>
                       <div className="space-y-2">
                         {additionalGuests.map((guest, index) => (
                           <div key={index} className="bg-background/30 p-3 rounded border border-accent-purple/20">
                             <p className="text-white font-medium">
-                              Guest {index + 3}: {guest.name}
+                              Guest {index + 2}: {guest.name}
                               {guest.email && <span className="text-muted-foreground text-sm ml-2">({guest.email})</span>}
                             </p>
                           </div>
@@ -742,23 +770,23 @@ const RSVP = () => {
                   )}
                 </div>
 
-                {/* Additional Guest Details - Only shown when guests > 2 */}
-                {formData.guestCount > 2 && (
+                {/* Additional Guest Details - Only shown when guests > 1 */}
+                {formData.guestCount > 1 && (
                   <div className="border-t border-accent-purple/30 pt-6">
                     <h3 className="font-subhead text-xl mb-4 text-accent-gold">
                       Additional Guest Details
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4 font-body">
-                      Please provide the names of your additional guests (guests 3-{formData.guestCount})
+                      Please provide the names of your additional guests (guests 2-{formData.guestCount})
                     </p>
                     
                     <div className="space-y-4">
                       {additionalGuests.map((guest, index) => (
                         <div key={index} className="bg-background/50 p-4 rounded-lg border border-accent-purple/20">
-                          <p className="text-accent-gold font-subhead mb-3">Guest {index + 3}</p>
+                          <p className="text-accent-gold font-subhead mb-3">Guest {index + 2}</p>
                           <div className="grid md:grid-cols-2 gap-4">
                             <FormField
-                              label={`Guest ${index + 3} Full Name *`}
+                              label={`Guest ${index + 2} Full Name *`}
                               name={`guest-${index}-name`}
                               type="text"
                               value={guest.name}
@@ -768,7 +796,7 @@ const RSVP = () => {
                             />
                             
                             <FormField
-                              label={`Guest ${index + 3} Email`}
+                              label={`Guest ${index + 2} Email`}
                               name={`guest-${index}-email`}
                               type="email"
                               value={guest.email}
