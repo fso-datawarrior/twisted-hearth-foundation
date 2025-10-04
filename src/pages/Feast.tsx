@@ -493,31 +493,38 @@ const Feast = () => {
                   {potluckItems.length === 0 ? (
                     <p className="text-muted-foreground py-8 text-center">No contributions yet. Be the first to add a dish!</p>
                   ) : (
-                    <ScrollArea className="max-h-96 pr-4">
-                      <div className="space-y-3">
-                        {potluckItems.map((item) => (
-                          <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-white flex items-center gap-2">
-                                    {item.item_name}
-                                    {item.is_vegan && <span title="Vegan">🌱</span>}
-                                    {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
-                                  </h4>
-                                  {item.contributor_name && (
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Contributed by: <span className="text-accent-gold font-medium">{item.contributor_name}</span>
-                                    </p>
-                                  )}
-                                  {item.notes && <p className="text-sm text-gray-400 mt-2">{item.notes}</p>}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                    <>
+                      <div className="scroll-area-enhanced" data-scrollable={potluckItems.length > 4 ? "true" : "false"}>
+                        <ScrollArea className="max-h-96 pr-4">
+                          <div className="space-y-3">
+                            {potluckItems.map((item) => (
+                              <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
+                                <CardContent className="p-4">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold text-white flex items-center gap-2">
+                                        {item.item_name}
+                                        {item.is_vegan && <span title="Vegan">🌱</span>}
+                                        {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
+                                      </h4>
+                                      {item.contributor_name && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          Contributed by: <span className="text-accent-gold font-medium">{item.contributor_name}</span>
+                                        </p>
+                                      )}
+                                      {item.notes && <p className="text-sm text-gray-400 mt-2">{item.notes}</p>}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </ScrollArea>
                       </div>
-                    </ScrollArea>
+                      {potluckItems.length > 4 && (
+                        <p className="scroll-hint">↕ Scroll to see all contributions</p>
+                      )}
+                    </>
                   )}
                   
                   {/* Update RSVP Button - Inside Container */}

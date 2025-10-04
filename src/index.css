@@ -142,6 +142,54 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     animation: sparkle 2s ease-in-out infinite;
   }
 
+  /* Enhanced scrollbar styling for contributions */
+  .scroll-area-enhanced {
+    position: relative;
+  }
+  
+  .scroll-area-enhanced::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to bottom, hsl(var(--card)), transparent);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .scroll-area-enhanced::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to top, hsl(var(--card)), transparent);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .scroll-area-enhanced[data-scrollable="true"]::before,
+  .scroll-area-enhanced[data-scrollable="true"]::after {
+    opacity: 1;
+  }
+  
+  /* Scroll hint text */
+  .scroll-hint {
+    font-size: 0.75rem;
+    color: hsl(var(--accent-gold));
+    text-align: center;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
   /* Bright pulsing red haze for RSVP button */
   .glow-red-pulse {
     box-shadow: 
