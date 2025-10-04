@@ -447,6 +447,7 @@ const Feast = () => {
                               checked={isVegan}
                               onCheckedChange={(checked) => setIsVegan(checked as boolean)}
                               disabled={isLoading}
+                              className="dietary-checkbox"
                             />
                             <Label htmlFor="vegan" className="text-sm cursor-pointer font-body text-muted-foreground">
                               🌱 This dish is <strong>Vegan</strong>
@@ -458,6 +459,7 @@ const Feast = () => {
                               checked={isGlutenFree}
                               onCheckedChange={(checked) => setIsGlutenFree(checked as boolean)}
                               disabled={isLoading}
+                              className="dietary-checkbox"
                             />
                             <Label htmlFor="gluten-free" className="text-sm cursor-pointer font-body text-muted-foreground">
                               🌾 This dish is <strong>Gluten-Free</strong>
@@ -571,25 +573,25 @@ const Feast = () => {
                   Contribution Requirements
                 </h3>
                 
-                {/* Color-Coded System */}
+                {/* Icon-Based System */}
                 <div className="mb-6 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-lg">
                   <h4 className="font-subhead text-lg mb-3 text-accent-gold font-bold text-center">
-                    🎨 Color-Coded Contribution System
+                    🎨 Icon-Based Contribution System
                   </h4>
                   <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-200 font-semibold">Green = Vegan/Vegetarian</span>
+                      <span className="text-lg">🌱</span>
+                      <span className="text-gray-200 font-semibold">🌱 = Vegan/Vegetarian</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                      <span className="text-gray-200 font-semibold">Blue = Gluten-Free</span>
+                      <span className="text-lg">🌾</span>
+                      <span className="text-gray-200 font-semibold">🌾 = Gluten-Free</span>
                     </div>
                   </div>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="text-center md:text-left">
+                  <div className="text-center">
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety & Dietary Needs</h4>
                     <ul className="font-body text-sm text-gray-200 space-y-1 inline-block text-left">
                       <li>• <strong className="text-accent-gold">Include ingredient list for allergens</strong></li>
@@ -599,7 +601,7 @@ const Feast = () => {
                       <li>• No home-canned items please</li>
                     </ul>
                   </div>
-                  <div className="text-center md:text-left">
+                  <div className="text-center">
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Presentation</h4>
                     <ul className="font-body text-sm text-gray-200 space-y-1 inline-block text-left">
                       <li>• Bring serving utensils</li>

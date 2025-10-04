@@ -446,6 +446,25 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   .hero-text-shadow {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   }
+
+  /* Enhanced dietary restriction checkboxes */
+  .dietary-checkbox {
+    @apply border-2 border-accent-gold/60 bg-background/50;
+    @apply hover:border-accent-gold hover:bg-accent-gold/10;
+    @apply focus-visible:ring-2 focus-visible:ring-accent-gold/50 focus-visible:ring-offset-2;
+    @apply data-[state=checked]:bg-accent-gold data-[state=checked]:border-accent-gold;
+    @apply data-[state=checked]:text-background;
+    @apply transition-all duration-200;
+    box-shadow: 0 0 0 1px hsl(var(--accent-gold) / 0.3);
+  }
+
+  .dietary-checkbox:hover {
+    box-shadow: 0 0 8px hsl(var(--accent-gold) / 0.4);
+  }
+
+  .dietary-checkbox[data-state="checked"] {
+    box-shadow: 0 0 12px hsl(var(--accent-gold) / 0.6);
+  }
 }
 
 @keyframes rise-fade {

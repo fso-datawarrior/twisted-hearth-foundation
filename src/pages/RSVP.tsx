@@ -917,6 +917,7 @@ const RSVP = () => {
                       id="vegan"
                       checked={isVegan}
                       onCheckedChange={(checked) => setIsVegan(checked as boolean)}
+                      className="dietary-checkbox"
                     />
                     <label htmlFor="vegan" className="text-sm text-gray-300 cursor-pointer">
                       🌱 This dish is Vegan
@@ -928,6 +929,7 @@ const RSVP = () => {
                       id="glutenFree"
                       checked={isGlutenFree}
                       onCheckedChange={(checked) => setIsGlutenFree(checked as boolean)}
+                      className="dietary-checkbox"
                     />
                     <label htmlFor="glutenFree" className="text-sm text-gray-300 cursor-pointer">
                       🌾 This dish is Gluten-Free
