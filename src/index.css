@@ -147,6 +147,37 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     position: relative;
   }
   
+  /* Force scrollbar visibility for Radix ScrollArea */
+  .scroll-area-enhanced [data-radix-scroll-area-scrollbar] {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Fallback native scrollbar styling */
+  .scroll-area-enhanced .scroll-fallback {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--accent-gold) / 0.8) transparent;
+  }
+  
+  .scroll-area-enhanced .scroll-fallback::-webkit-scrollbar {
+    width: 12px;
+  }
+  
+  .scroll-area-enhanced .scroll-fallback::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scroll-area-enhanced .scroll-fallback::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--accent-gold) / 0.8);
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  .scroll-area-enhanced .scroll-fallback::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--accent-gold));
+  }
+  
   .scroll-area-enhanced::before {
     content: "";
     position: absolute;

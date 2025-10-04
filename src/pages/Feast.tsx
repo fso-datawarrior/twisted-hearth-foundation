@@ -496,7 +496,7 @@ const Feast = () => {
                     <>
                       <div className="scroll-area-enhanced" data-scrollable={potluckItems.length > 4 ? "true" : "false"}>
                         <ScrollArea className="max-h-96 pr-4">
-                          <div className="space-y-3">
+                          <div className="space-y-3 scroll-fallback max-h-96 overflow-y-auto pr-2">
                             {potluckItems.map((item) => (
                               <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
                                 <CardContent className="p-4">
