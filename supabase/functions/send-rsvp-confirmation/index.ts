@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 interface AdditionalGuest {
   name: string;
@@ -21,6 +22,11 @@ const FROM_NAME = Deno.env.get("MAILJET_FROM_NAME") ?? "Jamie & Kat Ruth";
 const ADMIN_EMAIL = FROM_EMAIL; // Admin receives notifications at the from email
 const PRIVATE_ADDRESS = Deno.env.get("PRIVATE_EVENT_ADDRESS") ?? "Location provided after RSVP.";
 const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map(s => s.trim()).filter(Boolean);
+
+// Supabase client for database updates
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Event facts (server-only source of truth)
 const EVENT_TITLE = "The Ruths' Twisted Fairytale Halloween Bash";
@@ -183,6 +189,24 @@ This address is private. Please don't share it publicly.
 
   const result = await res.json();
   console.log('Emails sent successfully:', result);
+  
+  // Update database to track email sent
+  try {
+    const { error: updateError } = await supabase
+      .from('rsvps')
+      .update({ email_sent_at: new Date().toISOString() })
+      .eq('id', body.rsvpId);
+    
+    if (updateError) {
+      console.error('Failed to update email_sent_at:', updateError);
+      // Don't fail the request, just log the error
+    } else {
+      console.log('Successfully updated email_sent_at for RSVP:', body.rsvpId);
+    }
+  } catch (dbError) {
+    console.error('Database update error:', dbError);
+    // Don't fail the request, just log the error
+  }
   
   return new Response("ok", { status: 200, headers: cors(origin) });
 });
