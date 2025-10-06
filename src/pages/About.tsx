@@ -54,13 +54,7 @@ const About = () => {
               
               <div className="mt-12 text-center">
                 <h2 className="font-subhead text-3xl mb-6 text-accent-gold">What to Expect</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-bg-2 p-6 rounded-lg">
-                    <h3 className="font-subhead text-xl mb-3 text-accent-gold">Immersive Storytelling</h3>
-                    <p className="font-body text-sm text-muted-foreground">
-                      Live performances and interactive story elements throughout the night
-                    </p>
-                  </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="bg-bg-2 p-6 rounded-lg">
                     <h3 className="font-subhead text-xl mb-3 text-accent-green">Twisted Treats</h3>
                     <p className="font-body text-sm text-muted-foreground">

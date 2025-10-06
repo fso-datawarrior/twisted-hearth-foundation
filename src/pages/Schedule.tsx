@@ -7,64 +7,64 @@ const Schedule = () => {
   const scheduleItems = [
     {
       time: "6:30 PM",
-      title: "Gates Open: Welcome to the Dark Forest",
-      description: "Arrival and check-in. The ancient gates creak open as twilight falls. Receive your story cards and choose your path through the evening's twisted tales.",
+      title: "Book Opens: Welcome to the Dark Forest",
+      description: "Arrival and tour (self-guided or otherwise). The story starts when you crack open the book as twilight falls. Enter the story with your own characters and begin wending your way through the evening's twisted tales.",
       type: "arrival"
     },
     {
       time: "7:15 PM", 
       title: "Welcome Gathering & Poison Toasts",
-      description: "Signature cocktails served as we gather in the main hall. Meet your fellow travelers on this dark journey.",
+      description: "Signature cocktails will be available as you meander the space. Meet your fellow travelers on this dark journey.",
       type: "social"
     },
     {
       time: "7:30 PM",
       title: "Vignette Loop Begins", 
-      description: "Wander room to room; each tale changes on each pass. Interactive storytelling where you shape the narrative. Multiple paths, darker endings.",
+      description: "Wander from scene to scene and see if you can spot the fairytale origins. Let your inner narrator take charge and suggest how you think the story got off track and if there is a way back....",
       type: "performance"
     },
     {
       time: "7:45 PM",
       title: "Feast of the Damned",
-      description: "Twisted fairytale potluck dinner begins. Each dish tells its own dark story, each bite a new chapter.",
+      description: "Much like Jack Sprat's wife, the twisted fairytale potluck is ever growing as people arrive. Each dish tells its own story as the author's dictate",
       type: "feast"
     },
     {
       time: "8:00 PM",
-      title: "Pong Tournament Begins",
-      description: "The annual battle where every miss is a step closer to the underworld. Will you survive the cursed cups?",
+      title: "Speed Pong Tournament Begins",
+      description: "The annual battle where every miss is a step closer to the underworld of elimination. Will you survive this speed gauntlet of the cursed cups?",
       type: "contest"
     },
     {
       time: "9:00 PM",
       title: "Costume Court",
-      description: "Showcase your twisted fairytale character. Judges evaluate creativity, presentation, and the darkness of your tale.",
-      type: "contest"
+      description: "Showcase your twisted fairytale, and be ready to tell your tale! Judges evaluate creativity and presentation of your dark disguise.",
+      type: "dance"
     },
     {
       time: "10:00 PM",
-      title: "Scavenger Hunt or Shots Round",
-      description: "The night takes a turn for the adventurous. Will you hunt for hidden treasures or face the consequences of your choices?",
-      type: "performance"
+      title: "The Story Unfolds",
+      description: "The end is not yet written. Will you hunt for new adventures, new characters to engage or simply have more libations? The tale is yours to craft.",
+      type: "story"
     },
     {
       time: "10:45 PM",
       title: "Final Toast / Last Dance",
-      description: "As midnight approaches, we gather one last time. The music plays, but some dances never end.",
+      description: "As the witching hour approaches, we gather once more for toast and pictures. The music plays on, but some dances never end...",
       type: "finale"
     }
   ];
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "arrival": return "text-accent-gold border-accent-gold";
-      case "social": return "text-accent-green border-accent-green";
-      case "performance": return "text-accent-gold border-accent-gold";
-      case "feast": return "text-accent-red border-accent-red";
-      case "contest": return "text-accent-gold border-accent-gold";
-      case "dance": return "text-accent-green border-accent-green";
-      case "finale": return "text-accent-red border-accent-red";
-      default: return "text-ink border-ink";
+      case "arrival": return "text-accent-gold border-accent-gold"; // 6:30 PM - Warm welcome
+      case "social": return "text-accent-green border-accent-green"; // 7:15 PM - Fresh, social
+      case "performance": return "text-[#B794F6] border-[#B794F6]"; // 7:30 PM - Bright purple, mysterious
+      case "feast": return "text-[#F59E0B] border-[#F59E0B]"; // 7:45 PM - Amber, food-related
+      case "contest": return "text-accent-gold border-accent-gold"; // 8:00 PM - Competitive gold
+      case "dance": return "text-[#06B6D4] border-[#06B6D4]"; // 9:00 PM - Cyan, showcase
+      case "finale": return "text-accent-red border-accent-red"; // 10:45 PM - Climactic red
+      default: return "text-[#3B82F6] border-[#3B82F6]"; // 10:00 PM - Blue, reflective
     }
   };
 
@@ -139,7 +139,7 @@ const Schedule = () => {
                 <ul className="font-body text-muted-foreground space-y-2">
                   <li>• Interactive experiences require participation</li>
                   <li>• <strong className="text-accent-red">Age 21+ only</strong> - This is an adult-only event</li>
-                  <li>• <strong className="text-accent-red">Risqué costumes & partial nudity</strong> may be present</li>
+                  <li>• Some risqué costumes may be seen</li>
                   <li>• <strong className="text-accent-gold">Photography with consent only</strong> - Ask before taking photos</li>
                   <li>• Stay in character for the full experience</li>
                 </ul>
