@@ -9,8 +9,9 @@ const DeveloperModeContext = createContext<DeveloperModeContextType | undefined>
 
 export const useDeveloperMode = () => {
   const context = useContext(DeveloperModeContext);
+  // Graceful fallback when provider is not mounted
   if (context === undefined) {
-    throw new Error('useDeveloperMode must be used within a DeveloperModeProvider');
+    return { isDeveloperMode: false, toggleDeveloperMode: () => {} } as DeveloperModeContextType;
   }
   return context;
 };

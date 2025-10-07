@@ -6,7 +6,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
-import { DeveloperModeProvider } from "@/contexts/DeveloperModeContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
@@ -44,19 +43,18 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DeveloperModeProvider>
-        <AuthProvider>
-          <AdminProvider>
-            <HuntProvider>
-              <BrowserRouter
-                future={{
-                  v7_startTransition: true,
-                  v7_relativeSplatPath: true,
-                }}
-              >
-                <AudioProvider>
-                  <SkipLink />
-                  <NavBar />
+      <AuthProvider>
+        <AdminProvider>
+          <HuntProvider>
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
+              <AudioProvider>
+                <SkipLink />
+                <NavBar />
                 <main>
                   <SwipeNavigator>
                     <Toaster />
@@ -87,16 +85,15 @@ function App() {
                   </SwipeNavigator>
                 </main>
                 
-                  {/* Hunt UI overlays */}
-                  <HuntProgress />
-                  <HuntReward />
-                  <HuntNotification />
-                </AudioProvider>
-              </BrowserRouter>
-            </HuntProvider>
-          </AdminProvider>
-        </AuthProvider>
-      </DeveloperModeProvider>
+                {/* Hunt UI overlays */}
+                <HuntProgress />
+                <HuntReward />
+                <HuntNotification />
+              </AudioProvider>
+            </BrowserRouter>
+          </HuntProvider>
+        </AdminProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
