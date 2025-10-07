@@ -59,8 +59,10 @@ function buildICS(name: string) {
 
 function cors(origin: string | null) {
   const allowed = origin && ALLOWED.includes(origin);
+  // Allow both the main domain and the 2025 subdomain
+  const defaultOrigin = origin && origin.includes("partytillyou.rip") ? origin : "https://partytillyou.rip";
   return {
-    "Access-Control-Allow-Origin": allowed ? origin : "https://partytillyou.rip",
+    "Access-Control-Allow-Origin": allowed ? origin : defaultOrigin,
     "Vary": "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "authorization, content-type",

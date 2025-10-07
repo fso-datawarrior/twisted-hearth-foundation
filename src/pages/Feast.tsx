@@ -581,7 +581,7 @@ const Feast = () => {
                   <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🌱</span>
-                      <span className="text-gray-200 font-semibold">🌱 = Vegan/Vegetarian</span>
+                      <span className="text-gray-200 font-semibold">🌱 = Vegetarian</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🌾</span>
@@ -595,7 +595,7 @@ const Feast = () => {
                     <h4 className="font-subhead text-lg mb-3 text-accent-gold">Food Safety & Dietary Needs</h4>
                     <ul className="font-body text-sm text-gray-200 space-y-1 inline-block text-left">
                       <li>• <strong className="text-accent-gold">Include ingredient list for allergens</strong></li>
-                      <li>• <strong className="text-accent-gold">Label vegan/vegetarian options clearly</strong></li>
+                      <li>• <strong className="text-accent-gold">Label vegetarian options clearly</strong></li>
                       <li>• <strong className="text-blue-400">Mark gluten-free items prominently</strong></li>
                       <li>• Keep hot foods hot, cold foods cold</li>
                       <li>• No home-canned items please</li>
