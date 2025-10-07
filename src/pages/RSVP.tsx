@@ -51,9 +51,7 @@ interface ExistingRsvp {
 
 const RSVP = () => {
   const { toast } = useToast();
-  // TEMPORARY: Bypass auth for testing due to rate limiting issues
-  const { user } = { user: { id: 'test-user-bypass', email: 'test@example.com' } };
-  // const { user } = useAuth();
+  const { user } = useAuth();
   const startRef = useRef(Date.now());
   const [formData, setFormData] = useState({
     name: "",
@@ -504,10 +502,11 @@ const RSVP = () => {
 
         // Send confirmation email
         try {
+          const contributorName = (user as any).user_metadata?.full_name || user.email?.split('@')[0] || 'Guest';
           const emailResponse = await supabase.functions.invoke('send-contribution-confirmation', {
             body: {
               contributorEmail: user.email,
-              contributorName: user.user_metadata?.full_name || user.email?.split('@')[0],
+              contributorName,
               dishName,
               notes: dishNotes || undefined,
               isVegan,

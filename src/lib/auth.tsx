@@ -16,6 +16,8 @@ type AuthCtx = {
   devSignIn: (email: string) => Promise<void>;
   signInWithOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<void>;
+  signUpWithPassword: (email: string, password: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
   loading: boolean;
 };
 
@@ -113,9 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('🔐 Magic Link Auth - Error details', {
           message: error.message,
           status: error.status,
-          statusText: error.statusText,
           name: error.name,
-          cause: error.cause,
           stack: error.stack
         });
         
@@ -211,9 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('🔐 OTP Auth - Error details', {
           message: error.message,
           status: error.status,
-          statusText: error.statusText,
           name: error.name,
-          cause: error.cause,
           stack: error.stack
         });
         throw error;
@@ -246,8 +244,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signUpWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+      }
+    });
+    
+    if (error) {
+      throw error;
+    }
+  };
+
+  const signInWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) {
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, loading }}>
+    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, signUpWithPassword, signInWithPassword, loading }}>
       {children}
     </AuthContext.Provider>
   );

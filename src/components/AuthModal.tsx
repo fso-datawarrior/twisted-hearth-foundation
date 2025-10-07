@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
-import { CheckCircle, Mail, KeyRound, ArrowLeft } from "lucide-react";
+import { CheckCircle, Mail, KeyRound, ArrowLeft, Lock, Clock } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface AuthModalProps {
@@ -16,14 +16,17 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'magic-link' | 'otp'>('magic-link');
+  const [authMethod, setAuthMethod] = useState<'magic-link' | 'otp' | 'password'>('magic-link');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [countdown, setCountdown] = useState(300);
-  const { signIn, devSignIn, signInWithOtp, verifyOtp } = useAuth();
+  const [rateLimitCooldown, setRateLimitCooldown] = useState(0);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const { signIn, devSignIn, signInWithOtp, verifyOtp, signUpWithPassword, signInWithPassword } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
 
@@ -35,22 +38,32 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   }, [otpSent, countdown]);
 
+  // Countdown timer for rate limit cooldown
+  useEffect(() => {
+    if (rateLimitCooldown > 0) {
+      const timer = setTimeout(() => setRateLimitCooldown(rateLimitCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [rateLimitCooldown]);
+
   const handleClose = () => {
     onClose();
     // Reset form state when modal closes
     setTimeout(() => {
       setEmail("");
+      setPassword("");
       setSent(false);
       setOtpSent(false);
       setOtpCode("");
       setCountdown(300);
       setAuthMethod('magic-link');
+      setIsSignUp(false);
     }, 200);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
+    if (!email.trim() || (authMethod === 'password' && !password.trim())) {
       return;
     }
 
@@ -60,7 +73,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (authMethod === 'magic-link') {
         await signIn(email.trim().toLowerCase());
         setSent(true);
-      } else {
+      } else if (authMethod === 'otp') {
         await signInWithOtp(email.trim().toLowerCase());
         setOtpSent(true);
         setCountdown(300);
@@ -69,22 +82,55 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           description: "Check your email for a 6-digit code.",
           duration: 4000,
         });
+      } else {
+        // Password authentication
+        if (isSignUp) {
+          await signUpWithPassword(email.trim().toLowerCase(), password);
+          toast({
+            title: "Account created!",
+            description: "Check your email to verify your account.",
+            duration: 5000,
+          });
+          handleClose();
+        } else {
+          await signInWithPassword(email.trim().toLowerCase(), password);
+          toast({
+            title: "Welcome back!",
+            description: "You're now signed in.",
+            duration: 3000,
+          });
+          handleClose();
+        }
       }
     } catch (error: any) {
       let errorMsg = authMethod === 'magic-link' 
         ? "Unable to send magic link. Please try again."
-        : "Unable to send code. Please try again.";
+        : authMethod === 'otp'
+        ? "Unable to send code. Please try again."
+        : isSignUp
+        ? "Unable to create account. Please try again."
+        : "Invalid email or password.";
       
       if (error?.message?.includes('rate') || error?.status === 429) {
-        errorMsg = "Too many requests. Please wait 1-2 hours before trying again.";
+        errorMsg = "Too many requests. Try password sign-in or wait before retrying.";
+        // Set cooldown to 2 hours (7200 seconds)
+        setRateLimitCooldown(7200);
       } else if (error?.message?.includes('invalid')) {
-        errorMsg = "Please enter a valid email address.";
+        errorMsg = authMethod === 'password' 
+          ? "Please check your email and password."
+          : "Please enter a valid email address.";
       } else if (error?.message?.includes('network')) {
         errorMsg = "Network error. Please check your connection and try again.";
+      } else if (error?.message?.includes('already registered')) {
+        errorMsg = "This email is already registered. Try signing in instead.";
       }
       
       toast({
-        title: authMethod === 'magic-link' ? "Failed to send magic link" : "Failed to send code",
+        title: authMethod === 'password' 
+          ? (isSignUp ? "Sign up failed" : "Sign in failed")
+          : authMethod === 'magic-link' 
+          ? "Failed to send magic link" 
+          : "Failed to send code",
         description: errorMsg,
         variant: "destructive",
         duration: 6000,
@@ -200,7 +246,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               ? "Enter the 6-digit code sent to your email."
               : authMethod === 'magic-link'
               ? "Enter your email to receive a magic link for instant access."
-              : "Enter your email to receive a 6-digit code."
+              : authMethod === 'otp'
+              ? "Enter your email to receive a 6-digit code."
+              : isSignUp
+              ? "Create an account with email and password."
+              : "Sign in with your email and password."
             }
           </DialogDescription>
         </DialogHeader>
@@ -295,31 +345,59 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
         ) : (
           <>
+            {/* Rate Limit Warning */}
+            {rateLimitCooldown > 0 && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-start gap-3">
+                <Clock className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium text-destructive">Rate limit active</p>
+                  <p className="text-xs text-muted-foreground">
+                    Cooldown: {Math.floor(rateLimitCooldown / 3600)}h {Math.floor((rateLimitCooldown % 3600) / 60)}m {rateLimitCooldown % 60}s
+                  </p>
+                  <p className="text-xs text-muted-foreground">Try password sign-in below instead.</p>
+                </div>
+              </div>
+            )}
+
             {/* Auth Method Toggle */}
-            <div className="flex gap-2 p-1 bg-accent-purple/10 rounded-lg">
+            <div className="grid grid-cols-3 gap-2 p-1 bg-accent-purple/10 rounded-lg">
               <button
                 type="button"
                 onClick={() => setAuthMethod('magic-link')}
-                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                disabled={rateLimitCooldown > 0}
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   authMethod === 'magic-link'
                     ? 'bg-accent-gold text-background'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Mail className="inline h-4 w-4 mr-2" />
-                Magic Link
+                <Mail className="inline h-3 w-3 mr-1" />
+                Magic
               </button>
               <button
                 type="button"
                 onClick={() => setAuthMethod('otp')}
-                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                disabled={rateLimitCooldown > 0}
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   authMethod === 'otp'
                     ? 'bg-accent-gold text-background'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <KeyRound className="inline h-4 w-4 mr-2" />
-                OTP Code
+                <KeyRound className="inline h-3 w-3 mr-1" />
+                OTP
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthMethod('password')}
+                className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                  authMethod === 'password'
+                    ? 'bg-accent-gold text-background'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Lock className="inline h-3 w-3 mr-1" />
+                Password
               </button>
             </div>
 
@@ -339,6 +417,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="bg-background border-accent-purple/30 focus:border-accent-gold"
                 />
               </div>
+
+              {authMethod === 'password' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="font-subhead text-accent-gold">
+                      Password
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      disabled={loading}
+                      minLength={6}
+                      className="bg-background border-accent-purple/30 focus:border-accent-gold"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(!isSignUp)}
+                      className="text-accent-gold hover:text-accent-gold/80 underline"
+                    >
+                      {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+                    </button>
+                  </div>
+                </>
+              )}
               
               <div className="flex gap-3">
                 <Button
@@ -352,22 +461,28 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || !email.trim()}
-                  className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+                  disabled={loading || !email.trim() || (authMethod === 'password' && !password.trim()) || (authMethod !== 'password' && rateLimitCooldown > 0)}
+                  className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead disabled:opacity-50"
                 >
                   {loading ? (
                     <>
                       {authMethod === 'magic-link' ? (
                         <Mail className="mr-2 h-4 w-4 animate-pulse" />
-                      ) : (
+                      ) : authMethod === 'otp' ? (
                         <KeyRound className="mr-2 h-4 w-4 animate-pulse" />
+                      ) : (
+                        <Lock className="mr-2 h-4 w-4 animate-pulse" />
                       )}
-                      Sending...
+                      {authMethod === 'password' ? (isSignUp ? "Creating..." : "Signing in...") : "Sending..."}
                     </>
                   ) : authMethod === 'magic-link' ? (
                     "Send Magic Link"
-                  ) : (
+                  ) : authMethod === 'otp' ? (
                     "Send Code"
+                  ) : isSignUp ? (
+                    "Create Account"
+                  ) : (
+                    "Sign In"
                   )}
                 </Button>
               </div>
@@ -406,13 +521,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     No password needed. Just click the link in your email.
                   </p>
                 </>
-              ) : (
+              ) : authMethod === 'otp' ? (
                 <>
                   <p className="font-body text-sm text-muted-foreground">
                     🔐 <strong>OTP code sign-in</strong> - Enter the code from your email!
                   </p>
                   <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
                     6-digit code • Expires in 5 minutes
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-body text-sm text-muted-foreground">
+                    🔒 <strong>Password sign-in</strong> - Instant access, no email wait!
+                  </p>
+                  <p className="font-body text-xs text-muted-foreground mt-1 opacity-75">
+                    Password must be at least 6 characters
                   </p>
                 </>
               )}
