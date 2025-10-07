@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
@@ -24,6 +25,25 @@ type AuthCtx = {
 const AuthContext = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Guard against duplicate React causing invalid hook calls
+  const dispatcher = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentDispatcher?.current;
+  if (!dispatcher) {
+    console.error('AuthProvider disabled: React dispatcher is null. Possible multiple React copies. Rendering pass-through auth context to avoid crash.');
+    const noopCtx: AuthCtx = {
+      user: null,
+      session: null,
+      signIn: async () => {},
+      signOut: async () => {},
+      devSignIn: async () => {},
+      signInWithOtp: async () => {},
+      verifyOtp: async () => {},
+      signUpWithPassword: async () => {},
+      signInWithPassword: async () => {},
+      loading: false,
+    };
+    return <AuthContext.Provider value={noopCtx}>{children}</AuthContext.Provider>;
+  }
+
   const [user, setUser] = useState<SessionUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
