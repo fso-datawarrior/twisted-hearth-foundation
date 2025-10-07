@@ -59,13 +59,15 @@ function buildICS(name: string) {
 
 function cors(origin: string | null) {
   const allowed = origin && ALLOWED.includes(origin);
-  // Allow both the main domain and the 2025 subdomain
-  const defaultOrigin = origin && origin.includes("partytillyou.rip") ? origin : "https://partytillyou.rip";
+  // Allow partytillyou.rip domains and lovable.app preview domains
+  const isPartytillyou = origin && origin.includes("partytillyou.rip");
+  const isLovable = origin && origin.includes("lovable.app");
+  const defaultOrigin = (isPartytillyou || isLovable) ? origin : "https://partytillyou.rip";
   return {
     "Access-Control-Allow-Origin": allowed ? origin : defaultOrigin,
     "Vary": "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Access-Control-Allow-Headers": "authorization, content-type, x-client-info, apikey",
   };
 }
 
@@ -177,16 +179,35 @@ This address is private. Please don't share it publicly.
     }
   ];
 
+  console.log('Sending to Mailjet API...', {
+    apiKey: MJ_API ? 'Present' : 'Missing',
+    apiSecret: MJ_SECRET ? 'Present' : 'Missing',
+    fromEmail: FROM_EMAIL,
+    fromName: FROM_NAME,
+    messageCount: messages.length
+  });
+
   const res = await fetch("https://api.mailjet.com/v3.1/send", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...mjAuth() },
     body: JSON.stringify({ Messages: messages })
   });
 
+  console.log('Mailjet API response:', {
+    status: res.status,
+    statusText: res.statusText,
+    ok: res.ok
+  });
+
   if (!res.ok) {
     const errorText = await res.text();
-    console.error('Mailjet API error:', errorText);
-    return new Response("Email send failed", { status: 502, headers: cors(origin) });
+    console.error('Mailjet API error details:', {
+      status: res.status,
+      statusText: res.statusText,
+      errorText: errorText,
+      headers: Object.fromEntries(res.headers.entries())
+    });
+    return new Response(`Email send failed: ${res.status} ${res.statusText} - ${errorText}`, { status: 502, headers: cors(origin) });
   }
 
   const result = await res.json();
