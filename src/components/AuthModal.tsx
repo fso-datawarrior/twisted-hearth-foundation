@@ -75,8 +75,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         ? "Unable to send magic link. Please try again."
         : "Unable to send code. Please try again.";
       
-      if (error?.message?.includes('rate')) {
-        errorMsg = "Too many requests. Please wait a moment before trying again.";
+      if (error?.message?.includes('rate') || error?.status === 429) {
+        errorMsg = "Too many requests. Please wait 1-2 hours before trying again.";
       } else if (error?.message?.includes('invalid')) {
         errorMsg = "Please enter a valid email address.";
       } else if (error?.message?.includes('network')) {

@@ -27,9 +27,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔐 AuthProvider: Initializing auth state...');
+    
     // Set up auth state listener FIRST to catch magic link auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('🔐 AuthProvider: Auth state changed', { event, hasSession: !!session });
         setSession(session);
         setUser(session?.user ? { 
           id: session.user.id, 
@@ -40,16 +43,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ? { 
-        id: session.user.id, 
-        email: session.user.email,
-        user_metadata: session.user.user_metadata 
-      } : null);
-      setLoading(false);
-    });
+    // Check for existing session with error handling
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('🔐 AuthProvider: Error getting session', error);
+        } else {
+          console.log('🔐 AuthProvider: Got existing session', { hasSession: !!session });
+        }
+        setSession(session);
+        setUser(session?.user ? { 
+          id: session.user.id, 
+          email: session.user.email,
+          user_metadata: session.user.user_metadata 
+        } : null);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('🔐 AuthProvider: Failed to get session', error);
+        setLoading(false);
+      });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -72,14 +85,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const signIn = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
+    console.log('🔐 Magic Link Auth - Starting signIn process', {
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth`,
-      }
+      origin: window.location.origin,
+      redirectTo: `${window.location.origin}/auth`,
+      timestamp: new Date().toISOString()
     });
-    
-    if (error) {
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+        }
+      });
+
+      console.log('🔐 Magic Link Auth - Supabase response', {
+        data,
+        error,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorCode: error?.status,
+        timestamp: new Date().toISOString()
+      });
+      
+      if (error) {
+        console.error('🔐 Magic Link Auth - Error details', {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText,
+          name: error.name,
+          cause: error.cause,
+          stack: error.stack
+        });
+        
+        // If it's a rate limit error, provide a helpful message
+        if (error.status === 429) {
+          throw new Error('Rate limit exceeded. Please wait a few minutes before trying again, or contact support if this persists.');
+        }
+        
+        throw error;
+      }
+
+      console.log('🔐 Magic Link Auth - Success! Magic link sent', {
+        email,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('🔐 Magic Link Auth - Catch block error', {
+        error,
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
       throw error;
     }
   };
@@ -123,15 +181,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithOtp = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
+    console.log('🔐 OTP Auth - Starting signInWithOtp process', {
       email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: `${window.location.origin}/auth`,
-      }
+      origin: window.location.origin,
+      redirectTo: `${window.location.origin}/auth`,
+      shouldCreateUser: false,
+      timestamp: new Date().toISOString()
     });
-    
-    if (error) {
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/auth`,
+        }
+      });
+
+      console.log('🔐 OTP Auth - Supabase response', {
+        data,
+        error,
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorCode: error?.status,
+        timestamp: new Date().toISOString()
+      });
+      
+      if (error) {
+        console.error('🔐 OTP Auth - Error details', {
+          message: error.message,
+          status: error.status,
+          statusText: error.statusText,
+          name: error.name,
+          cause: error.cause,
+          stack: error.stack
+        });
+        throw error;
+      }
+
+      console.log('🔐 OTP Auth - Success! OTP sent', {
+        email,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('🔐 OTP Auth - Catch block error', {
+        error,
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
       throw error;
     }
   };
