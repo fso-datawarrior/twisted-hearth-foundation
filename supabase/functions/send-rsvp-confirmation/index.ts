@@ -15,11 +15,8 @@ type Payload = {
   additionalGuests?: AdditionalGuest[];
 };
 
-// Temporarily hardcoded keys for testing
-const MJ_API = "f3c1a2db847296151b9b989dc49cfa9a";
-const MJ_SECRET = "6dec0ac72390100efa3e4a435077b870";
-// const MJ_API = Deno.env.get("MAILJET_API_KEY")!;
-// const MJ_SECRET = Deno.env.get("MAILJET_API_SECRET")!;
+const MJ_API = Deno.env.get("MAILJET_API_KEY")!;
+const MJ_SECRET = Deno.env.get("MAILJET_API_SECRET")!;
 const FROM_EMAIL = Deno.env.get("MAILJET_FROM_EMAIL")!;
 const FROM_NAME = Deno.env.get("MAILJET_FROM_NAME") ?? "Jamie & Kat Ruth";
 const ADMIN_EMAIL = FROM_EMAIL; // Admin receives notifications at the from email
