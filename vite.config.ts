@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ['date-fns', '@radix-ui/react-checkbox', 'react', 'react-dom'],
+    include: ['date-fns', '@radix-ui/react-checkbox'],
     dedupe: ['react', 'react-dom'],
     force: true
   },
