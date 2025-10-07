@@ -51,7 +51,9 @@ const Feast = () => {
   // Auto-populate display name from RSVP or email when user logs in
   useEffect(() => {
     const loadDisplayName = async () => {
-      if (!user?.email) return;
+      if (!user?.email) {
+        return;
+      }
       
       // Try to get name from RSVP
       const { data: rsvpData } = await supabase
@@ -150,6 +152,9 @@ const Feast = () => {
 
     setIsLoading(true);
     try {
+      console.log('Feast: Adding contribution with displayName:', displayName);
+      console.log('Feast: User data:', { id: user.id, email: user.email });
+      
       // Insert into database
       const { data, error } = await supabase
         .from("potluck_items")
@@ -161,13 +166,16 @@ const Feast = () => {
             is_vegan: isVegan,
             is_gluten_free: isGlutenFree,
             user_email: user.email,
-            display_name: displayName.trim(),
+            display_name: displayName.trim() || null,
           },
         ])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Feast: Database insert error:', error);
+        throw error;
+      }
       
       setPotluckItems([{ ...data, contributor_name: displayName.trim() }, ...potluckItems]);
 
