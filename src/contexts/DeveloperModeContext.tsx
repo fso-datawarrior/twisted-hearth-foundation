@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { ReactNode, FC } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 interface DeveloperModeContextType {
   isDeveloperMode: boolean;
@@ -17,10 +16,10 @@ export const useDeveloperMode = () => {
 };
 
 interface DeveloperModeProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-export const DeveloperModeProvider: FC<DeveloperModeProviderProps> = ({ children }) => {
+export const DeveloperModeProvider: React.FC<DeveloperModeProviderProps> = ({ children }) => {
   const [isDeveloperMode, setIsDeveloperMode] = useState(false);
 
   // Initialize from localStorage after component mounts - only in development
