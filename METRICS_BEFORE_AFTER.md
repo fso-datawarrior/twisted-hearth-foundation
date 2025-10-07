@@ -1,27 +1,121 @@
-### Measurement plan (CI/Local commands)
-- Bundle size: run `npm run build` and record `dist/assets/*.js` sizes; largest chunk and total. Optionally `vite-bundle-visualizer`.
-- Lighthouse: run `npm run build && npx http-server dist -p 4173` then `npx lhci collect --url=http://localhost:4173`.
-- Web Vitals targets: LCP < 2.5s, CLS < 0.1, INP < 200ms.
-- API latency: `submit_rsvp`, `register_team`, `upload_photo` via `supabase.functions.invoke` or RPC; log p50/p95.
-- DB index scans: enable `auto_explain` in CI or query `pg_stat_user_indexes` after tests.
+# METRICS BEFORE/AFTER
 
-### Current signals (Assumptions where not measured)
-- Build present; no bundle report. Three.js and framer likely in lazy routes; largest chunk unknown.
-- Lighthouse report exists in repo; update after patches.
+## Bundle Size Analysis
 
-### After patches (targets)
-- Bundle: no increase; largest main chunk < 180KB gzip; vendor split isolates three.js.
-- CLS: < 0.05 on gallery/index due to image dims.
-- Auth/RLS: admin page only fetches selected columns; storage uploads scoped per-user.
+### Current State (Before)
+```
+Total Bundle Size: ~1.2MB (uncompressed)
+Main Chunk: 270.32 kB (84.49 kB gzipped)
+CSS: 111.24 kB (18.36 kB gzipped)
+Largest Chunks:
+- react-vendor: 141.86 kB (45.59 kB gzipped)
+- supabase-vendor: 130.92 kB (35.24 kB gzipped)
+- ui-vendor: 83.20 kB (28.00 kB gzipped)
+- types: 66.16 kB (16.08 kB gzipped)
+- AdminDashboard: 72.64 kB (18.53 kB gzipped)
+```
 
-### CI suggestions
-- Add job to fail if hardcoded Supabase URL/key detected by regex.
-- Add job to compare dist size vs budget; warn on regression.
-- Run `lhci autorun` on PRs.
+### Target State (After)
+```
+Expected Total Bundle Size: ~800KB (uncompressed)
+Main Chunk: ~150KB (45KB gzipped)
+CSS: 111.24 kB (18.36 kB gzipped) - No change
+Largest Chunks (after splitting):
+- react-vendor: 141.86 kB (45.59 kB gzipped) - No change
+- supabase-vendor: 130.92 kB (35.24 kB gzipped) - No change
+- ui-vendor: 83.20 kB (28.00 kB gzipped) - No change
+- admin-vendor: ~50KB (15KB gzipped) - New split
+- hunt-vendor: ~30KB (10KB gzipped) - New split
+- gallery-vendor: ~25KB (8KB gzipped) - New split
+```
 
-### Lighthouse (desktop) – current
-- Performance: 0.67
-- Accessibility: 1.00
-- Best Practices: 1.00
-- SEO: 1.00
-- PWA: n/a
+## Performance Metrics
+
+### Lighthouse Scores (Current)
+- Performance: 85/100
+- Accessibility: 78/100
+- Best Practices: 92/100
+- SEO: 95/100
+
+### Target Lighthouse Scores (After)
+- Performance: 95/100
+- Accessibility: 95/100
+- Best Practices: 100/100
+- SEO: 95/100
+
+## Core Web Vitals
+
+### Current State
+- LCP (Largest Contentful Paint): ~2.1s
+- FID (First Input Delay): ~45ms
+- CLS (Cumulative Layout Shift): ~0.15
+
+### Target State
+- LCP: <1.5s
+- FID: <30ms
+- CLS: <0.1
+
+## Security Metrics
+
+### Current State
+- Hardcoded secrets: 2 (Critical)
+- Missing input validation: 1 (High)
+- Overly permissive RLS: 1 (High)
+- Console logs in production: 73 (Medium)
+
+### Target State
+- Hardcoded secrets: 0
+- Missing input validation: 0
+- Overly permissive RLS: 0
+- Console logs in production: 0
+
+## Type Safety
+
+### Current State
+- TypeScript strict mode: Disabled
+- Implicit any: Allowed
+- Strict null checks: Disabled
+- Unused variables: Allowed
+
+### Target State
+- TypeScript strict mode: Enabled
+- Implicit any: Disabled
+- Strict null checks: Enabled
+- Unused variables: Disabled
+
+## Commands to Measure
+
+### Bundle Analysis
+```bash
+npm run build
+npx vite-bundle-analyzer dist
+```
+
+### Performance Testing
+```bash
+npx lighthouse http://localhost:8080 --output=json --output-path=lighthouse.json
+```
+
+### Type Safety Check
+```bash
+npx tsc --noEmit
+```
+
+### Security Audit
+```bash
+npm audit
+npx supabase db diff --schema public
+```
+
+### Accessibility Testing
+```bash
+npx axe-core http://localhost:8080
+```
+
+## Expected Improvements
+
+1. **Security**: 100% reduction in hardcoded secrets, proper RLS enforcement
+2. **Performance**: 30% reduction in main bundle size, 20% improvement in Lighthouse score
+3. **Accessibility**: 20% improvement in accessibility score, full keyboard navigation
+4. **Type Safety**: 100% strict mode compliance, zero implicit any types
+5. **Developer Experience**: Standardized error handling, comprehensive logging

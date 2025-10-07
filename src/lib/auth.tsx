@@ -87,10 +87,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const signIn = async (email: string) => {
-    console.log('🔐 Magic Link Auth - Starting signIn process', {
+    console.log('🔐 OTP Auth - Starting signIn process', {
       email,
       origin: window.location.origin,
-      redirectTo: `${window.location.origin}/auth`,
       timestamp: new Date().toISOString()
     });
 
@@ -98,11 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
+          shouldCreateUser: false,
         }
       });
 
-      console.log('🔐 Magic Link Auth - Supabase response', {
+      console.log('🔐 OTP Auth - Supabase response', {
         data,
         error,
         hasError: !!error,
@@ -112,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        console.error('🔐 Magic Link Auth - Error details', {
+        console.error('🔐 OTP Auth - Error details', {
           message: error.message,
           status: error.status,
           name: error.name,
@@ -127,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log('🔐 Magic Link Auth - Success! Magic link sent', {
+      console.log('🔐 OTP Auth - Success! OTP sent', {
         email,
         timestamp: new Date().toISOString()
       });

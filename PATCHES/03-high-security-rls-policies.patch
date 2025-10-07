@@ -1,0 +1,15 @@
+--- a/supabase/migrations/20250906204143_15569238-0b31-4728-b925-e322645146d2.sql
++++ b/supabase/migrations/20250906204143_15569238-0b31-4728-b925-e322645146d2.sql
+@@ -72,11 +72,11 @@
+ -- Minimal read policies (relaxed for this project)
+ do $$
+ begin
+   if not exists (
+     select 1 from pg_policies where schemaname='public' and tablename='rsvps' and policyname='select_own_rsvp'
+   ) then
+-    create policy "select_own_rsvp" on public.rsvps
+-      for select using (true);
++    create policy "select_own_rsvp" on public.rsvps
++      for select using (auth.uid() = user_id OR public.is_admin());
+   end if;
+ end$$;
