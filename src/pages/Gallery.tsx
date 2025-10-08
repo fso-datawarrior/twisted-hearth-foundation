@@ -31,7 +31,22 @@ const Gallery = () => {
   const [uploading, setUploading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
+  const [photosPerView, setPhotosPerView] = useState(1);
   const { toast } = useToast();
+
+  // Dynamic photos per view based on window width
+  useEffect(() => {
+    const updatePhotosPerView = () => {
+      if (window.innerWidth >= 1280) setPhotosPerView(4);
+      else if (window.innerWidth >= 1024) setPhotosPerView(3);
+      else if (window.innerWidth >= 640) setPhotosPerView(2);
+      else setPhotosPerView(1);
+    };
+    
+    updatePhotosPerView();
+    window.addEventListener('resize', updatePhotosPerView);
+    return () => window.removeEventListener('resize', updatePhotosPerView);
+  }, []);
 
   useEffect(() => {
     loadImages();
@@ -462,7 +477,7 @@ const Gallery = () => {
                   onFavorite={handleFavorite}
                   onEmojiReaction={handleEmojiReaction}
                   onCaptionUpdate={handleCaptionUpdate}
-                  photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
+                  photosPerView={photosPerView}
                   className="mb-4"
                 />
               </div>

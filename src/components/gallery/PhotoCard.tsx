@@ -113,7 +113,8 @@ export const PhotoCard = ({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-2 w-full">
+      {/* Photo Container */}
       <div className="group relative aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all">
         {loading ? (
           <div className="w-full h-full flex items-center justify-center">
@@ -131,13 +132,13 @@ export const PhotoCard = ({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <span className="text-sm">Photo unavailable</span>
+                <span className="text-xs md:text-sm">Photo unavailable</span>
               </div>
             )}
             
             {getStatusBadge()}
 
-            {/* Photo Edit Controls (only for unapproved photos) */}
+            {/* Photo Edit Controls (only for unapproved photos) - Keep absolute positioned */}
             {showEditControls && !photo.is_approved && onUpdate && onDelete && (
               <div className="absolute top-2 right-2 z-20">
                 <PhotoEditControls
@@ -148,21 +149,10 @@ export const PhotoCard = ({
               </div>
             )}
 
-            {/* User Photo Actions (delete, favorite) */}
-            {showUserActions && (onDelete || onFavorite) && (
-              <div className="absolute top-2 right-2 z-20">
-                <UserPhotoActions
-                  photo={photo}
-                  onDelete={onDelete ? (photoId) => onDelete(photoId, photo.storage_path) : undefined}
-                  onFavorite={onFavorite}
-                />
-              </div>
-            )}
-
             {/* Photo info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-2 md:p-3 opacity-0 group-hover:opacity-100 transition-opacity">
               {photo.caption && (
-                <p className="font-body text-xs text-ink mb-2 line-clamp-2">
+                <p className="font-body text-[10px] md:text-xs text-ink mb-1 md:mb-2 line-clamp-2">
                   {photo.caption}
                 </p>
               )}
@@ -173,15 +163,15 @@ export const PhotoCard = ({
                     size="sm"
                     variant="ghost"
                     onClick={() => onLike(photo.id)}
-                    className="h-8 px-2 text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
+                    className="h-6 md:h-8 px-1 md:px-2 text-[10px] md:text-xs text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
                   >
-                    <Heart className="w-4 h-4 mr-1" />
+                    <Heart className="w-3 md:w-4 h-3 md:h-4 mr-1" />
                     {photo.likes_count}
                   </Button>
                 )}
                 
                 {photo.category && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-[10px] md:text-xs">
                     {photo.category}
                   </Badge>
                 )}
@@ -191,18 +181,27 @@ export const PhotoCard = ({
         )}
       </div>
 
-      {/* Emoji Reactions - Horizontal Layout Below Photo */}
-      {showUserActions && onEmojiReaction && (
-        <div className="mt-2 p-2 bg-bg-2/50 rounded border-t border-b border-accent-gold/30">
-          <PhotoEmojiReactions
-            photoId={photo.id}
-            onReaction={onEmojiReaction}
+      {/* User Actions Row - Below Photo */}
+      {showUserActions && (onDelete || onFavorite) && (
+        <div className="flex justify-center">
+          <UserPhotoActions
+            photo={photo}
+            onDelete={onDelete ? (photoId) => onDelete(photoId, photo.storage_path) : undefined}
+            onFavorite={onFavorite}
           />
         </div>
       )}
 
-      {/* Caption Display/Edit Below Card - Fixed Height */}
-      <div className="mt-2 p-3 bg-bg-2/50 rounded-lg border-2 border-accent-gold/60 min-h-[120px] flex flex-col">
+      {/* Emoji Reactions - Below User Actions */}
+      {showUserActions && onEmojiReaction && (
+        <PhotoEmojiReactions
+          photoId={photo.id}
+          onReaction={onEmojiReaction}
+        />
+      )}
+
+      {/* Caption Display/Edit - Fixed Height with Responsive Sizing */}
+      <div className="p-2 md:p-3 bg-bg-2/50 rounded-lg border md:border-2 border-accent-gold/60 min-h-[160px] md:min-h-[140px] flex flex-col">
         {allowCaptionEdit && onCaptionUpdate ? (
           isEditingCaption ? (
             // Edit Mode
@@ -213,26 +212,26 @@ export const PhotoCard = ({
                 placeholder="Add a caption to your photo..."
                 maxLength={250}
                 rows={4}
-                className="flex-1 bg-bg-1 border-accent-purple/50 text-spooky-gold placeholder:text-accent-gold/50 resize-none"
+                className="flex-1 bg-bg-1 border-accent-purple/50 text-spooky-gold text-xs md:text-sm placeholder:text-accent-gold/50 resize-none"
               />
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-accent-gold/70">{charCount}/250</p>
-                <div className="flex gap-2">
+                <p className="text-[10px] md:text-xs text-accent-gold/70">{charCount}/250</p>
+                <div className="flex gap-1 md:gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={handleCancelEdit}
-                    className="h-7 px-2 text-xs border-accent-purple/50 text-accent-gold hover:bg-accent-purple/20"
+                    className="h-6 md:h-7 px-1.5 md:px-2 text-[10px] md:text-xs border-accent-purple/50 text-accent-gold hover:bg-accent-purple/20"
                   >
-                    <X className="w-3 h-3 mr-1" />
+                    <X className="w-3 h-3 mr-0.5 md:mr-1" />
                     Cancel
                   </Button>
                   <Button
                     size="sm"
                     onClick={handleSaveCaption}
-                    className="h-7 px-2 text-xs bg-accent-gold text-ink hover:bg-accent-gold/80"
+                    className="h-6 md:h-7 px-1.5 md:px-2 text-[10px] md:text-xs bg-accent-gold text-ink hover:bg-accent-gold/80"
                   >
-                    <Save className="w-3 h-3 mr-1" />
+                    <Save className="w-3 h-3 mr-0.5 md:mr-1" />
                     Save
                   </Button>
                 </div>
@@ -241,16 +240,16 @@ export const PhotoCard = ({
           ) : (
             // View Mode
             <div className="flex flex-col flex-1 items-center justify-center">
-              <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full flex-1 flex items-center justify-center">
+              <p className="text-spooky-gold text-xs md:text-sm text-center leading-snug md:leading-relaxed break-words w-full flex-1 flex items-center justify-center px-1">
                 {photo.caption || 'No caption yet'}
               </p>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => setIsEditingCaption(true)}
-                className="mt-2 h-7 px-2 text-xs text-accent-gold hover:bg-accent-gold/10"
+                className="mt-2 h-6 md:h-7 px-1.5 md:px-2 text-[10px] md:text-xs text-accent-gold hover:bg-accent-gold/10"
               >
-                <Pencil className="w-3 h-3 mr-1" />
+                <Pencil className="w-3 h-3 mr-0.5 md:mr-1" />
                 Edit Caption
               </Button>
             </div>
@@ -258,12 +257,12 @@ export const PhotoCard = ({
         ) : (
           // Display Only Mode (no editing allowed)
           <div className="flex items-center justify-center flex-1">
-            <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full">
+            <p className="text-spooky-gold text-xs md:text-sm text-center leading-snug md:leading-relaxed break-words w-full px-1">
               {photo.caption || ''}
             </p>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };

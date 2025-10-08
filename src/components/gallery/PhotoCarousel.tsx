@@ -54,7 +54,7 @@ export const PhotoCarousel = ({
     <div className={cn("relative", className)}>
       <div className="overflow-hidden">
         <div 
-          className="flex transition-transform duration-300 ease-in-out gap-4"
+          className="flex transition-transform duration-300 ease-in-out gap-4 md:gap-6"
           style={{ 
             transform: `translateX(-${currentIndex * (100 / photosPerView)}%)` 
           }}
@@ -62,7 +62,7 @@ export const PhotoCarousel = ({
           {photos.map((photo) => (
             <div 
               key={photo.id}
-              className="flex-shrink-0"
+              className="flex-shrink-0 min-w-[280px] md:min-w-[320px]"
               style={{ width: `calc(${100 / photosPerView}% - ${(photosPerView - 1) * 16 / photosPerView}px)` }}
             >
               <PhotoCard
