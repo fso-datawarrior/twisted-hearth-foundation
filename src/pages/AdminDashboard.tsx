@@ -115,8 +115,33 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
           </div>
           
+          {/* Navigation Tabs */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <Button
+                  key={tab.id}
+                  variant={activeTab === tab.id ? 'default' : 'outline'}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative flex items-center gap-2"
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                  {tab.count !== null && tab.count !== undefined && (
+                    <Badge variant="secondary" className="ml-1">
+                      {tab.count}
+                    </Badge>
+                  )}
+                </Button>
+              );
+            })}
+          </div>
+
           {activeTab === 'overview' && (
-            <>
+            <div className="bg-card rounded-lg border p-6">
+              <h2 className="text-2xl font-bold text-accent-gold mb-6">OVERVIEW</h2>
+              
               {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
@@ -214,31 +239,8 @@ export default function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
-            </>
+            </div>
           )}
-
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <Button
-                  key={tab.id}
-                  variant={activeTab === tab.id ? 'default' : 'outline'}
-                  onClick={() => setActiveTab(tab.id)}
-                  className="relative flex items-center gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
-                  {tab.count !== null && tab.count !== undefined && (
-                    <Badge variant="secondary" className="ml-1">
-                      {tab.count}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
-          </div>
 
           {/* Tab Content Placeholders */}
           <div className="bg-card rounded-lg border p-6">
