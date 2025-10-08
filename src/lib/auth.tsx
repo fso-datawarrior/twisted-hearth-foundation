@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { isPartyOver } from './event';
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔐 AuthProvider: Initializing auth state...');
+    console.log('🔐 AuthProvider: Initializing auth state...', { reactVersion: (React as any).version });
     
     // Set up auth state listener FIRST to catch magic link auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

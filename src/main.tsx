@@ -48,6 +48,7 @@ async function bootstrap() {
   } catch (e) {
     console.log('Cleanup error:', e);
   } finally {
+    console.log('React runtime version:', (React as any).version);
     const rootEl = document.getElementById('root');
     if (rootEl) {
       createRoot(rootEl).render(
