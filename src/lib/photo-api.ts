@@ -14,6 +14,7 @@ export interface Photo {
   category?: 'past-vignettes' | 'creepy-decor' | 'costume-heroes' | 'event-memories' | 'general';
   is_approved: boolean;
   is_featured: boolean;
+  is_favorite: boolean;
   likes_count: number;
   file_size?: number;
   mime_type?: string;
@@ -39,7 +40,7 @@ export interface PhotoReaction {
 export const getApprovedPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
   const { data, error } = await supabase
     .from('photos')
-    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, created_at, updated_at')
+    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, is_favorite, likes_count, created_at, updated_at')
     .eq('is_approved', true)
     .order('created_at', { ascending: false });
 
@@ -59,7 +60,7 @@ export const getUserPhotos = async (): Promise<{ data: Photo[] | null; error: an
 
   const { data, error } = await supabase
     .from('photos')
-    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, created_at, updated_at')
+    .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, is_favorite, likes_count, created_at, updated_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -205,6 +206,93 @@ export const updatePhotoMetadata = async (
     .eq('id', photoId);
 
   return { error };
+};
+
+/**
+ * Toggle photo favorite status
+ */
+export const togglePhotoFavorite = async (photoId: string): Promise<{ data: boolean | null; error: any }> => {
+  // Get current favorite status
+  const { data: photo, error: fetchError } = await supabase
+    .from('photos')
+    .select('is_favorite')
+    .eq('id', photoId)
+    .single();
+
+  if (fetchError) return { data: null, error: fetchError };
+
+  // Toggle the favorite status
+  const newFavoriteStatus = !photo.is_favorite;
+  const { error: updateError } = await supabase
+    .from('photos')
+    .update({ is_favorite: newFavoriteStatus })
+    .eq('id', photoId);
+
+  if (updateError) return { data: null, error: updateError };
+
+  return { data: newFavoriteStatus, error: null };
+};
+
+/**
+ * Toggle photo emoji reaction
+ */
+export const togglePhotoEmojiReaction = async (
+  photoId: string,
+  emoji: string
+): Promise<{ data: boolean | null; error: any }> => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    return { data: null, error: userError || new Error('Not authenticated') };
+  }
+  const userId = userData.user.id;
+
+  // Check if reaction exists
+  const { data: existing, error: fetchError } = await supabase
+    .from('photo_emoji_reactions')
+    .select('id')
+    .eq('photo_id', photoId)
+    .eq('user_id', userId)
+    .eq('emoji', emoji)
+    .maybeSingle();
+
+  if (fetchError) return { data: null, error: fetchError };
+
+  if (existing) {
+    // Remove reaction
+    const { error: deleteError } = await supabase
+      .from('photo_emoji_reactions')
+      .delete()
+      .eq('photo_id', photoId)
+      .eq('user_id', userId)
+      .eq('emoji', emoji);
+
+    if (deleteError) return { data: null, error: deleteError };
+    return { data: false, error: null };
+  } else {
+    // Add reaction
+    const { error: insertError } = await supabase
+      .from('photo_emoji_reactions')
+      .insert({
+        photo_id: photoId,
+        user_id: userId,
+        emoji
+      });
+
+    if (insertError) return { data: null, error: insertError };
+    return { data: true, error: null };
+  }
+};
+
+/**
+ * Get emoji reactions for a photo
+ */
+export const getPhotoEmojiReactions = async (photoId: string): Promise<{ data: any[] | null; error: any }> => {
+  const { data, error } = await supabase
+    .from('photo_emoji_reactions')
+    .select('id, emoji, user_id, created_at')
+    .eq('photo_id', photoId);
+
+  return { data, error };
 };
 
 export default Photo;

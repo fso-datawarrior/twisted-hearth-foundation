@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Heart, Clock, CheckCircle, Star } from "lucide-react";
 import { Photo } from "@/lib/photo-api";
 import { PhotoEditControls } from "./PhotoEditControls";
+import UserPhotoActions from "./UserPhotoActions";
+import PhotoEmojiReactions from "./PhotoEmojiReactions";
 
 interface PhotoCardProps {
   photo: Photo;
@@ -11,11 +13,25 @@ interface PhotoCardProps {
   getPhotoUrl?: (storagePath: string) => Promise<string>;
   showStatus?: boolean;
   showEditControls?: boolean;
+  showUserActions?: boolean;
   onUpdate?: (photoId: string, updates: any) => void;
   onDelete?: (photoId: string, storagePath: string) => void;
+  onFavorite?: (photoId: string) => void;
+  onEmojiReaction?: (photoId: string, emoji: string) => void;
 }
 
-export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditControls, onUpdate, onDelete }: PhotoCardProps) => {
+export const PhotoCard = ({ 
+  photo, 
+  onLike, 
+  getPhotoUrl, 
+  showStatus, 
+  showEditControls, 
+  showUserActions,
+  onUpdate, 
+  onDelete,
+  onFavorite,
+  onEmojiReaction
+}: PhotoCardProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -92,12 +108,26 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditCont
           
           {getStatusBadge()}
 
+          {/* Photo Edit Controls (only for unapproved photos) */}
           {showEditControls && !photo.is_approved && onUpdate && onDelete && (
-            <PhotoEditControls
-              photo={photo}
-              onUpdate={onUpdate}
-              onDelete={onDelete}
-            />
+            <div className="absolute top-2 right-2 z-20">
+              <PhotoEditControls
+                photo={photo}
+                onUpdate={onUpdate}
+                onDelete={(photoId) => onDelete(photoId, photo.storage_path)}
+              />
+            </div>
+          )}
+
+          {/* User Photo Actions (delete, favorite) */}
+          {showUserActions && (onDelete || onFavorite) && (
+            <div className="absolute top-2 right-2 z-20">
+              <UserPhotoActions
+                photo={photo}
+                onDelete={onDelete ? (photoId) => onDelete(photoId, photo.storage_path) : undefined}
+                onFavorite={onFavorite}
+              />
+            </div>
           )}
 
           {/* Photo info overlay */}
@@ -128,6 +158,16 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditCont
               )}
             </div>
           </div>
+
+          {/* Emoji Reactions (shown for user's own photos) */}
+          {showUserActions && onEmojiReaction && (
+            <div className="absolute bottom-0 left-0 right-0 p-3 bg-bg-1/95 border-t border-accent-purple/20">
+              <PhotoEmojiReactions
+                photoId={photo.id}
+                onReaction={onEmojiReaction}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

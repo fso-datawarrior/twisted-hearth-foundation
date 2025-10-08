@@ -280,6 +280,38 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_emoji_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          photo_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          photo_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          photo_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_emoji_reactions_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       photo_reactions: {
         Row: {
           created_at: string
@@ -320,6 +352,7 @@ export type Database = {
           filename: string
           id: string
           is_approved: boolean | null
+          is_favorite: boolean | null
           is_featured: boolean | null
           likes_count: number | null
           storage_path: string
@@ -334,6 +367,7 @@ export type Database = {
           filename: string
           id?: string
           is_approved?: boolean | null
+          is_favorite?: boolean | null
           is_featured?: boolean | null
           likes_count?: number | null
           storage_path: string
@@ -348,6 +382,7 @@ export type Database = {
           filename?: string
           id?: string
           is_approved?: boolean | null
+          is_favorite?: boolean | null
           is_featured?: boolean | null
           likes_count?: number | null
           storage_path?: string

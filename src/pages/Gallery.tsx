@@ -16,6 +16,8 @@ import {
   getApprovedPhotos, 
   getUserPhotos,
   togglePhotoReaction,
+  togglePhotoFavorite,
+  togglePhotoEmojiReaction,
   deletePhoto,
   updatePhotoMetadata,
   Photo 
@@ -74,6 +76,7 @@ const Gallery = () => {
       category: categoryId as any,
       is_approved: true,
       is_featured: false,
+      is_favorite: false,
       likes_count: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -252,6 +255,43 @@ const Gallery = () => {
     }
   };
 
+  const handleFavorite = async (photoId: string) => {
+    try {
+      const { data, error } = await togglePhotoFavorite(photoId);
+      if (error) throw error;
+      
+      toast({
+        title: data ? "Added to favorites" : "Removed from favorites",
+        description: data ? "Photo has been marked as favorite." : "Photo removed from favorites.",
+      });
+      
+      loadImages();
+    } catch (error) {
+      console.error('Favorite error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEmojiReaction = async (photoId: string, emoji: string) => {
+    try {
+      const { error } = await togglePhotoEmojiReaction(photoId, emoji);
+      if (error) throw error;
+      
+      loadImages();
+    } catch (error) {
+      console.error('Emoji reaction error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reaction.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background relative">
@@ -306,16 +346,18 @@ const Gallery = () => {
             {userPhotos.length > 0 && (
               <div className="mb-12">
                 <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
-                  My Photos ({userPhotos.length})
+                  My Photos
                 </h2>
                 <PhotoCarousel
                   photos={userPhotos}
                   onLike={handleLike}
                   getPhotoUrl={getPhotoUrl}
                   showStatus={true}
-                  showEditControls={true}
+                  showUserActions={true}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
+                  onFavorite={handleFavorite}
+                  onEmojiReaction={handleEmojiReaction}
                   photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
                   className="mb-4"
                 />

@@ -65,13 +65,13 @@ const ImageCarousel = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main Image Container */}
-      <div className="relative aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+      <div className="relative max-w-[85%] mx-auto aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
         <img 
           src={images[currentIndex]}
           alt={`Gallery preview ${currentIndex + 1}`}
           width="800"
           height="800"
-          className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all motion-safe"
+          className="w-full h-full object-cover transition-all motion-safe"
           loading="lazy"
           decoding="async"
         />

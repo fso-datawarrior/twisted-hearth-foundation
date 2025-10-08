@@ -7,12 +7,15 @@ import { PhotoCard } from "./PhotoCard";
 
 interface PhotoCarouselProps {
   photos: Photo[];
-  onLike: (photoId: string) => void;
-  getPhotoUrl: (storagePath: string) => Promise<string>;
+  onLike?: (photoId: string) => void;
+  getPhotoUrl?: (storagePath: string) => Promise<string>;
   showStatus?: boolean;
   showEditControls?: boolean;
+  showUserActions?: boolean;
   onUpdate?: (photoId: string, updates: any) => void;
   onDelete?: (photoId: string, storagePath: string) => void;
+  onFavorite?: (photoId: string) => void;
+  onEmojiReaction?: (photoId: string, emoji: string) => void;
   photosPerView?: number;
   className?: string;
 }
@@ -23,8 +26,11 @@ export const PhotoCarousel = ({
   getPhotoUrl,
   showStatus,
   showEditControls,
+  showUserActions,
   onUpdate,
   onDelete,
+  onFavorite,
+  onEmojiReaction,
   photosPerView = 4,
   className
 }: PhotoCarouselProps) => {
@@ -60,12 +66,15 @@ export const PhotoCarousel = ({
               <PhotoCard
                 photo={photo}
                 onLike={onLike}
-                getPhotoUrl={getPhotoUrl}
-                showStatus={showStatus}
-                showEditControls={showEditControls}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-              />
+              getPhotoUrl={getPhotoUrl}
+              showStatus={showStatus}
+              showEditControls={showEditControls}
+              showUserActions={showUserActions}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              onFavorite={onFavorite}
+              onEmojiReaction={onEmojiReaction}
+            />
             </div>
           ))}
         </div>
