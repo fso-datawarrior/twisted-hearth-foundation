@@ -79,7 +79,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setCountdown(300);
         toast({
           title: "Code sent!",
-          description: "Check your email for a 6-digit code.",
+          description: "Check your email for a 6-digit code.\n🎃 Check your spam crypt if it doesn't appear!",
           duration: 4000,
         });
       } else {
@@ -88,7 +88,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           await signUpWithPassword(email.trim().toLowerCase(), password);
           toast({
             title: "Account created!",
-            description: "Check your email to verify your account.",
+            description: "Check your email to verify your account.\n🎃 Check your spam crypt if it doesn't appear!",
             duration: 5000,
           });
           handleClose();
@@ -188,7 +188,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setOtpCode("");
       toast({
         title: "New code sent!",
-        description: "Check your email for a new 6-digit code.",
+        description: "Check your email for a new 6-digit code.\n🎃 Check your spam crypt if it doesn't appear!",
         duration: 4000,
       });
     } catch (error: any) {
@@ -263,6 +263,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <p className="text-sm text-muted-foreground">
                 We sent a 6-digit code to <strong className="text-foreground">{email}</strong>
               </p>
+              <p className="text-xs text-amber-400 font-semibold">
+                💀 Check your spam crypt if it doesn't appear!
+              </p>
               
               <div className="w-full max-w-xs">
                 <InputOTP 
@@ -331,6 +334,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </p>
               <p className="text-xs text-muted-foreground opacity-75">
                 Click the link in the email to log in instantly - no confirmation needed!
+              </p>
+              <p className="text-xs text-amber-400 font-semibold">
+                💀 Check your spam crypt if it doesn't appear!
               </p>
             </div>
             

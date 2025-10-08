@@ -120,7 +120,7 @@ export default function AuthCallback() {
       await signIn(email);
       toast({
         title: "Magic Link Sent!",
-        description: "Check your email for a fresh sign-in link.",
+        description: "Check your email for a fresh sign-in link.\n🎃 Check your spam crypt if it doesn't appear!",
       });
       setEmail('');
     } catch (error) {

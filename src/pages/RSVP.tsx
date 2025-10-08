@@ -227,7 +227,7 @@ const RSVP = () => {
     if (Date.now() - startRef.current < 1000 || formData.nickname) {
       toast({
         title: "RSVP Received!",
-        description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
+        description: "Your twisted tale reservation has been confirmed. Check your email for location details.\n🎃 Check your spam crypt if it doesn't appear!",
         variant: "default"
       });
       return;
@@ -297,7 +297,7 @@ const RSVP = () => {
 
           toast({
             title: "RSVP Updated!",
-            description: "Your reservation has been updated successfully. Check your email for confirmation.",
+            description: "Your reservation has been updated successfully. Check your email for confirmation.\n🎃 Check your spam crypt if it doesn't appear!",
             variant: "default"
           });
 
@@ -356,7 +356,7 @@ const RSVP = () => {
           
           toast({
             title: "RSVP Received!",
-            description: "Your twisted tale reservation has been confirmed. Check your email for location details.",
+            description: "Your twisted tale reservation has been confirmed. Check your email for location details.\n🎃 Check your spam crypt if it doesn't appear!",
             variant: "default"
           });
 

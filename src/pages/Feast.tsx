@@ -212,7 +212,7 @@ const Feast = () => {
       } else {
         toast({
           title: "Success!",
-          description: "Your dish has been added to the feast",
+          description: "Your dish has been added to the feast. Check your email for confirmation.\n🎃 Check your spam crypt if it doesn't appear!",
         });
       }
     } catch (error: any) {
