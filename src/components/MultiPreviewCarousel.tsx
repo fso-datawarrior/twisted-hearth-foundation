@@ -40,9 +40,12 @@ const MultiPreviewCarousel = ({
   // Generate image URLs from previewPhotos
   useEffect(() => {
     const generateUrls = async () => {
+      console.info('[MultiPreviewCarousel] Generating URLs for category:', activeCategory);
       if (!previewPhotos || previewPhotos.length === 0) {
         // Fall back to static images
-        setImageUrls(getPreviewImagesByCategory(activeCategory));
+        const staticUrls = getPreviewImagesByCategory(activeCategory) || [];
+        console.info('[MultiPreviewCarousel] Using static URLs:', staticUrls);
+        setImageUrls(staticUrls);
         setCurrentIndex(0);
         return;
       }
@@ -51,7 +54,9 @@ const MultiPreviewCarousel = ({
       for (const photo of previewPhotos) {
         if (photo.user_id === 'system') {
           // Static image - use path directly
-          urls.push(photo.storage_path);
+          if (photo.storage_path) {
+            urls.push(photo.storage_path);
+          }
         } else {
           // Database image - generate signed URL
           try {
@@ -66,7 +71,9 @@ const MultiPreviewCarousel = ({
           }
         }
       }
-      setImageUrls(urls);
+      const uniqueUrls = urls.filter(Boolean);
+      console.info('[MultiPreviewCarousel] Final URLs:', uniqueUrls);
+      setImageUrls(uniqueUrls);
       setCurrentIndex(0);
     };
     

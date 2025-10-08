@@ -81,6 +81,11 @@ const ImageCarousel = ({
           className="w-full h-full object-cover transition-all motion-safe"
           loading="lazy"
           decoding="async"
+          onError={(e) => {
+            const badSrc = (e.currentTarget as HTMLImageElement).src;
+            console.error('Image failed to load, using placeholder:', badSrc);
+            (e.currentTarget as HTMLImageElement).src = '/img/no-photos-placeholder.jpg';
+          }}
         />
         
         {/* Overlay for controls */}
