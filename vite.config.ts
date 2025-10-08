@@ -16,11 +16,17 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Ensure a single React instance at runtime
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
+      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   optimizeDeps: {
-    include: ['date-fns', '@radix-ui/react-checkbox'],
+    // Prebundle and dedupe React to avoid invalid hook calls from duplicate copies
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'date-fns', '@radix-ui/react-checkbox'],
     dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
     force: true
   },
