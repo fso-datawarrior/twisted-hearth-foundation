@@ -50,9 +50,17 @@ export const getApprovedPhotos = async (): Promise<{ data: Photo[] | null; error
  * Get user's own photos (including unapproved)
  */
 export const getUserPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
+  // Ensure we only fetch the current user's photos for the "My Photos" section
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    return { data: [], error: userError || new Error('Not authenticated') };
+  }
+  const userId = userData.user.id;
+
   const { data, error } = await supabase
     .from('photos')
     .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, likes_count, created_at, updated_at')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   return { data: data as any, error };

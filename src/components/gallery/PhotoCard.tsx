@@ -16,14 +16,14 @@ interface PhotoCardProps {
 }
 
 export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditControls, onUpdate, onDelete }: PhotoCardProps) => {
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUrl = async () => {
       try {
         const url = await getPhotoUrl(photo.storage_path);
-        setImageUrl(url);
+        setImageUrl(url || null);
       } catch (error) {
         console.error('Error loading photo URL:', error);
       } finally {
@@ -70,12 +70,19 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditCont
         </div>
       ) : (
         <>
-          <img 
-            src={imageUrl}
-            alt={photo.caption || 'Gallery photo'}
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            loading="lazy"
-          />
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={photo.caption || 'Gallery photo'}
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImageUrl(null)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              <span className="text-sm">Photo unavailable</span>
+            </div>
+          )}
           
           {getStatusBadge()}
 
