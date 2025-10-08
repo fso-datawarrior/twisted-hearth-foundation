@@ -18,7 +18,6 @@ import {
   togglePhotoReaction,
   deletePhoto,
   updatePhotoMetadata,
-  getAllPreviewPhotos,
   Photo 
 } from "@/lib/photo-api";
 import { PhotoCarousel } from "@/components/gallery/PhotoCarousel";
@@ -63,16 +62,13 @@ const Gallery = () => {
 
   const loadPreviewImages = async () => {
     try {
-      // Try to load preview images from database first
-      const { data: dbPreviewPhotos, error } = await getAllPreviewPhotos();
-      
-      if (!error && dbPreviewPhotos && dbPreviewPhotos.length > 0) {
-        // Use database photos
-        setPreviewPhotos(dbPreviewPhotos);
-        console.log(`Loaded ${dbPreviewPhotos.length} preview photos from database`);
-      } else {
-        // Fallback to static images from config
-        const imagePaths = getAllPreviewImages();
+      // Load static images from config
+      const imagePaths = getAllPreviewImages();
+      setPreviewImages(imagePaths);
+    } catch (error) {
+      console.error('Error loading preview images:', error);
+    }
+  };
         
         // Test which images actually exist by trying to load them
         const existingImages: string[] = [];

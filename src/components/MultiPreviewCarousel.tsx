@@ -26,15 +26,13 @@ const MultiPreviewCarousel = ({
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
   
   // Use database photos if available, otherwise fall back to static images
-  const getCurrentImages = () => {
+  const getCurrentImages = (): string[] => {
     if (previewPhotos && previewPhotos.length > 0) {
       // Filter database photos by category
-      const categoryPhotos = previewPhotos.filter(photo => photo.preview_category === activeCategory);
-      return categoryPhotos.map(photo => ({
-        src: supabase.storage.from('gallery').getPublicUrl(photo.storage_path).data.publicUrl,
-        alt: photo.caption || photo.filename,
-        title: photo.caption || photo.filename
-      }));
+      const categoryPhotos = previewPhotos.filter(photo => photo.category === activeCategory);
+      return categoryPhotos.map(photo => 
+        supabase.storage.from('gallery').getPublicUrl(photo.storage_path).data.publicUrl
+      );
     } else {
       // Fall back to static images
       return getPreviewImagesByCategory(activeCategory);

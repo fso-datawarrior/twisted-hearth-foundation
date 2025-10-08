@@ -43,8 +43,6 @@ interface ExistingRsvp {
   email: string;
   num_guests: number;
   dietary_restrictions: string | null;
-  costume_idea: string | null;
-  contributions: string | null;
   additional_guests: AdditionalGuest[] | null;
   created_at: string;
   updated_at: string;
@@ -102,8 +100,6 @@ const RSVP = () => {
           email: data.email,
           num_guests: data.num_guests,
           dietary_restrictions: data.dietary_restrictions,
-          costume_idea: data.costume_idea,
-          contributions: data.contributions,
           additional_guests: guestData,
           created_at: data.created_at,
           updated_at: data.updated_at,
@@ -114,9 +110,9 @@ const RSVP = () => {
           name: data.name,
           email: data.email,
           guestCount: data.num_guests,
-          costumeIdea: data.costume_idea || '',
+          costumeIdea: '',
           dietary: data.dietary_restrictions || '',
-          contributions: data.contributions || '',
+          contributions: '',
           nickname: ''
         });
         setIsEditing(false); // Show sealed state
@@ -250,8 +246,6 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
-              costume_idea: formData.costumeIdea || null,
-              contributions: formData.contributions || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               updated_at: new Date().toISOString(),
               status: 'pending', // Reset to pending on edit
@@ -278,8 +272,6 @@ const RSVP = () => {
               email: updatedData.email,
               num_guests: updatedData.num_guests,
               dietary_restrictions: updatedData.dietary_restrictions,
-              costume_idea: updatedData.costume_idea,
-              contributions: updatedData.contributions,
               additional_guests: guestData,
               created_at: updatedData.created_at,
               updated_at: updatedData.updated_at,
@@ -320,8 +312,6 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
-              costume_idea: formData.costumeIdea || null,
-              contributions: formData.contributions || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               status: 'pending'
             }])
@@ -341,8 +331,6 @@ const RSVP = () => {
               email: data.email,
               num_guests: data.num_guests,
               dietary_restrictions: data.dietary_restrictions,
-              costume_idea: data.costume_idea,
-              contributions: data.contributions,
               additional_guests: guestData,
               created_at: data.created_at,
               updated_at: data.updated_at,
@@ -401,6 +389,7 @@ const RSVP = () => {
         guestCount: existingRsvp.num_guests,
         costumeIdea: '',
         dietary: existingRsvp.dietary_restrictions || '',
+        contributions: '',
         nickname: ''
       });
       
