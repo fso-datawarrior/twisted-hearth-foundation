@@ -40,14 +40,17 @@ async function bootstrap() {
       // Aggressively clear any existing SW and caches to avoid stale React chunks (run once per session)
       if ('serviceWorker' in navigator) {
         const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister()));
+        if (regs.length) await Promise.all(regs.map((r) => r.unregister()));
       }
       if ('caches' in window) {
         const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
+        if (keys.length) await Promise.all(keys.map((k) => caches.delete(k)));
       }
-      console.log('Service workers and caches cleared.');
+      console.log('Service workers and caches cleared. Reloading...');
       sessionStorage.setItem('bootstrap_done', '1');
+      // Force a clean reload to ensure a single React instance
+      location.reload();
+      return; // Stop bootstrapping on this pass
     }
   } catch (e) {
     console.log('Cleanup error:', e);
