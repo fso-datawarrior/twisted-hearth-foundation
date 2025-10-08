@@ -662,6 +662,10 @@ export type Database = {
         }
         Returns: string
       }
+      soft_delete_potluck_item: {
+        Args: { p_item_id: string }
+        Returns: undefined
+      }
       submit_rsvp: {
         Args: {
           p_contributions?: string

@@ -565,11 +565,10 @@ const RSVP = () => {
       if (!user) {
         throw new Error('Not authenticated');
       }
-      const { error } = await supabase
-        .from('potluck_items')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('user_id', user.id);
+      
+      const { error } = await supabase.rpc('soft_delete_potluck_item', {
+        p_item_id: id
+      });
 
       if (error) throw error;
 
