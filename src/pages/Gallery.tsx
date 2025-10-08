@@ -16,8 +16,11 @@ import {
   getApprovedPhotos, 
   getUserPhotos,
   togglePhotoReaction,
+  deletePhoto,
+  updatePhotoMetadata,
   Photo 
 } from "@/lib/photo-api";
+import { PhotoCarousel } from "@/components/gallery/PhotoCarousel";
 import { PhotoCard } from "@/components/gallery/PhotoCard";
 
 const Gallery = () => {
@@ -164,6 +167,48 @@ const Gallery = () => {
     }
   };
 
+  const handleDelete = async (photoId: string, storagePath: string) => {
+    try {
+      const { error } = await deletePhoto(photoId, storagePath);
+      if (error) throw error;
+      
+      toast({
+        title: "Photo deleted",
+        description: "Your photo has been removed.",
+      });
+      
+      loadImages();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete photo.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdate = async (photoId: string, updates: any) => {
+    try {
+      const { error } = await updatePhotoMetadata(photoId, updates);
+      if (error) throw error;
+      
+      toast({
+        title: "Photo updated",
+        description: "Your photo metadata has been saved.",
+      });
+      
+      loadImages();
+    } catch (error) {
+      console.error('Update error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update photo.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background relative">
@@ -217,18 +262,20 @@ const Gallery = () => {
             {/* My Photos Section */}
             {userPhotos.length > 0 && (
               <div className="mb-12">
-                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">My Photos</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {userPhotos.map((photo) => (
-                    <PhotoCard 
-                      key={photo.id} 
-                      photo={photo} 
-                      onLike={handleLike}
-                      getPhotoUrl={getPhotoUrl}
-                      showStatus={true}
-                    />
-                  ))}
-                </div>
+                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
+                  My Photos ({userPhotos.length})
+                </h2>
+                <PhotoCarousel
+                  photos={userPhotos}
+                  onLike={handleLike}
+                  getPhotoUrl={getPhotoUrl}
+                  showStatus={true}
+                  showEditControls={true}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
+                  className="mb-4"
+                />
               </div>
             )}
 

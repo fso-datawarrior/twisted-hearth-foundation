@@ -159,3 +159,42 @@ export const subscribeToPhotoReactions = (callback: (payload: any) => void) => {
     )
     .subscribe();
 };
+
+/**
+ * Delete a photo (storage and database)
+ */
+export const deletePhoto = async (photoId: string, storagePath: string): Promise<{ error: any }> => {
+  // Delete from database first
+  const { error: dbError } = await supabase
+    .from('photos')
+    .delete()
+    .eq('id', photoId);
+
+  if (dbError) return { error: dbError };
+
+  // Delete from storage
+  const { error: storageError } = await supabase.storage
+    .from('gallery')
+    .remove([storagePath]);
+
+  return { error: storageError };
+};
+
+/**
+ * Update photo metadata (tags, category, caption)
+ */
+export const updatePhotoMetadata = async (
+  photoId: string,
+  updates: {
+    caption?: string;
+    tags?: string[];
+    category?: 'costumes' | 'food' | 'activities' | 'general';
+  }
+): Promise<{ error: any }> => {
+  const { error } = await supabase
+    .from('photos')
+    .update(updates)
+    .eq('id', photoId);
+
+  return { error };
+};

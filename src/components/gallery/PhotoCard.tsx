@@ -3,15 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Clock, CheckCircle, Star } from "lucide-react";
 import { Photo } from "@/lib/photo-api";
+import { PhotoEditControls } from "./PhotoEditControls";
 
 interface PhotoCardProps {
   photo: Photo;
   onLike: (photoId: string) => void;
   getPhotoUrl: (storagePath: string) => Promise<string>;
   showStatus?: boolean;
+  showEditControls?: boolean;
+  onUpdate?: (photoId: string, updates: any) => void;
+  onDelete?: (photoId: string, storagePath: string) => void;
 }
 
-export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus }: PhotoCardProps) => {
+export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditControls, onUpdate, onDelete }: PhotoCardProps) => {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -74,6 +78,14 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus }: PhotoCardP
           />
           
           {getStatusBadge()}
+
+          {showEditControls && !photo.is_approved && onUpdate && onDelete && (
+            <PhotoEditControls
+              photo={photo}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+            />
+          )}
 
           {/* Photo info overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
