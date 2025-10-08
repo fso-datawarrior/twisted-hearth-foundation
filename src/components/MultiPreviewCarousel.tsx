@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ImageCarousel from "@/components/ImageCarousel";
@@ -24,22 +24,43 @@ const MultiPreviewCarousel = ({
   previewPhotos = []
 }: MultiPreviewCarouselProps) => {
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   
-  // Use database photos if available, otherwise fall back to static images
-  const getCurrentImages = (): string[] => {
-    if (previewPhotos && previewPhotos.length > 0) {
-      // Filter database photos by category
-      const categoryPhotos = previewPhotos.filter(photo => photo.category === activeCategory);
-      return categoryPhotos.map(photo => 
-        supabase.storage.from('gallery').getPublicUrl(photo.storage_path).data.publicUrl
-      );
-    } else {
-      // Fall back to static images
-      return getPreviewImagesByCategory(activeCategory);
-    }
-  };
+  // Generate image URLs from previewPhotos
+  useEffect(() => {
+    const generateUrls = async () => {
+      if (!previewPhotos || previewPhotos.length === 0) {
+        // Fall back to static images
+        setImageUrls(getPreviewImagesByCategory(activeCategory));
+        return;
+      }
+
+      const urls: string[] = [];
+      for (const photo of previewPhotos) {
+        if (photo.user_id === 'system') {
+          // Static image - use path directly
+          urls.push(photo.storage_path);
+        } else {
+          // Database image - generate signed URL
+          try {
+            const { data } = await supabase.storage
+              .from('gallery')
+              .createSignedUrl(photo.storage_path, 3600);
+            if (data?.signedUrl) {
+              urls.push(data.signedUrl);
+            }
+          } catch (error) {
+            console.error('Error generating signed URL:', error);
+          }
+        }
+      }
+      setImageUrls(urls);
+    };
+    
+    generateUrls();
+  }, [previewPhotos, activeCategory]);
   
-  const currentImages = getCurrentImages();
+  const currentImages = imageUrls;
   const currentCategoryData = PREVIEW_CATEGORIES.find(cat => cat.id === activeCategory);
 
   if (PREVIEW_CATEGORIES.length === 0) {

@@ -7,8 +7,8 @@ import { PhotoEditControls } from "./PhotoEditControls";
 
 interface PhotoCardProps {
   photo: Photo;
-  onLike: (photoId: string) => void;
-  getPhotoUrl: (storagePath: string) => Promise<string>;
+  onLike?: (photoId: string) => void;
+  getPhotoUrl?: (storagePath: string) => Promise<string>;
   showStatus?: boolean;
   showEditControls?: boolean;
   onUpdate?: (photoId: string, updates: any) => void;
@@ -22,8 +22,14 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditCont
   useEffect(() => {
     const loadUrl = async () => {
       try {
-        const url = await getPhotoUrl(photo.storage_path);
-        setImageUrl(url || null);
+        // If getPhotoUrl is not provided, use storage_path directly (for static images)
+        if (!getPhotoUrl) {
+          setImageUrl(photo.storage_path);
+        } else {
+          // Otherwise, generate signed URL (for database images)
+          const url = await getPhotoUrl(photo.storage_path);
+          setImageUrl(url || null);
+        }
       } catch (error) {
         console.error('Error loading photo URL:', error);
       } finally {
@@ -103,15 +109,17 @@ export const PhotoCard = ({ photo, onLike, getPhotoUrl, showStatus, showEditCont
             )}
             
             <div className="flex items-center justify-between">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => onLike(photo.id)}
-                className="h-8 px-2 text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
-              >
-                <Heart className="w-4 h-4 mr-1" />
-                {photo.likes_count}
-              </Button>
+              {onLike && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onLike(photo.id)}
+                  className="h-8 px-2 text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
+                >
+                  <Heart className="w-4 h-4 mr-1" />
+                  {photo.likes_count}
+                </Button>
+              )}
               
               {photo.category && (
                 <Badge variant="outline" className="text-xs">
