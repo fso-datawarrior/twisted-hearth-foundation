@@ -13,3 +13,4 @@
 +      for select using (auth.uid() = user_id OR public.is_admin());
    end if;
  end$$;
+

@@ -42,3 +42,4 @@
 +        logger.error('🔐 AuthProvider: Failed to get session', error);
          setLoading(false);
        });
+

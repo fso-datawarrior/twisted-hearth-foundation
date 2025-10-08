@@ -599,8 +599,7 @@ const RSVP = () => {
   };
 
   return (
-    // TEMPORARY: Bypass RequireAuth for testing due to rate limiting issues
-    // <RequireAuth>
+    <RequireAuth>
       <div className="min-h-screen bg-background relative">
         <main className="pt-20 relative z-10">
           <section className="py-16 px-6">
@@ -1104,8 +1103,8 @@ const RSVP = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-    // </RequireAuth>
+      </div>
+    </RequireAuth>
   );
 };
 
