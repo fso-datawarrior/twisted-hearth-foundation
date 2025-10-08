@@ -22,9 +22,10 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime.js"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    preserveSymlinks: true,
   },
   optimizeDeps: {
-    include: ['date-fns', '@radix-ui/react-checkbox'],
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-router-dom', 'date-fns', '@radix-ui/react-checkbox'],
     dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
     force: true
   },
