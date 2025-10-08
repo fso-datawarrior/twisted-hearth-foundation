@@ -14,7 +14,7 @@ interface Reaction {
   userReacted: boolean;
 }
 
-const AVAILABLE_EMOJIS = ['🎃', '🕯️', '🩸', '🕷️', '👻', '💀', '❤️'];
+const AVAILABLE_EMOJIS = ['❤️', '🎃', '🕯️', '🕷️', '👻', '💀', '🦇'];
 
 const PhotoEmojiReactions: React.FC<PhotoEmojiReactionsProps> = ({ photoId, onReaction }) => {
   const [reactions, setReactions] = useState<Reaction[]>([]);

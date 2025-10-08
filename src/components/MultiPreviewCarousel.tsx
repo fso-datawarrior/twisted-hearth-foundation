@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ImageCarousel from "@/components/ImageCarousel";
+import EmptyGalleryState from "@/components/gallery/EmptyGalleryState";
 import { PREVIEW_CATEGORIES, getPreviewImagesByCategory, type PreviewCategory } from "@/config/previewImages";
 import { supabase } from "@/integrations/supabase/client";
 import { Photo } from "@/lib/photo-api";
@@ -90,7 +91,7 @@ const MultiPreviewCarousel = ({
               >
                 {category.title}
                 <Badge variant="secondary" className="ml-2 text-xs">
-                  {category.images.length}
+                  {previewPhotos?.length || category.images.length}
                 </Badge>
               </Button>
             ))}
@@ -124,11 +125,10 @@ const MultiPreviewCarousel = ({
           )}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">
-            No images available for {currentCategoryData?.title || 'this category'}.
-          </p>
-        </div>
+        <EmptyGalleryState 
+          categoryName={currentCategoryData?.title || 'this category'}
+          message={`No memories captured in ${currentCategoryData?.title || 'this category'} yet`}
+        />
       )}
 
       {/* Image Count */}
