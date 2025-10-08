@@ -426,6 +426,7 @@ export type Database = {
           created_at: string
           dietary_restrictions: string | null
           email: string
+          email_sent_at: string | null
           id: string
           is_approved: boolean | null
           name: string
@@ -439,6 +440,7 @@ export type Database = {
           created_at?: string
           dietary_restrictions?: string | null
           email: string
+          email_sent_at?: string | null
           id?: string
           is_approved?: boolean | null
           name: string
@@ -452,6 +454,7 @@ export type Database = {
           created_at?: string
           dietary_restrictions?: string | null
           email?: string
+          email_sent_at?: string | null
           id?: string
           is_approved?: boolean | null
           name?: string
