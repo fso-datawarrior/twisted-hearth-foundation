@@ -567,7 +567,7 @@ const RSVP = () => {
       }
       const { error } = await supabase
         .from('potluck_items')
-        .update({ deleted_at: new Date().toISOString(), user_id: user.id })
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', id)
         .eq('user_id', user.id);
 
