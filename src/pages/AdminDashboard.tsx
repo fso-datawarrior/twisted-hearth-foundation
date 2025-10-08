@@ -47,11 +47,8 @@ export default function AdminDashboard() {
         .from('rsvps' as any)
         .select(`
           id, user_id, name, email, status, num_guests, 
-          costume_idea, dietary_restrictions, contributions, 
-          additional_guests, is_approved, 
-          attended, checked_in_at, rsvp_notes, 
-          payment_status, payment_amount, payment_date, special_requests,
-          created_at, updated_at
+          dietary_restrictions, additional_guests, is_approved, 
+          email_sent_at, created_at, updated_at
         `)
         .order('created_at', { ascending: false });
       
@@ -84,8 +81,7 @@ export default function AdminDashboard() {
         .from('photos' as any)
         .select(`
           id, user_id, filename, storage_path, caption, category, 
-          is_approved, is_featured, is_preview, preview_category, 
-          deleted_at, sort_order, created_at, likes_count
+          is_approved, is_featured, tags, created_at, updated_at, likes_count
         `)
         .order('created_at', { ascending: false });
       
@@ -101,11 +97,11 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('hunt_progress' as any)
         .select(`
-          id, user_id, hunt_run_id, hint_id, found_at, points_earned, created_at,
-          hunt_runs(user_id, status),
-          hunt_hints(title, points)
+          id, user_id, hunt_run_id, hint_id, found_at, points_earned,
+          hunt_runs(user_id, started_at, completed_at, total_points),
+          hunt_hints(hint_text, points)
         `)
-        .order('created_at', { ascending: false });
+        .order('found_at', { ascending: false });
       
       if (error) throw error;
       return data as any;
