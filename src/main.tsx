@@ -35,16 +35,20 @@ if (false && 'serviceWorker' in navigator) {
 }
 async function bootstrap() {
   try {
-    // Aggressively clear any existing SW and caches to avoid stale React chunks
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
+    const already = sessionStorage.getItem('bootstrap_done');
+    if (!already) {
+      // Aggressively clear any existing SW and caches to avoid stale React chunks (run once per session)
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      console.log('Service workers and caches cleared.');
+      sessionStorage.setItem('bootstrap_done', '1');
     }
-    if ('caches' in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    }
-    console.log('Service workers and caches cleared.');
   } catch (e) {
     console.log('Cleanup error:', e);
   } finally {
