@@ -9,6 +9,7 @@ interface ImageCarouselProps {
   showControls?: boolean;
   showIndicators?: boolean;
   className?: string;
+  onIndexChange?: (index: number) => void;
 }
 
 const ImageCarousel = ({ 
@@ -17,11 +18,17 @@ const ImageCarousel = ({
   autoPlayInterval = 4000,
   showControls = true,
   showIndicators = true,
-  className = ""
+  className = "",
+  onIndexChange
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Notify parent of index changes
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+  }, [currentIndex, onIndexChange]);
 
   // Auto-play functionality
   useEffect(() => {

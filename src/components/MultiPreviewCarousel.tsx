@@ -114,10 +114,10 @@ const MultiPreviewCarousel = ({
             autoPlayInterval={autoPlayInterval}
             onIndexChange={setCurrentIndex}
           />
-          {/* Description Container - Fixed Height */}
+          {/* Description Container - Fixed Height with Gold Border */}
           {previewPhotos.length > 0 && (
-            <div className="mt-3 p-4 bg-bg-2/50 rounded min-h-[100px] flex items-center justify-center">
-              <p className="text-spooky-gold text-sm text-center leading-relaxed max-w-xl">
+            <div className="mt-3 p-4 bg-bg-2/50 rounded-lg border-2 border-accent-gold/60 min-h-[100px] flex items-center justify-center">
+              <p className="font-subhead text-accent-gold text-sm text-center leading-relaxed max-w-xl" style={{ textShadow: '0 0 8px hsla(var(--accent-gold), 0.4), 1px 1px 2px rgba(0, 0, 0, 0.8)' }}>
                 {previewPhotos[currentIndex]?.caption || ''}
               </p>
             </div>
@@ -155,24 +155,6 @@ const ImageCarouselWrapper = ({
   autoPlayInterval: number;
   onIndexChange: (index: number) => void;
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Sync index changes to parent
-  useEffect(() => {
-    onIndexChange(currentIndex);
-  }, [currentIndex, onIndexChange]);
-
-  // Track autoplay changes
-  useEffect(() => {
-    if (!autoPlay || images.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-    }, autoPlayInterval);
-
-    return () => clearInterval(interval);
-  }, [autoPlay, images.length, autoPlayInterval]);
-
   return (
     <ImageCarousel
       images={images}
@@ -180,6 +162,7 @@ const ImageCarouselWrapper = ({
       autoPlayInterval={autoPlayInterval}
       showControls={true}
       showIndicators={true}
+      onIndexChange={onIndexChange}
     />
   );
 };
