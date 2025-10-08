@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-// import CSSFogBackground from "@/components/CSSFogBackground";
-import ImageCarousel from "@/components/ImageCarousel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload } from "lucide-react";
+import { Upload, Heart, Clock, CheckCircle } from "lucide-react";
 import { getAllPreviewImages, PREVIEW_CATEGORIES } from "@/config/previewImages";
 import MultiPreviewCarousel from "@/components/MultiPreviewCarousel";
 import RequireAuth from "@/components/RequireAuth";
+import { 
+  uploadPhotoMetadata, 
+  getApprovedPhotos, 
+  getUserPhotos,
+  togglePhotoReaction,
+  Photo 
+} from "@/lib/photo-api";
+import { PhotoCard } from "@/components/gallery/PhotoCard";
 
 const Gallery = () => {
-  const [images, setImages] = useState<string[]>([]);
+  const [approvedPhotos, setApprovedPhotos] = useState<Photo[]>([]);
+  const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -26,21 +34,26 @@ const Gallery = () => {
 
   const loadImages = async () => {
     try {
-      const { data, error } = await supabase.storage
-        .from('gallery')
-        .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-      
-      if (error) throw error;
-      
-      const imageUrls = data
-        ?.filter(file => file.name.includes('/'))
-        ?.map(file => supabase.storage.from('gallery').getPublicUrl(file.name).data.publicUrl)
-        || [];
-      
-      setImages(imageUrls);
+      // Load approved photos for public gallery
+      const { data: approved, error: approvedError } = await getApprovedPhotos();
+      if (approvedError) throw approvedError;
+      setApprovedPhotos(approved || []);
+
+      // Load user's own photos (including pending)
+      const { data: user, error: userError } = await getUserPhotos();
+      if (userError) throw userError;
+      setUserPhotos(user || []);
     } catch (error) {
       console.error('Error loading images:', error);
     }
+  };
+
+  const getPhotoUrl = async (storagePath: string): Promise<string> => {
+    // Generate signed URL for private bucket
+    const { data } = await supabase.storage
+      .from('gallery')
+      .createSignedUrl(storagePath, 3600); // 1 hour expiry
+    return data?.signedUrl || '';
   };
 
   const loadPreviewImages = async () => {
@@ -81,26 +94,43 @@ const Gallery = () => {
 
     setUploading(true);
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) throw new Error('Not authenticated');
+      const userId = userData.user.id;
+
       for (const file of Array.from(files)) {
         const fileExt = file.name.split('.').pop();
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData?.user) throw new Error('Not authenticated');
-        const userId = userData.user.id;
+        const fileName = file.name;
         const filePath = `user-uploads/${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
-        const { error } = await supabase.storage
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
           .from('gallery')
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false
           });
 
-        if (error) throw error;
+        if (uploadError) throw uploadError;
+
+        // Create database record
+        const { error: metadataError } = await uploadPhotoMetadata(
+          filePath,
+          fileName,
+          undefined, // caption
+          [], // tags
+          'general' // category
+        );
+
+        if (metadataError) {
+          console.error('Metadata error:', metadataError);
+          // Still continue - photo is uploaded to storage
+        }
       }
       
       toast({
-        title: "Images uploaded!",
-        description: "Your photos have been added to the gallery.",
+        title: "Photos uploaded!",
+        description: "Your photos are pending approval and will appear in the gallery once reviewed.",
       });
       
       loadImages();
@@ -114,6 +144,23 @@ const Gallery = () => {
     } finally {
       setUploading(false);
       event.target.value = '';
+    }
+  };
+
+  const handleLike = async (photoId: string) => {
+    try {
+      const { error } = await togglePhotoReaction(photoId, 'like');
+      if (error) throw error;
+      
+      // Refresh photos to update like counts
+      loadImages();
+    } catch (error) {
+      console.error('Like error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -164,32 +211,51 @@ const Gallery = () => {
                   {uploading && (
                     <p className="font-body text-sm text-accent-gold mt-4">Uploading...</p>
                   )}
+              </div>
+            </div>
+
+            {/* My Photos Section */}
+            {userPhotos.length > 0 && (
+              <div className="mb-12">
+                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">My Photos</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {userPhotos.map((photo) => (
+                    <PhotoCard 
+                      key={photo.id} 
+                      photo={photo} 
+                      onLike={handleLike}
+                      getPhotoUrl={getPhotoUrl}
+                      showStatus={true}
+                    />
+                  ))}
                 </div>
               </div>
+            )}
 
-            {/* Image Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.length > 0 ? (
-                images.map((url, index) => (
-                  <div key={index} className="aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
-                    <img 
-                      src={url}
-                      alt={`Gallery image ${index + 1}`}
-                      width="600"
-                      height="600"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
+            {/* Public Gallery */}
+            <div className="mb-12">
+              <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
+                {approvedPhotos.length > 0 ? 'Gallery' : 'Gallery'}
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {approvedPhotos.length > 0 ? (
+                  approvedPhotos.map((photo) => (
+                    <PhotoCard 
+                      key={photo.id} 
+                      photo={photo} 
+                      onLike={handleLike}
+                      getPhotoUrl={getPhotoUrl}
+                      showStatus={false}
                     />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <p className="font-body text-muted-foreground">
+                      No approved photos yet. Upload photos to get started!
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="font-body text-muted-foreground">
-                    No images yet. Be the first to share memories from the bash!
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             <div className="text-center mb-16">
               <div className="bg-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-lg border border-accent-purple/30 max-w-3xl mx-auto">
