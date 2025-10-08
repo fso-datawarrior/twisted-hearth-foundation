@@ -582,6 +582,60 @@ GRANT EXECUTE ON FUNCTION public.admin_update_rsvp_status TO authenticated;
 - The `admin_update_rsvp_status` function was using `rsvp_id` instead of `id` as the primary key
 - This causes RSVP management to fail in the admin dashboard
 
+### RSVP Management System Fix
+
+**Files:** 
+- `supabase/migrations/20250120000009_fix_rsvp_admin_access.sql`
+- `supabase/migrations/20250120000010_add_rsvp_tracking_fields.sql`
+- `supabase/migrations/20250120000011_add_rsvp_admin_functions.sql`
+
+**Problem:** RSVP Management page showed 0 RSVPs and Export CSV button didn't work due to missing RLS policies and tracking fields.
+
+**Solution:**
+1. **RLS Policies** - Added admin policies to allow viewing all RSVPs
+2. **Tracking Fields** - Added comprehensive event management fields:
+   - `attended` (boolean) - Whether guest actually attended
+   - `checked_in_at` (timestamp) - When guest checked in
+   - `rsvp_notes` (text) - Admin notes about RSVP
+   - `payment_status` (enum) - Payment tracking
+   - `payment_amount` (decimal) - Amount paid
+   - `payment_date` (timestamp) - When payment received
+   - `special_requests` (text) - Guest special needs
+   - `checked_in_by` (uuid) - Which admin checked them in
+
+3. **Admin Functions** - Added functions for:
+   - `admin_checkin_guest()` - Check in/out guests
+   - `admin_update_rsvp_notes()` - Update admin notes
+   - `admin_update_payment_status()` - Manage payment status
+   - `admin_bulk_checkin_guests()` - Bulk check-in operations
+
+4. **Enhanced UI** - Complete RSVPManagement component rewrite with:
+   - Check-in status tracking
+   - Payment status management
+   - Admin notes editing
+   - Bulk operations
+   - Enhanced CSV export with all fields
+   - Advanced filtering (status, attendance, payment)
+   - Real-time statistics cards
+
+### RSVP Access Debugging
+
+**File**: `supabase/migrations/20250120000012_debug_admin_rsvp_access.sql`
+
+If RSVPs still don't show up after applying the migrations, this debug migration will:
+
+1. **Re-run admin seeding** - Ensures admin users are properly seeded
+2. **Test admin functions** - Verifies `check_admin_status()` and `has_role()` work
+3. **Recreate RLS policies** - Drops and recreates all RSVP policies
+4. **Add logging** - Logs admin status and RSVP counts for debugging
+5. **Test access** - Attempts to count RSVPs to verify access
+
+**Debug Steps:**
+1. Apply the debug migration
+2. Check browser console for admin status logs
+3. Check Supabase logs for RLS policy evaluation
+4. Verify admin user has correct role in `user_roles` table
+
 ### Rollback Plan
 1. Database migrations are additive and safe
 2. Static preview images remain as fallback

@@ -27,19 +27,40 @@ import {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // RSVPs query
+  // RSVPs query - include all tracking fields
   const { data: rsvps, isLoading: rsvpsLoading } = useQuery({
     queryKey: ['admin-rsvps'],
     queryFn: async () => {
+      console.log('🔍 AdminDashboard: Fetching RSVPs...');
+      
+      // First check admin status
+      const { data: adminCheck, error: adminError } = await supabase.rpc('check_admin_status');
+      console.log('🔐 AdminDashboard: Admin check result:', adminCheck, 'Error:', adminError);
+      
+      // Test: Try to count all RSVPs without RLS (using service role would be better, but this is a quick test)
+      const { count: totalRsvps, error: countError } = await supabase
+        .from('rsvps')
+        .select('*', { count: 'exact', head: true });
+      console.log('📈 AdminDashboard: Total RSVPs in database:', totalRsvps, 'Count error:', countError);
+      
       const { data, error } = await supabase
         .from('rsvps' as any)
         .select(`
-          id, user_id, name, email, status, num_guests, costume_idea, dietary_restrictions, contributions, 
-          additional_guests, is_approved, created_at, updated_at
+          id, user_id, name, email, status, num_guests, 
+          costume_idea, dietary_restrictions, contributions, 
+          additional_guests, is_approved, 
+          attended, checked_in_at, rsvp_notes, 
+          payment_status, payment_amount, payment_date, special_requests,
+          created_at, updated_at
         `)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      console.log('📊 AdminDashboard: RSVPs query result:', { data, error, count: data?.length });
+      
+      if (error) {
+        console.error('❌ AdminDashboard: RSVPs query error:', error);
+        throw error;
+      }
       return data as any;
     }
   });
