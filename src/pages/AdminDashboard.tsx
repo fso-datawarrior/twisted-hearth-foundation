@@ -34,8 +34,8 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('rsvps' as any)
         .select(`
-          rsvp_id, user_id, status, num_guests, costume_idea, dietary_restrictions, contributions, created_at, updated_at,
-          users!inner(name, email)
+          id, user_id, name, email, status, num_guests, costume_idea, dietary_restrictions, contributions, 
+          additional_guests, is_approved, created_at, updated_at
         `)
         .order('created_at', { ascending: false });
       

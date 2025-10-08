@@ -43,6 +43,8 @@ interface ExistingRsvp {
   email: string;
   num_guests: number;
   dietary_restrictions: string | null;
+  costume_idea: string | null;
+  contributions: string | null;
   additional_guests: AdditionalGuest[] | null;
   created_at: string;
   updated_at: string;
@@ -59,6 +61,7 @@ const RSVP = () => {
     guestCount: 1,
     costumeIdea: "",
     dietary: "",
+    contributions: "",
     nickname: "" // Honeypot field
   });
 
@@ -99,6 +102,8 @@ const RSVP = () => {
           email: data.email,
           num_guests: data.num_guests,
           dietary_restrictions: data.dietary_restrictions,
+          costume_idea: data.costume_idea,
+          contributions: data.contributions,
           additional_guests: guestData,
           created_at: data.created_at,
           updated_at: data.updated_at,
@@ -109,8 +114,9 @@ const RSVP = () => {
           name: data.name,
           email: data.email,
           guestCount: data.num_guests,
-          costumeIdea: '',
+          costumeIdea: data.costume_idea || '',
           dietary: data.dietary_restrictions || '',
+          contributions: data.contributions || '',
           nickname: ''
         });
         setIsEditing(false); // Show sealed state
@@ -244,6 +250,8 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
+              costume_idea: formData.costumeIdea || null,
+              contributions: formData.contributions || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               updated_at: new Date().toISOString(),
               status: 'pending', // Reset to pending on edit
@@ -270,6 +278,8 @@ const RSVP = () => {
               email: updatedData.email,
               num_guests: updatedData.num_guests,
               dietary_restrictions: updatedData.dietary_restrictions,
+              costume_idea: updatedData.costume_idea,
+              contributions: updatedData.contributions,
               additional_guests: guestData,
               created_at: updatedData.created_at,
               updated_at: updatedData.updated_at,
@@ -310,6 +320,8 @@ const RSVP = () => {
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
+              costume_idea: formData.costumeIdea || null,
+              contributions: formData.contributions || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
               status: 'pending'
             }])
@@ -329,6 +341,8 @@ const RSVP = () => {
               email: data.email,
               num_guests: data.num_guests,
               dietary_restrictions: data.dietary_restrictions,
+              costume_idea: data.costume_idea,
+              contributions: data.contributions,
               additional_guests: guestData,
               created_at: data.created_at,
               updated_at: data.updated_at,
@@ -700,7 +714,7 @@ const RSVP = () => {
               </div>
             ) : (
               <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
-                <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting}>
+                <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting ? "true" : "false"}>
                 {/* Honeypot field - anti-spam */}
                 <input 
                   type="text" 

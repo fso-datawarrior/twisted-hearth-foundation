@@ -22,19 +22,19 @@ import {
 } from 'lucide-react';
 
 interface RSVP {
-  rsvp_id: string;
+  id: string;
   user_id: string;
+  name: string;
+  email: string;
   num_guests: number;
   costume_idea: string | null;
   dietary_restrictions: string | null;
   contributions: string | null;
+  additional_guests: any[] | null;
+  is_approved: boolean;
   status: string;
   created_at: string;
   updated_at: string;
-  users: {
-    name: string;
-    email: string;
-  };
 }
 
 interface RSVPManagementProps {
@@ -85,8 +85,8 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
     return rsvps
       .filter(rsvp => {
         const matchesSearch = !searchTerm || 
-          rsvp.users.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          rsvp.users.email.toLowerCase().includes(searchTerm.toLowerCase());
+          rsvp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          rsvp.email.toLowerCase().includes(searchTerm.toLowerCase());
         
         const matchesStatus = statusFilter === 'all' || rsvp.status === statusFilter;
         
@@ -121,15 +121,16 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
   const exportToCSV = () => {
     if (!filteredRsvps.length) return;
     
-    const headers = ['Name', 'Email', 'Status', 'Guests', 'Costume Idea', 'Dietary Restrictions', 'Contributions', 'Created Date'];
+    const headers = ['Name', 'Email', 'Status', 'Guests', 'Costume Idea', 'Dietary Restrictions', 'Contributions', 'Additional Guests', 'Created Date'];
     const csvData = filteredRsvps.map(rsvp => [
-      rsvp.users.name,
-      rsvp.users.email,
+      rsvp.name,
+      rsvp.email,
       rsvp.status,
       rsvp.num_guests,
       rsvp.costume_idea || '',
       rsvp.dietary_restrictions || '',
       rsvp.contributions || '',
+      rsvp.additional_guests ? JSON.stringify(rsvp.additional_guests) : '',
       new Date(rsvp.created_at).toLocaleDateString()
     ]);
     
@@ -274,7 +275,7 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('users')}>
+                  <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
                     <div className="flex items-center gap-2">
                       Name
                       <ArrowUpDown className="h-4 w-4" />
@@ -316,9 +317,9 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
               </TableHeader>
               <TableBody>
                 {filteredRsvps.map((rsvp) => (
-                  <TableRow key={rsvp.rsvp_id}>
-                    <TableCell className="font-medium">{rsvp.users.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{rsvp.users.email}</TableCell>
+                  <TableRow key={rsvp.id}>
+                    <TableCell className="font-medium">{rsvp.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{rsvp.email}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusBadgeVariant(rsvp.status)}>
                         {rsvp.status}
@@ -341,7 +342,7 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
                             size="sm"
                             variant="outline"
                             onClick={() => updateStatusMutation.mutate({
-                              rsvpId: rsvp.rsvp_id,
+                              rsvpId: rsvp.id,
                               status: 'confirmed'
                             })}
                             disabled={updateStatusMutation.isPending}
@@ -355,7 +356,7 @@ export default function RSVPManagement({ rsvps, isLoading }: RSVPManagementProps
                             size="sm"
                             variant="outline"
                             onClick={() => updateStatusMutation.mutate({
-                              rsvpId: rsvp.rsvp_id,
+                              rsvpId: rsvp.id,
                               status: 'cancelled'
                             })}
                             disabled={updateStatusMutation.isPending}
