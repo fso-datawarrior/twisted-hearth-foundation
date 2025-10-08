@@ -1,18 +1,19 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from '@supabase/supabase-js';
-import { isPartyOver } from './event';
+import type { Session } from "@supabase/supabase-js";
+import { isPartyOver } from "./event";
 
-type SessionUser = { 
-  id: string; 
+type SessionUser = {
+  id: string;
   email: string | null;
   user_metadata?: { full_name?: string; [key: string]: any };
 };
-type AuthCtx = { 
-  user: SessionUser | null; 
+
+type AuthCtx = {
+  user: SessionUser | null;
   session: Session | null;
-  signIn: (email: string) => Promise<void>; 
-  signOut: () => Promise<void>; 
+  signIn: (email: string) => Promise<void>;
+  signOut: () => Promise<void>;
   devSignIn: (email: string) => Promise<void>;
   signInWithOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<void>;
@@ -23,256 +24,153 @@ type AuthCtx = {
 
 const AuthContext = createContext<AuthCtx | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+type State = {
+  user: SessionUser | null;
+  session: Session | null;
+  loading: boolean;
+};
 
-  useEffect(() => {
-    console.log('🔐 AuthProvider: Initializing auth state...', { reactVersion: (React as any).version });
-    
-    // Set up auth state listener FIRST to catch magic link auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔐 AuthProvider: Auth state changed', { event, hasSession: !!session });
-        setSession(session);
-        setUser(session?.user ? { 
-          id: session.user.id, 
-          email: session.user.email,
-          user_metadata: session.user.user_metadata 
-        } : null);
-        setLoading(false);
-      }
-    );
+export class AuthProvider extends React.Component<{ children: React.ReactNode }, State> {
+  private subscription: { unsubscribe: () => void } | null = null;
+  private partyInterval: number | undefined;
 
-    // Check for existing session with error handling
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
-        if (error) {
-          console.error('🔐 AuthProvider: Error getting session', error);
-        } else {
-          console.log('🔐 AuthProvider: Got existing session', { hasSession: !!session });
-        }
-        setSession(session);
-        setUser(session?.user ? { 
-          id: session.user.id, 
-          email: session.user.email,
-          user_metadata: session.user.user_metadata 
-        } : null);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('🔐 AuthProvider: Failed to get session', error);
-        setLoading(false);
-      });
+  state: State = {
+    user: null,
+    session: null,
+    loading: true,
+  };
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Auto sign-out after party ends
-  useEffect(() => {
-    const checkPartyEnd = () => {
-      if (isPartyOver() && session) {
-        supabase.auth.signOut();
-      }
-    };
-
-    // Check immediately
-    checkPartyEnd();
-
-    // Check every minute
-    const interval = setInterval(checkPartyEnd, 60_000);
-    
-    return () => clearInterval(interval);
-  }, [session]);
-
-  const signIn = async (email: string) => {
-    console.log('🔐 OTP Auth - Starting signIn process', {
-      email,
-      origin: window.location.origin,
-      timestamp: new Date().toISOString()
-    });
-
+  async componentDidMount() {
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-        }
-      });
+      // Log the React runtime to help diagnose duplicate React issues
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.log("🔐 AuthProvider (class): React.version=", (React as any).version);
 
-      console.log('🔐 OTP Auth - Supabase response', {
-        data,
-        error,
-        hasError: !!error,
-        errorMessage: error?.message,
-        errorCode: error?.status,
-        timestamp: new Date().toISOString()
-      });
-      
-      if (error) {
-        console.error('🔐 OTP Auth - Error details', {
-          message: error.message,
-          status: error.status,
-          name: error.name,
-          stack: error.stack
+      // Listen for auth state changes FIRST
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        // console.debug('🔐 Auth state changed', { event, hasSession: !!session });
+        this.setState({
+          session: session ?? null,
+          user: session?.user
+            ? { id: session.user.id, email: session.user.email, user_metadata: session.user.user_metadata }
+            : null,
+          loading: false,
         });
-        
-        // If it's a rate limit error, provide a helpful message
-        if (error.status === 429) {
-          throw new Error('Rate limit exceeded. Please wait a few minutes before trying again, or contact support if this persists.');
-        }
-        
-        throw error;
+      });
+      this.subscription = data?.subscription ?? null;
+
+      // Then check existing session
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("🔐 AuthProvider: Error getting session", error);
       }
-
-      console.log('🔐 OTP Auth - Success! OTP sent', {
-        email,
-        timestamp: new Date().toISOString()
+      const session = sessionData.session ?? null;
+      this.setState({
+        session,
+        user: session?.user
+          ? { id: session.user.id, email: session.user.email, user_metadata: session.user.user_metadata }
+          : null,
+        loading: false,
       });
-    } catch (error) {
-      console.error('🔐 Magic Link Auth - Catch block error', {
-        error,
-        errorType: typeof error,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-      throw error;
+
+      // Auto sign-out after party ends
+      const checkPartyEnd = () => {
+        if (isPartyOver() && this.state.session) {
+          supabase.auth.signOut();
+        }
+      };
+      checkPartyEnd();
+      this.partyInterval = window.setInterval(checkPartyEnd, 60_000);
+    } catch (e) {
+      console.error("🔐 AuthProvider: Initialization error", e);
+      this.setState({ loading: false });
     }
-  };
-  
-  const signOut = async () => { 
-    await supabase.auth.signOut(); 
-  };
+  }
 
-  // Dev mode: Create a mock session for testing (bypasses email) - DEVELOPMENT ONLY
-  const devSignIn = async (email: string) => {
-    // Security: Only allow in development environment
-    if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
-      throw new Error('Developer authentication is disabled in production');
-    }
-    
-    // Create a mock user session for development
-    const mockUser = {
-      id: 'dev-user-' + Date.now(),
-      email: email,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      app_metadata: {},
-      user_metadata: { email },
-      aud: 'authenticated',
-      confirmation_sent_at: new Date().toISOString(),
-    };
-    
-    setUser({ 
-      id: mockUser.id, 
-      email: mockUser.email,
-      user_metadata: mockUser.user_metadata 
-    });
-    setSession({
-      access_token: 'dev-token',
-      refresh_token: 'dev-refresh',
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      token_type: 'bearer',
-      user: mockUser as any
-    });
-  };
-
-  const signInWithOtp = async (email: string) => {
-    console.log('🔐 OTP Auth - Starting signInWithOtp process', {
-      email,
-      origin: window.location.origin,
-      redirectTo: `${window.location.origin}/auth`,
-      shouldCreateUser: false,
-      timestamp: new Date().toISOString()
-    });
-
+  componentWillUnmount(): void {
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/auth`,
-        }
-      });
+      this.subscription?.unsubscribe();
+    } catch {}
+    if (this.partyInterval) window.clearInterval(this.partyInterval);
+  }
 
-      console.log('🔐 OTP Auth - Supabase response', {
-        data,
-        error,
-        hasError: !!error,
-        errorMessage: error?.message,
-        errorCode: error?.status,
-        timestamp: new Date().toISOString()
-      });
-      
-      if (error) {
-        console.error('🔐 OTP Auth - Error details', {
-          message: error.message,
-          status: error.status,
-          name: error.name,
-          stack: error.stack
-        });
-        throw error;
-      }
-
-      console.log('🔐 OTP Auth - Success! OTP sent', {
-        email,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('🔐 OTP Auth - Catch block error', {
-        error,
-        errorType: typeof error,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-      throw error;
-    }
-  };
-
-  const verifyOtp = async (email: string, token: string) => {
-    const { error } = await supabase.auth.verifyOtp({
+  // ----- Auth API (same surface as before) -----
+  signIn = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      token,
-      type: 'email'
+      options: { shouldCreateUser: false },
     });
-    
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  const signUpWithPassword = async (email: string, password: string) => {
+  signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  devSignIn = async (email: string) => {
+    if (import.meta.env.PROD || window.location.hostname !== "localhost") {
+      throw new Error("Developer authentication is disabled in production");
+    }
+    // Minimal mock (kept for local-only developer flow)
+    this.setState({
+      user: { id: "dev-user-" + Date.now(), email, user_metadata: { email } },
+      session: {
+        access_token: "dev-token",
+        refresh_token: "dev-refresh",
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        token_type: "bearer",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        user: { id: "dev-user-" + Date.now(), email, user_metadata: { email } } as any,
+      },
+      loading: false,
+    });
+  };
+
+  signInWithOtp = async (email: string) => {
+    const redirectTo = `${window.location.origin}/auth`;
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
+    });
+    if (error) throw error;
+  };
+
+  verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    if (error) throw error;
+  };
+
+  signUpWithPassword = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth`,
-      }
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
     });
-    
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  const signInWithPassword = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) {
-      throw error;
-    }
+  signInWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
-  return (
-    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, signUpWithPassword, signInWithPassword, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  render() {
+    const value: AuthCtx = {
+      user: this.state.user,
+      session: this.state.session,
+      signIn: this.signIn,
+      signOut: this.signOut,
+      devSignIn: this.devSignIn,
+      signInWithOtp: this.signInWithOtp,
+      verifyOtp: this.verifyOtp,
+      signUpWithPassword: this.signUpWithPassword,
+      signInWithPassword: this.signInWithPassword,
+      loading: this.state.loading,
+    };
+
+    return <AuthContext.Provider value={value}>{this.props.children}</AuthContext.Provider>;
+  }
 }
 
 export function useAuth() {
