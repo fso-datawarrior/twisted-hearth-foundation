@@ -562,10 +562,14 @@ const RSVP = () => {
 
   const handleDeleteDish = async (id: string) => {
     try {
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
       const { error } = await supabase
         .from('potluck_items')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id);
+        .update({ deleted_at: new Date().toISOString(), user_id: user.id })
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
