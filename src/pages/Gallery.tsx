@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Heart, Clock, CheckCircle } from "lucide-react";
 import { getAllPreviewImages, PREVIEW_CATEGORIES } from "@/config/previewImages";
 import MultiPreviewCarousel from "@/components/MultiPreviewCarousel";
+import EmptyGalleryState from "@/components/gallery/EmptyGalleryState";
 import RequireAuth from "@/components/RequireAuth";
 import { 
   uploadPhotoMetadata, 
@@ -30,7 +31,6 @@ const Gallery = () => {
   const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [photosPerView, setPhotosPerView] = useState(1);
   const { toast } = useToast();
 
@@ -118,38 +118,6 @@ const Gallery = () => {
     
     return [...filteredDbPhotos, ...staticPhotos];
   };
-
-  // Get filtered image URLs for carousel
-  const getFilteredImageUrls = async (): Promise<string[]> => {
-    const filteredPhotos = getFilteredPhotos();
-    const urls: string[] = [];
-    
-    for (const photo of filteredPhotos) {
-      if (photo.user_id === 'system') {
-        // Static images - use path directly
-        urls.push(photo.storage_path);
-      } else {
-        // Database images - generate signed URL
-        try {
-          const url = await getPhotoUrl(photo.storage_path);
-          if (url) urls.push(url);
-        } catch (error) {
-          console.error('Error generating signed URL:', error);
-        }
-      }
-    }
-    
-    return urls;
-  };
-
-  // Update carousel images when category changes
-  useEffect(() => {
-    const loadCarouselImages = async () => {
-      const urls = await getFilteredImageUrls();
-      setCarouselImages(urls);
-    };
-    loadCarouselImages();
-  }, [activeCategory, approvedPhotos]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -435,28 +403,24 @@ const Gallery = () => {
               </div>
 
               {/* Gallery Carousel */}
-              {carouselImages.length > 0 ? (
-                <div className="max-w-3xl mx-auto">
-                  <MultiPreviewCarousel
-                    defaultCategory={activeCategory}
-                    showCategoryTabs={false}
-                    autoPlay={true}
-                    autoPlayInterval={5000}
-                    previewPhotos={getFilteredPhotos()}
-                  />
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-card rounded-lg border border-accent-purple/30">
-                  <p className="font-body text-muted-foreground mb-2">
-                    No photos in this category yet.
-                  </p>
-                  <p className="font-body text-sm text-muted-foreground">
-                    {activeCategory === 'all' 
-                      ? 'Be the first to share your Twisted Tales memories!' 
-                      : `Be the first to upload a photo for ${PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title}!`
-                    }
-                  </p>
-                </div>
+              <div className="max-w-3xl mx-auto">
+                <MultiPreviewCarousel
+                  defaultCategory={activeCategory}
+                  activeCategory={activeCategory}
+                  showCategoryTabs={false}
+                  autoPlay={true}
+                  autoPlayInterval={5000}
+                  previewPhotos={getFilteredPhotos()}
+                />
+              </div>
+              {getFilteredPhotos().length === 0 && (
+                <EmptyGalleryState 
+                  categoryName={PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title || 'this category'}
+                  message={activeCategory === 'all' 
+                    ? 'Be the first to share your Twisted Tales memories!' 
+                    : `No memories captured in ${PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title} yet`
+                  }
+                />
               )}
             </div>
 

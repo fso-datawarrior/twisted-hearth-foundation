@@ -9,6 +9,7 @@ import { Photo } from "@/lib/photo-api";
 
 interface MultiPreviewCarouselProps {
   defaultCategory?: string;
+  activeCategory?: string; // Controlled category from parent
   showCategoryTabs?: boolean;
   autoPlay?: boolean;
   autoPlayInterval?: number;
@@ -18,6 +19,7 @@ interface MultiPreviewCarouselProps {
 
 const MultiPreviewCarousel = ({ 
   defaultCategory = 'vignettes',
+  activeCategory: controlledCategory,
   showCategoryTabs = true,
   autoPlay = true,
   autoPlayInterval = 5000,
@@ -27,6 +29,13 @@ const MultiPreviewCarousel = ({
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Sync internal state with controlled prop
+  useEffect(() => {
+    if (controlledCategory !== undefined) {
+      setActiveCategory(controlledCategory);
+    }
+  }, [controlledCategory]);
   
   // Generate image URLs from previewPhotos
   useEffect(() => {
