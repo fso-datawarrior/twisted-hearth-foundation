@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Check, X, Star, StarOff, Images } from 'lucide-react';
 import { moderatePhoto, updatePhotoMetadata, type Photo } from '@/lib/photo-api';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +24,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
   const queryClient = useQueryClient();
   const [photosWithUrls, setPhotosWithUrls] = useState<PhotoWithUrl[]>([]);
   const [categoryEdits, setCategoryEdits] = useState<Record<string, string[]>>({});
+  const [captionEdits, setCaptionEdits] = useState<Record<string, string>>({});
 
   // Generate signed URLs for all photos
   useEffect(() => {
@@ -69,6 +71,17 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     }
   });
 
+  const updateCaptionMutation = useMutation({
+    mutationFn: async ({ photoId, caption }: { photoId: string; caption: string }) => {
+      const { error } = await updatePhotoMetadata(photoId, { caption });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-photos'] });
+      toast({ title: "Caption Updated", description: "Photo description saved successfully." });
+    }
+  });
+
   const handleCategoryChange = (photoId: string, categories: string[]) => {
     setCategoryEdits(prev => ({ ...prev, [photoId]: categories }));
   };
@@ -77,6 +90,19 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     const categories = categoryEdits[photoId];
     if (categories) {
       updateCategoriesMutation.mutate({ photoId, categories });
+    }
+  };
+
+  const handleCaptionChange = (photoId: string, caption: string) => {
+    if (caption.length <= 250) {
+      setCaptionEdits(prev => ({ ...prev, [photoId]: caption }));
+    }
+  };
+
+  const handleCaptionSave = (photoId: string) => {
+    const caption = captionEdits[photoId];
+    if (caption !== undefined) {
+      updateCaptionMutation.mutate({ photoId, caption });
     }
   };
 
@@ -116,6 +142,25 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                     onChange={(categories) => handleCategoryChange(photo.id, categories)}
                     onSave={() => handleCategorySave(photo.id)}
                   />
+                  <div className="space-y-1">
+                    <Textarea
+                      placeholder="Add description (250 char max)"
+                      value={captionEdits[photo.id] ?? photo.caption ?? ''}
+                      onChange={(e) => handleCaptionChange(photo.id, e.target.value)}
+                      maxLength={250}
+                      className="text-xs min-h-[60px] resize-none"
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">
+                        {(captionEdits[photo.id] ?? photo.caption ?? '').length}/250
+                      </span>
+                      {captionEdits[photo.id] !== undefined && (
+                        <Button size="sm" variant="ghost" onClick={() => handleCaptionSave(photo.id)}>
+                          Save
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex gap-1">
                     <Button 
                       size="sm" 
@@ -185,6 +230,25 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                     onChange={(categories) => handleCategoryChange(photo.id, categories)}
                     onSave={() => handleCategorySave(photo.id)}
                   />
+                  <div className="space-y-1">
+                    <Textarea
+                      placeholder="Add description (250 char max)"
+                      value={captionEdits[photo.id] ?? photo.caption ?? ''}
+                      onChange={(e) => handleCaptionChange(photo.id, e.target.value)}
+                      maxLength={250}
+                      className="text-xs min-h-[60px] resize-none"
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">
+                        {(captionEdits[photo.id] ?? photo.caption ?? '').length}/250
+                      </span>
+                      {captionEdits[photo.id] !== undefined && (
+                        <Button size="sm" variant="ghost" onClick={() => handleCaptionSave(photo.id)}>
+                          Save
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex gap-1">
                     <Button 
                       size="sm" 

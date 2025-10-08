@@ -342,28 +342,6 @@ const Gallery = () => {
               </div>
             </div>
 
-            {/* My Photos Section */}
-            {userPhotos.length > 0 && (
-              <div className="mb-12">
-                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
-                  My Photos
-                </h2>
-                <PhotoCarousel
-                  photos={userPhotos}
-                  onLike={handleLike}
-                  getPhotoUrl={getPhotoUrl}
-                  showStatus={true}
-                  showUserActions={true}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                  onFavorite={handleFavorite}
-                  onEmojiReaction={handleEmojiReaction}
-                  photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
-                  className="mb-4"
-                />
-              </div>
-            )}
-
             {/* Gallery from Halloween's Past */}
             <div className="mb-16">
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
@@ -435,6 +413,28 @@ const Gallery = () => {
                 </div>
               )}
             </div>
+
+            {/* My Photos Section - Moved Below */}
+            {userPhotos.length > 0 && (
+              <div className="mb-12">
+                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
+                  My Photos
+                </h2>
+                <PhotoCarousel
+                  photos={userPhotos}
+                  onLike={handleLike}
+                  getPhotoUrl={getPhotoUrl}
+                  showStatus={true}
+                  showUserActions={true}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onFavorite={handleFavorite}
+                  onEmojiReaction={handleEmojiReaction}
+                  photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
+                  className="mb-4"
+                />
+              </div>
+            )}
             
             {/* Photo Guidelines */}
             <div className="bg-bg-2 p-8 rounded-lg border border-accent-purple/30">

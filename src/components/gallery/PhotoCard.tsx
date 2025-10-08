@@ -85,91 +85,100 @@ export const PhotoCard = ({
   };
 
   return (
-    <div className="group relative aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all">
-      {loading ? (
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-gold"></div>
-        </div>
-      ) : (
-        <>
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={photo.caption || 'Gallery photo'}
-              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              loading="lazy"
-              onError={() => setImageUrl(null)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <span className="text-sm">Photo unavailable</span>
-            </div>
-          )}
-          
-          {getStatusBadge()}
-
-          {/* Photo Edit Controls (only for unapproved photos) */}
-          {showEditControls && !photo.is_approved && onUpdate && onDelete && (
-            <div className="absolute top-2 right-2 z-20">
-              <PhotoEditControls
-                photo={photo}
-                onUpdate={onUpdate}
-                onDelete={(photoId) => onDelete(photoId, photo.storage_path)}
+    <>
+      <div className="group relative aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all">
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-gold"></div>
+          </div>
+        ) : (
+          <>
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={photo.caption || 'Gallery photo'}
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                loading="lazy"
+                onError={() => setImageUrl(null)}
               />
-            </div>
-          )}
-
-          {/* User Photo Actions (delete, favorite) */}
-          {showUserActions && (onDelete || onFavorite) && (
-            <div className="absolute top-2 right-2 z-20">
-              <UserPhotoActions
-                photo={photo}
-                onDelete={onDelete ? (photoId) => onDelete(photoId, photo.storage_path) : undefined}
-                onFavorite={onFavorite}
-              />
-            </div>
-          )}
-
-          {/* Photo info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            {photo.caption && (
-              <p className="font-body text-xs text-ink mb-2 line-clamp-2">
-                {photo.caption}
-              </p>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <span className="text-sm">Photo unavailable</span>
+              </div>
             )}
             
-            <div className="flex items-center justify-between">
-              {onLike && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onLike(photo.id)}
-                  className="h-8 px-2 text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
-                >
-                  <Heart className="w-4 h-4 mr-1" />
-                  {photo.likes_count}
-                </Button>
+            {getStatusBadge()}
+
+            {/* Photo Edit Controls (only for unapproved photos) */}
+            {showEditControls && !photo.is_approved && onUpdate && onDelete && (
+              <div className="absolute top-2 right-2 z-20">
+                <PhotoEditControls
+                  photo={photo}
+                  onUpdate={onUpdate}
+                  onDelete={(photoId) => onDelete(photoId, photo.storage_path)}
+                />
+              </div>
+            )}
+
+            {/* User Photo Actions (delete, favorite) */}
+            {showUserActions && (onDelete || onFavorite) && (
+              <div className="absolute top-2 right-2 z-20">
+                <UserPhotoActions
+                  photo={photo}
+                  onDelete={onDelete ? (photoId) => onDelete(photoId, photo.storage_path) : undefined}
+                  onFavorite={onFavorite}
+                />
+              </div>
+            )}
+
+            {/* Photo info overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              {photo.caption && (
+                <p className="font-body text-xs text-ink mb-2 line-clamp-2">
+                  {photo.caption}
+                </p>
               )}
               
-              {photo.category && (
-                <Badge variant="outline" className="text-xs">
-                  {photo.category}
-                </Badge>
-              )}
+              <div className="flex items-center justify-between">
+                {onLike && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onLike(photo.id)}
+                    className="h-8 px-2 text-accent-gold hover:text-accent-gold hover:bg-accent-gold/10"
+                  >
+                    <Heart className="w-4 h-4 mr-1" />
+                    {photo.likes_count}
+                  </Button>
+                )}
+                
+                {photo.category && (
+                  <Badge variant="outline" className="text-xs">
+                    {photo.category}
+                  </Badge>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Emoji Reactions (shown for user's own photos) */}
-          {showUserActions && onEmojiReaction && (
-            <div className="absolute bottom-0 left-0 right-0 p-3 bg-bg-1/95 border-t border-accent-purple/20">
-              <PhotoEmojiReactions
-                photoId={photo.id}
-                onReaction={onEmojiReaction}
-              />
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            {/* Emoji Reactions - Horizontal Layout Below Photo */}
+            {showUserActions && onEmojiReaction && (
+              <div className="absolute bottom-0 left-0 right-0 p-2 bg-bg-1/95 border-t border-accent-purple/20">
+                <PhotoEmojiReactions
+                  photoId={photo.id}
+                  onReaction={onEmojiReaction}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Description Display Below Card - Fixed Height */}
+      <div className="mt-2 p-3 bg-bg-2/50 rounded min-h-[100px] flex items-center justify-center">
+        <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full">
+          {photo.caption || ''}
+        </p>
+      </div>
+    </>
   );
 };

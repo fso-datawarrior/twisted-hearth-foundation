@@ -66,15 +66,15 @@ export const PhotoCarousel = ({
               <PhotoCard
                 photo={photo}
                 onLike={onLike}
-              getPhotoUrl={getPhotoUrl}
-              showStatus={showStatus}
-              showEditControls={showEditControls}
-              showUserActions={showUserActions}
-              onUpdate={onUpdate}
-              onDelete={onDelete}
-              onFavorite={onFavorite}
-              onEmojiReaction={onEmojiReaction}
-            />
+                getPhotoUrl={getPhotoUrl}
+                showStatus={showStatus}
+                showEditControls={showEditControls}
+                showUserActions={showUserActions}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                onFavorite={onFavorite}
+                onEmojiReaction={onEmojiReaction}
+              />
             </div>
           ))}
         </div>

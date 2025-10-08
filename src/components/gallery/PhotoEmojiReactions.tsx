@@ -65,7 +65,7 @@ const PhotoEmojiReactions: React.FC<PhotoEmojiReactionsProps> = ({ photoId, onRe
   if (!user) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center justify-center gap-1 flex-wrap">
       {AVAILABLE_EMOJIS.map(emoji => {
         const reaction = reactions.find(r => r.emoji === emoji);
         const count = reaction?.count || 0;
@@ -74,18 +74,18 @@ const PhotoEmojiReactions: React.FC<PhotoEmojiReactionsProps> = ({ photoId, onRe
         return (
           <Button
             key={emoji}
-            variant={userReacted ? "secondary" : "outline"}
+            variant={userReacted ? "default" : "outline"}
             size="sm"
             onClick={() => handleReaction(emoji)}
             disabled={isLoading}
-            className={`h-8 px-2 text-sm border-accent-purple/20 hover:border-accent-gold/50 ${
+            className={`px-2 py-1 h-8 min-w-[45px] ${
               userReacted 
-                ? 'bg-accent-purple/20 text-accent-gold border-accent-purple/40' 
-                : 'hover:bg-accent-gold/10'
+                ? "bg-accent-gold text-ink hover:bg-accent-gold/80" 
+                : "border-accent-purple/50 hover:bg-accent-purple/20"
             }`}
           >
-            <span className="mr-1">{emoji}</span>
-            {count > 0 && <span className="text-xs">{count}</span>}
+            <span className="text-base">{emoji}</span>
+            {count > 0 && <span className="ml-1 text-xs">{count}</span>}
           </Button>
         );
       })}

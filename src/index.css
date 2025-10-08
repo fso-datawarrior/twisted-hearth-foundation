@@ -142,6 +142,14 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     animation: sparkle 2s ease-in-out infinite;
   }
 
+  /* Spooky gold text styling for photo descriptions */
+  .text-spooky-gold {
+    color: hsl(var(--accent-gold));
+    font-family: var(--font-subhead);
+    text-shadow: 0 0 8px hsla(var(--accent-gold), 0.4),
+                 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
   /* Enhanced scrollbar styling for contributions */
   .scroll-area-enhanced {
     position: relative;
