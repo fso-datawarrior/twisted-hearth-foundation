@@ -292,6 +292,37 @@ const Gallery = () => {
     }
   };
 
+  const handleCaptionUpdate = async (photoId: string, caption: string) => {
+    try {
+      // Validate caption length
+      if (caption.length > 250) {
+        toast({
+          title: "Caption too long",
+          description: "Caption must be 250 characters or less.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const { error } = await updatePhotoMetadata(photoId, { caption });
+      if (error) throw error;
+      
+      toast({
+        title: "Caption updated",
+        description: "Your photo caption has been saved.",
+      });
+      
+      loadImages();
+    } catch (error) {
+      console.error('Caption update error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update caption.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background relative">
@@ -430,6 +461,7 @@ const Gallery = () => {
                   onDelete={handleDelete}
                   onFavorite={handleFavorite}
                   onEmojiReaction={handleEmojiReaction}
+                  onCaptionUpdate={handleCaptionUpdate}
                   photosPerView={window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2}
                   className="mb-4"
                 />

@@ -65,7 +65,7 @@ const PhotoEmojiReactions: React.FC<PhotoEmojiReactionsProps> = ({ photoId, onRe
   if (!user) return null;
 
   return (
-    <div className="flex items-center justify-center gap-1 flex-wrap">
+    <div className="flex flex-row flex-nowrap items-center justify-center gap-2">
       {AVAILABLE_EMOJIS.map(emoji => {
         const reaction = reactions.find(r => r.emoji === emoji);
         const count = reaction?.count || 0;

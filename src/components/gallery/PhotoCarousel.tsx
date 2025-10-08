@@ -16,6 +16,7 @@ interface PhotoCarouselProps {
   onDelete?: (photoId: string, storagePath: string) => void;
   onFavorite?: (photoId: string) => void;
   onEmojiReaction?: (photoId: string, emoji: string) => void;
+  onCaptionUpdate?: (photoId: string, caption: string) => void;
   photosPerView?: number;
   className?: string;
 }
@@ -31,6 +32,7 @@ export const PhotoCarousel = ({
   onDelete,
   onFavorite,
   onEmojiReaction,
+  onCaptionUpdate,
   photosPerView = 4,
   className
 }: PhotoCarouselProps) => {
@@ -74,6 +76,8 @@ export const PhotoCarousel = ({
                 onDelete={onDelete}
                 onFavorite={onFavorite}
                 onEmojiReaction={onEmojiReaction}
+                onCaptionUpdate={onCaptionUpdate}
+                allowCaptionEdit={showUserActions}
               />
             </div>
           ))}

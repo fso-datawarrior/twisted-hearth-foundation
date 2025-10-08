@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Clock, CheckCircle, Star } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Heart, Clock, CheckCircle, Star, Pencil, Save, X } from "lucide-react";
 import { Photo } from "@/lib/photo-api";
 import { PhotoEditControls } from "./PhotoEditControls";
 import UserPhotoActions from "./UserPhotoActions";
@@ -18,6 +19,8 @@ interface PhotoCardProps {
   onDelete?: (photoId: string, storagePath: string) => void;
   onFavorite?: (photoId: string) => void;
   onEmojiReaction?: (photoId: string, emoji: string) => void;
+  onCaptionUpdate?: (photoId: string, caption: string) => void;
+  allowCaptionEdit?: boolean;
 }
 
 export const PhotoCard = ({ 
@@ -30,10 +33,15 @@ export const PhotoCard = ({
   onUpdate, 
   onDelete,
   onFavorite,
-  onEmojiReaction
+  onEmojiReaction,
+  onCaptionUpdate,
+  allowCaptionEdit
 }: PhotoCardProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [editedCaption, setEditedCaption] = useState(photo.caption || '');
+  const [charCount, setCharCount] = useState(photo.caption?.length || 0);
 
   useEffect(() => {
     const loadUrl = async () => {
@@ -82,6 +90,26 @@ export const PhotoCard = ({
         Pending
       </Badge>
     );
+  };
+
+  const handleCaptionChange = (value: string) => {
+    if (value.length <= 250) {
+      setEditedCaption(value);
+      setCharCount(value.length);
+    }
+  };
+
+  const handleSaveCaption = () => {
+    if (onCaptionUpdate) {
+      onCaptionUpdate(photo.id, editedCaption.trim());
+      setIsEditingCaption(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedCaption(photo.caption || '');
+    setCharCount(photo.caption?.length || 0);
+    setIsEditingCaption(false);
   };
 
   return (
@@ -159,25 +187,82 @@ export const PhotoCard = ({
                 )}
               </div>
             </div>
-
-            {/* Emoji Reactions - Horizontal Layout Below Photo */}
-            {showUserActions && onEmojiReaction && (
-              <div className="absolute bottom-0 left-0 right-0 p-2 bg-bg-1/95 border-t border-accent-purple/20">
-                <PhotoEmojiReactions
-                  photoId={photo.id}
-                  onReaction={onEmojiReaction}
-                />
-              </div>
-            )}
           </>
         )}
       </div>
 
-      {/* Description Display Below Card - Fixed Height */}
-      <div className="mt-2 p-3 bg-bg-2/50 rounded min-h-[100px] flex items-center justify-center">
-        <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full">
-          {photo.caption || ''}
-        </p>
+      {/* Emoji Reactions - Horizontal Layout Below Photo */}
+      {showUserActions && onEmojiReaction && (
+        <div className="mt-2 p-2 bg-bg-2/50 rounded border-t border-b border-accent-gold/30">
+          <PhotoEmojiReactions
+            photoId={photo.id}
+            onReaction={onEmojiReaction}
+          />
+        </div>
+      )}
+
+      {/* Caption Display/Edit Below Card - Fixed Height */}
+      <div className="mt-2 p-3 bg-bg-2/50 rounded-lg border-2 border-accent-gold/60 min-h-[120px] flex flex-col">
+        {allowCaptionEdit && onCaptionUpdate ? (
+          isEditingCaption ? (
+            // Edit Mode
+            <div className="flex flex-col flex-1">
+              <Textarea
+                value={editedCaption}
+                onChange={(e) => handleCaptionChange(e.target.value)}
+                placeholder="Add a caption to your photo..."
+                maxLength={250}
+                rows={4}
+                className="flex-1 bg-bg-1 border-accent-purple/50 text-spooky-gold placeholder:text-accent-gold/50 resize-none"
+              />
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-accent-gold/70">{charCount}/250</p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="h-7 px-2 text-xs border-accent-purple/50 text-accent-gold hover:bg-accent-purple/20"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveCaption}
+                    className="h-7 px-2 text-xs bg-accent-gold text-ink hover:bg-accent-gold/80"
+                  >
+                    <Save className="w-3 h-3 mr-1" />
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // View Mode
+            <div className="flex flex-col flex-1 items-center justify-center">
+              <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full flex-1 flex items-center justify-center">
+                {photo.caption || 'No caption yet'}
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsEditingCaption(true)}
+                className="mt-2 h-7 px-2 text-xs text-accent-gold hover:bg-accent-gold/10"
+              >
+                <Pencil className="w-3 h-3 mr-1" />
+                Edit Caption
+              </Button>
+            </div>
+          )
+        ) : (
+          // Display Only Mode (no editing allowed)
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-spooky-gold text-sm text-center leading-relaxed break-words w-full">
+              {photo.caption || ''}
+            </p>
+          </div>
+        )}
       </div>
     </>
   );
