@@ -141,9 +141,6 @@ const RSVP = () => {
   // Load user's potluck contributions
   useEffect(() => {
     const loadPotluckItems = async () => {
-      // TEMPORARY: Bypass auth for testing due to rate limiting issues
-      const user = { id: 'test-user-bypass', email: 'test@example.com' };
-      // const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -162,7 +159,7 @@ const RSVP = () => {
     };
 
     loadPotluckItems();
-  }, []);
+  }, [user]);
 
   // Auto-adjust additionalGuests array when guestCount changes
   useEffect(() => {
@@ -444,9 +441,6 @@ const RSVP = () => {
         return;
       }
 
-      // TEMPORARY: Bypass auth for testing due to rate limiting issues
-      const user = { id: 'test-user-bypass', email: 'test@example.com' };
-      // const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Error",
