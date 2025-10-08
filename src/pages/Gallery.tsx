@@ -18,6 +18,7 @@ import {
   togglePhotoReaction,
   deletePhoto,
   updatePhotoMetadata,
+  getAllPreviewPhotos,
   Photo 
 } from "@/lib/photo-api";
 import { PhotoCarousel } from "@/components/gallery/PhotoCarousel";
@@ -27,6 +28,7 @@ const Gallery = () => {
   const [approvedPhotos, setApprovedPhotos] = useState<Photo[]>([]);
   const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [previewPhotos, setPreviewPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -61,33 +63,43 @@ const Gallery = () => {
 
   const loadPreviewImages = async () => {
     try {
-      // Get all preview image paths from all categories
-      const imagePaths = getAllPreviewImages();
+      // Try to load preview images from database first
+      const { data: dbPreviewPhotos, error } = await getAllPreviewPhotos();
       
-      // Test which images actually exist by trying to load them
-      const existingImages: string[] = [];
-      
-      for (const imagePath of imagePaths) {
-        try {
-          await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = imagePath;
-          });
-          existingImages.push(imagePath);
-        } catch (error) {
-          // Image doesn't exist, skip it
-          console.log(`Preview image not found: ${imagePath}`);
+      if (!error && dbPreviewPhotos && dbPreviewPhotos.length > 0) {
+        // Use database photos
+        setPreviewPhotos(dbPreviewPhotos);
+        console.log(`Loaded ${dbPreviewPhotos.length} preview photos from database`);
+      } else {
+        // Fallback to static images from config
+        const imagePaths = getAllPreviewImages();
+        
+        // Test which images actually exist by trying to load them
+        const existingImages: string[] = [];
+        
+        for (const imagePath of imagePaths) {
+          try {
+            await new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = imagePath;
+            });
+            existingImages.push(imagePath);
+          } catch (error) {
+            // Image doesn't exist, skip it
+            console.log(`Preview image not found: ${imagePath}`);
+          }
         }
+        
+        setPreviewImages(existingImages);
+        console.log(`Loaded ${existingImages.length} static preview images across ${PREVIEW_CATEGORIES.length} categories`);
       }
-      
-      setPreviewImages(existingImages);
-      console.log(`Loaded ${existingImages.length} preview images across ${PREVIEW_CATEGORIES.length} categories`);
     } catch (error) {
       console.error('Error loading preview images:', error);
-      // Fallback to empty array if there's an error
-      setPreviewImages([]);
+      // Fallback to static images
+      const imagePaths = getAllPreviewImages();
+      setPreviewImages(imagePaths);
     }
   };
 
@@ -350,6 +362,7 @@ const Gallery = () => {
                 autoPlay={true}
                 autoPlayInterval={6000}
                 className="motion-safe hover-tilt"
+                previewPhotos={previewPhotos}
               />
             </div>
             

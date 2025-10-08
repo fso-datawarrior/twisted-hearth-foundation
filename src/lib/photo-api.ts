@@ -14,6 +14,10 @@ export interface Photo {
   category?: 'costumes' | 'food' | 'activities' | 'general';
   is_approved: boolean;
   is_featured: boolean;
+  is_preview?: boolean;
+  preview_category?: 'vignettes' | 'activities' | 'costumes' | 'thumbnails';
+  deleted_at?: string;
+  sort_order?: number;
   likes_count: number;
   file_size?: number;
   mime_type?: string;
@@ -205,4 +209,107 @@ export const updatePhotoMetadata = async (
     .eq('id', photoId);
 
   return { error };
+};
+
+// ================================================================
+// ADMIN FUNCTIONS
+// ================================================================
+
+/**
+ * Soft delete photo (admin only)
+ */
+export const softDeletePhoto = async (photoId: string): Promise<{ error: any }> => {
+  const { error } = await supabase.rpc('soft_delete_photo', { p_photo_id: photoId });
+  return { error };
+};
+
+/**
+ * Restore soft-deleted photo (admin only)
+ */
+export const restorePhoto = async (photoId: string): Promise<{ error: any }> => {
+  const { error } = await supabase.rpc('restore_photo', { p_photo_id: photoId });
+  return { error };
+};
+
+/**
+ * Get preview photos by category
+ */
+export const getPreviewPhotosByCategory = async (category: string): Promise<{ data: Photo[] | null; error: any }> => {
+  const { data, error } = await supabase
+    .from('photos')
+    .select('*')
+    .eq('is_preview', true)
+    .eq('preview_category', category)
+    .eq('is_approved', true)
+    .is('deleted_at', null)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+  
+  return { data: data as Photo[] | null, error };
+};
+
+/**
+ * Get all preview photos
+ */
+export const getAllPreviewPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
+  const { data, error } = await supabase
+    .from('photos')
+    .select('*')
+    .eq('is_preview', true)
+    .eq('is_approved', true)
+    .is('deleted_at', null)
+    .order('preview_category', { ascending: true })
+    .order('sort_order', { ascending: true });
+  
+  return { data: data as Photo[] | null, error };
+};
+
+/**
+ * Admin: upload preview photo
+ */
+export const uploadPreviewPhoto = async (
+  filePath: string,
+  filename: string,
+  previewCategory: string,
+  caption?: string,
+  sortOrder?: number
+): Promise<{ data: Photo | null; error: any }> => {
+  const { data, error } = await supabase
+    .from('photos')
+    .insert({
+      storage_path: filePath,
+      filename,
+      caption,
+      is_preview: true,
+      preview_category: previewCategory,
+      is_approved: true,
+      sort_order: sortOrder || 0
+    })
+    .select()
+    .single();
+  
+  return { data: data as Photo | null, error };
+};
+
+/**
+ * Enhanced moderate photo with category management (admin only)
+ */
+export const moderatePhotoEnhanced = async (
+  photoId: string,
+  approve: boolean,
+  featured: boolean = false,
+  isPreview?: boolean,
+  previewCategory?: string,
+  sortOrder?: number
+): Promise<{ data: Photo | null; error: any }> => {
+  const { data, error } = await supabase.rpc('moderate_photo', {
+    p_photo_id: photoId,
+    p_approved: approve,
+    p_featured: featured,
+    p_is_preview: isPreview,
+    p_preview_category: previewCategory,
+    p_sort_order: sortOrder
+  });
+
+  return { data: data as Photo | null, error };
 };

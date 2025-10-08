@@ -10,6 +10,7 @@ import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
+import EmailCommunication from '@/components/admin/EmailCommunication';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { 
   Users, 
@@ -19,7 +20,8 @@ import {
   Search,
   Calendar,
   Map,
-  Settings 
+  Settings,
+  Mail
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -53,14 +55,16 @@ export default function AdminDashboard() {
     }
   });
 
-  // Gallery photos query
+  // Gallery photos query - include new fields
   const { data: photos, isLoading: photosLoading } = useQuery({
     queryKey: ['admin-photos'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('photos' as any)
         .select(`
-          id, user_id, filename, storage_path, is_approved, is_featured, created_at, likes_count
+          id, user_id, filename, storage_path, caption, category, 
+          is_approved, is_featured, is_preview, preview_category, 
+          deleted_at, sort_order, created_at, likes_count
         `)
         .order('created_at', { ascending: false });
       
@@ -98,7 +102,8 @@ export default function AdminDashboard() {
     { id: 'tournament', label: 'Tournament', icon: Trophy, count: tournamentRegs?.length },
     { id: 'gallery', label: 'Gallery', icon: Images, count: photos?.length },
     { id: 'hunt', label: 'Hunt', icon: Search, count: activeHuntRuns },
-    { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null }
+    { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
+    { id: 'email', label: 'Email', icon: Mail, count: null }
   ];
 
   return (
@@ -251,6 +256,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === 'guestbook' && (
               <GuestbookManagement />
+            )}
+            {activeTab === 'email' && (
+              <EmailCommunication />
             )}
           </div>
         </div>
