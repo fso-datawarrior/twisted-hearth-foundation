@@ -11,7 +11,7 @@ export interface Photo {
   filename: string;
   caption?: string;
   tags: string[];
-  category?: 'costumes' | 'food' | 'activities' | 'general';
+  category?: 'past-vignettes' | 'creepy-decor' | 'costume-heroes' | 'event-memories' | 'general';
   is_approved: boolean;
   is_featured: boolean;
   likes_count: number;

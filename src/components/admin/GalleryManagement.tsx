@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check, X, Star, StarOff, Images } from 'lucide-react';
-import { moderatePhoto, type Photo } from '@/lib/photo-api';
+import { moderatePhoto, updatePhotoMetadata, type Photo } from '@/lib/photo-api';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import CategorySelector from './CategorySelector';
 
 interface GalleryManagementProps {
   photos: Photo[];
@@ -21,6 +22,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [photosWithUrls, setPhotosWithUrls] = useState<PhotoWithUrl[]>([]);
+  const [categoryEdits, setCategoryEdits] = useState<Record<string, string[]>>({});
 
   // Generate signed URLs for all photos
   useEffect(() => {
@@ -56,6 +58,28 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     }
   });
 
+  const updateCategoriesMutation = useMutation({
+    mutationFn: async ({ photoId, categories }: { photoId: string; categories: string[] }) => {
+      const { error } = await updatePhotoMetadata(photoId, { tags: categories });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-photos'] });
+      toast({ title: "Categories Updated", description: "Photo categories saved successfully." });
+    }
+  });
+
+  const handleCategoryChange = (photoId: string, categories: string[]) => {
+    setCategoryEdits(prev => ({ ...prev, [photoId]: categories }));
+  };
+
+  const handleCategorySave = (photoId: string) => {
+    const categories = categoryEdits[photoId];
+    if (categories) {
+      updateCategoriesMutation.mutate({ photoId, categories });
+    }
+  };
+
   const pendingPhotos = photosWithUrls?.filter(p => !p.is_approved) || [];
   const approvedPhotos = photosWithUrls?.filter(p => p.is_approved) || [];
 
@@ -87,6 +111,11 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                 />
                 <CardContent className="p-2 space-y-2">
                   <p className="text-xs text-muted-foreground truncate">{photo.filename}</p>
+                  <CategorySelector
+                    selectedCategories={categoryEdits[photo.id] || photo.tags || []}
+                    onChange={(categories) => handleCategoryChange(photo.id, categories)}
+                    onSave={() => handleCategorySave(photo.id)}
+                  />
                   <div className="flex gap-1">
                     <Button 
                       size="sm" 
@@ -151,6 +180,11 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                 </div>
                 <CardContent className="p-2 space-y-2">
                   <p className="text-xs text-muted-foreground truncate">{photo.filename}</p>
+                  <CategorySelector
+                    selectedCategories={categoryEdits[photo.id] || photo.tags || []}
+                    onChange={(categories) => handleCategoryChange(photo.id, categories)}
+                    onSave={() => handleCategorySave(photo.id)}
+                  />
                   <div className="flex gap-1">
                     <Button 
                       size="sm" 

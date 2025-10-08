@@ -26,14 +26,12 @@ import { PhotoCard } from "@/components/gallery/PhotoCard";
 const Gallery = () => {
   const [approvedPhotos, setApprovedPhotos] = useState<Photo[]>([]);
   const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
-  const [previewPhotos, setPreviewPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const { toast } = useToast();
 
   useEffect(() => {
     loadImages();
-    loadPreviewImages();
   }, []);
 
   const loadImages = async () => {
@@ -60,14 +58,46 @@ const Gallery = () => {
     return data?.signedUrl || '';
   };
 
-  const loadPreviewImages = async () => {
-    try {
-      // Load static images from config
-      const imagePaths = getAllPreviewImages();
-      setPreviewImages(imagePaths);
-    } catch (error) {
-      console.error('Error loading preview images:', error);
+  // Convert static images to Photo-like objects
+  const getStaticPhotosForCategory = (categoryId: string): Photo[] => {
+    const category = PREVIEW_CATEGORIES.find(c => c.id === categoryId);
+    if (!category) return [];
+    
+    return category.images.map((img, index) => ({
+      id: `static-${categoryId}-${index}`,
+      user_id: 'system',
+      storage_path: img.path,
+      filename: img.filename,
+      caption: img.title,
+      tags: [categoryId],
+      category: categoryId as any,
+      is_approved: true,
+      is_featured: false,
+      likes_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+  };
+
+  // Get filtered photos based on active category
+  const getFilteredPhotos = (): Photo[] => {
+    const dbPhotos = approvedPhotos || [];
+    
+    if (activeCategory === 'all') {
+      // Show all database photos + all static images
+      const allStaticPhotos = PREVIEW_CATEGORIES.flatMap(cat => getStaticPhotosForCategory(cat.id));
+      return [...dbPhotos, ...allStaticPhotos];
     }
+    
+    // Filter database photos by category
+    const filteredDbPhotos = dbPhotos.filter(photo => 
+      photo.tags?.includes(activeCategory) || photo.category === activeCategory
+    );
+    
+    // Get static images for this category
+    const staticPhotos = getStaticPhotosForCategory(activeCategory);
+    
+    return [...filteredDbPhotos, ...staticPhotos];
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,78 +289,56 @@ const Gallery = () => {
               </div>
             )}
 
-            {/* Public Gallery */}
-            <div className="mb-12">
-              <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
-                {approvedPhotos.length > 0 ? 'Gallery' : 'Gallery'}
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {approvedPhotos.length > 0 ? (
-                  approvedPhotos.map((photo) => (
-                    <PhotoCard 
-                      key={photo.id} 
-                      photo={photo} 
-                      onLike={handleLike}
-                      getPhotoUrl={getPhotoUrl}
-                      showStatus={false}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-12">
-                    <p className="font-body text-muted-foreground">
-                      No approved photos yet. Upload photos to get started!
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="text-center mb-16">
-              <div className="bg-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-lg border border-accent-purple/30 max-w-3xl mx-auto">
-                <div className="font-heading text-4xl sm:text-5xl md:text-6xl mb-4 sm:mb-5 md:mb-6 text-accent-gold">🖼️</div>
-                <h2 className="font-subhead text-2xl sm:text-3xl mb-4 sm:mb-5 md:mb-6 text-accent-red tracking-tight text-balance">
-                  Gallery Opening Soon
-                </h2>
-                <p className="font-body text-muted-foreground mb-6 sm:mb-7 md:mb-8 text-base sm:text-lg">
-                  Our photographers are still developing the film from last year's celebration. 
-                  Some images are too dark to process... others refuse to develop at all.
-                </p>
-                <p className="font-body text-muted-foreground mb-6">
-                  This gallery will feature:
-                </p>
-                <div className="grid md:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
-                  <div className="bg-bg-2 p-4 rounded-lg">
-                    <h3 className="font-subhead text-lg mb-2 text-accent-gold">Past Events</h3>
-                    <ul className="font-body text-sm text-muted-foreground space-y-1">
-                      <li>• Costume contest winners</li>
-                      <li>• Interactive vignette moments</li>
-                      <li>• Behind-the-scenes preparations</li>
-                    </ul>
-                  </div>
-                  <div className="bg-bg-2 p-4 rounded-lg">
-                    <h3 className="font-subhead text-lg mb-2 text-accent-gold">This Year</h3>
-                    <ul className="font-body text-sm text-muted-foreground space-y-1">
-                      <li>• Live event photography</li>
-                      <li>• Guest submissions welcome</li>
-                      <li>• Professional portrait station</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Multi-Category Preview */}
+            {/* Gallery from Halloween's Past */}
             <div className="mb-16">
-              <h2 className="font-subhead text-2xl text-center mb-8 text-accent-gold">
-                Event Preview Gallery
+              <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
+                Gallery from Halloween's Past
               </h2>
-              <MultiPreviewCarousel 
-                defaultCategory="vignettes"
-                showCategoryTabs={true}
-                autoPlay={true}
-                autoPlayInterval={6000}
-                className="motion-safe hover-tilt"
-                previewPhotos={previewPhotos}
-              />
+              
+              {/* Category Filter Tabs */}
+              <div className="flex flex-wrap justify-center gap-2 mb-8">
+                <Button
+                  variant={activeCategory === 'all' ? 'default' : 'outline'}
+                  onClick={() => setActiveCategory('all')}
+                  className="font-subhead"
+                >
+                  All Photos
+                </Button>
+                {PREVIEW_CATEGORIES.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={activeCategory === category.id ? 'default' : 'outline'}
+                    onClick={() => setActiveCategory(category.id)}
+                    className="font-subhead"
+                  >
+                    {category.title}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Gallery Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {getFilteredPhotos().map((photo) => (
+                  <PhotoCard 
+                    key={photo.id} 
+                    photo={photo} 
+                    onLike={photo.user_id !== 'system' ? handleLike : undefined}
+                    getPhotoUrl={photo.user_id === 'system' ? undefined : getPhotoUrl}
+                    showStatus={false}
+                  />
+                ))}
+              </div>
+
+              {getFilteredPhotos().length === 0 && (
+                <div className="text-center py-12 bg-card rounded-lg border border-accent-purple/30">
+                  <p className="font-body text-muted-foreground mb-2">
+                    No photos in this category yet.
+                  </p>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Be the first to upload a photo for {PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title}!
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Photo Guidelines */}

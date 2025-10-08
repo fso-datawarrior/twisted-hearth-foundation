@@ -15,7 +15,7 @@ export interface PreviewCategory {
 
 export const PREVIEW_CATEGORIES: PreviewCategory[] = [
   {
-    id: 'vignettes',
+    id: 'past-vignettes',
     title: 'Past Vignettes',
     description: 'Twisted tales from previous gatherings',
     images: [
@@ -40,9 +40,9 @@ export const PREVIEW_CATEGORIES: PreviewCategory[] = [
     ]
   },
   {
-    id: 'activities',
-    title: 'Event Activities',
-    description: 'Games, competitions, and twisted fun',
+    id: 'creepy-decor',
+    title: 'Creepy Decor',
+    description: 'Haunting decorations and atmosphere',
     images: [
       {
         filename: 'beerPongWicked.jpg',
@@ -53,8 +53,8 @@ export const PREVIEW_CATEGORIES: PreviewCategory[] = [
     ]
   },
   {
-    id: 'costumes',
-    title: 'Costume Inspiration', 
+    id: 'costume-heroes',
+    title: 'Costume Heroes', 
     description: 'Twisted fairytale character ideas',
     images: [
       {
@@ -90,9 +90,9 @@ export const PREVIEW_CATEGORIES: PreviewCategory[] = [
     ]
   },
   {
-    id: 'thumbnails',
+    id: 'event-memories',
     title: 'Event Memories',
-    description: 'Quick glimpses of past celebrations',
+    description: 'Captured moments from past celebrations',
     images: [
       {
         filename: 'goldilocks-thumb.jpg',
@@ -134,5 +134,5 @@ export const getPreviewCategory = (categoryId: string): PreviewCategory | undefi
 
 // Legacy compatibility - returns all vignette images
 export const getPreviewImagePaths = (): string[] => {
-  return getPreviewImagesByCategory('vignettes');
+  return getPreviewImagesByCategory('past-vignettes');
 };
