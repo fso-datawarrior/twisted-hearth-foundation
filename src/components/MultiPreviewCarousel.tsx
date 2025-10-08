@@ -116,8 +116,8 @@ const MultiPreviewCarousel = ({
           />
           {/* Description Container - Fixed Height with Gold Border */}
           {previewPhotos.length > 0 && (
-            <div className="mt-3 p-4 bg-bg-2/50 rounded-lg border-2 border-accent-gold/60 min-h-[100px] flex items-center justify-center">
-              <p className="font-subhead text-accent-gold text-sm text-center leading-relaxed max-w-xl" style={{ textShadow: '0 0 8px hsla(var(--accent-gold), 0.4), 1px 1px 2px rgba(0, 0, 0, 0.8)' }}>
+            <div className="mt-3 p-4 bg-bg-2/50 rounded-lg border-2 border-accent-gold/60 min-h-[100px] flex items-center justify-center max-w-[85%] mx-auto">
+              <p className="font-subhead text-accent-gold text-2xl text-center leading-relaxed" style={{ textShadow: '0 0 8px hsla(var(--accent-gold), 0.4), 1px 1px 2px rgba(0, 0, 0, 0.8)' }}>
                 {previewPhotos[currentIndex]?.caption || ''}
               </p>
             </div>
