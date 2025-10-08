@@ -172,12 +172,13 @@ const Gallery = () => {
       const { error } = await deletePhoto(photoId, storagePath);
       if (error) throw error;
       
+      // Immediately update state by filtering out deleted photo
+      setUserPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== photoId));
+      
       toast({
         title: "Photo deleted",
         description: "Your photo has been removed.",
       });
-      
-      loadImages();
     } catch (error) {
       console.error('Delete error:', error);
       toast({
