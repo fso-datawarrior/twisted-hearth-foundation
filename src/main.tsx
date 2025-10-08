@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Force clean rebuild - v1.0.6
+// Force clean rebuild - v1.0.7
 // Register/Unregister service worker based on route (avoid SW on /auth)
 if (false && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
