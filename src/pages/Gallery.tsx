@@ -69,35 +69,6 @@ const Gallery = () => {
       console.error('Error loading preview images:', error);
     }
   };
-        
-        // Test which images actually exist by trying to load them
-        const existingImages: string[] = [];
-        
-        for (const imagePath of imagePaths) {
-          try {
-            await new Promise((resolve, reject) => {
-              const img = new Image();
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = imagePath;
-            });
-            existingImages.push(imagePath);
-          } catch (error) {
-            // Image doesn't exist, skip it
-            console.log(`Preview image not found: ${imagePath}`);
-          }
-        }
-        
-        setPreviewImages(existingImages);
-        console.log(`Loaded ${existingImages.length} static preview images across ${PREVIEW_CATEGORIES.length} categories`);
-      }
-    } catch (error) {
-      console.error('Error loading preview images:', error);
-      // Fallback to static images
-      const imagePaths = getAllPreviewImages();
-      setPreviewImages(imagePaths);
-    }
-  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
