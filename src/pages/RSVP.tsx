@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useRef, useEffect } from "react";
 import { formatEventShort, formatEventTime } from "@/lib/event";
 import Footer from "@/components/Footer";

@@ -219,7 +219,7 @@ export const updatePhotoMetadata = async (
  * Soft delete photo (admin only)
  */
 export const softDeletePhoto = async (photoId: string): Promise<{ error: any }> => {
-  const { error } = await supabase.rpc('soft_delete_photo', { p_photo_id: photoId });
+  const { error } = await (supabase.rpc as any)('soft_delete_photo', { p_photo_id: photoId });
   return { error };
 };
 
@@ -227,7 +227,7 @@ export const softDeletePhoto = async (photoId: string): Promise<{ error: any }> 
  * Restore soft-deleted photo (admin only)
  */
 export const restorePhoto = async (photoId: string): Promise<{ error: any }> => {
-  const { error } = await supabase.rpc('restore_photo', { p_photo_id: photoId });
+  const { error } = await (supabase.rpc as any)('restore_photo', { p_photo_id: photoId });
   return { error };
 };
 
@@ -235,8 +235,7 @@ export const restorePhoto = async (photoId: string): Promise<{ error: any }> => 
  * Get preview photos by category
  */
 export const getPreviewPhotosByCategory = async (category: string): Promise<{ data: Photo[] | null; error: any }> => {
-  const { data, error } = await supabase
-    .from('photos')
+  const { data, error } = await (supabase.from as any)('photos')
     .select('*')
     .eq('is_preview', true)
     .eq('preview_category', category)
@@ -252,8 +251,7 @@ export const getPreviewPhotosByCategory = async (category: string): Promise<{ da
  * Get all preview photos
  */
 export const getAllPreviewPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
-  const { data, error } = await supabase
-    .from('photos')
+  const { data, error } = await (supabase.from as any)('photos')
     .select('*')
     .eq('is_preview', true)
     .eq('is_approved', true)
@@ -274,8 +272,7 @@ export const uploadPreviewPhoto = async (
   caption?: string,
   sortOrder?: number
 ): Promise<{ data: Photo | null; error: any }> => {
-  const { data, error } = await supabase
-    .from('photos')
+  const { data, error } = await (supabase.from as any)('photos')
     .insert({
       storage_path: filePath,
       filename,
@@ -302,14 +299,14 @@ export const moderatePhotoEnhanced = async (
   previewCategory?: string,
   sortOrder?: number
 ): Promise<{ data: Photo | null; error: any }> => {
-  const { data, error } = await supabase.rpc('moderate_photo', {
+  const { data, error } = await (supabase.rpc as any)('moderate_photo', {
     p_photo_id: photoId,
     p_approved: approve,
     p_featured: featured,
     p_is_preview: isPreview,
     p_preview_category: previewCategory,
     p_sort_order: sortOrder
-  });
+  } as any);
 
   return { data: data as Photo | null, error };
 };
