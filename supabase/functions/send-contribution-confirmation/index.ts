@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,13 +15,31 @@ interface ContributionData {
   isGlutenFree: boolean;
 }
 
+const ContributionSchema = z.object({
+  contributorEmail: z.string().email(),
+  contributorName: z.string().min(1).max(100),
+  dishName: z.string().min(1).max(200),
+  notes: z.string().max(500).optional(),
+  isVegan: z.boolean(),
+  isGlutenFree: z.boolean()
+});
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { contributorEmail, contributorName, dishName, notes, isVegan, isGlutenFree }: ContributionData = await req.json();
+    const rawBody = await req.json();
+    const validated = ContributionSchema.safeParse(rawBody);
+    if (!validated.success) {
+      console.error('Validation error:', validated.error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: validated.error }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+    const { contributorEmail, contributorName, dishName, notes, isVegan, isGlutenFree }: ContributionData = validated.data;
 
     console.log('Sending contribution confirmation emails for:', { contributorEmail, dishName });
 

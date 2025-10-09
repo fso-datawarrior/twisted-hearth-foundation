@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 interface AdditionalGuest {
@@ -14,6 +15,18 @@ type Payload = {
   isUpdate?: boolean;
   additionalGuests?: AdditionalGuest[];
 };
+
+const PayloadSchema = z.object({
+  rsvpId: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  guests: z.number().int().min(1).max(8),
+  isUpdate: z.boolean().optional(),
+  additionalGuests: z.array(z.object({
+    name: z.string().min(1).max(100),
+    email: z.string().email().optional()
+  })).optional()
+});
 
 const MJ_API = Deno.env.get("MAILJET_API_KEY")!;
 const MJ_SECRET = Deno.env.get("MAILJET_API_SECRET")!;
@@ -94,7 +107,20 @@ serve(async (req) => {
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors(origin) });
 
   let body: Payload;
-  try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400, headers: cors(origin) }); }
+  try { 
+    const rawBody = await req.json();
+    const validated = PayloadSchema.safeParse(rawBody);
+    if (!validated.success) {
+      console.error('Validation error:', validated.error);
+      return new Response(JSON.stringify({ error: 'Invalid input', details: validated.error }), { 
+        status: 400, 
+        headers: cors(origin) 
+      });
+    }
+    body = validated.data;
+  } catch { 
+    return new Response("Bad Request", { status: 400, headers: cors(origin) }); 
+  }
 
   console.log('Processing RSVP confirmation:', { 
     email: body.email, 

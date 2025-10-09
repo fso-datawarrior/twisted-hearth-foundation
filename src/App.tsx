@@ -59,10 +59,10 @@ function App() {
                   <SwipeNavigator>
                     <Toaster />
                     <Sonner />
-                    <ErrorBoundary>
-                      <Suspense fallback={
+                    <Suspense fallback={
                         <div className="p-8 text-center text-[--ink]/80">Loading…</div>
                       }>
+                      <ErrorBoundary>
                         <Routes>
                           <Route path="/" element={<Index />} />
                           <Route path="/about" element={<About />} />
@@ -80,8 +80,8 @@ function App() {
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
-                      </Suspense>
-                    </ErrorBoundary>
+                      </ErrorBoundary>
+                    </Suspense>
                   </SwipeNavigator>
                 </main>
                 

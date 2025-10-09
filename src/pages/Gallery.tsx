@@ -310,14 +310,15 @@ const Gallery = () => {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-background relative">
-        <main className="pt-20 relative z-10">
-          {/* <CSSFogBackground /> */}
-          <section className="py-16 px-6">
-            <div className="container mx-auto max-w-7xl px-4">
-              <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
-                Gallery of Twisted Tales
-              </h1>
+      <ErrorBoundary>
+        <div className="min-h-screen bg-background relative">
+          <main className="pt-20 relative z-10">
+            {/* <CSSFogBackground /> */}
+            <section className="py-16 px-6">
+              <div className="container mx-auto max-w-7xl px-4">
+                <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
+                  Gallery of Twisted Tales
+                </h1>
               
               <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-3xl mx-auto">
                 Memories from past celebrations and previews of what's to come. 
@@ -487,6 +488,7 @@ const Gallery = () => {
       
       <Footer />
     </div>
+    </ErrorBoundary>
   </RequireAuth>
   );
 };

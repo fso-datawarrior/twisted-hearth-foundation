@@ -14,54 +14,27 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `01-critical-security-hardcoded-credentials.patch` - Removed hardcoded credentials
 - [x] `01-high-supabase-hardcoded-client.patch` - Fixed hardcoded Supabase client
 - [x] `PATCH-CR-01-vignette-schema.sql` - Added vignette database schema (25 TS errors fixed)
+- [x] `PATCH-CR-02-input-validation.patch` - Added Zod validation to all 3 edge functions
+- [x] `01-critical-performance-fix-gallery-loading.patch` - Optimized gallery image loading
+- [x] `02-critical-resilience-add-error-boundaries.patch` - Added error boundaries to Gallery
+- [x] `07-medium-ux-error-boundaries.patch` - Fixed ErrorBoundary/Suspense order in App.tsx
+- [x] `02-high-security-server-client.patch` - Created secure server-side Supabase client (server.ts)
+- [x] `03-high-security-rls-policies.patch` - Strengthened Row Level Security on RSVPs table
+- [x] `04-high-security-edge-function-validation.patch` - Input validation (included in PATCH-CR-02)
+- [x] `03-high-performance-fix-memory-leaks.patch` - Fixed memory leaks in ImageCarousel.tsx
+- [x] `06-high-data-admin-selects.patch` - Optimized database queries with selective fields
 
 ---
 
 ## 🔴 Critical Priority (Install First)
 
-### [ ] `PATCH-CR-02-input-validation.patch`
-**Impact:** Prevents SQL injection and XSS attacks in edge functions  
-**Files:** 3 (edge functions: send-rsvp-confirmation, send-bulk-email, send-contribution-confirmation)  
-**Action:** Adds Zod validation schemas to all edge function inputs
-
-### [ ] `01-critical-performance-fix-gallery-loading.patch`
-**Impact:** Fixes gallery image loading performance issues  
-**Files:** 1 (MultiPreviewCarousel.tsx)  
-**Action:** Optimizes image fetching and rendering
-
-### [ ] `02-critical-resilience-add-error-boundaries.patch`
-**Impact:** Prevents app crashes from rendering errors  
-**Files:** 2 (ErrorBoundary.tsx, Gallery.tsx)  
-**Action:** Wraps components in error boundaries
+*All critical patches have been applied!*
 
 ---
 
 ## 🟠 High Priority (Install Next)
 
-### [ ] `02-high-security-server-client.patch`
-**Impact:** Creates secure server-side Supabase client  
-**Files:** 1 (new file: integrations/supabase/server.ts)  
-**Action:** Adds admin client for edge functions
-
-### [ ] `03-high-security-rls-policies.patch`
-**Impact:** Strengthens Row Level Security on RSVPs  
-**Files:** 1 (migration file)  
-**Action:** Updates RLS policy to restrict access properly
-
-### [ ] `04-high-security-edge-function-validation.patch`
-**Impact:** Adds input validation to RSVP confirmation  
-**Files:** 1 (send-rsvp-confirmation/index.ts)  
-**Action:** Implements Zod schema validation
-
-### [ ] `03-high-performance-fix-memory-leaks.patch`
-**Impact:** Fixes memory leaks in image carousel  
-**Files:** 1 (ImageCarousel.tsx)  
-**Action:** Properly cleans up intervals on unmount
-
-### [ ] `06-high-data-admin-selects.patch`
-**Impact:** Optimizes database queries by selecting specific fields  
-**Files:** 2 (AdminDashboard.tsx, tournament-api.ts)  
-**Action:** Replaces `select('*')` with explicit columns
+*All high priority patches have been applied!*
 
 ---
 
@@ -107,10 +80,6 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (new file: .env.example)  
 **Action:** Creates example env file
 
-### [ ] `07-medium-ux-error-boundaries.patch`
-**Impact:** Better error boundary placement  
-**Files:** 1 (App.tsx)  
-**Action:** Moves ErrorBoundary inside Suspense
 
 ### [ ] `08-medium-performance-bundle-splitting.patch`
 **Impact:** Reduces bundle size with code splitting  
@@ -182,5 +151,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 25  
-**Applied:** 3  
-**Remaining:** 22
+**Applied:** 12  
+**Remaining:** 13
