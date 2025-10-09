@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,13 +15,51 @@ interface ContributionData {
   isGlutenFree: boolean;
 }
 
+// Input validation schema
+const ContributionSchema = z.object({
+  contributorEmail: z.string()
+    .trim()
+    .email('Invalid email address')
+    .max(255, 'Email must be less than 255 characters'),
+  contributorName: z.string()
+    .trim()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  dishName: z.string()
+    .trim()
+    .min(1, 'Dish name is required')
+    .max(200, 'Dish name must be less than 200 characters'),
+  notes: z.string()
+    .max(500, 'Notes must be less than 500 characters')
+    .optional()
+    .nullable(),
+  isVegan: z.boolean(),
+  isGlutenFree: z.boolean()
+});
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { contributorEmail, contributorName, dishName, notes, isVegan, isGlutenFree }: ContributionData = await req.json();
+    const rawBody = await req.json();
+    
+    // Validate input
+    const validationResult = ContributionSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input',
+          details: validationResult.error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const { contributorEmail, contributorName, dishName, notes, isVegan, isGlutenFree }: ContributionData = validationResult.data;
 
     console.log('Sending contribution confirmation emails for:', { contributorEmail, dishName });
 

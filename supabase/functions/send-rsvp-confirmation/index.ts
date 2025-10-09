@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 interface AdditionalGuest {
   name: string;
@@ -14,6 +15,28 @@ type Payload = {
   isUpdate?: boolean;
   additionalGuests?: AdditionalGuest[];
 };
+
+// Input validation schema
+const RSVPConfirmationSchema = z.object({
+  rsvpId: z.string().uuid(),
+  name: z.string()
+    .trim()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  email: z.string()
+    .trim()
+    .email('Invalid email address')
+    .max(255, 'Email must be less than 255 characters'),
+  guests: z.number()
+    .int('Number of guests must be an integer')
+    .min(1, 'Must have at least 1 guest')
+    .max(10, 'Maximum 10 guests allowed'),
+  isUpdate: z.boolean().optional(),
+  additionalGuests: z.array(z.object({
+    name: z.string().min(1).max(100),
+    email: z.string().email().optional()
+  })).optional()
+});
 
 const MJ_API = Deno.env.get("MAILJET_API_KEY")!;
 const MJ_SECRET = Deno.env.get("MAILJET_API_SECRET")!;
@@ -93,8 +116,24 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(origin) });
   if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: cors(origin) });
 
-  let body: Payload;
-  try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400, headers: cors(origin) }); }
+  let rawBody: any;
+  try { rawBody = await req.json(); } catch { return new Response("Bad Request", { status: 400, headers: cors(origin) }); }
+
+  // Validate input
+  const validationResult = RSVPConfirmationSchema.safeParse(rawBody);
+  
+  if (!validationResult.success) {
+    console.error('Validation error:', validationResult.error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Invalid input',
+        details: validationResult.error.errors 
+      }),
+      { status: 400, headers: { ...cors(origin), 'Content-Type': 'application/json' } }
+    );
+  }
+  
+  const body: Payload = validationResult.data;
 
   console.log('Processing RSVP confirmation:', { 
     email: body.email, 
