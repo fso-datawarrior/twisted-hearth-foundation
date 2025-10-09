@@ -322,40 +322,6 @@ const Gallery = () => {
                 Every image tells a story... some darker than others.
               </p>
               
-              {/* Upload Section */}
-              <div className="mb-12 text-center relative">
-                <HuntRune 
-                  id="7" 
-                  label="A picture is a promise"
-                  bonus={true}
-                  className="absolute -top-2 -right-2"
-                />
-                <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
-                  <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Share Your Photos</h2>
-                  <Label htmlFor="image-upload" className="cursor-pointer">
-                    <div className="border-2 border-dashed border-accent-purple/50 rounded-lg p-8 hover:border-accent-gold/50 transition-colors">
-                      <Upload className="mx-auto mb-4 text-accent-gold" size={48} />
-                      <p className="font-subhead text-accent-gold mb-2">Click to upload images</p>
-                      <p className="font-body text-sm text-muted-foreground">
-                        Multiple files supported. By uploading, you confirm you have permission to share these images.
-                      </p>
-                    </div>
-                    <Input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileUpload}
-                      disabled={uploading}
-                      className="sr-only"
-                    />
-                  </Label>
-                  {uploading && (
-                    <p className="font-body text-sm text-accent-gold mt-4">Uploading...</p>
-                  )}
-              </div>
-            </div>
-
             {/* Gallery from Halloween's Past */}
             <div className="mb-16">
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
@@ -422,6 +388,40 @@ const Gallery = () => {
                   }
                 />
               )}
+            </div>
+
+            {/* Upload Section */}
+            <div className="mb-8 text-center relative">
+              <HuntRune 
+                id="7" 
+                label="A picture is a promise"
+                bonus={true}
+                className="absolute -top-2 -right-2"
+              />
+              <div className="bg-card p-6 rounded-lg border border-accent-purple/30 max-w-4xl mx-auto">
+                <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Share Your Photos</h2>
+                <Label htmlFor="image-upload" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-accent-purple/50 rounded-lg p-6 hover:border-accent-gold/50 transition-colors">
+                    <Upload className="mx-auto mb-4 text-accent-gold" size={48} />
+                    <p className="font-subhead text-accent-gold mb-2">Click to upload images</p>
+                    <p className="font-body text-sm text-muted-foreground">
+                      Multiple files supported. By uploading, you confirm you have permission to share these images.
+                    </p>
+                  </div>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    className="sr-only"
+                  />
+                </Label>
+                {uploading && (
+                  <p className="font-body text-sm text-accent-gold mt-4">Uploading...</p>
+                )}
+              </div>
             </div>
 
             {/* My Photos Section - Moved Below */}
