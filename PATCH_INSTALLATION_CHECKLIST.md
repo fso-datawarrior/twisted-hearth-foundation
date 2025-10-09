@@ -29,6 +29,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `05-medium-performance-console-logs.patch` - Replaced console.logs with logger in auth.tsx
 - [x] `10-low-performance-image-dimensions.patch` - Added width/height to HeroVideo poster and video
 - [x] `05-medium-db-indexes.patch` - Created 8 database indexes for improved query performance
+- [x] `04-medium-ux-add-loading-states.patch` - Added skeleton loading states to Gallery
 
 ---
 
@@ -152,5 +153,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
-**Applied:** 22  
-**Remaining:** 4
+**Applied:** 23  
+**Remaining:** 3

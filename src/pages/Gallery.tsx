@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +56,7 @@ const Gallery = () => {
   }, []);
 
   const loadImages = async () => {
+    setLoading(true);
     try {
       // Load approved photos for public gallery
       const { data: approved, error: approvedError } = await getApprovedPhotos();
@@ -67,6 +69,8 @@ const Gallery = () => {
       setUserPhotos(user || []);
     } catch (error) {
       console.error('Error loading images:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -373,16 +377,27 @@ const Gallery = () => {
 
               {/* Gallery Carousel */}
               <div className="w-full">
-                <MultiPreviewCarousel
-                  defaultCategory={activeCategory}
-                  activeCategory={activeCategory}
-                  showCategoryTabs={false}
-                  autoPlay={true}
-                  autoPlayInterval={5000}
-                  previewPhotos={getFilteredPhotos()}
-                />
+                {loading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="w-full h-[400px] rounded-lg" />
+                    <div className="flex justify-center space-x-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="w-2 h-2 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <MultiPreviewCarousel
+                    defaultCategory={activeCategory}
+                    activeCategory={activeCategory}
+                    showCategoryTabs={false}
+                    autoPlay={true}
+                    autoPlayInterval={5000}
+                    previewPhotos={getFilteredPhotos()}
+                  />
+                )}
               </div>
-              {getFilteredPhotos().length === 0 && (
+              {!loading && getFilteredPhotos().length === 0 && (
                 <EmptyGalleryState 
                   categoryName={PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title || 'this category'}
                   message={activeCategory === 'all' 
@@ -428,7 +443,18 @@ const Gallery = () => {
             </div>
 
             {/* My Photos Section - Moved Below */}
-            {userPhotos.length > 0 && (
+            {loading ? (
+              <div className="mb-12">
+                <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
+                  My Photos
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="w-full h-64 rounded-lg" />
+                  ))}
+                </div>
+              </div>
+            ) : userPhotos.length > 0 && (
               <div className="mb-12">
                 <h2 className="font-subhead text-2xl mb-6 text-accent-gold">
                   My Photos
