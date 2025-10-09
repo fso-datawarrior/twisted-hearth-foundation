@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { isPartyOver } from './event';
+import { logger } from './logger';
 
 type SessionUser = { 
   id: string; 
@@ -29,12 +30,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    console.log('🔐 AuthProvider: Initializing auth state...');
+    logger.info('🔐 AuthProvider: Initializing auth state...');
     
     // Set up auth state listener FIRST to catch magic link auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('🔐 AuthProvider: Auth state changed', { event, hasSession: !!session });
+        logger.info('🔐 AuthProvider: Auth state changed', { event, hasSession: !!session });
         setSession(session);
         setUser(session?.user ? { 
           id: session.user.id, 
@@ -49,9 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
         if (error) {
-          console.error('🔐 AuthProvider: Error getting session', error);
+          logger.error('🔐 AuthProvider: Error getting session', error);
         } else {
-          console.log('🔐 AuthProvider: Got existing session', { hasSession: !!session });
+          logger.info('🔐 AuthProvider: Got existing session', { hasSession: !!session });
         }
         setSession(session);
         setUser(session?.user ? { 
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('🔐 AuthProvider: Failed to get session', error);
+        logger.error('🔐 AuthProvider: Failed to get session', error);
         setLoading(false);
       });
 
@@ -87,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [session]);
 
   const signIn = async (email: string) => {
-    console.log('🔐 OTP Auth - Starting signIn process', {
+    logger.debug('🔐 OTP Auth - Starting signIn process', {
       email,
       origin: window.location.origin,
       timestamp: new Date().toISOString()
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      console.log('🔐 OTP Auth - Supabase response', {
+      logger.debug('🔐 OTP Auth - Supabase response', {
         data,
         error,
         hasError: !!error,
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        console.error('🔐 OTP Auth - Error details', {
+        logger.error('🔐 OTP Auth - Error details', error, {
           message: error.message,
           status: error.status,
           name: error.name,
@@ -126,12 +127,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log('🔐 OTP Auth - Success! OTP sent', {
+      logger.info('🔐 OTP Auth - Success! OTP sent', {
         email,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('🔐 Magic Link Auth - Catch block error', {
+      logger.error('🔐 Magic Link Auth - Catch block error', error instanceof Error ? error : new Error('Unknown error'), {
         error,
         errorType: typeof error,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
@@ -180,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithOtp = async (email: string) => {
-    console.log('🔐 OTP Auth - Starting signInWithOtp process', {
+    logger.debug('🔐 OTP Auth - Starting signInWithOtp process', {
       email,
       origin: window.location.origin,
       redirectTo: `${window.location.origin}/auth`,
@@ -197,7 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      console.log('🔐 OTP Auth - Supabase response', {
+      logger.debug('🔐 OTP Auth - Supabase response', {
         data,
         error,
         hasError: !!error,
@@ -207,7 +208,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) {
-        console.error('🔐 OTP Auth - Error details', {
+        logger.error('🔐 OTP Auth - Error details', error, {
           message: error.message,
           status: error.status,
           name: error.name,
@@ -216,12 +217,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log('🔐 OTP Auth - Success! OTP sent', {
+      logger.info('🔐 OTP Auth - Success! OTP sent', {
         email,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('🔐 OTP Auth - Catch block error', {
+      logger.error('🔐 OTP Auth - Catch block error', error instanceof Error ? error : new Error('Unknown error'), {
         error,
         errorType: typeof error,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',

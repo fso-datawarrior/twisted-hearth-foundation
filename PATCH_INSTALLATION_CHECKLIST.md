@@ -25,6 +25,8 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `03-high-performance-fix-memory-leaks.patch` - Fixed memory leaks in ImageCarousel.tsx
 - [x] `06-high-data-admin-selects.patch` - Optimized database queries with selective fields
 - [x] `02-medium-storage-user-prefix.patch` - Prefixed uploads with user ID in Gallery.tsx
+- [x] `12-low-dx-error-handling.patch` - Created centralized logger utility (lib/logger.ts)
+- [x] `05-medium-performance-console-logs.patch` - Replaced console.logs with logger in auth.tsx
 
 ---
 
@@ -62,7 +64,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (new migration)  
 **Action:** Creates indexes on commonly queried columns
 
-### [ ] `05-medium-performance-console-logs.patch`
+### [x] `05-medium-performance-console-logs.patch`
 **Impact:** Removes console logs in production  
 **Files:** 1 (lib/auth.tsx)  
 **Action:** Replaces console.log with logger utility
@@ -102,7 +104,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (.env.example)  
 **Action:** Documents all environment variables
 
-### [ ] `12-low-dx-error-handling.patch`
+### [x] `12-low-dx-error-handling.patch`
 **Impact:** Adds centralized logging utility  
 **Files:** 1 (new file: lib/logger.ts)  
 **Action:** Creates logger for consistent error handling
@@ -148,5 +150,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
-**Applied:** 18  
-**Remaining:** 8
+**Applied:** 20  
+**Remaining:** 6
