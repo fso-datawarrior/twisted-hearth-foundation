@@ -52,9 +52,19 @@ async function bootstrap() {
       location.reload();
       return; // Stop bootstrapping on this pass
     }
+    
+    // Only render after cleanup is complete
+    const rootEl = document.getElementById('root');
+    if (rootEl) {
+      createRoot(rootEl).render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+    }
   } catch (e) {
     console.log('Cleanup error:', e);
-  } finally {
+    // Still try to render even if cleanup fails
     const rootEl = document.getElementById('root');
     if (rootEl) {
       createRoot(rootEl).render(
