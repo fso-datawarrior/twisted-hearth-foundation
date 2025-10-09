@@ -102,7 +102,7 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
       <div
         ref={modalRef}
         className={cn(
-          "relative bg-black/90 backdrop-blur-sm border border-accent-purple/30 rounded-lg shadow-2xl max-w-2xl max-h-[90vh] overflow-auto m-4 animate-scale-in",
+          "relative bg-black/90 backdrop-blur-sm border border-accent-purple/30 rounded-lg shadow-2xl max-w-2xl max-h-[90vh] max-h-[90dvh] overflow-auto overscroll-contain m-4 animate-scale-in",
           className
         )}
         tabIndex={-1}
@@ -113,7 +113,7 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 text-muted-foreground hover:text-accent-gold"
+          className="absolute top-4 right-4 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-accent-gold touch-manipulation"
           aria-label="Close modal"
         >
           <X className="h-4 w-4" />

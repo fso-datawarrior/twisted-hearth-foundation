@@ -68,13 +68,13 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe pt-[max(env(safe-area-inset-top),1rem)] ${
         isScrolled ? "backdrop-blur-md shadow-lg bg-bg-2/20" : "bg-transparent"
       }`}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-[max(env(safe-area-inset-left),1rem)] pr-[max(env(safe-area-inset-right),1rem)] py-4">
         <div className="flex items-center justify-between nav-full:justify-center">
           {/* Logo/Title - Positioned just to the left of nav links */}
           <div className="flex items-center gap-3 nav-full:mr-8">
@@ -114,7 +114,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               <Link
                 key={to}
                 to={to}
-                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 min-h-[44px] flex items-center touch-manipulation ${
                   location.pathname === to
                     ? "text-accent-gold"
                     : "text-ink hover:text-accent-gold"

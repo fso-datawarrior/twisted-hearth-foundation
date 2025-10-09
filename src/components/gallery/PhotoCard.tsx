@@ -118,7 +118,7 @@ export const PhotoCard = ({
     <div className="flex flex-col gap-2 w-full">
       {/* Photo Container */}
       <div 
-        className={`group relative aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all ${onImageClick ? 'cursor-pointer' : ''}`}
+        className={`group relative aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 transition-all [@media(hover:hover)]:hover:border-accent-gold/50 ${onImageClick ? 'cursor-pointer' : ''}`}
         onClick={() => onImageClick?.(photo)}
       >
         {loading ? (
@@ -155,7 +155,7 @@ export const PhotoCard = ({
             )}
 
             {/* Photo info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-2 md:p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-2 md:p-3 transition-opacity [@media(hover:none)]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
               {photo.caption && (
                 <p className="font-body text-[10px] md:text-xs text-ink mb-1 md:mb-2 line-clamp-2">
                   {photo.caption}

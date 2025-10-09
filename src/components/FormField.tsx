@@ -16,6 +16,9 @@ interface FormFieldProps {
   max?: number;
   rows?: number;
   className?: string;
+  inputMode?: "text" | "email" | "numeric" | "tel" | "url" | "search";
+  autoComplete?: string;
+  enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
 }
 
 const FormField = ({
@@ -30,7 +33,10 @@ const FormField = ({
   min,
   max,
   rows = 3,
-  className
+  className,
+  inputMode,
+  autoComplete,
+  enterKeyHint
 }: FormFieldProps) => {
   const baseClasses = "bg-input border-4 border-accent-gold/80 text-foreground placeholder:text-muted-foreground focus:border-accent-gold focus:ring-4 focus:ring-accent-gold/30 focus:shadow-sparkle transition-all duration-300";
   
@@ -74,6 +80,9 @@ const FormField = ({
           required={required}
           min={min}
           max={max}
+          inputMode={inputMode}
+          autoComplete={autoComplete}
+          enterKeyHint={enterKeyHint}
           className={cn(
             baseClasses,
             error && "border-accent-red focus:border-accent-red focus:ring-accent-red/20"

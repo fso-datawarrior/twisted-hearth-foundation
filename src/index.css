@@ -800,3 +800,40 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 .hunt-debug-show-all .hunt-rune-placeholder {
   opacity: 1 !important;
 }
+
+/* iOS viewport height fix - ensure dvh fallback */
+@supports not (height: 100dvh) {
+  .min-h-\[80dvh\] {
+    min-height: 80vh;
+  }
+  .max-h-\[90dvh\] {
+    max-height: 90vh;
+  }
+}
+
+/* Safe area insets for iOS notch/home indicator */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+.toast-viewport {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Touch device optimizations - show controls by default */
+@media (hover: none) {
+  /* Reduce transform effects on touch to prevent janky animations */
+  .hover\:-translate-y-1,
+  .motion-safe\:hover\:-translate-y-0\.5 {
+    transform: none !important;
+  }
+  
+  /* Show focus rings on touch */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--accent-gold));
+    outline-offset: 2px;
+  }
+}

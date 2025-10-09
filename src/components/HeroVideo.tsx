@@ -67,7 +67,7 @@ export default function HeroVideo({
   return (
     <section 
       ref={sectionRef}
-      className="relative isolate min-h-[80vh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black" 
+      className="relative isolate min-h-[80vh] min-h-[80dvh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black"
       {...(!ready && { "aria-busy": "true" })}
     >
       <div className="sr-only" aria-live="polite">

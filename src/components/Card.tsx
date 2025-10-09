@@ -28,9 +28,9 @@ const Card = ({
   const baseClasses = "group relative rounded-2xl bg-black/90 backdrop-blur-sm shadow/50 transition cursor-pointer overflow-hidden";
   
   const variantClasses = {
-    vignette: "border border-accent-purple/30 hover:shadow-[0_0_30px_rgba(59,110,71,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]",
-    costume: "border border-accent-green/30 hover:shadow-[0_0_30px_rgba(59,47,74,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]",
-    default: "border border-accent-purple/30 hover:shadow-[0_0_30px_rgba(197,164,93,0.25)] motion-safe:hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[--accent-gold]"
+    vignette: "border border-accent-purple/30 focus-within:ring-2 focus-within:ring-[--accent-gold] active:border-accent-gold/30 active:shadow-md [@media(hover:hover)]:hover:shadow-[0_0_30px_rgba(59,110,71,0.25)] [@media(hover:hover)]:motion-safe:hover:-translate-y-0.5",
+    costume: "border border-accent-green/30 focus-within:ring-2 focus-within:ring-[--accent-gold] active:border-accent-gold/30 active:shadow-md [@media(hover:hover)]:hover:shadow-[0_0_30px_rgba(59,47,74,0.25)] [@media(hover:hover)]:motion-safe:hover:-translate-y-0.5",
+    default: "border border-accent-purple/30 focus-within:ring-2 focus-within:ring-[--accent-gold] active:border-accent-gold/30 active:shadow-md [@media(hover:hover)]:hover:shadow-[0_0_30px_rgba(197,164,93,0.25)] [@media(hover:hover)]:motion-safe:hover:-translate-y-0.5"
   };
 
   return (

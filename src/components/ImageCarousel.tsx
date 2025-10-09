@@ -94,7 +94,7 @@ const ImageCarousel = ({
         />
         
         {/* Overlay for controls */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity motion-safe" />
+        <div className="absolute inset-0 bg-black/20 transition-opacity motion-safe [@media(hover:none)]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100" />
         
         
         {/* Play/Pause Button */}
@@ -102,7 +102,7 @@ const ImageCarousel = ({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity motion-safe bg-black/50 hover:bg-black/70 text-white"
+            className="absolute top-2 right-2 min-w-[44px] min-h-[44px] transition-opacity motion-safe bg-black/50 text-white [@media(hover:none)]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:hover:bg-black/70 [@media(hover:hover)]:group-hover:opacity-100"
             onClick={togglePlayPause}
             aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
           >
@@ -131,7 +131,7 @@ const ImageCarousel = ({
       
       {/* Image Counter */}
       {images.length > 1 && (
-        <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity motion-safe">
+        <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded transition-opacity motion-safe [@media(hover:none)]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
           {currentIndex + 1} / {images.length}
         </div>
       )}

@@ -726,6 +726,8 @@ const RSVP = () => {
                     onChange={(value) => handleInputChange("name", value)}
                     error={errors.name}
                     placeholder="Enter your real name... or your character's"
+                    autoComplete="name"
+                    enterKeyHint="next"
                   />
                   
                   <FormField
@@ -736,6 +738,9 @@ const RSVP = () => {
                     onChange={(value) => handleInputChange("email", value)}
                     error={errors.email}
                     placeholder="your.email@domain.com"
+                    inputMode="email"
+                    autoComplete="email"
+                    enterKeyHint="next"
                   />
                 </div>
                 

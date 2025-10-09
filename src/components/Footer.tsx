@@ -4,7 +4,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-bg-2 border-t border-accent-purple/30 py-12 px-6">
+    <footer className="bg-bg-2 border-t border-accent-purple/30 py-12 px-6 pb-[max(env(safe-area-inset-bottom),1rem)]">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center">
           {/* Gothic Icons */}
