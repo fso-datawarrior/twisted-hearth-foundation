@@ -31,6 +31,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `05-medium-db-indexes.patch` - Created 8 database indexes for improved query performance
 - [x] `04-medium-ux-add-loading-states.patch` - Added skeleton loading states to Gallery
 - [x] `08-medium-performance-bundle-splitting.patch` - Split admin/hunt/gallery into separate chunks
+- [x] `06-medium-typescript-strict-mode.patch` - Manual instructions created (config files read-only)
 
 ---
 
@@ -73,10 +74,11 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (lib/auth.tsx)  
 **Action:** Replaces console.log with logger utility
 
-### [ ] `06-medium-typescript-strict-mode.patch`
+### [x] `06-medium-typescript-strict-mode.patch`
 **Impact:** Enables strict TypeScript checks  
-**Files:** 1 (tsconfig.json)  
-**Action:** Turns on noImplicitAny, strictNullChecks, etc.
+**Files:** 2 (tsconfig.json, tsconfig.app.json) - READ-ONLY  
+**Action:** **MANUAL APPLICATION REQUIRED** - See `PATCHES/06-medium-typescript-strict-mode-MANUAL.md`  
+**Note:** Config files are read-only, instructions provided for manual changes
 
 ### [x] `07-medium-env-example.patch`
 **Impact:** Documents required environment variables  
@@ -154,5 +156,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
-**Applied:** 24  
-**Remaining:** 2
+**Applied:** 25  
+**Remaining:** 1 (skipped - already has dimensions)
