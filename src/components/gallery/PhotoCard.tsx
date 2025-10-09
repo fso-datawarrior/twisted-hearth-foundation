@@ -21,6 +21,7 @@ interface PhotoCardProps {
   onEmojiReaction?: (photoId: string, emoji: string) => void;
   onCaptionUpdate?: (photoId: string, caption: string) => void;
   allowCaptionEdit?: boolean;
+  onImageClick?: (photo: Photo) => void;
 }
 
 export const PhotoCard = ({ 
@@ -35,7 +36,8 @@ export const PhotoCard = ({
   onFavorite,
   onEmojiReaction,
   onCaptionUpdate,
-  allowCaptionEdit
+  allowCaptionEdit,
+  onImageClick
 }: PhotoCardProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,7 +117,10 @@ export const PhotoCard = ({
   return (
     <div className="flex flex-col gap-2 w-full">
       {/* Photo Container */}
-      <div className="group relative aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all">
+      <div 
+        className={`group relative aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-all ${onImageClick ? 'cursor-pointer' : ''}`}
+        onClick={() => onImageClick?.(photo)}
+      >
         {loading ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-gold"></div>
@@ -126,7 +131,7 @@ export const PhotoCard = ({
               <img
                 src={imageUrl}
                 alt={photo.caption || 'Gallery photo'}
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                className="w-full h-full object-contain transition-transform group-hover:scale-105"
                 loading="lazy"
                 onError={() => setImageUrl(null)}
               />

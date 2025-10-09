@@ -10,6 +10,7 @@ interface ImageCarouselProps {
   showIndicators?: boolean;
   className?: string;
   onIndexChange?: (index: number) => void;
+  onImageClick?: (index: number) => void;
 }
 
 const ImageCarousel = ({ 
@@ -19,7 +20,8 @@ const ImageCarousel = ({
   showControls = true,
   showIndicators = true,
   className = "",
-  onIndexChange
+  onIndexChange,
+  onImageClick
 }: ImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
@@ -72,13 +74,16 @@ const ImageCarousel = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main Image Container */}
-      <div className="relative max-w-[85%] mx-auto aspect-square bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+      <div 
+        className={`relative w-full mx-auto aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors ${onImageClick ? 'cursor-pointer' : ''}`}
+        onClick={() => onImageClick?.(currentIndex)}
+      >
         <img 
           src={images[currentIndex]}
           alt={`Gallery preview ${currentIndex + 1}`}
           width="800"
           height="800"
-          className="w-full h-full object-cover transition-all motion-safe"
+          className="w-full h-full object-contain transition-all motion-safe"
           loading="lazy"
           decoding="async"
           onError={(e) => {
@@ -91,30 +96,6 @@ const ImageCarousel = ({
         {/* Overlay for controls */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity motion-safe" />
         
-        {/* Navigation Controls */}
-        {showControls && images.length > 1 && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity motion-safe bg-black/50 hover:bg-black/70 text-white"
-              onClick={goToPrevious}
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity motion-safe bg-black/50 hover:bg-black/70 text-white"
-              onClick={goToNext}
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </>
-        )}
         
         {/* Play/Pause Button */}
         {showControls && images.length > 1 && (
@@ -153,6 +134,29 @@ const ImageCarousel = ({
         <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity motion-safe">
           {currentIndex + 1} / {images.length}
         </div>
+      )}
+      
+      {/* Navigation Controls - Outside Image Container */}
+      {showControls && images.length > 1 && (
+        <>
+          <Button
+            variant="outline"
+            className="absolute left-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+            onClick={goToPrevious}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="absolute right-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+            onClick={goToNext}
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </>
       )}
     </div>
   );

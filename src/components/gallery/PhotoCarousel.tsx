@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Photo } from "@/lib/photo-api";
 import { PhotoCard } from "./PhotoCard";
+import { PhotoLightbox } from "./PhotoLightbox";
 
 interface PhotoCarouselProps {
   photos: Photo[];
@@ -37,6 +38,8 @@ export const PhotoCarousel = ({
   className
 }: PhotoCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   
   const maxIndex = Math.max(0, photos.length - photosPerView);
 
@@ -48,13 +51,19 @@ export const PhotoCarousel = ({
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
+  const handleImageClick = (photo: Photo) => {
+    const index = photos.findIndex(p => p.id === photo.id);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
   if (photos.length === 0) return null;
 
   return (
     <div className={cn("relative", className)}>
       <div className="overflow-hidden">
         <div 
-          className="flex transition-transform duration-300 ease-in-out gap-4 md:gap-6"
+          className="flex transition-transform duration-300 ease-in-out gap-2 md:gap-3"
           style={{ 
             transform: `translateX(-${currentIndex * (100 / photosPerView)}%)` 
           }}
@@ -62,8 +71,8 @@ export const PhotoCarousel = ({
           {photos.map((photo) => (
             <div 
               key={photo.id}
-              className="flex-shrink-0 min-w-[280px] md:min-w-[320px]"
-              style={{ width: `calc(${100 / photosPerView}% - ${(photosPerView - 1) * 16 / photosPerView}px)` }}
+              className="flex-shrink-0 min-w-[200px] md:min-w-[240px]"
+              style={{ width: `calc(${100 / photosPerView}% - ${(photosPerView - 1) * 8 / photosPerView}px)` }}
             >
               <PhotoCard
                 photo={photo}
@@ -78,6 +87,7 @@ export const PhotoCarousel = ({
                 onEmojiReaction={onEmojiReaction}
                 onCaptionUpdate={onCaptionUpdate}
                 allowCaptionEdit={showUserActions}
+                onImageClick={handleImageClick}
               />
             </div>
           ))}
@@ -88,10 +98,9 @@ export const PhotoCarousel = ({
         <>
           <Button
             variant="outline"
-            size="icon"
             onClick={prevSlide}
             disabled={currentIndex === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-bg-2/95 border-accent-purple/50 text-ink hover:bg-accent-purple/20 hover:text-accent-gold z-10 disabled:opacity-30"
+            className="absolute left-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30 z-20"
             aria-label="Previous photos"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -99,10 +108,9 @@ export const PhotoCarousel = ({
 
           <Button
             variant="outline"
-            size="icon"
             onClick={nextSlide}
             disabled={currentIndex >= maxIndex}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-bg-2/95 border-accent-purple/50 text-ink hover:bg-accent-purple/20 hover:text-accent-gold z-10 disabled:opacity-30"
+            className="absolute right-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30 z-20"
             aria-label="Next photos"
           >
             <ChevronRight className="h-4 w-4" />
@@ -125,6 +133,16 @@ export const PhotoCarousel = ({
           </div>
         </>
       )}
+
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        photos={photos}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onLike={onLike}
+        getPhotoUrl={getPhotoUrl}
+      />
     </div>
   );
 };

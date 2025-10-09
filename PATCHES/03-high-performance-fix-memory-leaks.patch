@@ -1,0 +1,118 @@
+# PATCHES/03-high-performance-fix-memory-leaks.patch
+
+--- a/src/components/ImageCarousel.tsx
++++ b/src/components/ImageCarousel.tsx
+@@ -35,6 +35,7 @@ const ImageCarousel = ({ 
+   // Auto-play functionality
+   useEffect(() => {
+     if (!isPlaying || isHovered || images.length <= 1) {
++      return;
+     }
+ 
+     const interval = setInterval(() => {
+@@ -44,6 +45,7 @@ const ImageCarousel.tsx
+     }, autoPlayInterval);
+ 
+     return () => clearInterval(interval);
+   }, [isPlaying, isHovered, images.length, autoPlayInterval]);
+@@ -66,6 +68,7 @@ const ImageCarousel.tsx
+   const togglePlayPause = () => {
+     setIsPlaying(!isPlaying);
+   };
+ 
+   if (images.length === 0) {
+     return null;
+   }
+@@ -75,6 +78,7 @@ const ImageCarousel.tsx
+       className={`relative group ${className}`}
+       onMouseEnter={() => setIsHovered(true)}
+       onMouseLeave={() => setIsHovered(false)}
+     >
+       {/* Main Image Container */}
+       <div 
+         className={`relative w-full mx-auto aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 hover:border-accent-gold/50 transition-colors ${onImageClick ? 'cursor-pointer' : ''}`}
+         onClick={() => onImageClick?.(currentIndex)}
+       >
+         <img 
+           src={images[currentIndex]}
+           alt={`Gallery preview ${currentIndex + 1}`}
+           width="800"
+           height="800"
+           className="w-full h-full object-contain transition-all motion-safe"
+           loading="lazy"
+           decoding="async"
+           onError={(e) => {
+             const badSrc = (e.currentTarget as HTMLImageElement).src;
+             console.error('Image failed to load, using placeholder:', badSrc);
+             (e.currentTarget as HTMLImageElement).src = '/img/no-photos-placeholder.jpg';
+           }}
+         />
+         
+         {/* Overlay for controls */}
+         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity motion-safe" />
+         
+         
+         {/* Play/Pause Button */}
+         {showControls && images.length > 1 && (
+           <Button
+             variant="ghost"
+             size="sm"
+             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity motion-safe bg-black/50 hover:bg-black/70 text-white"
+             onClick={togglePlayPause}
+             aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+           >
+             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+           </Button>
+         )}
+       </div>
+       
+       {/* Indicators */}
+       {showIndicators && images.length > 1 && (
+         <div className="flex justify-center space-x-2 mt-4">
+           {images.map((_, index) => (
+             <button
+               key={index}
+               className={`w-2 h-2 rounded-full transition-colors motion-safe ${
+                 index === currentIndex 
+                   ? "bg-accent-gold" 
+                   : "bg-accent-gold/30 hover:bg-accent-gold/50"
+               }`}
+               onClick={() => goToSlide(index)}
+               aria-label={`Go to image ${index + 1}`}
+             />
+           ))}
+         </div>
+       )}
+       
+       {/* Image Counter */}
+       {images.length > 1 && (
+         <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity motion-safe">
+           {currentIndex + 1} / {images.length}
+         </div>
+       )}
+       
+       {/* Navigation Controls - Outside Image Container */}
+       {showControls && images.length > 1 && (
+         <>
+           <Button
+             variant="outline"
+             className="absolute left-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+             onClick={goToPrevious}
+             aria-label="Previous image"
+           >
+             <ChevronLeft className="w-4 h-4" />
+           </Button>
+           
+           <Button
+             variant="outline"
+             className="absolute right-[-60px] top-1/2 -translate-y-1/2 h-24 w-10 bg-bg-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+             onClick={goToNext}
+             aria-label="Next image"
+           >
+             <ChevronRight className="w-4 h-4" />
+           </Button>
+         </>
+       )}
+     </div>
+   );
+ };

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ImageCarousel from "@/components/ImageCarousel";
 import EmptyGalleryState from "@/components/gallery/EmptyGalleryState";
+import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
 import { PREVIEW_CATEGORIES, getPreviewImagesByCategory, type PreviewCategory } from "@/config/previewImages";
 import { supabase } from "@/integrations/supabase/client";
 import { Photo } from "@/lib/photo-api";
@@ -29,6 +30,10 @@ const MultiPreviewCarousel = ({
   const [activeCategory, setActiveCategory] = useState(defaultCategory);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Sync internal state with controlled prop
   useEffect(() => {
@@ -40,41 +45,54 @@ const MultiPreviewCarousel = ({
   // Generate image URLs from previewPhotos
   useEffect(() => {
     const generateUrls = async () => {
-      console.info('[MultiPreviewCarousel] Generating URLs for category:', activeCategory);
-      if (!previewPhotos || previewPhotos.length === 0) {
-        // Fall back to static images
-        const staticUrls = getPreviewImagesByCategory(activeCategory) || [];
-        console.info('[MultiPreviewCarousel] Using static URLs:', staticUrls);
-        setImageUrls(staticUrls);
-        setCurrentIndex(0);
-        return;
-      }
-
-      const urls: string[] = [];
-      for (const photo of previewPhotos) {
-        if (photo.user_id === 'system') {
-          // Static image - use path directly
-          if (photo.storage_path) {
-            urls.push(photo.storage_path);
-          }
-        } else {
-          // Database image - generate signed URL
-          try {
-            const { data } = await supabase.storage
-              .from('gallery')
-              .createSignedUrl(photo.storage_path, 3600);
-            if (data?.signedUrl) {
-              urls.push(data.signedUrl);
-            }
-          } catch (error) {
-            console.error('Error generating signed URL:', error);
-          }
+      setLoading(true);
+      setError(null);
+      
+      try {
+        console.info('[MultiPreviewCarousel] Generating URLs for category:', activeCategory);
+        
+        if (!previewPhotos || previewPhotos.length === 0) {
+          // Fall back to static images
+          const staticUrls = getPreviewImagesByCategory(activeCategory) || [];
+          console.info('[MultiPreviewCarousel] Using static URLs:', staticUrls);
+          setImageUrls(staticUrls);
+          setCurrentIndex(0);
+          setLoading(false);
+          return;
         }
+
+        // Generate URLs in parallel for better performance
+        const urlPromises = previewPhotos.map(async (photo) => {
+          if (photo.user_id === 'system') {
+            // Static image - use path directly
+            return photo.storage_path || null;
+          } else {
+            // Database image - generate signed URL
+            try {
+              const { data } = await supabase.storage
+                .from('gallery')
+                .createSignedUrl(photo.storage_path, 3600);
+              return data?.signedUrl || null;
+            } catch (error) {
+              console.error('Error generating signed URL:', error);
+              return null;
+            }
+          }
+        });
+        
+        const urls = await Promise.all(urlPromises);
+        const uniqueUrls = urls.filter(Boolean) as string[];
+        
+        console.info('[MultiPreviewCarousel] Final URLs:', uniqueUrls);
+        setImageUrls(uniqueUrls);
+        setCurrentIndex(0);
+      } catch (error) {
+        console.error('Error generating image URLs:', error);
+        setError('Failed to load images');
+        setImageUrls([]);
+      } finally {
+        setLoading(false);
       }
-      const uniqueUrls = urls.filter(Boolean);
-      console.info('[MultiPreviewCarousel] Final URLs:', uniqueUrls);
-      setImageUrls(uniqueUrls);
-      setCurrentIndex(0);
     };
     
     generateUrls();
@@ -83,8 +101,60 @@ const MultiPreviewCarousel = ({
   const currentImages = imageUrls;
   const currentCategoryData = PREVIEW_CATEGORIES.find(cat => cat.id === activeCategory);
 
+  // Convert image URLs to Photo objects for the lightbox
+  const lightboxPhotos: Photo[] = currentImages.map((url, index) => ({
+    id: `preview-${index}`,
+    storage_path: url,
+    caption: `Gallery preview ${index + 1}`,
+    likes_count: 0,
+    user_id: 'preview',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    approved: true,
+    category: activeCategory || 'general'
+  }));
+
+  const handleImageClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
   if (PREVIEW_CATEGORIES.length === 0) {
     return null;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        <div className="w-full max-w-[1500px] mx-auto px-2">
+          <div className="relative w-full mx-auto aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-gold"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        <div className="w-full max-w-[1500px] mx-auto px-2">
+          <div className="relative w-full mx-auto aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-accent-gold hover:text-accent-gold/80 underline"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -124,12 +194,13 @@ const MultiPreviewCarousel = ({
 
       {/* Image Carousel */}
       {currentImages.length > 0 ? (
-        <div className="max-w-2xl mx-auto">
+        <div className="w-full max-w-[1500px] mx-auto px-2">
           <ImageCarouselWrapper
             images={currentImages}
             autoPlay={autoPlay}
             autoPlayInterval={autoPlayInterval}
             onIndexChange={setCurrentIndex}
+            onImageClick={handleImageClick}
           />
           {/* Description Container - Fixed Height with Gold Border */}
           {previewPhotos.length > 0 && (
@@ -155,6 +226,14 @@ const MultiPreviewCarousel = ({
           </Badge>
         </div>
       )}
+
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        photos={lightboxPhotos}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 };
@@ -164,12 +243,14 @@ const ImageCarouselWrapper = ({
   images, 
   autoPlay, 
   autoPlayInterval,
-  onIndexChange 
+  onIndexChange,
+  onImageClick
 }: { 
   images: string[]; 
   autoPlay: boolean; 
   autoPlayInterval: number;
   onIndexChange: (index: number) => void;
+  onImageClick?: (index: number) => void;
 }) => {
   return (
     <ImageCarousel
@@ -179,6 +260,7 @@ const ImageCarouselWrapper = ({
       showControls={true}
       showIndicators={true}
       onIndexChange={onIndexChange}
+      onImageClick={onImageClick}
     />
   );
 };

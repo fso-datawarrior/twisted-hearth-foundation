@@ -1,56 +1,33 @@
-# CODE REVIEW CHECKLIST
+# CHECKLIST.md
 
 ## Security
-- [ ] **01** Move hardcoded Supabase credentials to environment variables
-- [ ] **02** Create server-side Supabase client with service role key
-- [ ] **03** Restrict RLS policies to authenticated users only
-- [ ] **04** Add input validation to Edge Functions using Zod
-- [ ] **11** Create .env.example file with all required variables
-- [ ] Verify no secrets are committed to repository
-- [ ] Test RLS policies with different user roles
-- [ ] Validate all API endpoints have proper authentication
+- [ ] **01** - Verify Supabase RLS policies are properly configured for photos table
+- [ ] **01** - Ensure signed URLs have appropriate expiration times (3600s is acceptable)
+- [ ] **02** - Add error boundary around sensitive operations to prevent data exposure
+- [ ] **03** - Implement rate limiting for signed URL generation to prevent abuse
+- [ ] **07** - Add runtime type validation for user inputs to prevent injection attacks
 
 ## Performance
-- [ ] **05** Replace console.log statements with proper logging utility
-- [ ] **08** Split large bundle into smaller chunks
-- [ ] **10** Add explicit width/height to all images and videos
-- [ ] Enable gzip compression on server
-- [ ] Implement lazy loading for heavy components
-- [ ] Optimize image formats (WebP, AVIF)
-- [ ] Set up proper cache headers
+- [ ] **01** - Implement parallel URL generation to reduce loading time
+- [ ] **01** - Add URL caching to avoid regenerating signed URLs
+- [ ] **03** - Optimize signed URL generation with Promise.all
+- [ ] **04** - Fix memory leaks by properly cleaning up event listeners
+- [ ] **04** - Add cleanup functions for all useEffect hooks
+- [ ] **08** - Implement useMemo for expensive computations
+- [ ] **08** - Add React.memo for components that don't need frequent updates
 
 ## Accessibility
-- [ ] **09** Enhance skip links with proper focus styling
-- [ ] Add proper ARIA labels to interactive elements
-- [ ] Ensure keyboard navigation works throughout
-- [ ] Test with screen readers
-- [ ] Verify color contrast meets WCAG standards
-- [ ] Add focus indicators for all focusable elements
-- [ ] Test with reduced motion preferences
+- [ ] **02** - Ensure error messages are accessible to screen readers
+- [ ] **05** - Add proper ARIA labels for loading states
+- [ ] **05** - Implement focus management during loading states
+- [ ] **06** - Ensure error messages have proper contrast ratios
+- [ ] **06** - Add keyboard navigation for error recovery actions
 
-## Developer Experience
-- [ ] **06** Enable TypeScript strict mode
-- [ ] **07** Add error boundaries per route
-- [ ] **12** Standardize error handling patterns
-- [ ] Set up proper ESLint rules
-- [ ] Add pre-commit hooks
-- [ ] Create comprehensive README
-- [ ] Add development setup instructions
-- [ ] Set up proper debugging tools
-
-## Testing
-- [ ] Add unit tests for critical functions
-- [ ] Add integration tests for auth flows
-- [ ] Add E2E tests for main user journeys
-- [ ] Test error boundary recovery
-- [ ] Test RLS policy enforcement
-- [ ] Test Edge Function validation
-- [ ] Test accessibility compliance
-
-## Monitoring
-- [ ] Set up error tracking (Sentry, etc.)
-- [ ] Add performance monitoring
-- [ ] Set up logging aggregation
-- [ ] Monitor bundle size changes
-- [ ] Track Core Web Vitals
-- [ ] Set up uptime monitoring
+## DX (Developer Experience)
+- [ ] **01** - Add comprehensive error logging for debugging
+- [ ] **02** - Implement error boundary hierarchy for better debugging
+- [ ] **05** - Add loading state management utilities
+- [ ] **06** - Create standardized error handling patterns
+- [ ] **07** - Enable strict TypeScript mode
+- [ ] **07** - Add proper type guards and null checks
+- [ ] **08** - Implement performance monitoring for re-renders

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ const Gallery = () => {
   const [approvedPhotos, setApprovedPhotos] = useState<Photo[]>([]);
   const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [photosPerView, setPhotosPerView] = useState(1);
   const { toast } = useToast();
@@ -37,10 +39,10 @@ const Gallery = () => {
   // Dynamic photos per view based on window width
   useEffect(() => {
     const updatePhotosPerView = () => {
-      if (window.innerWidth >= 1280) setPhotosPerView(4);
-      else if (window.innerWidth >= 1024) setPhotosPerView(3);
-      else if (window.innerWidth >= 640) setPhotosPerView(2);
-      else setPhotosPerView(1);
+      if (window.innerWidth >= 1280) setPhotosPerView(5);
+      else if (window.innerWidth >= 1024) setPhotosPerView(4);
+      else if (window.innerWidth >= 640) setPhotosPerView(3);
+      else setPhotosPerView(2);
     };
     
     updatePhotosPerView();
@@ -312,7 +314,7 @@ const Gallery = () => {
         <main className="pt-20 relative z-10">
           {/* <CSSFogBackground /> */}
           <section className="py-16 px-6">
-            <div className="container mx-auto max-w-6xl">
+            <div className="container mx-auto max-w-7xl px-4">
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
                 Gallery of Twisted Tales
               </h1>
@@ -369,7 +371,7 @@ const Gallery = () => {
               </div>
 
               {/* Gallery Carousel */}
-              <div className="max-w-3xl mx-auto">
+              <div className="w-full">
                 <MultiPreviewCarousel
                   defaultCategory={activeCategory}
                   activeCategory={activeCategory}

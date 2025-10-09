@@ -79,10 +79,8 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
     }
   };
 
-  if (!isOpen) return null;
-  
-  // Guard SSR
-  if (typeof document === "undefined") return null;
+  // Guard SSR and closed state
+  if (!isOpen || typeof document === "undefined") return null;
 
   const content = (
     <div 

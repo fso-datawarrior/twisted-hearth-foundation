@@ -1,334 +1,374 @@
-# DETAILED FINDINGS
+# DETAILS.md
 
-## 01 - Hardcoded Supabase credentials in client code
+## Finding 01: Gallery Infinite Loading Due to Async URL Generation
 
-**Context**: The Supabase URL and anonymous key are hardcoded directly in the client-side code, which is a critical security vulnerability. These credentials are exposed in the browser and can be easily extracted by anyone.
+### Context
+The MultiPreviewCarousel component generates signed URLs synchronously in a useEffect hook, causing the component to appear in a perpetual loading state. The async operations block the render cycle, making the gallery appear broken to users.
 
-**Evidence**: 
+### Evidence
+**File**: `src/components/MultiPreviewCarousel.tsx:44-84`
 ```typescript
-// src/integrations/supabase/client.ts:5-6
-const SUPABASE_URL = "https://dgdeiybuxlqbdfofzxpy.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+useEffect(() => {
+  const generateUrls = async () => {
+    // ... async operations without loading states
+    for (const photo of previewPhotos) {
+      // Sequential signed URL generation blocks UI
+      const { data } = await supabase.storage
+        .from('gallery')
+        .createSignedUrl(photo.storage_path, 3600);
+    }
+  };
+  generateUrls();
+}, [previewPhotos, activeCategory]);
 ```
 
-**Fix**: Move credentials to environment variables using Vite's `import.meta.env`:
+### Fix
+1. Add loading state management with `useState`
+2. Implement parallel URL generation using `Promise.all`
+3. Add error handling with try-catch blocks
+4. Show loading skeleton while URLs are being generated
+5. Add retry mechanism for failed URL generation
+
+### Regression Tests
 ```typescript
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-```
-
-**Regression Tests**: 
-- Test that app loads with environment variables
-- Test that app fails gracefully when env vars are missing
-- Verify credentials are not visible in browser dev tools
-
-**Rollback Plan**: Revert to hardcoded values if environment variables cause issues
-
----
-
-## 02 - Missing server-side Supabase client
-
-**Context**: There's no server-side Supabase client for Edge Functions and server-side operations. The current setup only has a client-side client, which limits server-side functionality and security.
-
-**Evidence**: No `src/integrations/supabase/server.ts` file found
-
-**Fix**: Create server-side client with service role key:
-```typescript
-// src/integrations/supabase/server.ts
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
-
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-export const supabaseAdmin = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
-```
-
-**Regression Tests**: 
-- Test Edge Functions can access admin client
-- Verify service role key is never exposed to client
-- Test admin operations work correctly
-
-**Rollback Plan**: Remove server.ts file and update Edge Functions to use client
-
----
-
-## 03 - Overly permissive RLS policies
-
-**Context**: The RSVP table has a policy that allows anyone to read all RSVPs (`using (true)`), which violates data privacy and security principles.
-
-**Evidence**:
-```sql
--- supabase/migrations/20250906204143_15569238-0b31-4728-b925-e322645146d2.sql:78-80
-create policy "select_own_rsvp" on public.rsvps
-  for select using (true);
-```
-
-**Fix**: Restrict to authenticated users and their own data:
-```sql
-create policy "select_own_rsvp" on public.rsvps
-  for select using (auth.uid() = user_id OR public.is_admin());
-```
-
-**Regression Tests**:
-- Test authenticated users can only see their own RSVPs
-- Test admins can see all RSVPs
-- Test unauthenticated users cannot see any RSVPs
-
-**Rollback Plan**: Revert to `using (true)` if it breaks functionality
-
----
-
-## 04 - Missing input validation in Edge Functions
-
-**Context**: The RSVP confirmation Edge Function accepts any JSON payload without validation, making it vulnerable to malformed data and potential attacks.
-
-**Evidence**:
-```typescript
-// supabase/functions/send-rsvp-confirmation/index.ts:96-97
-let body: Payload;
-try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400, headers: cors(origin) }); }
-```
-
-**Fix**: Add Zod validation schema:
-```typescript
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
-
-const PayloadSchema = z.object({
-  rsvpId: z.string().uuid(),
-  name: z.string().min(1).max(100),
-  email: z.string().email(),
-  guests: z.number().int().min(1).max(8),
-  isUpdate: z.boolean().optional(),
-  additionalGuests: z.array(z.object({
-    name: z.string().min(1).max(100),
-    email: z.string().email().optional()
-  })).optional()
+// Test loading state
+it('should show loading state while generating URLs', () => {
+  render(<MultiPreviewCarousel previewPhotos={mockPhotos} />);
+  expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
 });
 
-// In the handler:
-const validationResult = PayloadSchema.safeParse(body);
-if (!validationResult.success) {
-  return new Response("Invalid payload", { status: 400, headers: cors(origin) });
-}
-const validatedBody = validationResult.data;
+// Test error handling
+it('should show error state when URL generation fails', () => {
+  mockSupabase.storage.from().createSignedUrl.mockRejectedValue(new Error('Network error'));
+  render(<MultiPreviewCarousel previewPhotos={mockPhotos} />);
+  expect(screen.getByText('Failed to load images')).toBeInTheDocument();
+});
 ```
 
-**Regression Tests**:
-- Test valid payloads work correctly
-- Test invalid payloads return 400 errors
-- Test malformed JSON returns 400 errors
-
-**Rollback Plan**: Remove validation and revert to original parsing
+### Rollback Plan
+Revert to sequential URL generation and remove loading states if performance issues arise.
 
 ---
 
-## 05 - Console.log statements in production
+## Finding 02: Missing Error Boundaries Causing Page Crashes
 
-**Context**: There are 73 console.log statements across 17 files that will execute in production, potentially exposing sensitive information and impacting performance.
+### Context
+The Gallery component lacks error boundaries around async operations, causing the entire page to crash when any API call fails. This creates a poor user experience and makes the application appear unstable.
 
-**Evidence**: Found in files like `src/lib/auth.tsx`, `src/pages/RSVP.tsx`, etc.
-
-**Fix**: Replace with proper logging utility:
+### Evidence
+**File**: `src/pages/Gallery.tsx:51-69`
 ```typescript
-// src/lib/logger.ts
-export const logger = {
-  debug: (message: string, ...args: any[]) => {
-    if (import.meta.env.DEV) {
-      console.log(`[DEBUG] ${message}`, ...args);
-    }
-  },
-  // ... other log levels
+const loadImages = async () => {
+  try {
+    const { data: approved, error: approvedError } = await getApprovedPhotos();
+    if (approvedError) throw approvedError;
+    // ... more async operations without error boundaries
+  } catch (error) {
+    console.error('Error loading images:', error);
+    // No user-facing error handling
+  }
 };
 ```
 
-**Regression Tests**:
-- Test logs only appear in development
-- Test error logging still works in production
-- Test performance impact is minimal
+### Fix
+1. Wrap async operations in ErrorBoundary components
+2. Add user-facing error messages with toast notifications
+3. Implement retry mechanisms for failed operations
+4. Add fallback UI for error states
 
-**Rollback Plan**: Revert to console.log statements
+### Regression Tests
+```typescript
+// Test error boundary
+it('should show error boundary when API fails', () => {
+  mockGetApprovedPhotos.mockRejectedValue(new Error('API Error'));
+  render(<Gallery />);
+  expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+});
+
+// Test retry functionality
+it('should allow retry after error', () => {
+  mockGetApprovedPhotos.mockRejectedValue(new Error('API Error'));
+  render(<Gallery />);
+  fireEvent.click(screen.getByText('Try Again'));
+  expect(mockGetApprovedPhotos).toHaveBeenCalledTimes(2);
+});
+```
+
+### Rollback Plan
+Remove error boundaries and revert to console.error only if error handling causes issues.
 
 ---
 
-## 06 - TypeScript strict mode disabled
+## Finding 03: Inefficient Signed URL Generation Blocking Render
 
-**Context**: TypeScript is configured with relaxed settings that reduce type safety and can lead to runtime errors.
+### Context
+The MultiPreviewCarousel generates signed URLs sequentially in a for loop, causing significant delays when loading multiple photos. This blocks the UI thread and creates a poor user experience.
 
-**Evidence**:
-```json
-// tsconfig.json:9,14
-"noImplicitAny": false,
-"strictNullChecks": false
-```
-
-**Fix**: Enable strict mode:
-```json
-{
-  "noImplicitAny": true,
-  "noUnusedParameters": true,
-  "noUnusedLocals": true,
-  "strictNullChecks": true
+### Evidence
+**File**: `src/components/MultiPreviewCarousel.tsx:66-75`
+```typescript
+for (const photo of previewPhotos) {
+  // Sequential processing blocks UI
+  const { data } = await supabase.storage
+    .from('gallery')
+    .createSignedUrl(photo.storage_path, 3600);
 }
 ```
 
-**Regression Tests**:
-- Test app compiles with strict mode
-- Test no new runtime errors introduced
-- Test type safety improvements
+### Fix
+1. Use `Promise.all` for parallel URL generation
+2. Implement URL caching to avoid regenerating URLs
+3. Add loading states during URL generation
+4. Implement progressive loading for better UX
 
-**Rollback Plan**: Revert to relaxed settings
-
----
-
-## 07 - Missing error boundaries per route
-
-**Context**: There's only one error boundary wrapping all routes, which means a single component error can crash the entire app.
-
-**Evidence**: `App.tsx:62-84` shows single ErrorBoundary wrapping all routes
-
-**Fix**: Add route-specific error boundaries:
-```tsx
-<Routes>
-  <Route path="/" element={
-    <ErrorBoundary>
-      <Index />
-    </ErrorBoundary>
-  } />
-  <Route path="/admin" element={
-    <ErrorBoundary>
-      <AdminDashboard />
-    </ErrorBoundary>
-  } />
-  // ... other routes
-</Routes>
-```
-
-**Regression Tests**:
-- Test error in one route doesn't crash others
-- Test error boundaries show appropriate messages
-- Test error recovery works correctly
-
-**Rollback Plan**: Revert to single error boundary
-
----
-
-## 08 - Large main bundle (270KB)
-
-**Context**: The main bundle is 270KB (84KB gzipped), which is large for a single chunk and impacts initial load time.
-
-**Evidence**: Build output shows `dist/js/index-BRv-5CZX.js 270.32 kB`
-
-**Fix**: Split heavy components into separate chunks:
+### Regression Tests
 ```typescript
-// vite.config.ts
-manualChunks: {
-  'admin-vendor': ['@/pages/AdminDashboard', '@/components/admin'],
-  'hunt-vendor': ['@/components/hunt', '@/hooks/use-hunt'],
-  'gallery-vendor': ['@/pages/Gallery', '@/components/ImageCarousel'],
-}
+// Test parallel URL generation
+it('should generate URLs in parallel', async () => {
+  const photos = [mockPhoto1, mockPhoto2, mockPhoto3];
+  render(<MultiPreviewCarousel previewPhotos={photos} />);
+  
+  // Should call createSignedUrl for all photos simultaneously
+  await waitFor(() => {
+    expect(mockCreateSignedUrl).toHaveBeenCalledTimes(3);
+  });
+});
+
+// Test URL caching
+it('should cache URLs to avoid regeneration', () => {
+  const photos = [mockPhoto1];
+  const { rerender } = render(<MultiPreviewCarousel previewPhotos={photos} />);
+  
+  rerender(<MultiPreviewCarousel previewPhotos={photos} />);
+  
+  // Should not regenerate URLs for same photos
+  expect(mockCreateSignedUrl).toHaveBeenCalledTimes(1);
+});
 ```
 
-**Regression Tests**:
-- Test chunks load correctly
-- Test lazy loading works
-- Test bundle size is reduced
-
-**Rollback Plan**: Revert to single chunk configuration
+### Rollback Plan
+Revert to sequential processing if parallel processing causes rate limiting issues.
 
 ---
 
-## 09 - Missing accessibility skip links
+## Finding 04: Memory Leaks from Uncleaned Event Listeners
 
-**Context**: The SkipLink component exists but lacks proper focus styling and keyboard navigation.
+### Context
+The ImageCarousel component doesn't properly clean up event listeners and intervals, causing memory leaks over time. This leads to performance degradation and potential crashes.
 
-**Evidence**: `src/components/SkipLink.tsx` has basic implementation
-
-**Fix**: Enhance skip link with proper focus styling:
-```tsx
-<a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded z-50 focus:outline-none focus:ring-2 focus:ring-ring">
-  Skip to main content
-</a>
-```
-
-**Regression Tests**:
-- Test skip link is visible on focus
-- Test skip link navigates correctly
-- Test keyboard navigation works
-
-**Rollback Plan**: Revert to original skip link
-
----
-
-## 10 - Missing image dimensions
-
-**Context**: Images and videos lack explicit width/height attributes, causing layout shift during loading.
-
-**Evidence**: `src/components/HeroVideo.tsx` and other image components
-
-**Fix**: Add explicit dimensions:
-```tsx
-<video
-  width={1920}
-  height={1080}
-  // ... other props
->
-```
-
-**Regression Tests**:
-- Test no layout shift on image load
-- Test images display correctly
-- Test responsive behavior works
-
-**Rollback Plan**: Remove width/height attributes
-
----
-
-## 11 - Missing .env.example file
-
-**Context**: No environment variable template exists, making it difficult for developers to set up the project.
-
-**Evidence**: No `.env.example` file found
-
-**Fix**: Create comprehensive environment template:
-```bash
-# .env.example
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-# ... other variables
-```
-
-**Regression Tests**:
-- Test app works with example env file
-- Test all required variables are documented
-- Test setup instructions are clear
-
-**Rollback Plan**: Remove .env.example file
-
----
-
-## 12 - Inconsistent error handling
-
-**Context**: Error handling patterns vary across the codebase, making debugging and maintenance difficult.
-
-**Evidence**: Mixed patterns in auth, API calls, and components
-
-**Fix**: Create centralized logging utility and standardize error handling:
+### Evidence
+**File**: `src/components/ImageCarousel.tsx:36-48`
 ```typescript
-// src/lib/logger.ts
-export const logger = {
-  debug: (message: string, ...args: any[]) => { /* ... */ },
-  error: (message: string, error?: Error, ...args: any[]) => { /* ... */ }
-};
+useEffect(() => {
+  if (!isPlaying || isHovered || images.length <= 1) {
+    return; // Missing cleanup function
+  }
+  
+  const interval = setInterval(() => {
+    // ... interval logic
+  }, autoPlayInterval);
+  
+  return () => clearInterval(interval);
+}, [isPlaying, isHovered, images.length, autoPlayInterval]);
 ```
 
-**Regression Tests**:
-- Test consistent error logging
-- Test error handling works across components
-- Test debugging is easier
+### Fix
+1. Add proper cleanup functions for all useEffect hooks
+2. Remove event listeners in cleanup functions
+3. Clear intervals and timeouts properly
+4. Add memory leak detection in development
 
-**Rollback Plan**: Revert to original error handling patterns
+### Regression Tests
+```typescript
+// Test cleanup on unmount
+it('should cleanup intervals on unmount', () => {
+  const { unmount } = render(<ImageCarousel images={mockImages} autoPlay={true} />);
+  
+  unmount();
+  
+  // Verify no intervals are running
+  expect(clearInterval).toHaveBeenCalled();
+});
+
+// Test cleanup on dependency change
+it('should cleanup and recreate interval when autoPlay changes', () => {
+  const { rerender } = render(<ImageCarousel images={mockImages} autoPlay={true} />);
+  
+  rerender(<ImageCarousel images={mockImages} autoPlay={false} />);
+  
+  expect(clearInterval).toHaveBeenCalled();
+});
+```
+
+### Rollback Plan
+Remove cleanup functions if they cause issues with component lifecycle.
+
+---
+
+## Finding 05: Missing Loading States Causing Poor UX
+
+### Context
+The Gallery component lacks loading states, making it appear broken during data fetching. Users see empty content without any indication that data is being loaded.
+
+### Evidence
+**File**: `src/pages/Gallery.tsx:30-35`
+```typescript
+const [approvedPhotos, setApprovedPhotos] = useState<Photo[]>([]);
+const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
+// No loading state management
+```
+
+### Fix
+1. Add loading state management with useState
+2. Implement skeleton loaders for better UX
+3. Add loading indicators for async operations
+4. Show progressive loading for better perceived performance
+
+### Regression Tests
+```typescript
+// Test loading state
+it('should show loading state while fetching photos', () => {
+  render(<Gallery />);
+  expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+});
+
+// Test loading completion
+it('should hide loading state when photos are loaded', async () => {
+  render(<Gallery />);
+  
+  await waitFor(() => {
+    expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument();
+  });
+});
+```
+
+### Rollback Plan
+Remove loading states if they cause layout shifts or performance issues.
+
+---
+
+## Finding 06: Inconsistent Error Handling Across Components
+
+### Context
+Different components handle errors inconsistently, some using console.error, others using toast notifications, and some having no error handling at all. This creates an inconsistent user experience.
+
+### Evidence
+**File**: `src/components/gallery/PhotoLightbox.tsx:89-93`
+```typescript
+onError={(e) => {
+  const badSrc = (e.currentTarget as HTMLImageElement).src;
+  console.error('Image failed to load, using placeholder:', badSrc);
+  (e.currentTarget as HTMLImageElement).src = '/img/no-photos-placeholder.jpg';
+}}
+```
+
+### Fix
+1. Create standardized error handling utility
+2. Implement consistent error reporting across components
+3. Add user-facing error messages where appropriate
+4. Create error boundary hierarchy for different error types
+
+### Regression Tests
+```typescript
+// Test consistent error handling
+it('should handle errors consistently across components', () => {
+  const mockError = new Error('Test error');
+  
+  // Test PhotoLightbox error handling
+  render(<PhotoLightbox photos={[]} currentIndex={0} isOpen={true} onClose={jest.fn()} />);
+  
+  // Test Gallery error handling
+  render(<Gallery />);
+  
+  // Both should handle errors in the same way
+  expect(mockErrorHandler).toHaveBeenCalledWith(mockError);
+});
+```
+
+### Rollback Plan
+Revert to individual error handling if standardized approach causes issues.
+
+---
+
+## Finding 07: Missing TypeScript Strict Mode Compliance
+
+### Context
+Several components lack proper TypeScript type checking, using `any` types and missing null checks. This can lead to runtime errors and makes the code harder to maintain.
+
+### Evidence
+**File**: `src/lib/photo-api.ts:48`
+```typescript
+return { data: data as any, error };
+```
+
+### Fix
+1. Enable strict TypeScript mode
+2. Add proper type guards for null/undefined values
+3. Replace `any` types with proper interfaces
+4. Add runtime type validation where needed
+
+### Regression Tests
+```typescript
+// Test type safety
+it('should handle null values safely', () => {
+  const result = getApprovedPhotos();
+  expect(result.data).toBeDefined();
+  expect(Array.isArray(result.data)).toBe(true);
+});
+
+// Test type guards
+it('should validate photo objects', () => {
+  const photo = { id: 'test', user_id: 'user' };
+  expect(isValidPhoto(photo)).toBe(true);
+});
+```
+
+### Rollback Plan
+Disable strict mode if it causes too many breaking changes.
+
+---
+
+## Finding 08: Inefficient Re-renders from Object Recreation
+
+### Context
+The MultiPreviewCarousel recreates the lightboxPhotos array on every render, causing unnecessary re-renders of child components and performance degradation.
+
+### Evidence
+**File**: `src/components/MultiPreviewCarousel.tsx:90-100`
+```typescript
+const lightboxPhotos: Photo[] = currentImages.map((url, index) => ({
+  id: `preview-${index}`,
+  storage_path: url,
+  // ... object recreation on every render
+}));
+```
+
+### Fix
+1. Use useMemo to memoize expensive computations
+2. Implement proper dependency arrays for useEffect
+3. Add React.memo for components that don't need frequent updates
+4. Optimize object creation patterns
+
+### Regression Tests
+```typescript
+// Test memoization
+it('should memoize lightboxPhotos array', () => {
+  const { rerender } = render(<MultiPreviewCarousel previewPhotos={mockPhotos} />);
+  
+  rerender(<MultiPreviewCarousel previewPhotos={mockPhotos} />);
+  
+  // Should not recreate array if dependencies haven't changed
+  expect(mockMap).toHaveBeenCalledTimes(1);
+});
+
+// Test re-render optimization
+it('should not re-render child components unnecessarily', () => {
+  const mockChildRender = jest.fn();
+  render(<MultiPreviewCarousel previewPhotos={mockPhotos} />);
+  
+  expect(mockChildRender).toHaveBeenCalledTimes(1);
+});
+```
+
+### Rollback Plan
+Remove memoization if it causes stale data issues or debugging difficulties.
