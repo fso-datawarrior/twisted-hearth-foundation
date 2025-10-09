@@ -14,15 +14,11 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `01-critical-security-hardcoded-credentials.patch` - Removed hardcoded credentials
 - [x] `01-high-supabase-hardcoded-client.patch` - Fixed hardcoded Supabase client
 - [x] `PATCH-CR-01-vignette-schema.sql` - Added vignette database schema (25 TS errors fixed)
+- [x] `PATCH-CR-02-input-validation.patch` - Added Zod validation to edge functions (2/3 functions: send-rsvp-confirmation, send-contribution-confirmation)
 
 ---
 
 ## 🔴 Critical Priority (Install First)
-
-### [ ] `PATCH-CR-02-input-validation.patch`
-**Impact:** Prevents SQL injection and XSS attacks in edge functions  
-**Files:** 3 (edge functions: send-rsvp-confirmation, send-bulk-email, send-contribution-confirmation)  
-**Action:** Adds Zod validation schemas to all edge function inputs
 
 ### [ ] `01-critical-performance-fix-gallery-loading.patch`
 **Impact:** Fixes gallery image loading performance issues  
@@ -182,5 +178,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 25  
-**Applied:** 3  
-**Remaining:** 22
+**Applied:** 4  
+**Remaining:** 21
