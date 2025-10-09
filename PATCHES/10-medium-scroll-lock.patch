@@ -1,0 +1,93 @@
+--- a/src/components/Modal.tsx
++++ b/src/components/Modal.tsx
+@@ -30,7 +30,11 @@
+       }
+       
+       // Prevent body scroll
++      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+       document.body.style.overflow = 'hidden';
++      document.body.style.paddingRight = `${scrollbarWidth}px`;
++      // Prevent iOS elastic bounce
++      document.body.style.position = 'fixed';
++      document.body.style.width = '100%';
+       
+       // Handle escape key
+       const handleEscape = (e: KeyboardEvent) => {
+@@ -44,6 +48,9 @@
+       return () => {
+         document.removeEventListener('keydown', handleEscape);
+         document.body.style.overflow = 'unset';
++        document.body.style.paddingRight = '';
++        document.body.style.position = '';
++        document.body.style.width = '';
+         
+         // Restore focus to the previously focused element
+         if (previousFocusRef.current) {
+
+--- a/src/components/ui/dialog.tsx
++++ b/src/components/ui/dialog.tsx
+@@ -36,7 +36,7 @@
+     <DialogPrimitive.Content
+       ref={ref}
+       className={cn(
+-        "fixed left-[50%] top-[50%] z-[100] grid w-full max-w-lg max-h-[90vh] max-h-[90dvh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-2xl duration-200 overflow-y-auto overscroll-contain data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg border-accent-purple/30",
++        "fixed left-[50%] top-[50%] z-[100] grid w-full max-w-lg max-h-[90vh] max-h-[90dvh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-2xl duration-200 overflow-y-auto overscroll-contain overscroll-behavior-contain data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg border-accent-purple/30",
+         className,
+       )}
+       {...props}
+
+--- a/src/components/ImageCarousel.tsx
++++ b/src/components/ImageCarousel.tsx
+@@ -70,7 +70,7 @@
+   return (
+     <div 
+-      className={`relative group ${className}`}
++      className={`relative group overscroll-behavior-x-contain ${className}`}
+       onMouseEnter={() => setIsHovered(true)}
+       onMouseLeave={() => setIsHovered(false)}
+     >
+
+--- a/src/index.css
++++ b/src/index.css
+@@ -848,3 +848,15 @@
+   box-shadow: 0 0 0 4px hsl(var(--accent-gold) / 0.2) !important;
+ }
++
++/* Prevent overscroll bounce on iOS */
++body {
++  overscroll-behavior-y: contain;
++}
++
++/* Carousel overscroll prevention */
++.overscroll-behavior-x-contain {
++  overscroll-behavior-x: contain;
++  -webkit-overflow-scrolling: touch;
++}
+
+## Description
+Adds scroll locking when modals open and prevents elastic bounce/overscroll on iOS.
+
+## Problem
+- Background scrolls when modal is open
+- iOS elastic bounce interferes with carousels
+- Layout shift from scrollbar appearing/disappearing
+- Swipe gestures accidentally dismiss modal
+
+## Solution
+- Lock body scroll with overflow: hidden
+- Compensate for scrollbar width to prevent shift
+- Add position: fixed to prevent iOS bounce
+- Add overscroll-behavior-contain to carousels
+- Restore scroll position on modal close
+
+## Impact
+- No background scroll during modal interaction
+- No layout shift from scrollbar
+- Better swipe gesture handling
+- More predictable UX on touch devices
+
+## Testing
+- Open modal, try to scroll background (should be locked)
+- Check for layout shift when modal opens
+- Test carousel swipe on iOS (no elastic bounce)
+- Verify scroll position restored after modal close

@@ -132,7 +132,7 @@ const MultiPreviewCarousel = ({
     return (
       <div className={`space-y-6 ${className}`}>
         <div className="w-full max-w-[1500px] mx-auto px-2">
-          <div className="relative w-full mx-auto aspect-[16/9] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 flex items-center justify-center">
+          <div className="relative w-full mx-auto aspect-[16/9] min-h-[200px] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-gold"></div>
           </div>
         </div>

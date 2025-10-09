@@ -69,7 +69,7 @@ const ImageCarousel = ({
 
   return (
     <div 
-      className={`relative group ${className}`}
+      className={`relative group overscroll-contain ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -80,6 +80,12 @@ const ImageCarousel = ({
       >
         <img 
           src={images[currentIndex]}
+          srcSet={`
+            ${images[currentIndex]}?w=480 480w,
+            ${images[currentIndex]}?w=800 800w,
+            ${images[currentIndex]}?w=1200 1200w
+          `}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
           alt={`Gallery preview ${currentIndex + 1}`}
           width="800"
           height="800"

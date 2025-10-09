@@ -837,3 +837,26 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     outline-offset: 2px;
   }
 }
+
+/* Global focus-visible styles for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(var(--accent-gold)) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px hsl(var(--accent-gold) / 0.2) !important;
+}
+
+/* Prevent overscroll bounce on iOS */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Carousel overscroll prevention */
+.overscroll-contain {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}

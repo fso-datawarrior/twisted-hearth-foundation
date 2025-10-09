@@ -30,7 +30,12 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
       }
       
       // Prevent body scroll
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      // Prevent iOS elastic bounce
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
       
       // Handle escape key
       const handleEscape = (e: KeyboardEvent) => {
@@ -44,6 +49,9 @@ const Modal = ({ isOpen, onClose, children, ariaLabel, 'aria-labelledby': ariaLa
       return () => {
         document.removeEventListener('keydown', handleEscape);
         document.body.style.overflow = 'unset';
+        document.body.style.paddingRight = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         
         // Restore focus to the previously focused element
         if (previousFocusRef.current) {

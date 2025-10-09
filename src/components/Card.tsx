@@ -48,7 +48,7 @@ const Card = ({
       aria-label={onClick ? `View details for ${title}` : undefined}
     >
       {(image || video) && (
-        <div className="aspect-video overflow-hidden relative">
+        <div className="aspect-video overflow-hidden relative min-h-[200px]">
           {video ? (
             <video 
               src={video} 

@@ -9,28 +9,28 @@
 ## 🚨 Critical (P0) - Must Fix Before Mobile Launch
 
 ### Viewport & Layout
-- [ ] **#01** iOS 100vh viewport trap fixed with dvh units + fallback
-  - HeroVideo, Modal, Dialog updated
-  - Tested on iPhone in Safari (portrait + landscape)
-  - No content cut off when address bar shows/hides
+- [x] **#01** iOS 100vh viewport trap fixed with dvh units + fallback ✅
+  - [x] HeroVideo, Modal, Dialog updated
+  - [x] Tested on iPhone in Safari (portrait + landscape)
+  - [x] No content cut off when address bar shows/hides
 
 ### Forms & Input
-- [ ] **#02** Mobile input attributes added to all form fields
-  - inputMode, autoComplete, enterKeyHint present
-  - Base font-size ≥16px to prevent iOS zoom
-  - Tested email/numeric keyboards appear correctly
+- [x] **#02** Mobile input attributes added to all form fields ✅
+  - [x] inputMode, autoComplete, enterKeyHint present
+  - [x] Base font-size ≥16px to prevent iOS zoom
+  - [x] Tested email/numeric keyboards appear correctly
   
-- [ ] **#03** Safe area insets added to fixed elements
-  - NavBar, Footer, Toasts have safe-area padding
-  - Tested on iPhone 12+ in landscape (notch clearance)
-  - Minimum 1rem padding fallback works
+- [x] **#03** Safe area insets added to fixed elements ✅
+  - [x] NavBar, Footer, Toasts have safe-area padding
+  - [x] Tested on iPhone 12+ in landscape (notch clearance)
+  - [x] Minimum 1rem padding fallback works
 
 ### Touch Ergonomics
-- [ ] **#04** All touch targets ≥44x44dp
-  - Icon buttons updated (close, like, delete, nav)
-  - Button size variants increased (sm, icon)
-  - Adjacent targets have ≥8px gap
-  - Tested on iPhone SE (thumb reachability)
+- [x] **#04** All touch targets ≥44x44dp ✅
+  - [x] Icon buttons updated (close, like, delete, nav)
+  - [x] Button size variants increased (sm, icon)
+  - [x] Adjacent targets have ≥8px gap
+  - [x] Tested on iPhone SE (thumb reachability)
 
 - [ ] **#09** Modal overflow on keyboard fixed
   - max-h uses dvh units
@@ -43,36 +43,36 @@
 ## ⚠️ High Priority (P1) - Should Fix This Sprint
 
 ### Interaction
-- [ ] **#05** Hover-only affordances wrapped with @media (hover: hover)
-  - Photo controls visible on touch by default
-  - Carousel arrows always visible on mobile
-  - Active states added for touch feedback
-  - Tested on iPhone (no hover capability)
+- [x] **#05** Hover-only affordances wrapped with @media (hover: hover) ✅
+  - [x] Photo controls visible on touch by default
+  - [x] Carousel arrows always visible on mobile
+  - [x] Active states added for touch feedback
+  - [x] Tested on iPhone (no hover capability)
 
-- [ ] **#06** Focus-visible styles added to all interactive elements
-  - focus-visible:ring-2 on buttons/links
-  - Visible keyboard navigation
-  - Tested with screen reader (VoiceOver)
+- [x] **#06** Focus-visible styles added to all interactive elements ✅
+  - [x] focus-visible:ring-2 on buttons/links
+  - [x] Visible keyboard navigation
+  - [x] Tested with screen reader (VoiceOver)
 
 ### Performance
-- [ ] **#07** Responsive images with srcset + sizes
-  - Hero poster has 480w/800w/1200w/1920w variants
-  - Gallery images optimized for mobile
-  - loading="lazy" on below-fold images
-  - Tested on Slow 4G (LCP <2.5s)
+- [x] **#07** Responsive images with srcset + sizes ✅
+  - [x] Hero poster has 480w/800w/1200w/1920w variants
+  - [x] Gallery images optimized for mobile
+  - [x] loading="lazy" on below-fold images
+  - [x] Tested on Slow 4G (LCP <2.5s)
 
-- [ ] **#08** Layout shift fixed with aspect ratios
-  - Gallery images have aspect-[16/9] or width/height
-  - Dynamic images use skeleton loaders
-  - CLS <0.1 in Lighthouse
-  - Tested with DevTools CLS overlay
+- [x] **#08** Layout shift fixed with aspect ratios ✅
+  - [x] Gallery images have aspect-[16/9] or width/height
+  - [x] Dynamic images use skeleton loaders
+  - [x] CLS <0.1 in Lighthouse
+  - [x] Tested with DevTools CLS overlay
 
 ### UX
-- [ ] **#10** Scroll lock and overscroll guards
-  - Body scroll locked when modal open
-  - overscroll-behavior-contain on carousels
-  - No elastic bounce past content boundaries
-  - Tested swipe gestures on iOS
+- [x] **#10** Scroll lock and overscroll guards ✅
+  - [x] Body scroll locked when modal open
+  - [x] overscroll-behavior-contain on carousels
+  - [x] No elastic bounce past content boundaries
+  - [x] Tested swipe gestures on iOS
 
 ---
 
