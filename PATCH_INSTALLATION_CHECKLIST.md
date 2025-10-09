@@ -23,6 +23,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `04-high-security-edge-function-validation.patch` - Input validation (included in PATCH-CR-02)
 - [x] `03-high-performance-fix-memory-leaks.patch` - Fixed memory leaks in ImageCarousel.tsx
 - [x] `06-high-data-admin-selects.patch` - Optimized database queries with selective fields
+- [x] `02-medium-storage-user-prefix.patch` - Prefixed uploads with user ID in Gallery.tsx
 
 ---
 
@@ -39,11 +40,6 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 ---
 
 ## 🟡 Medium Priority (Install When Ready)
-
-### [ ] `02-medium-storage-user-prefix.patch`
-**Impact:** Improves storage organization by user ID  
-**Files:** 1 (Gallery.tsx)  
-**Action:** Prefixes uploaded files with user ID
 
 ### [ ] `03-medium-dx-unify-supabase-client.patch`
 **Impact:** Consolidates Supabase client imports  
@@ -151,5 +147,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 25  
-**Applied:** 12  
-**Remaining:** 13
+**Applied:** 13  
+**Remaining:** 12
