@@ -24,7 +24,7 @@ const PayloadSchema = z.object({
   isUpdate: z.boolean().optional(),
   additionalGuests: z.array(z.object({
     name: z.string().min(1).max(100),
-    email: z.string().email().optional()
+    email: z.union([z.string().email(), z.literal('')]).optional()
   })).optional()
 });
 

@@ -27,6 +27,8 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `02-medium-storage-user-prefix.patch` - Prefixed uploads with user ID in Gallery.tsx
 - [x] `12-low-dx-error-handling.patch` - Created centralized logger utility (lib/logger.ts)
 - [x] `05-medium-performance-console-logs.patch` - Replaced console.logs with logger in auth.tsx
+- [x] `10-low-performance-image-dimensions.patch` - Added width/height to HeroVideo poster and video
+- [x] `05-medium-db-indexes.patch` - Created 8 database indexes for improved query performance
 
 ---
 
@@ -52,14 +54,14 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 ### [ ] `04-medium-perf-image-dimensions.patch`
 **Impact:** Adds explicit image dimensions for better performance  
 **Files:** 2 (Carousel.tsx, ImageCarousel.tsx)  
-**Action:** Adds width/height/loading attributes
+**Action:** Already has dimensions - SKIP
 
-### [ ] `04-medium-ux-add-loading-states.patch`
+### [x] `04-medium-ux-add-loading-states.patch`
 **Impact:** Improves UX with loading skeletons  
 **Files:** 1 (Gallery.tsx)  
 **Action:** Adds skeleton placeholders during image loading
 
-### [ ] `05-medium-db-indexes.patch`
+### [x] `05-medium-db-indexes.patch`
 **Impact:** Improves database query performance  
 **Files:** 1 (new migration)  
 **Action:** Creates indexes on commonly queried columns
@@ -94,7 +96,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (SkipLink.tsx)  
 **Action:** Adds focus ring styles
 
-### [ ] `10-low-performance-image-dimensions.patch`
+### [x] `10-low-performance-image-dimensions.patch`
 **Impact:** Adds dimensions to hero video  
 **Files:** 1 (HeroVideo.tsx)  
 **Action:** Adds width/height to video element
@@ -150,5 +152,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
-**Applied:** 20  
-**Remaining:** 6
+**Applied:** 22  
+**Remaining:** 4

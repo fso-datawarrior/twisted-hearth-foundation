@@ -78,6 +78,8 @@ export default function HeroVideo({
       <img
         src={poster}
         alt="Halloween party scene with pumpkins, trees, and a cozy house"
+        width="1920"
+        height="1080"
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
           ready && !prefersReducedMotion && !videoError ? "opacity-0" : "opacity-100"
         }`}
@@ -98,6 +100,8 @@ export default function HeroVideo({
           }`}
           src={src}
           poster={poster}
+          width="1920"
+          height="1080"
           preload="metadata"
           muted={muted}
           playsInline
