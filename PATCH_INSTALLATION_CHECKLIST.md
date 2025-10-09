@@ -41,7 +41,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 
 ## 🟡 Medium Priority (Install When Ready)
 
-### [ ] `03-medium-dx-unify-supabase-client.patch`
+### [x] `03-medium-dx-unify-supabase-client.patch`
 **Impact:** Consolidates Supabase client imports  
 **Files:** 1 (lib/supabase.ts)  
 **Action:** Single source of truth for Supabase client
@@ -71,7 +71,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (tsconfig.json)  
 **Action:** Turns on noImplicitAny, strictNullChecks, etc.
 
-### [ ] `07-medium-env-example.patch`
+### [x] `07-medium-env-example.patch`
 **Impact:** Documents required environment variables  
 **Files:** 1 (new file: .env.example)  
 **Action:** Creates example env file
@@ -86,7 +86,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 
 ## 🟢 Low Priority (Install Last)
 
-### [ ] `09-low-accessibility-skip-links.patch`
+### [x] `09-low-accessibility-skip-links.patch`
 **Impact:** Improves keyboard navigation accessibility  
 **Files:** 1 (SkipLink.tsx)  
 **Action:** Adds focus ring styles
@@ -96,7 +96,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Files:** 1 (HeroVideo.tsx)  
 **Action:** Adds width/height to video element
 
-### [ ] `11-low-dx-env-example.patch`
+### [x] `11-low-dx-env-example.patch`
 **Impact:** Comprehensive env example file  
 **Files:** 1 (.env.example)  
 **Action:** Documents all environment variables
@@ -147,5 +147,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 25  
-**Applied:** 13  
-**Remaining:** 12
+**Applied:** 17  
+**Remaining:** 8
