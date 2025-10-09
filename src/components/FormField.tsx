@@ -19,6 +19,9 @@ interface FormFieldProps {
   inputMode?: "text" | "email" | "numeric" | "tel" | "url" | "search";
   autoComplete?: string;
   enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
 }
 
 const FormField = ({
@@ -36,7 +39,10 @@ const FormField = ({
   className,
   inputMode,
   autoComplete,
-  enterKeyHint
+  enterKeyHint,
+  minLength,
+  maxLength,
+  pattern
 }: FormFieldProps) => {
   const baseClasses = "bg-input border-4 border-accent-gold/80 text-foreground placeholder:text-muted-foreground focus:border-accent-gold focus:ring-4 focus:ring-accent-gold/30 focus:shadow-sparkle transition-all duration-300";
   
@@ -83,6 +89,9 @@ const FormField = ({
           inputMode={inputMode}
           autoComplete={autoComplete}
           enterKeyHint={enterKeyHint}
+          minLength={minLength}
+          maxLength={maxLength}
+          pattern={pattern}
           className={cn(
             baseClasses,
             error && "border-accent-red focus:border-accent-red focus:ring-accent-red/20"

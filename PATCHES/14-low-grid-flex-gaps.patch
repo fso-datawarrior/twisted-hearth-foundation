@@ -1,0 +1,51 @@
+--- a/src/index.css
++++ b/src/index.css
+@@ -870,3 +870,20 @@
+ .will-change-opacity {
+   will-change: opacity;
+ }
+
++/* Grid/flex gap fallbacks for older browsers */
++@supports not (gap: 1rem) {
++  .grid > * + *,
++  .flex > * + * {
++    margin-top: 1rem;
++  }
++  
++  .grid.gap-4 > * + *,
++  .flex.gap-4 > * + * {
++    margin-top: 1rem;
++  }
++}
+
+## Description
+Adds fallback spacing for browsers that don't support CSS Grid/Flexbox gap property.
+
+## Problem
+- Older mobile browsers don't support gap property
+- Layout breaks on older Android devices
+- No spacing between grid/flex items
+- Poor backwards compatibility
+
+## Solution
+- Use @supports to detect gap support
+- Add margin-top fallback for older browsers
+- Applies to grid and flex containers
+- Maintains consistent spacing
+
+## Impact
+- Works on older Android devices (< Chrome 84)
+- Better backwards compatibility
+- Consistent spacing across all devices
+- No layout breaks
+
+## Browser Support
+- Fallback for Android < 5.0 (Chrome < 84)
+- iOS Safari < 14.5
+- Older Samsung Internet browsers
+
+## Testing
+- Test on BrowserStack with older devices
+- Verify spacing consistent
+- Check no double-spacing when gap IS supported
+- Test grid layouts on old Android
