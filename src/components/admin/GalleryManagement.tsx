@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Check, X, Star, StarOff, Images } from 'lucide-react';
 import { moderatePhoto, updatePhotoMetadata, type Photo } from '@/lib/photo-api';
 import { useToast } from '@/hooks/use-toast';
@@ -63,7 +64,9 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
   const updateCategoriesMutation = useMutation({
     mutationFn: async ({ photoId, categories }: { photoId: string; categories: string[] }) => {
       const { error } = await updatePhotoMetadata(photoId, { tags: categories });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-photos'] });
@@ -74,7 +77,9 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
   const updateCaptionMutation = useMutation({
     mutationFn: async ({ photoId, caption }: { photoId: string; caption: string }) => {
       const { error } = await updatePhotoMetadata(photoId, { caption });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-photos'] });
@@ -104,6 +109,61 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     if (caption !== undefined) {
       updateCaptionMutation.mutate({ photoId, caption });
     }
+  };
+
+  const toggleVignetteSelection = useMutation({
+    mutationFn: async ({ photoId, selected }: { photoId: string; selected: boolean }) => {
+      // Get current photo data
+      const { data: currentPhoto, error: fetchError } = await supabase
+        .from('photos')
+        .select('tags')
+        .eq('id', photoId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Update tags to include or remove 'vignette-selected'
+      const currentTags = currentPhoto.tags || [];
+      let newTags;
+      
+      if (selected) {
+        // Add vignette-selected tag if not already present
+        newTags = currentTags.includes('vignette-selected') 
+          ? currentTags 
+          : [...currentTags, 'vignette-selected'];
+      } else {
+        // Remove vignette-selected tag
+        newTags = currentTags.filter(tag => tag !== 'vignette-selected');
+      }
+      
+      const { error } = await supabase
+        .from('photos')
+        .update({ tags: newTags })
+        .eq('id', photoId)
+        .eq('is_approved', true);
+      
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-photos'] });
+      toast({ 
+        title: "Vignette Selection Updated", 
+        description: "Photo vignette selection has been updated." 
+      });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: `Failed to update vignette selection: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleVignetteToggle = (photoId: string, selected: boolean) => {
+    toggleVignetteSelection.mutate({ photoId, selected });
   };
 
   const pendingPhotos = photosWithUrls?.filter(p => !p.is_approved) || [];
@@ -249,6 +309,23 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                       )}
                     </div>
                   </div>
+                  
+                  {/* Vignette Selection Controls */}
+                  <div className="flex items-center space-x-2 border-t pt-2">
+                    <Checkbox
+                      id={`vignette-approved-${photo.id}`}
+                      checked={photo.tags?.includes('vignette-selected') || false}
+                      onCheckedChange={(checked) => handleVignetteToggle(photo.id, checked as boolean)}
+                      disabled={toggleVignetteSelection.isPending}
+                    />
+                    <label 
+                      htmlFor={`vignette-approved-${photo.id}`} 
+                      className="text-xs font-medium text-accent-gold cursor-pointer"
+                    >
+                      Use for Vignette
+                    </label>
+                  </div>
+                  
                   <div className="flex gap-1">
                     <Button 
                       size="sm" 

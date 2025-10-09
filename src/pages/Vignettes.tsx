@@ -1,35 +1,152 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import Card from "@/components/Card";
 import HuntRune from "@/components/hunt/HuntRune";
+import { supabase } from "@/integrations/supabase/client";
 
 const Vignettes = () => {
-  const pastVignettes = [
-    {
-      id: 1,
-      title: "Goldilocks: Home Invasion",
-      image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop",
-      hook: "What really happened when Goldilocks broke into the Bears' house? A tale of obsession, surveillance, and the price of curiosity.",
-      year: "2023",
-      theme: "Breaking & Entering"
-    },
-    {
-      id: 2,
-      title: "Jack & The Corporate Ladder", 
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-      hook: "Jack's beanstalk led not to a giant's castle, but to the top of a corporate empire built on the bones of the working class.",
-      year: "2022",
-      theme: "Economic Horror"
-    },
-    {
-      id: 3,
-      title: "Snow White: Mirror, Mirror",
-      image: "https://images.unsplash.com/photo-1520637836862-4d197d17c55a?w=800&h=600&fit=crop", 
-      hook: "The magic mirror showed more than vanity - it revealed the darkest truths about beauty standards and self-worth in a social media age.",
-      year: "2021",
-      theme: "Digital Dystopia"
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
+
+  // Responsive items per view
+  useEffect(() => {
+    const updateItemsPerView = () => {
+      if (window.innerWidth < 768) {
+        setItemsPerView(1);
+      } else if (window.innerWidth < 1024) {
+        setItemsPerView(2);
+      } else {
+        setItemsPerView(3);
+      }
+    };
+
+    updateItemsPerView();
+    window.addEventListener('resize', updateItemsPerView);
+    return () => window.removeEventListener('resize', updateItemsPerView);
+  }, []);
+
+  // Fetch photos selected for vignettes directly
+  const { data: vignettePhotos, isLoading, error } = useQuery({
+    queryKey: ['vignette-photos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .contains('tags', ['vignette-selected'])
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     }
-  ];
+  });
+
+  // Convert photos to display format with proper signed URLs
+  const [displayVignettes, setDisplayVignettes] = useState<any[]>([]);
+
+  useEffect(() => {
+    const generateVignetteUrls = async () => {
+      if (!vignettePhotos || vignettePhotos.length === 0) {
+        // Set fallback data if no photos exist
+        setDisplayVignettes([
+          {
+            id: "fallback-1",
+            title: "Goldilocks: Home Invasion",
+            description: "What really happened when Goldilocks broke into the Bears' house? A tale of obsession, surveillance, and the price of curiosity.",
+            year: 2023,
+            theme_tag: "Breaking & Entering",
+            imageUrl: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"
+          },
+          {
+            id: "fallback-2", 
+            title: "Jack & The Corporate Ladder",
+            description: "Jack's beanstalk led not to a giant's castle, but to the top of a corporate empire built on the bones of the working class.",
+            year: 2022,
+            theme_tag: "Economic Horror",
+            imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop"
+          },
+          {
+            id: "fallback-3",
+            title: "Snow White: Mirror, Mirror", 
+            description: "The magic mirror showed more than vanity - it revealed the darkest truths about beauty standards and self-worth in a social media age.",
+            year: 2021,
+            theme_tag: "Digital Dystopia",
+            imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c55a?w=800&h=600&fit=crop"
+          }
+        ]);
+        return;
+      }
+
+      // Generate signed URLs for each photo
+      const vignettesWithUrls = await Promise.all(
+        vignettePhotos.map(async (photo) => {
+          try {
+            // Generate signed URL for gallery bucket
+            const { data } = await supabase.storage
+              .from('gallery')
+              .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+            
+            return {
+              id: photo.id,
+              title: photo.caption || 'Untitled Memory',
+              description: photo.caption || 'A haunting memory from the past...',
+              year: 2023, // Default year, could be enhanced later
+              theme_tag: 'Twisted Memory', // Default theme
+              imageUrl: data?.signedUrl || '',
+              isActive: true
+            };
+          } catch (error) {
+            console.error('Error generating signed URL for photo:', photo.id, error);
+            return {
+              id: photo.id,
+              title: photo.caption || 'Untitled Memory',
+              description: photo.caption || 'A haunting memory from the past...',
+              year: 2023,
+              theme_tag: 'Twisted Memory',
+              imageUrl: '', // Will show placeholder
+              isActive: true
+            };
+          }
+        })
+      );
+
+      setDisplayVignettes(vignettesWithUrls.filter(v => v.imageUrl)); // Only show vignettes with valid URLs
+    };
+
+    generateVignetteUrls();
+  }, [vignettePhotos]);
+
+  // Carousel navigation
+  const maxIndex = Math.max(0, displayVignettes.length - itemsPerView);
+  
+  const nextSlide = () => {
+    setCurrentIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(Math.min(index, maxIndex));
+  };
+
+  // Auto-play carousel
+  useEffect(() => {
+    if (displayVignettes.length <= itemsPerView) return;
+    
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [displayVignettes.length, itemsPerView, maxIndex]);
+
+  // Reset current index when items per view changes
+  useEffect(() => {
+    setCurrentIndex(prev => Math.min(prev, maxIndex));
+  }, [maxIndex]);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -47,35 +164,136 @@ const Vignettes = () => {
               Browse our previous performances and see how far down the rabbit hole we've gone.
             </p>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {pastVignettes.map((vignette) => (
-                <div key={vignette.id} className="relative">
-                  <HuntRune
-                    id={vignette.id === 1 ? "5" : vignette.id === 2 ? "6" : "7"}
-                    label={
-                      vignette.id === 1 ? "Knives gleam where spoons should lie" :
-                      vignette.id === 2 ? "Coins seldom tell a clean story" :
-                      "Glass remembers every breath"
-                    }
-                    className="absolute top-2 right-2 z-10"
-                  />
-                  <Card
-                    variant="vignette"
-                    image={vignette.image}
-                    title={vignette.title}
-                    hook={vignette.hook}
-                    onClick={() => {
-                      console.log(`Opening vignette: ${vignette.title}`);
-                    }}
-                    className="hover-tilt motion-safe"
+            {isLoading && (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground">Loading past vignettes...</div>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-center py-12">
+                <div className="text-destructive">Failed to load vignettes. Showing archived versions.</div>
+              </div>
+            )}
+            
+            {/* Carousel Container */}
+            <div className="relative max-w-6xl mx-auto">
+              {displayVignettes.length > itemsPerView ? (
+                <>
+                  {/* Carousel Navigation Buttons */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background"
+                    onClick={prevSlide}
                   >
-                    <div className="mt-4 flex justify-between items-center text-sm">
-                      <span className="font-subhead text-accent-gold">{vignette.year}</span>
-                      <span className="font-body text-muted-foreground">{vignette.theme}</span>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background"
+                    onClick={nextSlide}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+
+                  {/* Carousel Track */}
+                  <div className="overflow-hidden rounded-lg">
+                    <div 
+                      className="flex transition-transform duration-500 ease-in-out"
+                      style={{ 
+                        transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                        width: `${(displayVignettes.length / itemsPerView) * 100}%`
+                      }}
+                    >
+                      {displayVignettes.map((vignette, index) => (
+                        <div 
+                          key={vignette.id} 
+                          className="relative flex-shrink-0 px-4"
+                          style={{ width: `${100 / displayVignettes.length}%` }}
+                        >
+                          <div className="h-full">
+                            <HuntRune
+                              id={index === 0 ? "5" : index === 1 ? "6" : "7"}
+                              label={
+                                index === 0 ? "Knives gleam where spoons should lie" :
+                                index === 1 ? "Coins seldom tell a clean story" :
+                                "Glass remembers every breath"
+                              }
+                              className="absolute top-2 right-2 z-10"
+                            />
+                            <Card
+                              variant="vignette"
+                              image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
+                              title={vignette.title}
+                              hook={vignette.description}
+                              onClick={() => {
+                                console.log(`Opening vignette: ${vignette.title}`);
+                              }}
+                              className="hover-tilt motion-safe h-full"
+                            >
+                              <div className="mt-4 flex justify-between items-center text-sm">
+                                <span className="font-subhead text-accent-gold">{vignette.year}</span>
+                                <span className="font-body text-muted-foreground">{vignette.theme_tag}</span>
+                              </div>
+                            </Card>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </Card>
+                  </div>
+
+                  {/* Carousel Dots */}
+                  <div className="flex justify-center mt-8 space-x-2">
+                    {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+                      <button
+                        key={index}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                          index === currentIndex 
+                            ? 'bg-accent-gold' 
+                            : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                        }`}
+                        onClick={() => goToSlide(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Static Grid for Small Number of Items */
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {displayVignettes.map((vignette, index) => (
+                    <div key={vignette.id} className="relative">
+                      <HuntRune
+                        id={index === 0 ? "5" : index === 1 ? "6" : "7"}
+                        label={
+                          index === 0 ? "Knives gleam where spoons should lie" :
+                          index === 1 ? "Coins seldom tell a clean story" :
+                          "Glass remembers every breath"
+                        }
+                        className="absolute top-2 right-2 z-10"
+                      />
+                      <Card
+                        variant="vignette"
+                        image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
+                        title={vignette.title}
+                        hook={vignette.description}
+                        onClick={() => {
+                          console.log(`Opening vignette: ${vignette.title}`);
+                        }}
+                        className="hover-tilt motion-safe h-full"
+                      >
+                        <div className="mt-4 flex justify-between items-center text-sm">
+                          <span className="font-subhead text-accent-gold">{vignette.year}</span>
+                          <span className="font-body text-muted-foreground">{vignette.theme_tag}</span>
+                        </div>
+                      </Card>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
             
             <div className="mt-16 text-center relative">

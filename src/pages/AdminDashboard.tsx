@@ -11,7 +11,9 @@ import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
 import EmailCommunication from '@/components/admin/EmailCommunication';
+import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
+import { getAllVignettes } from '@/lib/vignette-api';
 import { 
   Users, 
   Trophy, 
@@ -21,7 +23,8 @@ import {
   Calendar,
   Map,
   Settings,
-  Mail
+  Mail,
+  Theater
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -73,7 +76,7 @@ export default function AdminDashboard() {
     }
   });
 
-  // Gallery photos query - include new fields
+  // Gallery photos query - include signed URLs
   const { data: photos, isLoading: photosLoading } = useQuery({
     queryKey: ['admin-photos'],
     queryFn: async () => {
@@ -86,7 +89,30 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as any;
+      
+      // Generate signed URLs for each photo
+      const photosWithUrls = await Promise.all(
+        (data || []).map(async (photo: any) => {
+          try {
+            const { data: urlData } = await supabase.storage
+              .from('gallery')
+              .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+            
+            return {
+              ...photo,
+              signedUrl: urlData?.signedUrl || ''
+            };
+          } catch (error) {
+            console.error('Error generating signed URL for photo:', photo.id, error);
+            return {
+              ...photo,
+              signedUrl: ''
+            };
+          }
+        })
+      );
+      
+      return photosWithUrls;
     }
   });
 
@@ -108,10 +134,35 @@ export default function AdminDashboard() {
     }
   });
 
+  // Vignettes statistics
+  const { data: vignettes, isLoading: vignettesLoading } = useQuery({
+    queryKey: ['admin-vignettes'],
+    queryFn: getAllVignettes,
+    select: (data) => data.data || []
+  });
+
+  // Count vignette-selected photos
+  const { data: vignettePhotosCount } = useQuery({
+    queryKey: ['vignette-photos-count'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('id')
+        .contains('tags', ['vignette-selected'])
+        .eq('is_approved', true);
+      
+      if (error) throw error;
+      return data?.length || 0;
+    }
+  });
+
   const totalGuests = rsvps?.reduce((sum, rsvp) => sum + rsvp.num_guests, 0) || 0;
   const pendingPhotos = photos?.filter(p => !p.is_approved).length || 0;
   const confirmedRsvps = rsvps?.filter(r => r.status === 'confirmed').length || 0;
   const activeHuntRuns = huntStats?.length || 0;
+  const activeVignettes = vignettes?.filter(v => v.is_active).length || 0;
+  const totalVignettes = vignettes?.length || 0;
+  const selectedVignettePhotos = vignettePhotosCount || 0;
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Settings, count: null },
@@ -119,6 +170,7 @@ export default function AdminDashboard() {
     { id: 'tournament', label: 'Tournament', icon: Trophy, count: tournamentRegs?.length },
     { id: 'gallery', label: 'Gallery', icon: Images, count: photos?.length },
     { id: 'hunt', label: 'Hunt', icon: Search, count: activeHuntRuns },
+    { id: 'vignettes', label: 'Vignettes', icon: Theater, count: selectedVignettePhotos },
     { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
     { id: 'email', label: 'Email', icon: Mail, count: null }
   ];
@@ -160,7 +212,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-bold text-accent-gold mb-6">OVERVIEW</h2>
               
               {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium flex items-center">
@@ -210,6 +262,19 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="text-3xl font-bold text-green-600">{activeHuntRuns}</div>
                     <p className="text-xs text-muted-foreground">active participants</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center">
+                      <Theater className="h-4 w-4 mr-2 text-accent-gold" />
+                      Vignettes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-accent-gold">{selectedVignettePhotos}</div>
+                    <p className="text-xs text-muted-foreground">photos selected ({activeVignettes} active)</p>
                   </CardContent>
                 </Card>
               </div>
@@ -272,6 +337,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === 'hunt' && (
               <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
+            )}
+            {activeTab === 'vignettes' && (
+              <VignetteManagementTab />
             )}
             {activeTab === 'guestbook' && (
               <GuestbookManagement />

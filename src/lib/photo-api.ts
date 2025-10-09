@@ -15,6 +15,7 @@ export interface Photo {
   is_approved: boolean;
   is_featured: boolean;
   is_favorite: boolean;
+  is_vignette_selected?: boolean;
   likes_count: number;
   file_size?: number;
   mime_type?: string;
