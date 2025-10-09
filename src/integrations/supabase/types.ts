@@ -280,6 +280,51 @@ export type Database = {
         }
         Relationships: []
       }
+      past_vignettes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          is_active: boolean | null
+          photo_ids: string[] | null
+          sort_order: number | null
+          theme_tag: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          is_active?: boolean | null
+          photo_ids?: string[] | null
+          sort_order?: number | null
+          theme_tag: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          photo_ids?: string[] | null
+          sort_order?: number | null
+          theme_tag?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       photo_emoji_reactions: {
         Row: {
           created_at: string
@@ -354,6 +399,7 @@ export type Database = {
           is_approved: boolean | null
           is_favorite: boolean | null
           is_featured: boolean | null
+          is_vignette_selected: boolean | null
           likes_count: number | null
           storage_path: string
           tags: string[] | null
@@ -369,6 +415,7 @@ export type Database = {
           is_approved?: boolean | null
           is_favorite?: boolean | null
           is_featured?: boolean | null
+          is_vignette_selected?: boolean | null
           likes_count?: number | null
           storage_path: string
           tags?: string[] | null
@@ -384,6 +431,7 @@ export type Database = {
           is_approved?: boolean | null
           is_favorite?: boolean | null
           is_featured?: boolean | null
+          is_vignette_selected?: boolean | null
           likes_count?: number | null
           storage_path?: string
           tags?: string[] | null
@@ -653,6 +701,23 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_active_vignettes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          is_active: boolean
+          photo_ids: string[]
+          sort_order: number
+          theme_tag: string
+          title: string
+          updated_at: string
+          updated_by: string
+          year: number
+        }[]
+      }
       get_hunt_stats: {
         Args: { p_user_id?: string }
         Returns: {
@@ -679,6 +744,20 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      manage_vignette: {
+        Args: {
+          p_action: string
+          p_description?: string
+          p_is_active?: boolean
+          p_photo_ids?: string[]
+          p_sort_order?: number
+          p_theme_tag?: string
+          p_title?: string
+          p_vignette_id?: string
+          p_year?: number
+        }
+        Returns: Json
       }
       mark_hint_found: {
         Args: { p_hint_id: number; p_hunt_run_id?: string }
@@ -716,6 +795,10 @@ export type Database = {
       toggle_photo_reaction: {
         Args: { p_photo_id: string; p_reaction_type?: string }
         Returns: boolean
+      }
+      toggle_vignette_selection: {
+        Args: { p_photo_id: string; p_selected: boolean }
+        Returns: Json
       }
       upload_photo: {
         Args: {

@@ -105,13 +105,17 @@ const MultiPreviewCarousel = ({
   const lightboxPhotos: Photo[] = currentImages.map((url, index) => ({
     id: `preview-${index}`,
     storage_path: url,
+    filename: `preview-${index}`,
     caption: `Gallery preview ${index + 1}`,
+    tags: activeCategory ? [activeCategory] : [],
+    category: activeCategory as any,
     likes_count: 0,
     user_id: 'preview',
+    is_approved: true,
+    is_featured: false,
+    is_favorite: false,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    approved: true,
-    category: activeCategory || 'general'
+    updated_at: new Date().toISOString()
   }));
 
   const handleImageClick = (index: number) => {

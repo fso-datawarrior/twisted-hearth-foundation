@@ -341,7 +341,14 @@ export default function VignetteManagementTab() {
       ) : (
         <div className="space-y-6">
           {selectedPhotos.map((photo, index) => {
-            const data = vignetteData[photo.id] || {};
+            const data: VignetteFormData = vignetteData[photo.id] || {
+              title: '',
+              description: '',
+              year: new Date().getFullYear(),
+              theme_tag: '',
+              is_active: true,
+              sort_order: index
+            };
             
             return (
               <Card key={photo.id} className="overflow-hidden">
