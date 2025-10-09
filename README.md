@@ -109,21 +109,25 @@ src/
 - **Backend** (v3): Supabase integration planned
 - **Email** (v3): Mailjet server-side integration planned
 
-## 📋 Current Status - Scaffold v1
+## 📋 Current Status - Production Ready v1.5
 
 ### ✅ Completed
 - [x] Full design system with gothic fairytale theme
 - [x] Responsive navigation with mobile menu
 - [x] All 10 routes with themed content
 - [x] Reusable component library
-- [x] RSVP form with client-side validation
+- [x] RSVP form with validation and email confirmation
 - [x] Accessibility features and focus management
-- [x] Performance optimizations (font-display, lazy loading ready)
+- [x] Performance optimizations (code splitting, lazy loading, image dimensions)
 - [x] SEO meta tags and semantic HTML
 - [x] Complete scavenger hunt system (15 secrets)
 - [x] Error boundaries and Suspense fallbacks for resilience
-- [x] Loading states for hero video, images, and form submissions
+- [x] Loading states with skeleton placeholders
 - [x] SPA navigation with React Router Links
+- [x] **NEW**: Code review patches applied (25/26 complete)
+- [x] **NEW**: Database performance indexes
+- [x] **NEW**: Bundle splitting for optimal loading
+- [x] **NEW**: Centralized logging system
 
 ### 🔄 TODO v2 - Interactive Features
 - [ ] Scavenger hunt system (components stubbed in `src/components/hunt/`)
@@ -145,6 +149,14 @@ src/
 - [ ] Real-time guestbook
 
 ## 🔧 Quality & Resilience
+
+### Recent Optimizations (2025-10-09)
+- **Performance**: Added 8 database indexes for faster queries
+- **Bundle Size**: Implemented code splitting (admin/hunt/gallery chunks load on-demand)
+- **UX**: Added skeleton loading states throughout Gallery
+- **Code Quality**: Centralized logging system (production-safe)
+- **Image Optimization**: Explicit dimensions to prevent layout shift
+- **Type Safety**: Manual instructions for TypeScript strict mode available
 
 ### SPA Navigation
 - **React Router Links**: All internal navigation uses `<Link>` components for instant client-side routing
