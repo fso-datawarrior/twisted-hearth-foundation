@@ -11,6 +11,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 
 ## ✅ Already Applied
 
+- [x] `00-critical-react-duplication-fix.patch` - Fixed React hook null errors from duplicate instances (UNPLANNED)
 - [x] `01-critical-security-hardcoded-credentials.patch` - Removed hardcoded credentials
 - [x] `01-high-supabase-hardcoded-client.patch` - Fixed hardcoded Supabase client
 - [x] `PATCH-CR-01-vignette-schema.sql` - Added vignette database schema (25 TS errors fixed)
@@ -146,6 +147,6 @@ git apply PATCHES/patch-name.patch
 ---
 
 **Last Updated:** 2025-10-09  
-**Total Patches:** 25  
-**Applied:** 17  
+**Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
+**Applied:** 18  
 **Remaining:** 8
