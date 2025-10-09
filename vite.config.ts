@@ -42,15 +42,41 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor chunks
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip'],
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          'query-vendor': ['@tanstack/react-query'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('react-router-dom')) {
+              return 'router-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('three') || id.includes('@react-three')) {
+              return 'three-vendor';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'query-vendor';
+            }
+            if (id.includes('@supabase/supabase-js')) {
+              return 'supabase-vendor';
+            }
+            if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
+              return 'utils-vendor';
+            }
+          }
+          // Split heavy components by file path
+          if (id.includes('/src/pages/AdminDashboard') || id.includes('/src/components/admin/')) {
+            return 'admin-chunk';
+          }
+          if (id.includes('/src/components/hunt/') || id.includes('/src/hooks/use-hunt')) {
+            return 'hunt-chunk';
+          }
+          if (id.includes('/src/pages/Gallery') || id.includes('/src/components/gallery/')) {
+            return 'gallery-chunk';
+          }
         },
         // Add version to chunk names for better cache busting
         chunkFileNames: (chunkInfo) => {

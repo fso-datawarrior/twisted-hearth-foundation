@@ -30,6 +30,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 - [x] `10-low-performance-image-dimensions.patch` - Added width/height to HeroVideo poster and video
 - [x] `05-medium-db-indexes.patch` - Created 8 database indexes for improved query performance
 - [x] `04-medium-ux-add-loading-states.patch` - Added skeleton loading states to Gallery
+- [x] `08-medium-performance-bundle-splitting.patch` - Split admin/hunt/gallery into separate chunks
 
 ---
 
@@ -83,7 +84,7 @@ Track your progress installing code review patches for the Twisted Hearth Founda
 **Action:** Creates example env file
 
 
-### [ ] `08-medium-performance-bundle-splitting.patch`
+### [x] `08-medium-performance-bundle-splitting.patch`
 **Impact:** Reduces bundle size with code splitting  
 **Files:** 1 (vite.config.ts)  
 **Action:** Splits admin, hunt, and gallery into separate chunks
@@ -153,5 +154,5 @@ git apply PATCHES/patch-name.patch
 
 **Last Updated:** 2025-10-09  
 **Total Patches:** 26 (25 planned + 1 unplanned critical fix)  
-**Applied:** 23  
-**Remaining:** 3
+**Applied:** 24  
+**Remaining:** 2
