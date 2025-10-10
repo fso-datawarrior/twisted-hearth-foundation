@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useQuery } from '@tanstack/react-query';
 import { formatEventLong, formatEventTime } from "@/lib/event";
 import { useReveal } from "@/hooks/use-reveal";
+import { getHomepageVignettes } from "@/lib/vignette-api";
 import HeroVideo from "@/components/HeroVideo";
 import Footer from "@/components/Footer";
 import Card from "@/components/Card";
@@ -71,29 +73,11 @@ const Index = () => {
   const { ref: vigRef, shown: vigShown } = useReveal();
   const { ref: ctaRef, shown: ctaShown } = useReveal();
 
-  const pastVignettes = [
-    {
-      id: 1,
-      title: "Goldilocks — The Butcher's Den",
-      hook: "What if the cozy little cottage wasn't a home at all… but a butcher's den?",
-      thumbImage: "/img/goldilocks-thumb.jpg",
-      teaserImage: "/img/goldilocks-teaser.jpg"
-    },
-    {
-      id: 2,
-      title: "Jack & the Beanstalk — A Thief's Reward",
-      hook: "What if Jack wasn't a hero at all, but a thief who finally got what he deserved?",
-      thumbImage: "/img/jack-thumb.jpg",
-      teaserImage: "/img/jack-teaser.jpg"
-    },
-    {
-      id: 3,
-      title: "Snow White & the Goblin-Dwarves — The Glass Coffin Feast",
-      hook: "What if the seven dwarves had a curse of their own?",
-      thumbImage: "/img/snowwhite-thumb.jpg",
-      teaserImage: "/img/snowwhite-teaser.jpg"
-    }
-  ];
+  // Fetch homepage vignettes from database
+  const { data: pastVignettes = [], isLoading: vignettesLoading } = useQuery({
+    queryKey: ['homepage-vignettes'],
+    queryFn: getHomepageVignettes,
+  });
 
   const featuredHighlights = [
     {
@@ -163,23 +147,29 @@ const Index = () => {
               each story a promise of what's to come.
             </p>
             
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
-              {pastVignettes.map((vignette) => (
-                <Card
-                  key={vignette.id}
-                  variant="vignette"
-                  image={vignette.thumbImage}
-                  title={vignette.title}
-                  hook={vignette.hook}
-                  onClick={() => setSelectedVignette(vignette)}
-                  className={`hover:shadow-lg motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] transition-all motion-reduce:transition-none cursor-pointer ${
-                    vignette.id === 1 
-                      ? "hover:shadow-accent-green/30 hover:border-accent-green/50" 
-                      : "hover:shadow-accent-green/20"
-                  }`}
-                />
-              ))}
-            </div>
+            {vignettesLoading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Loading vignettes...</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-8 mb-8">
+                {pastVignettes.map((vignette, index) => (
+                  <Card
+                    key={vignette.id}
+                    variant="vignette"
+                    image={vignette.thumbnail_url}
+                    title={vignette.title}
+                    hook={vignette.description}
+                    onClick={() => setSelectedVignette(vignette)}
+                    className={`hover:shadow-lg motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.01] transition-all motion-reduce:transition-none cursor-pointer ${
+                      index === 0 
+                        ? "hover:shadow-accent-green/30 hover:border-accent-green/50" 
+                        : "hover:shadow-accent-green/20"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
             
             <div className="text-center">
               <div className="w-24 h-px bg-gradient-to-r from-transparent via-accent-purple to-transparent mx-auto mb-4" />
@@ -300,7 +290,7 @@ const Index = () => {
         {selectedVignette && (
           <div className="text-center">
             <img 
-              src={selectedVignette.teaserImage}
+              src={selectedVignette.teaser_url}
               alt={selectedVignette.title}
               className="w-full h-64 object-cover rounded-lg mb-6"
               width="600"
@@ -315,7 +305,7 @@ const Index = () => {
               {selectedVignette.title}
             </h3>
             <p className="font-body text-lg text-muted-foreground leading-relaxed">
-              {selectedVignette.hook}
+              {selectedVignette.description}
             </p>
           </div>
         )}

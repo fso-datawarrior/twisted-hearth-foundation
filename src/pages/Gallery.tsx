@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Heart, Clock, CheckCircle } from "lucide-react";
-import { getAllPreviewImages, PREVIEW_CATEGORIES } from "@/config/previewImages";
+import { Upload } from "lucide-react";
 import MultiPreviewCarousel from "@/components/MultiPreviewCarousel";
 import EmptyGalleryState from "@/components/gallery/EmptyGalleryState";
 import RequireAuth from "@/components/RequireAuth";
@@ -33,7 +30,6 @@ const Gallery = () => {
   const [userPhotos, setUserPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [photosPerView, setPhotosPerView] = useState(1);
   const { toast } = useToast();
 
@@ -80,49 +76,6 @@ const Gallery = () => {
       .from('gallery')
       .createSignedUrl(storagePath, 3600); // 1 hour expiry
     return data?.signedUrl || '';
-  };
-
-  // Convert static images to Photo-like objects
-  const getStaticPhotosForCategory = (categoryId: string): Photo[] => {
-    const category = PREVIEW_CATEGORIES.find(c => c.id === categoryId);
-    if (!category) return [];
-    
-    return category.images.map((img, index) => ({
-      id: `static-${categoryId}-${index}`,
-      user_id: 'system',
-      storage_path: img.path,
-      filename: img.filename,
-      caption: img.title,
-      tags: [categoryId],
-      category: categoryId as any,
-      is_approved: true,
-      is_featured: false,
-      is_favorite: false,
-      likes_count: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }));
-  };
-
-  // Get filtered photos based on active category
-  const getFilteredPhotos = (): Photo[] => {
-    const dbPhotos = approvedPhotos || [];
-    
-    if (activeCategory === 'all') {
-      // Show all database photos + all static images
-      const allStaticPhotos = PREVIEW_CATEGORIES.flatMap(cat => getStaticPhotosForCategory(cat.id));
-      return [...dbPhotos, ...allStaticPhotos];
-    }
-    
-    // Filter database photos by category
-    const filteredDbPhotos = dbPhotos.filter(photo => 
-      photo.tags?.includes(activeCategory) || photo.category === activeCategory
-    );
-    
-    // Get static images for this category
-    const staticPhotos = getStaticPhotosForCategory(activeCategory);
-    
-    return [...filteredDbPhotos, ...staticPhotos];
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -334,46 +287,6 @@ const Gallery = () => {
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Gallery from Halloween's Past
               </h2>
-              
-              {/* Category Filter Tabs */}
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
-                <Button
-                  variant={activeCategory === 'all' ? 'default' : 'outline'}
-                  onClick={() => setActiveCategory('all')}
-                  className={`font-subhead ${
-                    activeCategory === 'all' 
-                      ? "bg-accent-gold text-ink hover:bg-accent-gold/80" 
-                      : "border-accent-purple text-accent-gold hover:bg-accent-purple/20"
-                  }`}
-                >
-                  All Photos
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    {getFilteredPhotos().length}
-                  </Badge>
-                </Button>
-                {PREVIEW_CATEGORIES.map((category) => {
-                  const categoryPhotos = activeCategory === category.id ? getFilteredPhotos() : 
-                    [...getStaticPhotosForCategory(category.id), 
-                     ...(approvedPhotos || []).filter(p => p.category === category.id || p.tags?.includes(category.id))];
-                  return (
-                    <Button
-                      key={category.id}
-                      variant={activeCategory === category.id ? 'default' : 'outline'}
-                      onClick={() => setActiveCategory(category.id)}
-                      className={`font-subhead ${
-                        activeCategory === category.id 
-                          ? "bg-accent-gold text-ink hover:bg-accent-gold/80" 
-                          : "border-accent-purple text-accent-gold hover:bg-accent-purple/20"
-                      }`}
-                    >
-                      {category.title}
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        {categoryPhotos.length}
-                      </Badge>
-                    </Button>
-                  );
-                })}
-              </div>
 
               {/* Gallery Carousel */}
               <div className="w-full">
@@ -388,22 +301,18 @@ const Gallery = () => {
                   </div>
                 ) : (
                   <MultiPreviewCarousel
-                    defaultCategory={activeCategory}
-                    activeCategory={activeCategory}
+                    defaultCategory="all"
                     showCategoryTabs={false}
                     autoPlay={true}
                     autoPlayInterval={5000}
-                    previewPhotos={getFilteredPhotos()}
+                    previewPhotos={approvedPhotos}
                   />
                 )}
               </div>
-              {!loading && getFilteredPhotos().length === 0 && (
+              {!loading && (!approvedPhotos || approvedPhotos.length === 0) && (
                 <EmptyGalleryState 
-                  categoryName={PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title || 'this category'}
-                  message={activeCategory === 'all' 
-                    ? 'Be the first to share your Twisted Tales memories!' 
-                    : `No memories captured in ${PREVIEW_CATEGORIES.find(c => c.id === activeCategory)?.title} yet`
-                  }
+                  categoryName="gallery"
+                  message="Be the first to share your Twisted Tales memories!"
                 />
               )}
             </div>

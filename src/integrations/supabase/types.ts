@@ -289,7 +289,9 @@ export type Database = {
           is_active: boolean | null
           photo_ids: string[] | null
           sort_order: number | null
+          teaser_url: string | null
           theme_tag: string
+          thumbnail_url: string | null
           title: string
           updated_at: string
           updated_by: string | null
@@ -303,7 +305,9 @@ export type Database = {
           is_active?: boolean | null
           photo_ids?: string[] | null
           sort_order?: number | null
+          teaser_url?: string | null
           theme_tag: string
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
           updated_by?: string | null
@@ -317,7 +321,9 @@ export type Database = {
           is_active?: boolean | null
           photo_ids?: string[] | null
           sort_order?: number | null
+          teaser_url?: string | null
           theme_tag?: string
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           updated_by?: string | null

@@ -224,3 +224,41 @@ export const validateVignetteData = (data: CreateVignetteData | UpdateVignetteDa
 
   return errors;
 };
+
+/**
+ * Fetch homepage-featured vignettes (with static images)
+ */
+export const getHomepageVignettes = async () => {
+  const { data, error } = await supabase
+    .from('past_vignettes')
+    .select('id, title, description, thumbnail_url, teaser_url, sort_order')
+    .eq('theme_tag', 'homepage-featured')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+    .limit(3);
+  
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Upload image to homepage-vignettes bucket
+ */
+export const uploadHomepageImage = async (file: File, type: 'thumbnail' | 'teaser') => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${type}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = fileName;
+
+  const { error: uploadError } = await supabase.storage
+    .from('homepage-vignettes')
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+    .from('homepage-vignettes')
+    .getPublicUrl(filePath);
+
+  return publicUrl;
+};

@@ -12,6 +12,7 @@ import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
 import EmailCommunication from '@/components/admin/EmailCommunication';
 import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
+import HomepageVignettesManagement from '@/components/admin/HomepageVignettesManagement';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { 
@@ -24,7 +25,8 @@ import {
   Map,
   Settings,
   Mail,
-  Theater
+  Theater,
+  Home
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -171,6 +173,7 @@ export default function AdminDashboard() {
     { id: 'gallery', label: 'Gallery', icon: Images, count: photos?.length },
     { id: 'hunt', label: 'Hunt', icon: Search, count: activeHuntRuns },
     { id: 'vignettes', label: 'Vignettes', icon: Theater, count: selectedVignettePhotos },
+    { id: 'homepage', label: 'Homepage', icon: Home, count: 3 },
     { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
     { id: 'email', label: 'Email', icon: Mail, count: null }
   ];
@@ -340,6 +343,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === 'vignettes' && (
               <VignetteManagementTab />
+            )}
+            {activeTab === 'homepage' && (
+              <HomepageVignettesManagement />
             )}
             {activeTab === 'guestbook' && (
               <GuestbookManagement />
