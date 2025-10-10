@@ -67,7 +67,7 @@ export default function HeroVideo({
   return (
     <section 
       ref={sectionRef}
-      className="relative isolate min-h-[80vh] min-h-[80dvh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+      className="relative isolate min-h-[80vh] supports-[height:100dvh]:min-h-[80dvh] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black"
       {...(!ready && { "aria-busy": "true" })}
     >
       <div className="sr-only" aria-live="polite">
@@ -77,13 +77,6 @@ export default function HeroVideo({
       {/* Poster shows immediately; fades out once video is ready (or stays visible if video fails) */}
       <img
         src={poster}
-        srcSet="
-          /hero-poster-480.jpg 480w,
-          /hero-poster-800.jpg 800w,
-          /hero-poster-1200.jpg 1200w,
-          /hero-poster-1920.jpg 1920w
-        "
-        sizes="100vw"
         alt="Halloween party scene with pumpkins, trees, and a cozy house"
         width="1920"
         height="1080"

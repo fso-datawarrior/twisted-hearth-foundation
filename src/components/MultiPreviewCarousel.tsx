@@ -69,13 +69,24 @@ const MultiPreviewCarousel = ({
           } else {
             // Database image - generate signed URL
             try {
-              const { data } = await supabase.storage
+              const { data, error } = await supabase.storage
                 .from('gallery')
                 .createSignedUrl(photo.storage_path, 3600);
-              return data?.signedUrl || null;
+              
+              if (error) {
+                console.error('Signed URL error for path:', photo.storage_path, error);
+                return '/img/no-photos-placeholder.jpg';
+              }
+              
+              if (!data?.signedUrl) {
+                console.warn('No signed URL returned for:', photo.storage_path);
+                return '/img/no-photos-placeholder.jpg';
+              }
+              
+              return data.signedUrl;
             } catch (error) {
-              console.error('Error generating signed URL:', error);
-              return null;
+              console.error('Exception generating signed URL:', error);
+              return '/img/no-photos-placeholder.jpg';
             }
           }
         });

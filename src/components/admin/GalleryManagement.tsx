@@ -186,16 +186,16 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {pendingPhotos.map((photo) => (
               <Card key={photo.id} className="overflow-hidden">
                 <img 
                   src={photo.signedUrl}
                   alt={photo.caption || photo.filename}
-                  className="w-full h-48 object-cover bg-muted"
+                  className="w-full h-48 sm:h-40 object-cover bg-muted"
                   loading="lazy"
                 />
-                <CardContent className="p-2 space-y-2">
+                <CardContent className="p-4 sm:p-2 space-y-3 sm:space-y-2">
                   <p className="text-xs text-muted-foreground truncate">{photo.filename}</p>
                   <CategorySelector
                     selectedCategories={categoryEdits[photo.id] || photo.tags || []}
@@ -221,7 +221,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-1">
                     <Button 
                       size="sm" 
                       variant="default"
@@ -266,14 +266,14 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {approvedPhotos.map((photo) => (
               <Card key={photo.id} className="overflow-hidden">
                 <div className="relative">
                   <img 
                     src={photo.signedUrl}
                     alt={photo.caption || photo.filename}
-                    className="w-full h-48 object-cover bg-muted"
+                    className="w-full h-48 sm:h-40 object-cover bg-muted"
                     loading="lazy"
                   />
                   {photo.is_featured && (
@@ -283,7 +283,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                     </Badge>
                   )}
                 </div>
-                <CardContent className="p-2 space-y-2">
+                <CardContent className="p-4 sm:p-2 space-y-3 sm:space-y-2">
                   <p className="text-xs text-muted-foreground truncate">{photo.filename}</p>
                   <CategorySelector
                     selectedCategories={categoryEdits[photo.id] || photo.tags || []}
@@ -326,7 +326,7 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
                     </label>
                   </div>
                   
-                  <div className="flex gap-1">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-1">
                     <Button 
                       size="sm" 
                       variant={photo.is_featured ? "default" : "outline"}

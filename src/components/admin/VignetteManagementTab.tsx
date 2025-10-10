@@ -353,48 +353,54 @@ export default function VignetteManagementTab() {
             return (
               <Card key={photo.id} className="overflow-hidden">
                 <CardContent className="p-4">
-                  <div className="flex gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
                     {/* Photo Preview */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 mx-auto lg:mx-0">
                       <img
                         src={photo.signedUrl}
                         alt={photo.caption || photo.filename}
-                        className="w-32 h-32 object-cover rounded border"
+                        className="w-full max-w-xs lg:w-32 h-48 lg:h-32 object-cover rounded border"
                       />
                     </div>
 
                     {/* Vignette Form */}
-                    <div className="flex-1 space-y-4">
-                      <div className="flex items-center justify-between">
+                    <div className="flex-1 space-y-4 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">#{index + 1}</Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-muted-foreground truncate">
                             {photo.filename}
                           </span>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap sm:flex-nowrap">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => movePhoto(photo.id, 'up')}
                             disabled={index === 0}
+                            className="flex-1 sm:flex-none"
                           >
                             <ArrowUp className="h-3 w-3" />
+                            <span className="sm:hidden ml-1">Up</span>
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => movePhoto(photo.id, 'down')}
                             disabled={index === selectedPhotos.length - 1}
+                            className="flex-1 sm:flex-none"
                           >
                             <ArrowDown className="h-3 w-3" />
+                            <span className="sm:hidden ml-1">Down</span>
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => removeFromVignettes(photo.id)}
+                            className="flex-1 sm:flex-none"
                           >
                             <X className="h-3 w-3" />
+                            <span className="sm:hidden ml-1">Remove</span>
                           </Button>
                         </div>
                       </div>
