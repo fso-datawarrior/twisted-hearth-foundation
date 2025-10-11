@@ -37,17 +37,16 @@ const About = () => {
                 
                 <div className="bg-card p-8 rounded-lg border border-accent-purple/30">
                   <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Your Hosts</h2>
-                  <p className="font-body text-muted-foreground mb-4">
+                  <p className="font-body text-lg mb-6 text-muted-foreground">
                     Jamie & Kat Ruth have been hosting legendary Halloween celebrations for years, 
                     each more elaborate than the last. Known for their attention to detail and 
-                    commitment to immersive experiences, they've transformed their home into 
+                    commitment to the Halloween experience, they've transformed their home into 
                     various haunted realms.
                   </p>
-                  <p className="font-body text-muted-foreground">
+                  <p className="font-body text-lg mb-6 text-muted-foreground">
                     This year's Alice-influenced fairytale theme promises to be their most ambitious yet, 
-                    complete with interactive storytelling, themed rooms, and surprises around 
-                    every corner. Will you find your way out of Wonderland, or will you be lost 
-                    in the madness forever?
+                    complete with new vignettes, added decor and surprises around every corner. 
+                    Will you find your way out of Wonderland, or will you be lost in the madness forever?
                   </p>
                 </div>
               </div>

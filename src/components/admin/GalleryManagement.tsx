@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Check, X, Star, StarOff, Images } from 'lucide-react';
+import { Check, X, Star, StarOff, Images, ArrowDown, ArrowUp } from 'lucide-react';
 import { moderatePhoto, updatePhotoMetadata, type Photo } from '@/lib/photo-api';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -177,8 +177,28 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-primary">Gallery Management</h2>
       
+      {/* Navigation Buttons */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => document.getElementById('pending-photos')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <ArrowDown className="h-4 w-4 mr-2" />
+          Go to Pending Photos
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => document.getElementById('approved-photos')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <ArrowDown className="h-4 w-4 mr-2" />
+          Go to Approved Photos
+        </Button>
+      </div>
+      
       {/* Pending Photos Section */}
-      <Card>
+      <Card id="pending-photos">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Images className="h-5 w-5" />
@@ -254,11 +274,20 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
           {pendingPhotos.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">No pending photos</div>
           )}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="mt-4"
+          >
+            <ArrowUp className="h-4 w-4 mr-2" />
+            Back to Top
+          </Button>
         </CardContent>
       </Card>
 
       {/* Approved Photos Section */}
-      <Card>
+      <Card id="approved-photos">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Check className="h-5 w-5" />
@@ -355,6 +384,15 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
           {approvedPhotos.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">No approved photos yet</div>
           )}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="mt-4"
+          >
+            <ArrowUp className="h-4 w-4 mr-2" />
+            Back to Top
+          </Button>
         </CardContent>
       </Card>
     </div>
