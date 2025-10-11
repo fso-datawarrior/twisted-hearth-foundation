@@ -103,6 +103,13 @@ This document tracks all patches, updates, and fixes for the Twisted Hearth Foun
 
 ## Completed Items (✅)
 
+### ✅ Fix Vignette Metadata Display and Admin Management
+- **Priority**: 🟡 High
+- **Status**: ✅ Completed
+- **Completion Date**: October 11, 2025
+- **Files**: `src/pages/Vignettes.tsx`, `src/components/admin/VignetteManagementTab.tsx`, `src/lib/image-url.ts`
+- **Description**: Fixed vignette metadata updates from admin panel to display correctly on Vignettes page. Refactored to use `getPublicImageUrlSync` for efficient image loading. Added active status counter (X Active / Y Total) in admin. Changed default `is_active` to `false` for new vignettes.
+
 ### ✅ Add Lightbox Feature to Vignettes Page Carousel
 - **Priority**: 🟡 High
 - **Status**: ✅ Completed
