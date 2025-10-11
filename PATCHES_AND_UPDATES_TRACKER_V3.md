@@ -23,8 +23,11 @@ This document tracks Phase 3 development for the Twisted Hearth Foundation proje
 
 ## 📊 Quick Summary
 
-**Total Planned Items**: 10 major features across 4 batches  
-**Estimated Timeline**: 36-47 hours (approximately 5-6 weeks at 8 hours/week)  
+**Total Planned Items**: 16 items (10 major features + 6 technical debt items)  
+**Estimated Timeline**: 47-62 hours total
+- **Feature Development**: 36-47 hours across 4 batches
+- **Technical Debt**: 11-15 hours across 6 items  
+
 **Current Focus**: Batch 1 - Foundation & Navigation
 
 ### Phase 3 Priorities
@@ -32,6 +35,7 @@ This document tracks Phase 3 development for the Twisted Hearth Foundation proje
 2. **BATCH 2**: User & Role Management (4-5 hours) - Security & user administration
 3. **BATCH 3**: Email Campaign System (6-8 hours) - Marketing communications
 4. **BATCH 4**: Modern Analytics Dashboard (21-28 hours) - Comprehensive metrics & insights
+5. **Technical Debt**: Code quality, security, and performance improvements (11-15 hours)
 
 ---
 
@@ -431,6 +435,222 @@ setting_history (
 ### 🔵 FEATURE-REQUEST-02: Analytics Dashboard (Subsumed by BATCH 4)
 - **Status**: ⚠️ Replaced by BATCH 4 - Modern Admin Dashboard Overhaul
 - **Note**: This feature has been significantly expanded and moved to BATCH 4
+
+---
+
+## Technical Debt & Maintenance (🔧)
+
+### 🔧 CODE-QUALITY-01: TypeScript Strict Mode Migration
+- **Status**: 🎯 Planned
+- **Priority**: Medium (Optional but recommended)
+- **Time Estimate**: 10 minutes (configuration) + 3-4 hours (fixing type errors)
+- **Source**: OPTIMIZATION_SUMMARY.md - Remaining Work
+
+**Files to Modify**:
+- `tsconfig.json` - Enable strict mode flags
+- `tsconfig.app.json` - Update compiler options
+- Various `.ts` and `.tsx` files - Fix type errors
+
+**Manual Steps Required**:
+- See: `PATCHES/06-medium-typescript-strict-mode-MANUAL.md`
+- TypeScript config files are read-only in Lovable
+
+**Strict Mode Flags to Enable**:
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true
+  }
+}
+```
+
+**When to Apply**:
+- When ready for stricter type checking
+- Before production deployment
+- During code refactoring sessions
+
+**Benefits**:
+- Catch null/undefined errors at compile time
+- Prevent implicit 'any' types
+- More robust code overall
+- Better IDE autocomplete and type hints
+
+**Expected Impact**:
+- 50-100 type errors to fix initially
+- Improved code quality and maintainability
+- Fewer runtime errors in production
+
+---
+
+### 🔧 CODE-QUALITY-02: Expand Centralized Logging Coverage
+- **Status**: 🎯 Planned
+- **Priority**: Low
+- **Time Estimate**: 2-3 hours
+- **Source**: OPTIMIZATION_SUMMARY.md - Code Quality Improvements
+
+**Files to Modify**:
+- `src/pages/AdminDashboard.tsx` - Replace console.log with logger
+- `src/components/admin/*` - Replace console.log with logger
+- `src/lib/photo-api.ts` - Replace console.log with logger
+- `src/hooks/*` - Replace console.log with logger
+- Any other files with console.log statements
+
+**Current Implementation**:
+✅ `src/lib/logger.ts` - Already created
+✅ `src/lib/auth.tsx` - Already migrated
+✅ `src/pages/Gallery.tsx` - Already migrated
+✅ `src/components/gallery/PhotoCard.tsx` - Already migrated
+
+**Remaining Work**:
+- Audit codebase for remaining console.log/console.error statements
+- Replace with appropriate logger methods
+- Ensure production logs are clean
+- Add structured logging where beneficial
+
+**Benefits**:
+- Cleaner production console
+- Better debugging in development
+- Foundation for error monitoring service integration
+- Structured logging for easier troubleshooting
+
+---
+
+### 🔧 SECURITY-01: Address Security Linter Warnings
+- **Status**: 🎯 Planned
+- **Priority**: Low (Pre-existing warnings, not urgent)
+- **Time Estimate**: 1-2 hours
+- **Source**: OPTIMIZATION_SUMMARY.md - Remaining Work
+
+**Files to Modify**:
+- Supabase configuration files
+- Environment variable configuration
+
+**Warnings to Address**:
+1. **Function Search Paths**: Configure search paths for Supabase functions
+2. **OTP Expiry Configuration**: Set appropriate OTP expiry times
+3. **Leaked Password Protection**: Review and enhance password protection measures
+
+**Note**: These are pre-existing warnings that do not pose immediate security risks but should be addressed for completeness.
+
+**When to Apply**:
+- During security audit
+- Before production launch
+- When configuring Supabase settings
+
+---
+
+### 🔧 PERFORMANCE-02: Image Dimension Audit
+- **Status**: 🎯 Planned
+- **Priority**: Low
+- **Time Estimate**: 1-2 hours
+- **Source**: OPTIMIZATION_SUMMARY.md - Maintenance Notes
+
+**Files to Audit**:
+- All image tags in `src/pages/*`
+- All image tags in `src/components/*`
+- Verify explicit `width` and `height` attributes
+
+**Current Implementation**:
+✅ Hero video: 1920x1080
+✅ Hero poster: 1920x1080
+✅ Carousel images: 600x800
+✅ Gallery images: 800x800
+
+**Remaining Work**:
+- Audit all other images for missing dimensions
+- Add `loading="lazy"` for below-the-fold images
+- Add `fetchPriority="high"` for above-the-fold images
+- Verify no layout shift occurs during image loading
+
+**Benefits**:
+- Reduced Cumulative Layout Shift (CLS)
+- Better Core Web Vitals scores
+- Improved perceived performance
+
+---
+
+### 🔧 CODE-QUALITY-03: Component Library Standardization
+- **Status**: 🎯 Planned
+- **Priority**: Medium
+- **Time Estimate**: 4-5 hours
+
+**Files to Standardize**:
+- All components in `src/components/`
+- All page components in `src/pages/`
+
+**Standardization Goals**:
+- Consistent prop naming conventions
+- Standard component structure (imports, types, component, exports)
+- Consistent error handling patterns
+- Standard loading state implementations
+- Consistent TypeScript patterns
+
+**Benefits**:
+- Better maintainability
+- Easier onboarding for new developers
+- Consistent UI/UX patterns
+- Reduced code duplication
+
+---
+
+### 🔧 PERFORMANCE-03: Bundle Size Monitoring
+- **Status**: 🎯 Planned
+- **Priority**: Low
+- **Time Estimate**: 1-2 hours
+
+**Implementation**:
+- Add bundle size analysis to build process
+- Set up bundle size budgets
+- Monitor chunk sizes over time
+- Alert on significant bundle size increases
+
+**Tools to Integrate**:
+- `vite-plugin-bundle-analyzer`
+- Bundle size CI checks
+- Performance budgets in package.json
+
+**Benefits**:
+- Prevent bundle bloat
+- Early detection of performance regressions
+- Maintain fast initial load times
+
+---
+
+### 🔧 DATABASE-01: Index Performance Monitoring
+- **Status**: 🎯 Planned
+- **Priority**: Low
+- **Time Estimate**: 30 minutes (setup) + ongoing monitoring
+
+**Implementation**:
+- Monitor query performance in Supabase dashboard
+- Identify slow queries
+- Add missing indexes as needed
+- Review existing index usage
+
+**Current Indexes**:
+✅ 8+ strategic indexes already created
+✅ Additional indexes for libations, vignettes, emoji reactions
+
+**Ongoing Tasks**:
+- Monthly review of query performance
+- Add indexes for new features
+- Remove unused indexes
+- Optimize query patterns
+
+**SQL Query for Index Review**:
+```sql
+SELECT tablename, indexname, indexdef
+FROM pg_indexes 
+WHERE schemaname = 'public' 
+ORDER BY tablename, indexname;
+```
 
 ---
 
@@ -1060,6 +1280,41 @@ const validatedEmail = emailSchema.parse(inputEmail);
 
 ---
 
+### Technical Debt & Code Quality (Ongoing)
+1. **TypeScript Strict Mode** (3-4 hours)
+   - Enable strict compiler flags
+   - Fix type errors across codebase
+   - Improve type safety
+
+2. **Expand Logging Coverage** (2-3 hours)
+   - Replace console.log with logger
+   - Audit all components
+   - Add structured logging
+
+3. **Security Linter Warnings** (1-2 hours)
+   - Configure function search paths
+   - Set OTP expiry configuration
+   - Review password protection
+
+4. **Image Dimension Audit** (1-2 hours)
+   - Verify all images have dimensions
+   - Add lazy loading attributes
+   - Optimize fetch priorities
+
+5. **Component Standardization** (4-5 hours)
+   - Standardize component patterns
+   - Consistent prop naming
+   - Error handling patterns
+
+6. **Bundle Size Monitoring** (1-2 hours)
+   - Add bundle analyzer
+   - Set performance budgets
+   - Monitor chunk sizes
+
+**Total: 11-15 hours** | **Can be done in parallel with batches**
+
+---
+
 ## 🎯 Detailed Overview - Complete Phase 3 Roadmap
 
 ### What We're Building
@@ -1068,6 +1323,7 @@ Phase 3 transforms the admin dashboard from a basic management interface into a 
 - **User & role management** with enterprise-grade security and safety features
 - **Email marketing system** for guest communications and campaigns
 - **Analytics dashboard** with 30+ metrics, data visualizations, and export capabilities
+- **Technical debt resolution** addressing code quality, security, and performance improvements
 
 ### Why These Features Matter
 
@@ -1100,6 +1356,11 @@ Phase 3 transforms the admin dashboard from a basic management interface into a 
 - Current: Basic counts, no insights or trends
 - Solution: 30+ metrics with charts, trends, and export
 - Impact: Data-driven decisions, understand guest behavior, optimize event
+
+**Technical Debt Resolution** (Ongoing):
+- Current: Console.log scattered, no TypeScript strict mode, inconsistent patterns
+- Solution: Centralized logging, strict typing, component standardization
+- Impact: Cleaner codebase, fewer bugs, easier maintenance, better developer experience
 
 ### Technical Approach
 
@@ -1186,8 +1447,42 @@ Phase 3 transforms the admin dashboard from a basic management interface into a 
 
 ---
 
+## 📝 Summary of Changes in V3
+
+### New Items Added from OPTIMIZATION_SUMMARY.md:
+1. ✅ **CODE-QUALITY-01**: TypeScript Strict Mode Migration (3-4 hours)
+2. ✅ **CODE-QUALITY-02**: Expand Centralized Logging Coverage (2-3 hours)
+3. ✅ **SECURITY-01**: Address Security Linter Warnings (1-2 hours)
+4. ✅ **PERFORMANCE-02**: Image Dimension Audit (1-2 hours)
+5. ✅ **CODE-QUALITY-03**: Component Library Standardization (4-5 hours)
+6. ✅ **PERFORMANCE-03**: Bundle Size Monitoring (1-2 hours)
+7. ✅ **DATABASE-01**: Index Performance Monitoring (ongoing)
+
+### Total Technical Debt: 11-15 hours
+
+### Updated Totals:
+- **Original V3 Plan**: 36-47 hours (4 batches)
+- **Technical Debt Added**: 11-15 hours (6 items)
+- **New Total**: 47-62 hours (4 batches + technical debt)
+
+### Priority Order for Implementation:
+1. **BATCH 1** (5-6 hours) - Start immediately
+2. **BATCH 2** (4-5 hours) - After BATCH 1
+3. **BATCH 3** (6-8 hours) - After BATCH 1
+4. **BATCH 4** (21-28 hours) - After BATCHES 1-3
+5. **Technical Debt** (11-15 hours) - Can be done in parallel
+
+### Notes for Adding New Features:
+- All planned items marked with 🎯 Planned status
+- All items include time estimates and dependencies
+- Security requirements clearly documented
+- Success criteria defined where applicable
+- Ready for additional items to be added by user
+
+---
+
 *Last Updated: October 11, 2025*  
 *Maintained by: Development Team*  
 *Version: 3.0 - Phase 3 Planning Document*  
-*Status: Ready for Implementation*
+*Status: Ready for Implementation - Awaiting User Input for Additional Features*
 
