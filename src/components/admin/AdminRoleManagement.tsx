@@ -6,8 +6,11 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Shield, UserX, Mail, AlertTriangle } from 'lucide-react';
+import { Shield, UserX, Mail, AlertTriangle, Check, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface AdminUser {
   id: string;
@@ -18,7 +21,10 @@ interface AdminUser {
 export default function AdminRoleManagement() {
   const { user } = useAuth();
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [allUsers, setAllUsers] = useState<AdminUser[]>([]);
   const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [comboboxOpen, setComboboxOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<AdminUser | null>(null);
@@ -26,6 +32,7 @@ export default function AdminRoleManagement() {
 
   useEffect(() => {
     loadAdmins();
+    loadAllUsers();
   }, []);
 
   const loadAdmins = async () => {
@@ -63,24 +70,48 @@ export default function AdminRoleManagement() {
     }
   };
 
+  const loadAllUsers = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, email, display_name')
+        .order('email');
+
+      if (error) throw error;
+      setAllUsers(profiles || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
   const handleAddAdmin = async () => {
-    if (!newAdminEmail.trim()) {
-      toast.error('Please enter an email address');
+    const emailToUse = selectedUserId 
+      ? allUsers.find(u => u.id === selectedUserId)?.email 
+      : newAdminEmail.trim();
+
+    if (!emailToUse) {
+      toast.error('Please select a user or enter an email address');
       return;
     }
 
     try {
       setActionLoading(true);
 
-      // Find user by email
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', newAdminEmail.trim().toLowerCase())
-        .single();
+      // Find user by email or ID
+      const { data: profile, error: profileError } = selectedUserId
+        ? await supabase
+            .from('profiles')
+            .select('id, email')
+            .eq('id', selectedUserId)
+            .single()
+        : await supabase
+            .from('profiles')
+            .select('id, email')
+            .eq('email', emailToUse.toLowerCase())
+            .single();
 
       if (profileError || !profile) {
-        toast.error('User not found with that email');
+        toast.error('User not found');
         return;
       }
 
@@ -109,7 +140,9 @@ export default function AdminRoleManagement() {
 
       toast.success(`Admin role granted to ${profile.email}`);
       setNewAdminEmail('');
+      setSelectedUserId('');
       await loadAdmins();
+      await loadAllUsers();
     } catch (error) {
       console.error('Error adding admin:', error);
       toast.error('Failed to add admin');
@@ -191,23 +224,98 @@ export default function AdminRoleManagement() {
           <Mail className="w-4 h-4" />
           Add New Admin
         </h3>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            type="email"
-            placeholder="Enter user email..."
-            value={newAdminEmail}
-            onChange={(e) => setNewAdminEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddAdmin()}
-            className="flex-1"
-            disabled={actionLoading}
-          />
-          <Button 
-            onClick={handleAddAdmin} 
-            disabled={actionLoading || !newAdminEmail.trim()}
-            className="w-full sm:w-auto min-h-[44px]"
-          >
-            {actionLoading ? 'Adding...' : 'Grant Admin'}
-          </Button>
+        <div className="space-y-3">
+          {/* User Selector */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Select from existing users:</label>
+            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={comboboxOpen}
+                  className="w-full justify-between min-h-[44px]"
+                  disabled={actionLoading}
+                >
+                  {selectedUserId
+                    ? allUsers.find((u) => u.id === selectedUserId)?.email
+                    : "Select user..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 bg-popover z-50" align="start">
+                <Command className="bg-popover">
+                  <CommandInput placeholder="Search users..." />
+                  <CommandList>
+                    <CommandEmpty>No user found.</CommandEmpty>
+                    <CommandGroup>
+                      {allUsers
+                        .filter(u => !admins.some(a => a.id === u.id))
+                        .map((u) => (
+                          <CommandItem
+                            key={u.id}
+                            value={u.email}
+                            onSelect={() => {
+                              setSelectedUserId(u.id);
+                              setNewAdminEmail('');
+                              setComboboxOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedUserId === u.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{u.email}</span>
+                              {u.display_name && (
+                                <span className="text-xs text-muted-foreground">
+                                  {u.display_name}
+                                </span>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          {/* Manual Email Input */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              type="email"
+              placeholder="Enter user email manually..."
+              value={newAdminEmail}
+              onChange={(e) => {
+                setNewAdminEmail(e.target.value);
+                setSelectedUserId('');
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddAdmin()}
+              className="flex-1"
+              disabled={actionLoading || !!selectedUserId}
+            />
+            <Button 
+              onClick={handleAddAdmin} 
+              disabled={actionLoading || (!newAdminEmail.trim() && !selectedUserId)}
+              className="w-full sm:w-auto min-h-[44px]"
+            >
+              {actionLoading ? 'Adding...' : 'Grant Admin'}
+            </Button>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           User must have an existing account on the platform
