@@ -214,7 +214,7 @@ const Costumes = () => {
               
               <div className="mt-8 text-center">
                 <p className="font-body text-muted-foreground mb-4">
-                  Judging will take place during the Costume Parade at 9:30 PM. 
+                  Judging will take place during the Costume Parade at 9:00 PM. 
                   Be prepared to present your character and explain your twisted interpretation!
                 </p>
                 <div className="font-subhead text-accent-red">

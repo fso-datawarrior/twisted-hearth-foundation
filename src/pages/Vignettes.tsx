@@ -7,10 +7,14 @@ import Footer from "@/components/Footer";
 import Card from "@/components/Card";
 import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
+import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
+import { Photo } from "@/lib/photo-api";
 
 const Vignettes = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Responsive items per view
   useEffect(() => {
@@ -135,6 +139,30 @@ const Vignettes = () => {
     setCurrentIndex(Math.min(index, maxIndex));
   };
 
+  // Convert vignettes to Photo format for lightbox
+  const lightboxPhotos: Photo[] = displayVignettes.map((vignette) => ({
+    id: vignette.id,
+    storage_path: vignette.imageUrl,
+    filename: `vignette-${vignette.id}`,
+    caption: `${vignette.title} - ${vignette.description}`,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    user_id: '',
+    is_approved: true,
+    tags: [vignette.theme_tag],
+    likes_count: 0,
+    is_featured: false
+  }));
+
+  // Handle vignette click to open lightbox
+  const handleVignetteClick = (vignetteId: string) => {
+    const index = displayVignettes.findIndex(v => v.id === vignetteId);
+    if (index !== -1) {
+      setLightboxIndex(index);
+      setLightboxOpen(true);
+    }
+  };
+
   // Auto-play carousel
   useEffect(() => {
     if (displayVignettes.length <= itemsPerView) return;
@@ -229,9 +257,7 @@ const Vignettes = () => {
                               image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
                               title={vignette.title}
                               hook={vignette.description}
-                              onClick={() => {
-                                console.log(`Opening vignette: ${vignette.title}`);
-                              }}
+                              onClick={() => handleVignetteClick(vignette.id)}
                               className="hover-tilt motion-safe h-full"
                             >
                               <div className="mt-4 flex justify-between items-center text-sm">
@@ -280,9 +306,7 @@ const Vignettes = () => {
                         image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
                         title={vignette.title}
                         hook={vignette.description}
-                        onClick={() => {
-                          console.log(`Opening vignette: ${vignette.title}`);
-                        }}
+                        onClick={() => handleVignetteClick(vignette.id)}
                         className="hover-tilt motion-safe h-full"
                       >
                         <div className="mt-4 flex justify-between items-center text-sm">
@@ -317,6 +341,14 @@ const Vignettes = () => {
           </div>
         </section>
       </main>
+      
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        photos={lightboxPhotos}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
       
       <div className="relative z-10">
         <Footer />

@@ -228,34 +228,19 @@ const Feast = () => {
   };
   const signatureDrinks = [
     {
-      name: "Poison Apple Martini",
-      description: "Green apple vodka, sour apple schnapps, and a hint of cinnamon. Garnished with a red wax seal. <em>Warning: One sip and you'll never want to wake up from this dream.</em>",
-      ingredients: "Vodka, Apple Schnapps, Lime, Simple Syrup, Cinnamon"
+      name: "Poisoned Apple",
+      description: "A bubbling brew of spiced apple cider, steeped with cinnamon, clove, and citrus, beckons like a potion from a haunted orchard. One sip warms the soul and whispers secrets of autumn's darkest magic.",
+      ingredients: "apple juice, cloves, nutmeg, allspice, candied ginger, orange peel, cinnamon, and the liquor of your choice"
     },
     {
       name: "Blood Wine of the Beast", 
-      description: "Deep red wine blend with blackberry and pomegranate. Served in goblets with dry ice. <em>The Beast's curse runs deep - each sip brings you closer to the transformation.</em>",
-      ingredients: "Cabernet, Blackberry Liqueur, Pomegranate Juice, Dry Ice"
+      description: "Deep red wine blend with flavors of blackberry and orange. <em>The Beast's curse runs deep - each sip brings you closer to the transformation.</em>",
+      ingredients: "red wine blend, cabernet, orange slices, blackberry, cinnamon"
     },
     {
-      name: "Sleeping Beauty's Nightcap",
-      description: "Lavender-infused gin with butterfly pea flower tea. Changes color when citrus is added. <em>Sleep comes easily, but waking up... that's another story entirely.</em>",
-      ingredients: "Gin, Lavender, Butterfly Pea Tea, Lemon, Elderflower"
-    },
-    {
-      name: "Rumpelstiltskin's Gold",
-      description: "Bourbon cocktail with honey and gold leaf. The price of magic in liquid form. <em>Every drop costs more than you think - are you willing to pay the price?</em>",
-      ingredients: "Bourbon, Honey Syrup, Lemon, Gold Leaf, Angostura Bitters"
-    },
-    {
-      name: "Alice's Mad Tea Party",
-      description: "Earl Grey-infused vodka with chamomile and a splash of absinthe. <em>Down the rabbit hole you go - there's no turning back once you've tasted madness.</em>",
-      ingredients: "Vodka, Earl Grey Tea, Chamomile, Absinthe, Simple Syrup"
-    },
-    {
-      name: "Cheshire Cat's Grin",
-      description: "Smoky mezcal with lime and a mysterious disappearing garnish. <em>The smile remains long after the drink is gone - just like the cat.</em>",
-      ingredients: "Mezcal, Lime, Agave, Smoked Salt, Mystery Garnish"
+      name: "The Enchanted Bramble",
+      description: "— a dark, enchanting brew kissed with forest berries and a whisper of cinnamon, as if plucked from a midnight spell in a forgotten glade.",
+      ingredients: "blueberry juice, agave syrup, lemon juice, blueberries, blackberries, cinnamon"
     }
   ];
 
@@ -458,7 +443,7 @@ const Feast = () => {
                               className="dietary-checkbox"
                             />
                             <Label htmlFor="vegan" className="text-sm cursor-pointer font-body text-muted-foreground">
-                              🌱 This dish is <strong>Vegan</strong>
+                              🌱 This dish is <strong>Vegetarian</strong>
                             </Label>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -514,7 +499,7 @@ const Feast = () => {
                                     <div className="flex-1">
                                       <h4 className="font-semibold text-white flex items-center gap-2">
                                         {item.item_name}
-                                        {item.is_vegan && <span title="Vegan">🌱</span>}
+                                        {item.is_vegan && <span title="Vegetarian">🌱</span>}
                                         {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
                                       </h4>
                                       {item.contributor_name && (
@@ -555,31 +540,12 @@ const Feast = () => {
                 Potluck Contribution Guidelines
               </h2>
               
-              <div className="grid lg:grid-cols-3 gap-8 mb-8">
-                {potluckSuggestions.map((category, index) => (
-                  <div 
-                    key={index}
-                    className="bg-card p-6 rounded-lg border border-accent-purple/30"
-                  >
-                    <h3 className="font-subhead text-xl mb-4 text-accent-gold">
-                      {category.category}
-                    </h3>
-                    <ul className="space-y-2">
-                      {category.items.map((item, itemIndex) => (
-                        <li key={itemIndex} className="flex items-start">
-                          <span className="w-2 h-2 bg-accent-red rounded-full mr-3 mt-2 flex-shrink-0"></span>
-                          <span className="font-body text-sm text-muted-foreground">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+              {/* Removed appetizers/main dishes/desserts cards - can be restored if needed */}
               
               <div className="bg-bg-2 p-8 rounded-lg border border-accent-gold/30">
-                <h3 className="font-subhead text-2xl mb-4 text-accent-gold text-center">
+                {/* <h3 className="font-subhead text-2xl mb-4 text-accent-gold text-center">
                   Contribution Requirements
-                </h3>
+                </h3> */}
                 
                 {/* Icon-Based System */}
                 <div className="mb-6 p-4 bg-accent-purple/10 border border-accent-purple/30 rounded-lg">
@@ -662,7 +628,7 @@ const Feast = () => {
               <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">🌱</span>
-                  <h3 className="font-subhead text-lg text-green-800 dark:text-green-200">Vegan</h3>
+                  <h3 className="font-subhead text-lg text-green-800 dark:text-green-200">Vegetarian</h3>
                 </div>
                 <p className="text-sm font-body text-green-700 dark:text-green-300">
                   Contains <strong>no animal products</strong> including meat, dairy, eggs, honey, gelatin, or any animal-derived ingredients.
