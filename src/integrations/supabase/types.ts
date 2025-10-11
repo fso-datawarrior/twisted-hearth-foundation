@@ -554,6 +554,60 @@ export type Database = {
         }
         Relationships: []
       }
+      signature_libations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          image_url: string | null
+          ingredients: string[]
+          is_active: boolean
+          libation_type: string
+          name: string
+          prep_notes: string | null
+          prep_time: string | null
+          serving_size: string | null
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          is_active?: boolean
+          libation_type?: string
+          name: string
+          prep_notes?: string | null
+          prep_time?: string | null
+          serving_size?: string | null
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          is_active?: boolean
+          libation_type?: string
+          name?: string
+          prep_notes?: string | null
+          prep_time?: string | null
+          serving_size?: string | null
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       tournament_matches: {
         Row: {
           created_at: string

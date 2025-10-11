@@ -18,6 +18,8 @@ import HuntRune from "@/components/hunt/HuntRune";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { getActiveLibations } from "@/lib/libations-api";
 import { z } from "zod";
 
 interface PotluckItem {
@@ -226,23 +228,12 @@ const Feast = () => {
       setIsLoading(false);
     }
   };
-  const signatureDrinks = [
-    {
-      name: "Poisoned Apple",
-      description: "A bubbling brew of spiced apple cider, steeped with cinnamon, clove, and citrus, beckons like a potion from a haunted orchard. One sip warms the soul and whispers secrets of autumn's darkest magic.",
-      ingredients: "apple juice, cloves, nutmeg, allspice, candied ginger, orange peel, cinnamon, and the liquor of your choice"
-    },
-    {
-      name: "Blood Wine of the Beast", 
-      description: "Deep red wine blend with flavors of blackberry and orange. <em>The Beast's curse runs deep - each sip brings you closer to the transformation.</em>",
-      ingredients: "red wine blend, cabernet, orange slices, blackberry, cinnamon"
-    },
-    {
-      name: "The Enchanted Bramble",
-      description: "— a dark, enchanting brew kissed with forest berries and a whisper of cinnamon, as if plucked from a midnight spell in a forgotten glade.",
-      ingredients: "blueberry juice, agave syrup, lemon juice, blueberries, blackberries, cinnamon"
-    }
-  ];
+
+  // Fetch signature libations from database
+  const { data: signatureDrinks = [], isLoading: drinksLoading } = useQuery({
+    queryKey: ['active-libations'],
+    queryFn: getActiveLibations,
+  });
 
   const potluckSuggestions = [
     {
@@ -302,31 +293,68 @@ const Feast = () => {
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Signature Libations
               </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {signatureDrinks.map((drink, index) => (
-                  <div 
-                    key={index}
-                    className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
-                  >
-                    {index === 0 && (
-                      <HuntRune 
-                        id="12" 
-                        label="A diced confession"
-                        className="absolute top-2 right-2"
-                      />
-                    )}
-                    <h3 className="font-subhead text-xl mb-3 text-accent-red">
-                      {drink.name}
-                    </h3>
-                    <p className="font-body text-muted-foreground mb-4" dangerouslySetInnerHTML={{ __html: drink.description }}>
-                    </p>
-                    <div className="text-sm">
-                      <span className="font-subhead text-accent-gold">Ingredients: </span>
-                      <span className="font-body text-muted-foreground">{drink.ingredients}</span>
+              
+              {drinksLoading ? (
+                <div className="text-center py-8">
+                  <p className="font-body text-muted-foreground">Loading libations...</p>
+                </div>
+              ) : signatureDrinks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="font-body text-muted-foreground">No signature libations available yet.</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {signatureDrinks.map((drink, index) => (
+                    <div 
+                      key={drink.id}
+                      className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
+                    >
+                      {index === 0 && (
+                        <HuntRune 
+                          id="12" 
+                          label="A diced confession"
+                          className="absolute top-2 right-2"
+                        />
+                      )}
+                      {drink.image_url && (
+                        <div className="text-4xl mb-3 text-center">
+                          {drink.image_url.startsWith('http') ? (
+                            <img src={drink.image_url} alt={drink.name} className="w-16 h-16 mx-auto object-cover rounded" />
+                          ) : (
+                            <span>{drink.image_url}</span>
+                          )}
+                        </div>
+                      )}
+                      <h3 className="font-subhead text-xl mb-3 text-accent-red">
+                        {drink.name}
+                      </h3>
+                      <p className="font-body text-muted-foreground mb-4" dangerouslySetInnerHTML={{ __html: drink.description }}>
+                      </p>
+                      <div className="text-sm mb-2">
+                        <span className="font-subhead text-accent-gold">Ingredients: </span>
+                        <span className="font-body text-muted-foreground">
+                          {Array.isArray(drink.ingredients) ? drink.ingredients.join(', ') : drink.ingredients}
+                        </span>
+                      </div>
+                      {drink.serving_size && (
+                        <div className="text-xs text-muted-foreground mt-2">
+                          <span className="font-semibold">Serves:</span> {drink.serving_size}
+                        </div>
+                      )}
+                      {drink.prep_time && (
+                        <div className="text-xs text-muted-foreground">
+                          <span className="font-semibold">Prep time:</span> {drink.prep_time}
+                        </div>
+                      )}
+                      {drink.prep_notes && (
+                        <div className="text-xs text-muted-foreground italic mt-2">
+                          {drink.prep_notes}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
               
               <div className="mt-8 text-center">
                 <div className="bg-bg-2 p-6 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">

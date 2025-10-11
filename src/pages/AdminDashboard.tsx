@@ -13,8 +13,10 @@ import GuestbookManagement from '@/components/admin/GuestbookManagement';
 import EmailCommunication from '@/components/admin/EmailCommunication';
 import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
 import HomepageVignettesManagement from '@/components/admin/HomepageVignettesManagement';
+import { LibationsManagement } from '@/components/admin/LibationsManagement';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
+import { getAllLibations } from '@/lib/libations-api';
 import { 
   Users, 
   Trophy, 
@@ -26,7 +28,8 @@ import {
   Settings,
   Mail,
   Theater,
-  Home
+  Home,
+  Wine
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -143,6 +146,12 @@ export default function AdminDashboard() {
     select: (data) => data.data || []
   });
 
+  // Libations query
+  const { data: libations, isLoading: libationsLoading } = useQuery({
+    queryKey: ['admin-libations'],
+    queryFn: getAllLibations,
+  });
+
   // Count vignette-selected photos
   const { data: vignettePhotosCount } = useQuery({
     queryKey: ['vignette-photos-count'],
@@ -165,6 +174,7 @@ export default function AdminDashboard() {
   const activeVignettes = vignettes?.filter(v => v.is_active).length || 0;
   const totalVignettes = vignettes?.length || 0;
   const selectedVignettePhotos = vignettePhotosCount || 0;
+  const activeLibations = libations?.filter(l => l.is_active).length || 0;
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Settings, count: null },
@@ -174,6 +184,7 @@ export default function AdminDashboard() {
     { id: 'hunt', label: 'Hunt', icon: Search, count: activeHuntRuns },
     { id: 'vignettes', label: 'Vignettes', icon: Theater, count: selectedVignettePhotos },
     { id: 'homepage', label: 'Homepage', icon: Home, count: 3 },
+    { id: 'libations', label: 'Libations', icon: Wine, count: activeLibations },
     { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
     { id: 'email', label: 'Email', icon: Mail, count: null }
   ];
@@ -346,6 +357,9 @@ export default function AdminDashboard() {
             )}
             {activeTab === 'homepage' && (
               <HomepageVignettesManagement />
+            )}
+            {activeTab === 'libations' && (
+              <LibationsManagement />
             )}
             {activeTab === 'guestbook' && (
               <GuestbookManagement />
