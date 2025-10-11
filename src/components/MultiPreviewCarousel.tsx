@@ -56,26 +56,21 @@ const MultiPreviewCarousel = ({
           return;
         }
 
-        // Generate URLs in parallel for better performance
+        // Generate public URLs for approved photos
         const urlPromises = previewPhotos.map(async (photo) => {
           try {
-            const { data, error } = await supabase.storage
+            const { data } = supabase.storage
               .from('gallery')
-              .createSignedUrl(photo.storage_path, 3600);
+              .getPublicUrl(photo.storage_path);
             
-            if (error) {
-              console.error('Signed URL error for path:', photo.storage_path, error);
+            if (!data?.publicUrl) {
+              console.warn('No public URL returned for:', photo.storage_path);
               return '/img/no-photos-placeholder.jpg';
             }
             
-            if (!data?.signedUrl) {
-              console.warn('No signed URL returned for:', photo.storage_path);
-              return '/img/no-photos-placeholder.jpg';
-            }
-            
-            return data.signedUrl;
+            return data.publicUrl;
           } catch (error) {
-            console.error('Exception generating signed URL:', error);
+            console.error('Exception generating public URL:', error);
             return '/img/no-photos-placeholder.jpg';
           }
         });

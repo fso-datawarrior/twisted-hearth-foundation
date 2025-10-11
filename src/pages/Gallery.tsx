@@ -71,11 +71,11 @@ const Gallery = () => {
   };
 
   const getPhotoUrl = async (storagePath: string): Promise<string> => {
-    // Generate signed URL for private bucket
-    const { data } = await supabase.storage
+    // Generate public URL for approved photos
+    const { data } = supabase.storage
       .from('gallery')
-      .createSignedUrl(storagePath, 3600); // 1 hour expiry
-    return data?.signedUrl || '';
+      .getPublicUrl(storagePath);
+    return data?.publicUrl || '';
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
