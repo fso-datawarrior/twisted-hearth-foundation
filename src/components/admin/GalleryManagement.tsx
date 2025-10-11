@@ -182,7 +182,14 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => document.getElementById('pending-photos')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => {
+            const element = document.getElementById('pending-photos');
+            if (element) {
+              const offset = 120;
+              const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+            }
+          }}
         >
           <ArrowDown className="h-4 w-4 mr-2" />
           Go to Pending Photos
@@ -190,7 +197,14 @@ export default function GalleryManagement({ photos, isLoading }: GalleryManageme
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => document.getElementById('approved-photos')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => {
+            const element = document.getElementById('approved-photos');
+            if (element) {
+              const offset = 120;
+              const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ top: elementPosition - offset, behavior: 'smooth' });
+            }
+          }}
         >
           <ArrowDown className="h-4 w-4 mr-2" />
           Go to Approved Photos
