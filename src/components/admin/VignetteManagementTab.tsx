@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Theater, ArrowUp, ArrowDown, X, Save, RotateCcw } from 'lucide-react';
+import { Theater, ArrowUp, ArrowDown, X, Save, RotateCcw, Eye } from 'lucide-react';
+import { PhotoLightbox } from '@/components/gallery/PhotoLightbox';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +44,8 @@ export default function VignetteManagementTab() {
   const [selectedPhotos, setSelectedPhotos] = useState<VignettePhoto[]>([]);
   const [vignetteData, setVignetteData] = useState<Record<string, VignetteFormData>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Fetch photos selected for vignettes
   const { data: photos, isLoading: photosLoading } = useQuery({
@@ -405,6 +408,19 @@ export default function VignetteManagementTab() {
                         </div>
                       </div>
 
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
+                        className="w-full sm:w-auto mb-4"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Full Size
+                      </Button>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Title</label>
@@ -505,6 +521,29 @@ export default function VignetteManagementTab() {
             </Button>
           </div>
         </div>
+      )}
+
+      {lightboxOpen && (
+        <PhotoLightbox
+          photos={selectedPhotos.map(p => ({
+            id: p.id,
+            url: p.signedUrl || '',
+            caption: vignetteData[p.id]?.title || p.caption || '',
+            user_id: '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_approved: true,
+            is_featured: false,
+            is_favorite: false,
+            likes_count: 0,
+            tags: [],
+            storage_path: p.storage_path,
+            filename: p.filename,
+          }))}
+          currentIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
       )}
     </div>
   );
