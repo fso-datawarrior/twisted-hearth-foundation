@@ -130,15 +130,16 @@ export const PhotoCard = ({
             {imageUrl ? (
               <img
                 src={imageUrl}
-                srcSet={`
-                  ${imageUrl}?w=400 400w,
-                  ${imageUrl}?w=800 800w
-                `}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                 alt={photo.caption || 'Gallery photo'}
                 className="w-full h-full object-contain transition-transform group-hover:scale-105"
                 loading="lazy"
-                onError={() => setImageUrl(null)}
+                onError={(e) => {
+                  console.error('[PhotoCard] Image load failed:', {
+                    photoId: photo.id,
+                    src: imageUrl.substring(0, 100)
+                  });
+                  setImageUrl(null);
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">

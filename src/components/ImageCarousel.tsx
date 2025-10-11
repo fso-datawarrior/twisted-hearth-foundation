@@ -80,12 +80,6 @@ const ImageCarousel = ({
       >
         <img 
           src={images[currentIndex]}
-          srcSet={`
-            ${images[currentIndex]}?w=480 480w,
-            ${images[currentIndex]}?w=800 800w,
-            ${images[currentIndex]}?w=1200 1200w
-          `}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
           alt={`Gallery preview ${currentIndex + 1}`}
           width="800"
           height="800"
@@ -94,7 +88,14 @@ const ImageCarousel = ({
           decoding="async"
           onError={(e) => {
             const badSrc = (e.currentTarget as HTMLImageElement).src;
-            console.error('Image failed to load, using placeholder:', badSrc);
+            const isSignedUrl = badSrc.includes('/object/sign/');
+            const isPublicUrl = badSrc.includes('/object/public/');
+            console.error('[ImageCarousel] Image load failed:', {
+              src: badSrc.substring(0, 100),
+              isSignedUrl,
+              isPublicUrl,
+              index: currentIndex
+            });
             (e.currentTarget as HTMLImageElement).src = '/img/no-photos-placeholder.jpg';
           }}
         />

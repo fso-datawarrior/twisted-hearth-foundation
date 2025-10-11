@@ -56,23 +56,28 @@ const MultiPreviewCarousel = ({
           return;
         }
 
-        // Generate public URLs for approved photos
+        // Log preview photos for diagnostics
+        console.info('[MultiPreviewCarousel] Loading photos:', 
+          previewPhotos.map(p => ({ id: p.id, storage_path: p.storage_path }))
+        );
+
+        // Generate public URLs using utility
         const urlPromises = previewPhotos.map(async (photo) => {
-          try {
-            const { data } = supabase.storage
-              .from('gallery')
-              .getPublicUrl(photo.storage_path);
-            
-            if (!data?.publicUrl) {
-              console.warn('No public URL returned for:', photo.storage_path);
-              return '/img/no-photos-placeholder.jpg';
-            }
-            
-            return data.publicUrl;
-          } catch (error) {
-            console.error('Exception generating public URL:', error);
+          const { data } = supabase.storage
+            .from('gallery')
+            .getPublicUrl(photo.storage_path);
+          
+          if (!data?.publicUrl) {
+            console.warn('[MultiPreviewCarousel] No public URL for:', photo.storage_path);
             return '/img/no-photos-placeholder.jpg';
           }
+          
+          console.info('[MultiPreviewCarousel] Generated URL:', {
+            id: photo.id,
+            url: data.publicUrl.substring(0, 80) + '...'
+          });
+          
+          return data.publicUrl;
         });
         
         const urls = await Promise.all(urlPromises);

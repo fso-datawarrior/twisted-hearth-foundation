@@ -71,11 +71,21 @@ const Gallery = () => {
   };
 
   const getPhotoUrl = async (storagePath: string): Promise<string> => {
-    // Generate public URL for approved photos
-    const { data } = supabase.storage
-      .from('gallery')
-      .getPublicUrl(storagePath);
-    return data?.publicUrl || '';
+    try {
+      const { data } = supabase.storage
+        .from('gallery')
+        .getPublicUrl(storagePath);
+      
+      if (!data?.publicUrl) {
+        console.warn('[Gallery] No public URL for:', storagePath);
+        return '/img/no-photos-placeholder.jpg';
+      }
+      
+      return data.publicUrl;
+    } catch (error) {
+      console.error('[Gallery] Error generating URL:', error, storagePath);
+      return '/img/no-photos-placeholder.jpg';
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
