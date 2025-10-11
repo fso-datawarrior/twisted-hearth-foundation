@@ -1,0 +1,49 @@
+diff --git a/src/pages/AuthCallback.tsx b/src/pages/AuthCallback.tsx
+index 0000000..0000000 100644
+--- a/src/pages/AuthCallback.tsx
++++ b/src/pages/AuthCallback.tsx
+@@ -1,10 +1,11 @@
+-import { useEffect, useState } from "react";
++import { useEffect, useState } from "react";
+ import { useNavigate } from "react-router-dom";
+ import { Button } from "@/components/ui/button";
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+ import { Input } from "@/components/ui/input";
+ import { useAuth } from "@/lib/auth";
+ import { supabase } from "@/integrations/supabase/client";
+ import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
+ import { useToast } from "@/hooks/use-toast";
++import { logger } from "@/lib/logger";
+@@
+-      console.log('🔐 AuthCallback: Processing magic link authentication...');
++      logger.info('🔐 AuthCallback: Processing magic link authentication...');
+@@
+-        console.log('✅ User already authenticated');
++        logger.info('✅ User already authenticated');
+@@
+-          console.error('❌ AuthCallback: Error in URL params:', errorCode, errorDescription);
++          logger.error('❌ AuthCallback: Error in URL params', new Error(String(errorCode ?? errorDescription ?? 'unknown')));
+@@
+-        if (accessToken) {
+-          console.log('✅ AuthCallback: Found auth tokens in URL, establishing session...');
+-        }
++        if (accessToken) logger.info('✅ AuthCallback: Found auth tokens in URL, establishing session...');
+@@
+-        if (sessionError) {
+-          console.error('❌ AuthCallback: Session error:', sessionError);
++        if (sessionError) {
++          logger.error('❌ AuthCallback: Session error', sessionError);
+@@
+-          console.log('✅ AuthCallback: Magic link authentication successful!');
++          logger.info('✅ AuthCallback: Magic link authentication successful!');
+@@
+-          console.log('❌ AuthCallback: No active session found');
++          logger.warn('❌ AuthCallback: No active session found');
+@@
+-      } catch (error) {
+-        console.error('❌ AuthCallback: Unexpected error:', error);
++      } catch (error) {
++        logger.error('❌ AuthCallback: Unexpected error', error as Error);
+         setErrorType('generic');
+         setStatus('error');
+       }
