@@ -9,6 +9,7 @@ import HuntRune from "@/components/hunt/HuntRune";
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
 import { Photo } from "@/lib/photo-api";
+import { getPublicImageUrlSync } from "@/lib/image-url";
 
 const Vignettes = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -84,54 +85,50 @@ const Vignettes = () => {
         return;
       }
 
-      // Generate signed URLs for each vignette's photos
-      const vignettesWithUrls = await Promise.all(
-        vignettes.map(async (vignette) => {
-          try {
-            // Get the first photo ID from the vignette
-            const photoId = vignette.photo_ids?.[0];
-            if (!photoId) {
-              console.warn('No photo ID found for vignette:', vignette.id);
-              return null;
-            }
+      // Build a map of first photo id per vignette
+      const photoIds = vignettes
+        .map((v: any) => v.photo_ids?.[0])
+        .filter((id: string | undefined) => !!id) as string[];
 
-            // Fetch the photo from the photos table
-            const { data: photo, error: photoError } = await supabase
-              .from('photos')
-              .select('storage_path')
-              .eq('id', photoId)
-              .single();
+      if (photoIds.length === 0) {
+        setDisplayVignettes([]);
+        return;
+      }
 
-            if (photoError || !photo) {
-              console.error('Error fetching photo:', photoError);
-              return null;
-            }
+      // Fetch all required photos in one query
+      const { data: photosData, error: photosErr } = await supabase
+        .from('photos')
+        .select('id, storage_path, is_approved')
+        .in('id', photoIds)
+        .eq('is_approved', true);
 
-            // Generate signed URL for gallery bucket
-            const { data: signedUrlData } = await supabase.storage
-              .from('gallery')
-              .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
-            
-            return {
-              id: vignette.id,
-              title: vignette.title,
-              description: vignette.description,
-              year: vignette.year,
-              theme_tag: vignette.theme_tag,
-              imageUrl: signedUrlData?.signedUrl || '',
-              isActive: vignette.is_active,
-              photoId: photoId,
-              storagePath: photo.storage_path
-            };
-          } catch (error) {
-            console.error('Error generating signed URL for vignette:', vignette.id, error);
-            return null;
-          }
-        })
-      );
+      if (photosErr) {
+        console.error('Error fetching vignette photos:', photosErr);
+        setDisplayVignettes([]);
+        return;
+      }
 
-      // Filter out nulls and vignettes without valid URLs
-      setDisplayVignettes(vignettesWithUrls.filter(v => v && v.imageUrl) as any[]);
+      const photoMap = new Map<string, { storage_path: string }>();
+      (photosData || []).forEach((p: any) => photoMap.set(p.id, { storage_path: p.storage_path }));
+
+      const vignettesWithUrls = vignettes.map((v: any) => {
+        const pid = v.photo_ids?.[0];
+        const photo = pid ? photoMap.get(pid) : undefined;
+        const imageUrl = photo ? getPublicImageUrlSync(photo.storage_path) : '';
+        return {
+          id: v.id,
+          title: v.title,
+          description: v.description,
+          year: v.year,
+          theme_tag: v.theme_tag,
+          imageUrl,
+          isActive: v.is_active,
+          photoId: pid,
+          storagePath: photo?.storage_path
+        };
+      }).filter((v: any) => v.imageUrl);
+
+      setDisplayVignettes(vignettesWithUrls as any[]);
     };
 
     generateVignetteUrls();
