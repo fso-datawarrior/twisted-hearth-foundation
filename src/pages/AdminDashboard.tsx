@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CollapsibleSection from '@/components/admin/CollapsibleSection';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import RequireAdmin from '@/components/RequireAdmin';
@@ -191,183 +193,190 @@ export default function AdminDashboard() {
 
   return (
     <RequireAdmin>
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8 mt-24">
-            <h1 className="text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
-            <p className="text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
+          <div className="mb-6 sm:mb-8 mt-20 sm:mt-24">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
           </div>
           
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <Button
-                  key={tab.id}
-                  variant={activeTab === tab.id ? 'default' : 'outline'}
-                  onClick={() => setActiveTab(tab.id)}
-                  className="relative flex items-center gap-2"
+          {/* Navigation Tabs - Mobile Optimized */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full h-auto flex-wrap justify-start gap-1 p-1 bg-muted/50 mb-6">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.length > 8 ? tab.label.slice(0, 7) + '...' : tab.label}</span>
+                    {tab.count !== null && tab.count !== undefined && (
+                      <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs px-1 sm:px-1.5 py-0">
+                        {tab.count}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+
+            <TabsContent value="overview" className="mt-0">
+              <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-accent-gold">OVERVIEW</h2>
+                
+                {/* Stats Overview */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-primary flex-shrink-0" />
+                        <span className="truncate">Total RSVPs</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-primary">{confirmedRsvps}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{totalGuests} total guests expected</p>
+                    </CardContent>
+                  </Card>
+                
+                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
+                        <span className="truncate">Tournament</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">teams registered</p>
+                    </CardContent>
+                  </Card>
+                
+                  <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Images className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-accent flex-shrink-0" />
+                        <span className="truncate">Gallery</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-accent">{pendingPhotos}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">photos awaiting approval</p>
+                    </CardContent>
+                  </Card>
+                
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
+                        <span className="truncate">Hunt Progress</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Theater className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-accent-gold flex-shrink-0" />
+                        <span className="truncate">Vignettes</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-accent-gold">{selectedVignettePhotos}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">photos selected ({activeVignettes} active)</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Quick Actions - Collapsible */}
+                <CollapsibleSection 
+                  title="Quick Actions" 
+                  icon={<Settings className="h-4 w-4 sm:h-5 sm:w-5" />}
+                  defaultOpen={true}
                 >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
-                  {tab.count !== null && tab.count !== undefined && (
-                    <Badge variant="secondary" className="ml-1">
-                      {tab.count}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
-          </div>
-
-          {activeTab === 'overview' && (
-            <div className="bg-card rounded-lg border p-6">
-              <h2 className="text-2xl font-bold text-accent-gold mb-6">OVERVIEW</h2>
-              
-              {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-primary" />
-                      Total RSVPs
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-primary">{confirmedRsvps}</div>
-                    <p className="text-xs text-muted-foreground">{totalGuests} total guests expected</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center">
-                      <Trophy className="h-4 w-4 mr-2 text-secondary" />
-                      Tournament
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
-                    <p className="text-xs text-muted-foreground">teams registered</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center">
-                      <Images className="h-4 w-4 mr-2 text-accent" />
-                      Gallery
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-accent">{pendingPhotos}</div>
-                    <p className="text-xs text-muted-foreground">photos awaiting approval</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center">
-                      <Search className="h-4 w-4 mr-2 text-green-600" />
-                      Hunt Progress
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-green-600">{activeHuntRuns}</div>
-                    <p className="text-xs text-muted-foreground">active participants</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center">
-                      <Theater className="h-4 w-4 mr-2 text-accent-gold" />
-                      Vignettes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-accent-gold">{selectedVignettePhotos}</div>
-                    <p className="text-xs text-muted-foreground">photos selected ({activeVignettes} active)</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions */}
-              <Card className="mb-8">
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <Button 
                       variant="outline" 
-                      className="h-16 flex-col space-y-2"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
                       onClick={() => setActiveTab('rsvps')}
                     >
-                      <Calendar className="h-6 w-6" />
-                      <span className="text-sm">Export RSVPs</span>
+                      <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-sm text-center">Export RSVPs</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="h-16 flex-col space-y-2"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
                       onClick={() => setActiveTab('tournament')}
                     >
-                      <Trophy className="h-6 w-6" />
-                      <span className="text-sm">Tournament Bracket</span>
+                      <Trophy className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-sm text-center">Tournament Bracket</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="h-16 flex-col space-y-2"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
                       onClick={() => setActiveTab('gallery')}
                     >
-                      <Images className="h-6 w-6" />
-                      <span className="text-sm">Approve Photos</span>
+                      <Images className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-sm text-center">Approve Photos</span>
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="h-16 flex-col space-y-2"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
                       onClick={() => setActiveTab('hunt')}
                     >
-                      <Map className="h-6 w-6" />
-                      <span className="text-sm">Hunt Stats</span>
+                      <Map className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-sm text-center">Hunt Stats</span>
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                </CollapsibleSection>
+              </div>
+            </TabsContent>
 
-          {/* Tab Content Placeholders */}
-          <div className="bg-card rounded-lg border p-6">
-            {activeTab === 'rsvps' && (
+            {/* Tab Content */}
+            <TabsContent value="rsvps" className="mt-0">
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
-            )}
-            {activeTab === 'tournament' && (
+            </TabsContent>
+            
+            <TabsContent value="tournament" className="mt-0">
               <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
-            )}
-            {activeTab === 'gallery' && (
+            </TabsContent>
+            
+            <TabsContent value="gallery" className="mt-0">
               <GalleryManagement photos={photos} isLoading={photosLoading} />
-            )}
-            {activeTab === 'hunt' && (
+            </TabsContent>
+            
+            <TabsContent value="hunt" className="mt-0">
               <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
-            )}
-            {activeTab === 'vignettes' && (
+            </TabsContent>
+            
+            <TabsContent value="vignettes" className="mt-0">
               <VignetteManagementTab />
-            )}
-            {activeTab === 'homepage' && (
+            </TabsContent>
+            
+            <TabsContent value="homepage" className="mt-0">
               <HomepageVignettesManagement />
-            )}
-            {activeTab === 'libations' && (
+            </TabsContent>
+            
+            <TabsContent value="libations" className="mt-0">
               <LibationsManagement />
-            )}
-            {activeTab === 'guestbook' && (
+            </TabsContent>
+            
+            <TabsContent value="guestbook" className="mt-0">
               <GuestbookManagement />
-            )}
-            {activeTab === 'email' && (
+            </TabsContent>
+            
+            <TabsContent value="email" className="mt-0">
               <EmailCommunication />
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </RequireAdmin>
