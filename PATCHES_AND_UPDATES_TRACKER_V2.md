@@ -48,21 +48,89 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 
 ## High Priority Issues (🟡)
 
-### 🟡 ADMIN-SETTINGS-01: User Role Management System
+### 🟡 ADMIN-SETTINGS-01: User Management & Database Reset System
 - **Files**: 
-  - NEW: `src/components/admin/UserRoleManagement.tsx`
-  - NEW: `src/lib/user-roles-api.ts`
+  - NEW: `src/components/admin/UserManagement.tsx`
+  - NEW: `src/components/admin/DatabaseResetPanel.tsx`
+  - NEW: `src/lib/user-management-api.ts`
+  - NEW: `src/lib/database-reset-api.ts`
+  - MODIFY: `src/pages/AdminDashboard.tsx`
+- **Status**: 🎯 Planned
+- **Time**: 4-5 hours
+- **Description**: Comprehensive user management system with database reset capabilities
+- **Features**:
+  - Remove individual users or bulk user removal
+  - Archive vs Delete user options (soft delete vs hard delete)
+  - Hide users without deletion
+  - Preserve user-generated content options (photos, comments, contributions)
+  - Selective content deletion (delete user but keep contributions)
+  - Database reset for testing environments
+  - Admin user protection (cannot delete admin accounts)
+  - Confirmation dialogs and audit logs
+
+### 🟡 ADMIN-SETTINGS-02: Admin Role Management System
+- **Files**: 
+  - NEW: `src/components/admin/AdminRoleManagement.tsx`
+  - NEW: `src/lib/admin-roles-api.ts`
   - MODIFY: `src/pages/AdminDashboard.tsx`
 - **Status**: 🎯 Planned
 - **Time**: 2-3 hours
-- **Description**: Create comprehensive user role management system with permissions
+- **Description**: Admin role assignment and management system
 - **Features**:
-  - Role creation and editing (Admin, Moderator, User)
-  - Permission assignment per role
-  - User role assignment interface
-  - Role-based access control (RBAC) implementation
+  - Add new admin users
+  - Remove admin privileges (with safeguards)
+  - Admin role hierarchy (Super Admin, Admin, Moderator)
+  - Permission levels per admin role
+  - Admin activity logging
+  - Prevent self-demotion safeguards
 
-### 🟡 ADMIN-SETTINGS-02: System Configuration Panel
+### 🟡 ADMIN-SETTINGS-03: Navigation Reorganization & Settings Groups
+- **Files**:
+  - MODIFY: `src/components/admin/AdminNavigation.tsx`
+  - NEW: `src/components/admin/SettingsDropdown.tsx`
+  - NEW: `src/components/admin/CategoryGroups.tsx`
+- **Status**: 🎯 Planned
+- **Time**: 2-3 hours
+- **Description**: Reorganize admin navigation into logical categories and settings
+- **Proposed Categories**:
+  - **User Management**: User removal, admin roles, permissions
+  - **Content Management**: Gallery, RSVPs, Hunt, Vignettes
+  - **Communication**: Email campaigns, guestbook, notifications
+  - **System Settings**: Configuration, maintenance, database tools
+  - **Analytics & Reports**: Statistics, exports, performance metrics
+- **Features**:
+  - Collapsible navigation groups
+  - Settings dropdown menu
+  - Quick action shortcuts
+  - Mobile-friendly navigation
+
+### 🟡 ADMIN-SETTINGS-04: Email Campaign Management System
+- **Files**:
+  - NEW: `src/components/admin/EmailCampaigns.tsx`
+  - NEW: `src/components/admin/EmailTemplateEditor.tsx`
+  - NEW: `src/components/admin/EmailStats.tsx`
+  - NEW: `src/components/admin/RecipientListManager.tsx`
+  - NEW: `src/lib/email-campaigns-api.ts`
+  - NEW: Database migrations for email system tables
+- **Status**: 🎯 Planned
+- **Time**: 6-8 hours
+- **Description**: Complete email marketing and communication system
+- **Standard Email Campaign Features**:
+  - **Template Management**: Create, edit, save email templates with rich text editor
+  - **Recipient Lists**: Segment users (All Guests, RSVP'd Only, Admins, Custom Lists)
+  - **Bulk Email Sending**: Schedule and send campaigns to selected lists
+  - **Email Statistics**: Open rates, click rates, bounce rates, delivery status
+  - **Campaign History**: Track all sent campaigns with performance metrics
+  - **A/B Testing**: Test subject lines and content variations
+  - **Personalization**: Dynamic content insertion (names, RSVP status, etc.)
+  - **Compliance**: Unsubscribe links, GDPR compliance, spam prevention
+- **Technical Considerations**:
+  - Integration with email service provider (SendGrid, Mailgun, etc.)
+  - Queue system for bulk sending
+  - Rate limiting to prevent spam flags
+  - Email validation and bounce handling
+
+### 🟡 ADMIN-SETTINGS-05: System Configuration Panel
 - **Files**:
   - NEW: `src/components/admin/SystemSettings.tsx`
   - NEW: `src/lib/system-config-api.ts`
@@ -161,18 +229,23 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 
 ## Implementation Batches
 
-### Batch 1 - Admin Settings Foundation (5-6 hours)
-1. ADMIN-SETTINGS-01: User Role Management System
-2. ADMIN-SETTINGS-02: System Configuration Panel
+### Batch 1 - Core Admin Management (8-10 hours)
+1. ADMIN-SETTINGS-01: User Management & Database Reset System
+2. ADMIN-SETTINGS-02: Admin Role Management System
+3. ADMIN-SETTINGS-03: Navigation Reorganization & Settings Groups
 
-### Batch 2 - UX Enhancements (5-7 hours)
-3. UX-ENHANCEMENT-01: Enhanced Loading States
-4. UX-ENHANCEMENT-02: Mobile Navigation Improvements
-5. PERFORMANCE-01: Image Optimization System
+### Batch 2 - Email Campaign System (6-8 hours)
+4. ADMIN-SETTINGS-04: Email Campaign Management System
+5. ADMIN-SETTINGS-05: System Configuration Panel
 
-### Batch 3 - Advanced Features (9-11 hours)
-6. FEATURE-REQUEST-01: Advanced Search & Filtering
-7. FEATURE-REQUEST-02: Analytics Dashboard
+### Batch 3 - UX Enhancements (5-7 hours)
+6. UX-ENHANCEMENT-01: Enhanced Loading States
+7. UX-ENHANCEMENT-02: Mobile Navigation Improvements
+8. PERFORMANCE-01: Image Optimization System
+
+### Batch 4 - Advanced Features (9-11 hours)
+9. FEATURE-REQUEST-01: Advanced Search & Filtering
+10. FEATURE-REQUEST-02: Analytics Dashboard
 
 ---
 
@@ -229,7 +302,8 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 - ✅ Comprehensive Patch System Established
 
 **Phase 2 Goals:**
-- 🎯 3 Implementation Batches Planned
-- 🎯 10+ New Features/Enhancements
+- 🎯 4 Implementation Batches Planned
+- 🎯 15+ New Features/Enhancements
+- 🎯 Admin Management & Email System Focus
 - 🎯 Performance & Security Focus
 - 🎯 Production-Ready System
