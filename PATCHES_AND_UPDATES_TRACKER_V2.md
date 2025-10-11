@@ -122,9 +122,9 @@ This document tracks all new patches, updates, and features for the Twisted Hear
   - MODIFY: `src/pages/AdminDashboard.tsx`
   - NEW: `src/components/admin/AdminNavigation.tsx`
   - NEW: `src/components/admin/SettingsDropdown.tsx`
-- **Status**: 🎯 Planned
+- **Status**: 🎯 Planned for BATCH 4
 - **Time**: 2.5-3 hours
-- **Priority**: BATCH 1 - Foundation & Navigation
+- **Priority**: BATCH 4 - Admin Dashboard Overhaul
 - **Description**: Mobile-first navigation reorganization with category grouping
 - **Current State**: 10 tabs (Overview, RSVPs, Tournament, Gallery, Hunt, Vignettes, Homepage, Libations, Guestbook, Email)
 - **Confirmed Scope**:
@@ -386,6 +386,91 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 
 ---
 
+## Database Connection Issues (🔴 CRITICAL)
+
+### DB-INTEGRITY-01: Missing Foreign Key Constraints
+- **Status**: 🔴 CRITICAL - Add to BATCH 4
+- **Issue**: NO foreign key constraints found in database
+- **Impact**: Data integrity at risk, orphaned records possible
+- **Tables Affected**: ALL tables with user_id references
+- **Required Fixes**:
+  ```sql
+  -- Add foreign keys for user references
+  ALTER TABLE photos ADD CONSTRAINT photos_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE guestbook ADD CONSTRAINT guestbook_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE potluck_items ADD CONSTRAINT potluck_items_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE rsvps ADD CONSTRAINT rsvps_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE hunt_runs ADD CONSTRAINT hunt_runs_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE hunt_progress ADD CONSTRAINT hunt_progress_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  
+  ALTER TABLE tournament_registrations ADD CONSTRAINT tournament_registrations_user_id_fkey 
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  ```
+
+### DB-SCHEMA-01: Missing Columns Causing Query Errors
+- **Status**: 🔴 CRITICAL - Add to BATCH 4
+- **Issue**: Multiple columns being queried but don't exist
+- **Errors Found**:
+  - `hunt_runs.status` - Column missing (queries expect: 'active', 'completed', 'abandoned')
+  - `tournament_registrations.status` - Column missing (queries expect: 'pending', 'approved', 'rejected')
+- **Required Fixes**:
+  ```sql
+  -- Add missing status column to hunt_runs
+  ALTER TABLE hunt_runs 
+    ADD COLUMN status TEXT DEFAULT 'active' 
+    CHECK (status IN ('active', 'completed', 'abandoned'));
+  
+  -- Update existing completed runs
+  UPDATE hunt_runs 
+    SET status = 'completed' 
+    WHERE completed_at IS NOT NULL;
+  
+  -- Add missing status column to tournament_registrations
+  ALTER TABLE tournament_registrations 
+    ADD COLUMN status TEXT DEFAULT 'pending' 
+    CHECK (status IN ('pending', 'approved', 'rejected'));
+  ```
+
+### DB-OPTIMIZATION-01: Add Missing Indexes
+- **Status**: 🟡 HIGH - Add to BATCH 4
+- **Issue**: No indexes found on frequently queried columns
+- **Impact**: Slow query performance on user lookups
+- **Required Indexes**:
+  ```sql
+  -- User ID indexes for faster lookups
+  CREATE INDEX idx_photos_user_id ON photos(user_id);
+  CREATE INDEX idx_guestbook_user_id ON guestbook(user_id);
+  CREATE INDEX idx_potluck_items_user_id ON potluck_items(user_id);
+  CREATE INDEX idx_rsvps_user_id ON rsvps(user_id);
+  CREATE INDEX idx_hunt_runs_user_id ON hunt_runs(user_id);
+  CREATE INDEX idx_hunt_progress_user_id ON hunt_progress(user_id);
+  CREATE INDEX idx_tournament_registrations_user_id ON tournament_registrations(user_id);
+  
+  -- Status indexes for filtering
+  CREATE INDEX idx_photos_is_approved ON photos(is_approved);
+  CREATE INDEX idx_photos_is_featured ON photos(is_featured);
+  CREATE INDEX idx_rsvps_status ON rsvps(status);
+  CREATE INDEX idx_rsvps_is_approved ON rsvps(is_approved);
+  
+  -- Date indexes for sorting
+  CREATE INDEX idx_photos_created_at ON photos(created_at DESC);
+  CREATE INDEX idx_guestbook_created_at ON guestbook(created_at DESC);
+  CREATE INDEX idx_hunt_runs_started_at ON hunt_runs(started_at DESC);
+  ```
+
+---
+
 ## Implementation Batches (REVISED)
 
 ### ✅ BATCH 1: Navigation & Layout Modernization (3-5 hours) - COMPLETED
@@ -485,30 +570,216 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 
 ---
 
-### 🎯 BATCH 3: Email System Phase 1 (6-8 hours)
-**Goal**: Core email campaign functionality with Mailjet
-**Priority**: MEDIUM - High value but can be phased
-**Dependencies**: Batch 1 (needs to be in Settings menu)
+### 🚧 BATCH 3: Email System Phase 1 (6-8 hours) - READY TO START
+**Goal**: Core email campaign functionality with Mailjet integration  
+**Priority**: HIGH - Blocked features awaiting email system  
+**Status**: 🎯 Planned - Ready to implement after BATCH 2  
+**Dependencies**: BATCH 2 complete ✅
 
-6. **ADMIN-SETTINGS-04**: Email Campaign System (6-8 hours)
-   - Template management with rich text editor
-   - Recipient list builder
-   - Campaign composer
-   - Basic statistics (sent, delivered, bounced)
-   - Mailjet integration
-   - Documentation: `docs/MAILJET_TEMPLATE_GUIDE.md`
+#### Implementation Plan:
+
+**PHASE 1: Database Schema & Edge Function (2-3 hours)**
+- Create email_templates table with rich text support
+- Create email_campaigns table with scheduling
+- Create campaign_recipients table with tracking
+- Implement send-email-campaign edge function
+- Add Mailjet batch sending with rate limiting (500/hour)
+- Test edge function with small recipient list
+
+**Database Schema**:
+```sql
+-- Email Templates
+CREATE TABLE email_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  html_content TEXT NOT NULL,
+  preview_text TEXT,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT true
+);
+
+-- Email Campaigns
+CREATE TABLE email_campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_id UUID REFERENCES email_templates(id),
+  recipient_list TEXT NOT NULL, -- 'all', 'rsvp_yes', 'rsvp_pending', 'custom'
+  subject TEXT NOT NULL,
+  scheduled_at TIMESTAMPTZ,
+  sent_at TIMESTAMPTZ,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'sending', 'sent', 'failed')),
+  stats JSONB DEFAULT '{"sent": 0, "delivered": 0, "bounced": 0}'::jsonb,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Campaign Recipients (tracking)
+CREATE TABLE campaign_recipients (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id UUID REFERENCES email_campaigns(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'delivered', 'bounced', 'failed')),
+  sent_at TIMESTAMPTZ,
+  delivered_at TIMESTAMPTZ,
+  error_message TEXT,
+  UNIQUE(campaign_id, email)
+);
+
+-- RLS Policies (admin only)
+ALTER TABLE email_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE email_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaign_recipients ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can manage templates" ON email_templates FOR ALL USING (is_admin());
+CREATE POLICY "Admins can manage campaigns" ON email_campaigns FOR ALL USING (is_admin());
+CREATE POLICY "Admins can view recipients" ON campaign_recipients FOR SELECT USING (is_admin());
+```
+
+**PHASE 2: Template Management UI (2-2.5 hours)**
+- Upgrade EmailCommunication from "Coming Soon" to full component
+- Implement template list view with search/filter
+- Add rich text editor (React Quill or TipTap)
+- Variable insertion ({{name}}, {{rsvp_status}}, etc.)
+- Live preview pane
+- Save/update/delete templates
+- Mobile-responsive editor
+
+**PHASE 3: Campaign Composer & Management (2-2.5 hours)**
+- Campaign creation wizard
+- Template selection
+- Recipient list builder (All Guests, RSVP'd, Pending, Custom)
+- CSV import with validation
+- Test email feature (send to self)
+- Campaign list with status badges
+- Basic stats (sent, delivered, bounced)
+
+**PHASE 4: Testing & Safety (1-1.5 hours)**
+- Test with 1-2 recipients
+- Verify Mailjet integration
+- Test rate limiting
+- Confirmation dialogs
+- Bounce handling
+- Mobile testing
+- Create MAILJET_TEMPLATE_GUIDE.md
 
 **Success Criteria**:
-- ✅ Email templates can be created/edited
-- ✅ Campaigns can be sent to recipient lists
-- ✅ Basic statistics are tracked
-- ✅ Mailjet documentation is complete
-- ✅ Test emails work correctly
-- ✅ Safety features prevent accidental sends
+- ✅ Create/edit templates with rich text
+- ✅ Compose and send campaigns
+- ✅ Send test emails
+- ✅ Schedule or send immediately
+- ✅ Track basic stats
+- ✅ Rate limiting works
+- ✅ Mobile responsive
 
 ---
 
-### 🎯 BATCH 4: Modern Admin Dashboard Overhaul (21-28 hours)
+### 🚧 BATCH 4: Navigation Consolidation & Database Fixes (5-7 hours) ⚠️ CRITICAL
+**Goal**: Consolidate admin navigation + fix critical database integrity issues  
+**Priority**: CRITICAL - Database integrity at risk + mobile UX improvement  
+**Status**: 🎯 Planned - INCLUDES CRITICAL DATABASE FIXES  
+**Dependencies**: BATCH 3 complete
+
+⚠️ **CRITICAL DATABASE ISSUES FOUND**:
+- NO foreign key constraints exist (data integrity at risk)
+- Missing columns causing query errors (hunt_runs.status, tournament_registrations.status)
+- No indexes on frequently queried columns (performance impact)
+
+#### Implementation Plan:
+
+**PHASE 1: CRITICAL DATABASE FIXES (2-3 hours) ⚠️ HIGHEST PRIORITY**
+```sql
+-- Fix 1: Add Foreign Key Constraints
+ALTER TABLE photos ADD CONSTRAINT photos_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE guestbook ADD CONSTRAINT guestbook_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE potluck_items ADD CONSTRAINT potluck_items_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE rsvps ADD CONSTRAINT rsvps_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE hunt_runs ADD CONSTRAINT hunt_runs_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE hunt_progress ADD CONSTRAINT hunt_progress_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE tournament_registrations ADD CONSTRAINT tournament_registrations_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- Fix 2: Add Missing Status Columns
+ALTER TABLE hunt_runs 
+  ADD COLUMN status TEXT DEFAULT 'active' 
+  CHECK (status IN ('active', 'completed', 'abandoned'));
+UPDATE hunt_runs SET status = 'completed' WHERE completed_at IS NOT NULL;
+
+ALTER TABLE tournament_registrations 
+  ADD COLUMN status TEXT DEFAULT 'pending' 
+  CHECK (status IN ('pending', 'approved', 'rejected'));
+
+-- Fix 3: Add Performance Indexes
+CREATE INDEX idx_photos_user_id ON photos(user_id);
+CREATE INDEX idx_guestbook_user_id ON guestbook(user_id);
+CREATE INDEX idx_potluck_items_user_id ON potluck_items(user_id);
+CREATE INDEX idx_rsvps_user_id ON rsvps(user_id);
+CREATE INDEX idx_hunt_runs_user_id ON hunt_runs(user_id);
+CREATE INDEX idx_hunt_progress_user_id ON hunt_progress(user_id);
+CREATE INDEX idx_tournament_registrations_user_id ON tournament_registrations(user_id);
+CREATE INDEX idx_photos_is_approved ON photos(is_approved);
+CREATE INDEX idx_rsvps_status ON rsvps(status);
+CREATE INDEX idx_photos_created_at ON photos(created_at DESC);
+```
+
+**PHASE 2: Navigation Consolidation (2-2.5 hours)**
+- Consolidate 12 tabs into 4 main categories
+- Implement dropdown menus with Radix UI
+- Structure: Overview | Content (dropdown) | Users (dropdown) | Settings (dropdown)
+- Add badge counts
+- Mobile-first design
+- Touch-friendly (44x44px minimum)
+
+**New Navigation**:
+```
+1. Overview (single)
+2. Content → Gallery, Vignettes, Homepage, Guestbook
+3. Users → RSVPs, Tournament, Hunt
+4. Settings → Libations, Email, User Mgmt, Admin Roles
+```
+
+**PHASE 3: Mobile Polish (1-1.5 hours)**
+- Hamburger menu for mobile
+- Sticky header
+- Swipe gestures
+- Smooth animations
+- Breadcrumb navigation
+
+**PHASE 4: Testing (0.5-1 hour)**
+- Test all navigation paths
+- Verify database fixes
+- Check for query errors
+- Test mobile/desktop
+- Accessibility verification
+
+**Files**:
+- NEW: `supabase/migrations/20251012000000_add_foreign_keys.sql`
+- NEW: `supabase/migrations/20251012000001_add_missing_status_columns.sql`
+- NEW: `supabase/migrations/20251012000002_add_performance_indexes.sql`
+- NEW: `src/components/admin/AdminNavigation.tsx`
+- NEW: `src/components/admin/SettingsDropdown.tsx`
+- MODIFY: `src/pages/AdminDashboard.tsx`
+
+**Success Criteria**:
+- ✅ All FK constraints added
+- ✅ Status columns added
+- ✅ Indexes created
+- ✅ No database errors
+- ✅ Navigation → 4 categories
+- ✅ All features accessible
+- ✅ Mobile friendly
+- ✅ Zero functionality lost
+
+---
+
+### 🎯 BATCH 5: Modern Admin Dashboard Analytics (DEFERRED - ORIGINAL BATCH 4)
 **Goal**: Transform admin dashboard into comprehensive analytics and management interface
 **Priority**: MEDIUM - Implement after Batches 1-3
 **Dependencies**: Batches 1-3 (navigation, user management, email system)
