@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { Eye } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Eye, Smartphone, Monitor } from 'lucide-react';
 import type { EmailTemplate } from '@/lib/email-campaigns-api';
 
 interface EmailTemplateEditorProps {
@@ -19,6 +20,7 @@ export function EmailTemplateEditor({ template, onSave, onCancel }: EmailTemplat
   const [previewText, setPreviewText] = useState(template?.preview_text || '');
   const [htmlContent, setHtmlContent] = useState(template?.html_content || '');
   const [showPreview, setShowPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
 
   const handleSave = () => {
     onSave({
@@ -32,6 +34,20 @@ export function EmailTemplateEditor({ template, onSave, onCancel }: EmailTemplat
 
   const insertVariable = (variable: string) => {
     setHtmlContent(prev => prev + `{{${variable}}}`);
+  };
+
+  const renderPreviewHtml = (html: string) => {
+    return html
+      .replace(/{{name}}/g, 'John Doe')
+      .replace(/{{email}}/g, 'guest@example.com')
+      .replace(/{{rsvp_status}}/g, 'confirmed')
+      .replace(/{{event_date}}/g, 'November 1st, 2025')
+      .replace(/{{event_time}}/g, '6:30 PM')
+      .replace(/{{event_address}}/g, 'Denver, Colorado')
+      .replace(/{{costume_idea}}/g, 'Little Red Riding Hood')
+      .replace(/{{num_guests}}/g, '2')
+      .replace(/{{dietary_restrictions}}/g, 'Vegetarian')
+      .replace(/{{gallery_link}}/g, 'https://twistedtale.com/gallery');
   };
 
   return (
@@ -97,37 +113,35 @@ export function EmailTemplateEditor({ template, onSave, onCancel }: EmailTemplat
           <div>
             <Label>Insert Variables</Label>
             <div className="flex flex-wrap gap-2 mt-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => insertVariable('name')}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('name')}>
                 {'{{name}}'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => insertVariable('email')}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('email')}>
                 {'{{email}}'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => insertVariable('rsvp_status')}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('rsvp_status')}>
                 {'{{rsvp_status}}'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => insertVariable('event_date')}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('event_date')}>
                 {'{{event_date}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('event_time')}>
+                {'{{event_time}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('event_address')}>
+                {'{{event_address}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('costume_idea')}>
+                {'{{costume_idea}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('num_guests')}>
+                {'{{num_guests}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('dietary_restrictions')}>
+                {'{{dietary_restrictions}}'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => insertVariable('gallery_link')}>
+                {'{{gallery_link}}'}
               </Button>
             </div>
           </div>
@@ -142,25 +156,71 @@ export function EmailTemplateEditor({ template, onSave, onCancel }: EmailTemplat
           </div>
         </div>
 
-        {/* Preview */}
+        {/* Rich Preview */}
         {showPreview && (
-          <Card className="p-4 h-fit">
-            <h3 className="text-sm font-medium mb-2">Preview</h3>
-            <div className="border rounded-lg p-4 bg-background">
-              <div className="text-xs text-muted-foreground mb-2">
-                Subject: {subject || '(no subject)'}
+          <Card className="p-4 h-fit sticky top-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium">Live Preview</h3>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={previewMode === 'desktop' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPreviewMode('desktop')}
+                >
+                  <Monitor className="w-4 h-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant={previewMode === 'mobile' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPreviewMode('mobile')}
+                >
+                  <Smartphone className="w-4 h-4" />
+                </Button>
               </div>
-              {previewText && (
-                <div className="text-xs text-muted-foreground mb-4">
-                  {previewText}
+            </div>
+
+            <Tabs defaultValue="rendered" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="rendered" className="flex-1">Rendered</TabsTrigger>
+                <TabsTrigger value="html" className="flex-1">HTML</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="rendered" className="mt-4">
+                <div 
+                  className={`border rounded-lg bg-white overflow-auto transition-all ${
+                    previewMode === 'mobile' ? 'max-w-[375px] mx-auto' : 'w-full'
+                  }`}
+                  style={{ height: '600px' }}
+                >
+                  <iframe
+                    title="Email Preview"
+                    srcDoc={renderPreviewHtml(htmlContent)}
+                    className="w-full h-full"
+                    sandbox="allow-same-origin"
+                  />
                 </div>
+              </TabsContent>
+              
+              <TabsContent value="html" className="mt-4">
+                <div className="border rounded-lg p-4 bg-muted max-h-[600px] overflow-auto">
+                  <pre className="text-xs font-mono whitespace-pre-wrap break-words">
+                    {htmlContent}
+                  </pre>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="mt-4 p-3 bg-muted rounded-lg text-xs">
+              <div className="font-medium mb-1">Subject:</div>
+              <div className="text-muted-foreground">{subject || '(no subject)'}</div>
+              {previewText && (
+                <>
+                  <div className="font-medium mt-2 mb-1">Preview:</div>
+                  <div className="text-muted-foreground">{previewText}</div>
+                </>
               )}
-              <div
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: htmlContent.replace(/\{\{(\w+)\}\}/g, '<span class="bg-yellow-200 px-1">$1</span>')
-                }}
-              />
             </div>
           </Card>
         )}
