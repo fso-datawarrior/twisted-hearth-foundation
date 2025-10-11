@@ -14,6 +14,130 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          delivered_at: string | null
+          email: string
+          error_message: string | null
+          id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          delivered_at?: string | null
+          email: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          delivered_at?: string | null
+          email?: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_recipients: string[] | null
+          id: string
+          recipient_list: string
+          scheduled_at: string | null
+          sent_at: string | null
+          stats: Json | null
+          status: string
+          subject: string
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_recipients?: string[] | null
+          id?: string
+          recipient_list: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats?: Json | null
+          status?: string
+          subject: string
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_recipients?: string[] | null
+          id?: string
+          recipient_list?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats?: Json | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          html_content: string
+          id: string
+          is_active: boolean
+          name: string
+          preview_text: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean
+          name: string
+          preview_text?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          preview_text?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guestbook: {
         Row: {
           created_at: string

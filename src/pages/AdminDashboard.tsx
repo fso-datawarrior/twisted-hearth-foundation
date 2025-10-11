@@ -12,7 +12,7 @@ import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
-import EmailCommunication from '@/components/admin/EmailCommunication';
+import { EmailCommunication } from '@/components/admin/EmailCommunication';
 import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
 import HomepageVignettesManagement from '@/components/admin/HomepageVignettesManagement';
 import { LibationsManagement } from '@/components/admin/LibationsManagement';
