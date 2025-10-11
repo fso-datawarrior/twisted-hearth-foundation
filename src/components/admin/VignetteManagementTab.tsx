@@ -122,7 +122,7 @@ export default function VignetteManagementTab() {
             description: '',
             year: new Date().getFullYear(),
             theme_tag: '',
-            is_active: true,
+            is_active: false,
             sort_order: index
           };
         }
@@ -364,6 +364,10 @@ export default function VignetteManagementTab() {
     return <div className="text-center py-12">Loading vignette data...</div>;
   }
 
+  // Calculate active vignettes count
+  const activeCount = Object.values(vignetteData).filter(data => data.is_active).length;
+  const totalCount = selectedPhotos.length;
+
   return (
     <div className="bg-card rounded-lg border p-6">
       <div className="flex items-center justify-between mb-6">
@@ -377,6 +381,9 @@ export default function VignetteManagementTab() {
           <Badge variant="outline" className="text-sm">
             <Theater className="h-3 w-3 mr-1" />
             {selectedPhotos.length} Selected
+          </Badge>
+          <Badge variant="default" className="text-sm bg-accent-gold text-background">
+            {activeCount} Active / {totalCount} Total
           </Badge>
         </div>
       </div>
@@ -397,7 +404,7 @@ export default function VignetteManagementTab() {
               description: '',
               year: new Date().getFullYear(),
               theme_tag: '',
-              is_active: true,
+              is_active: false,
               sort_order: index
             };
             
