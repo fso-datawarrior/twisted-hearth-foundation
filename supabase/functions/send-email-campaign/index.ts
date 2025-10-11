@@ -118,17 +118,22 @@ Deno.serve(async (req) => {
       throw new Error('No recipients found');
     }
 
-    // Create recipient records
+    // Create recipient records (upsert to handle duplicates)
     for (const recipient of recipientsData) {
-      await supabase
+      const { error: insertError } = await supabase
         .from('campaign_recipients')
-        .insert({
+        .upsert({
           campaign_id,
           email: recipient.email,
           status: 'pending',
-        })
-        .onConflict('campaign_id, email')
-        .ignoreDuplicates();
+        }, {
+          onConflict: 'campaign_id,email',
+          ignoreDuplicates: false
+        });
+      
+      if (insertError) {
+        console.log(`Warning: Could not insert recipient ${recipient.email}:`, insertError.message);
+      }
     }
 
     // Function to replace variables in HTML
