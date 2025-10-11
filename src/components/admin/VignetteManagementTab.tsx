@@ -43,7 +43,9 @@ export default function VignetteManagementTab() {
   const queryClient = useQueryClient();
   const [selectedPhotos, setSelectedPhotos] = useState<VignettePhoto[]>([]);
   const [vignetteData, setVignetteData] = useState<Record<string, VignetteFormData>>({});
-  const [hasChanges, setHasChanges] = useState(false);
+  const [vignetteChanges, setVignetteChanges] = useState<Record<string, boolean>>({});
+  const [savingVignettes, setSavingVignettes] = useState<Record<string, boolean>>({});
+  const [originalVignetteData, setOriginalVignetteData] = useState<Record<string, VignetteFormData>>({});
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -127,6 +129,7 @@ export default function VignetteManagementTab() {
       });
       
       setVignetteData(initialData);
+      setOriginalVignetteData(initialData);
     }
   }, [existingVignettes, selectedPhotos]);
 
@@ -183,7 +186,7 @@ export default function VignetteManagementTab() {
         [field]: value
       }
     }));
-    setHasChanges(true);
+    setVignetteChanges(prev => ({ ...prev, [photoId]: true }));
   };
 
   const movePhoto = (photoId: string, direction: 'up' | 'down') => {
@@ -201,12 +204,16 @@ export default function VignetteManagementTab() {
     [newPhotos[currentIndex], newPhotos[swapIndex]] = [newPhotos[swapIndex], newPhotos[currentIndex]];
     setSelectedPhotos(newPhotos);
     
-    // Update sort orders
+    // Update sort orders and mark as changed
     const newData = { ...vignetteData };
     newData[photoId] = { ...newData[photoId], sort_order: swapIndex };
     newData[newPhotos[currentIndex].id] = { ...newData[newPhotos[currentIndex].id], sort_order: currentIndex };
     setVignetteData(newData);
-    setHasChanges(true);
+    setVignetteChanges(prev => ({ 
+      ...prev, 
+      [photoId]: true,
+      [newPhotos[currentIndex].id]: true 
+    }));
   };
 
   const removeFromVignettes = async (photoId: string) => {
@@ -251,6 +258,11 @@ export default function VignetteManagementTab() {
       delete newData[photoId];
       return newData;
     });
+    setVignetteChanges(prev => {
+      const newChanges = { ...prev };
+      delete newChanges[photoId];
+      return newChanges;
+    });
 
     // Delete existing vignette if it exists
     const existingVignette = existingVignettes?.find(v => 
@@ -267,20 +279,30 @@ export default function VignetteManagementTab() {
     });
   };
 
-  const saveAllChanges = async () => {
-    for (const photo of selectedPhotos) {
-      const data = vignetteData[photo.id];
+  const saveVignette = async (photoId: string) => {
+    setSavingVignettes(prev => ({ ...prev, [photoId]: true }));
+    
+    try {
+      const data = vignetteData[photoId];
+      const photo = selectedPhotos.find(p => p.id === photoId);
+      
+      if (!photo || !data) {
+        throw new Error("Photo or data not found");
+      }
+
+      // Validate required fields
       if (!data.title || !data.description || !data.theme_tag) {
         toast({
-          title: "Missing Data",
-          description: `Please fill in all fields for ${photo.filename}`,
-          variant: "destructive"
+          title: "Validation Error",
+          description: "Title, description, and theme tag are required",
+          variant: "destructive",
         });
+        setSavingVignettes(prev => ({ ...prev, [photoId]: false }));
         return;
       }
 
       const existingVignette = existingVignettes?.find(v => 
-        v.photo_ids && v.photo_ids.includes(photo.id)
+        v.photo_ids && v.photo_ids.includes(photoId)
       );
 
       const vignettePayload = {
@@ -288,7 +310,7 @@ export default function VignetteManagementTab() {
         description: data.description,
         year: data.year,
         theme_tag: data.theme_tag,
-        photo_ids: [photo.id],
+        photo_ids: [photoId],
         is_active: data.is_active,
         sort_order: data.sort_order
       };
@@ -301,15 +323,41 @@ export default function VignetteManagementTab() {
       } else {
         await createVignetteMutation.mutateAsync(vignettePayload);
       }
-    }
 
-    setHasChanges(false);
+      // Update original data and clear changes
+      setOriginalVignetteData(prev => ({
+        ...prev,
+        [photoId]: data,
+      }));
+      setVignetteChanges(prev => ({ ...prev, [photoId]: false }));
+
+      toast({
+        title: "Success",
+        description: "Vignette saved successfully",
+      });
+    } catch (error) {
+      console.error("Error saving vignette:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save vignette",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingVignettes(prev => ({ ...prev, [photoId]: false }));
+    }
   };
 
-  const resetChanges = () => {
-    // Reset to original data
-    setHasChanges(false);
-    queryClient.invalidateQueries({ queryKey: ['all-vignettes'] });
+  const resetVignette = (photoId: string) => {
+    setVignetteData(prev => ({
+      ...prev,
+      [photoId]: originalVignetteData[photoId],
+    }));
+    setVignetteChanges(prev => ({ ...prev, [photoId]: false }));
+    
+    toast({
+      title: "Reset",
+      description: "Changes discarded",
+    });
   };
 
   if (photosLoading || vignettesLoading) {
@@ -494,32 +542,34 @@ export default function VignetteManagementTab() {
                           />
                         </div>
                       </div>
+
+                      {/* Individual Save/Reset Buttons */}
+                      <div className="flex gap-2 pt-4 border-t col-span-full">
+                        <Button 
+                          size="sm"
+                          onClick={() => saveVignette(photo.id)}
+                          disabled={!vignetteChanges[photo.id] || savingVignettes[photo.id]}
+                          className="flex-1"
+                        >
+                          <Save className="h-3 w-3 mr-1" />
+                          {savingVignettes[photo.id] ? 'Saving...' : 'Save'}
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => resetVignette(photo.id)}
+                          disabled={!vignetteChanges[photo.id]}
+                        >
+                          <RotateCcw className="h-3 w-3 mr-1" />
+                          Reset
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             );
           })}
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-4 border-t">
-            <Button 
-              onClick={saveAllChanges}
-              disabled={!hasChanges || createVignetteMutation.isPending || updateVignetteMutation.isPending}
-              className="flex-1"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {createVignetteMutation.isPending || updateVignetteMutation.isPending ? 'Saving...' : 'Save All Changes'}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={resetChanges}
-              disabled={!hasChanges}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
         </div>
       )}
 
@@ -527,7 +577,6 @@ export default function VignetteManagementTab() {
         <PhotoLightbox
           photos={selectedPhotos.map(p => ({
             id: p.id,
-            url: p.signedUrl || '',
             caption: vignetteData[p.id]?.title || p.caption || '',
             user_id: '',
             created_at: new Date().toISOString(),
@@ -539,10 +588,17 @@ export default function VignetteManagementTab() {
             tags: [],
             storage_path: p.storage_path,
             filename: p.filename,
+            category: null,
           }))}
           currentIndex={lightboxIndex}
           isOpen={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
+          getPhotoUrl={async (storagePath: string) => {
+            const { data } = await supabase.storage
+              .from('gallery')
+              .createSignedUrl(storagePath, 3600);
+            return data?.signedUrl || '';
+          }}
         />
       )}
     </div>
