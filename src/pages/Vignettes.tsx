@@ -151,7 +151,8 @@ const Vignettes = () => {
     is_approved: true,
     tags: [vignette.theme_tag],
     likes_count: 0,
-    is_featured: false
+    is_featured: false,
+    is_favorite: false
   }));
 
   // Handle vignette click to open lightbox
