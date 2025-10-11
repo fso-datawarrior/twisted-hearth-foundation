@@ -16,6 +16,9 @@ import EmailCommunication from '@/components/admin/EmailCommunication';
 import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
 import HomepageVignettesManagement from '@/components/admin/HomepageVignettesManagement';
 import { LibationsManagement } from '@/components/admin/LibationsManagement';
+import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
+import UserManagement from '@/components/admin/UserManagement';
+import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -31,7 +34,9 @@ import {
   Mail,
   Theater,
   Home,
-  Wine
+  Wine,
+  Shield,
+  UserCog
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -188,7 +193,9 @@ export default function AdminDashboard() {
     { id: 'homepage', label: 'Homepage', icon: Home, count: 3 },
     { id: 'libations', label: 'Libations', icon: Wine, count: activeLibations },
     { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
-    { id: 'email', label: 'Email', icon: Mail, count: null }
+    { id: 'email', label: 'Email', icon: Mail, count: null },
+    { id: 'admin-roles', label: 'Admins', icon: Shield, count: null },
+    { id: 'users', label: 'Users', icon: UserCog, count: null }
   ];
 
   return (
@@ -375,6 +382,17 @@ export default function AdminDashboard() {
             
             <TabsContent value="email" className="mt-0">
               <EmailCommunication />
+            </TabsContent>
+            
+            <TabsContent value="admin-roles" className="mt-0">
+              <AdminRoleManagement />
+            </TabsContent>
+            
+            <TabsContent value="users" className="mt-0">
+              <UserManagement />
+              <div className="mt-6">
+                <DatabaseResetPanel />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
