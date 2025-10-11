@@ -49,11 +49,13 @@ export function EmailCommunication() {
         getTemplates(),
         getCampaigns(),
       ]);
-      setTemplates(templatesData);
-      setCampaigns(campaignsData);
+      setTemplates(templatesData || []);
+      setCampaigns(campaignsData || []);
     } catch (error) {
       console.error('Failed to load email data:', error);
-      toast.error('Failed to load email data');
+      // Don't show error toast on initial load failure - just set empty arrays
+      setTemplates([]);
+      setCampaigns([]);
     }
   };
 

@@ -38,10 +38,10 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
   const loadTemplates = async () => {
     try {
       const data = await getActiveTemplates();
-      setTemplates(data);
+      setTemplates(data || []);
     } catch (error) {
       console.error('Failed to load templates:', error);
-      toast.error('Failed to load templates');
+      setTemplates([]);
     }
   };
 
@@ -51,10 +51,11 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
         setRecipientCount(customRecipients.length);
       } else {
         const count = await getRecipientCount(recipientList);
-        setRecipientCount(count);
+        setRecipientCount(count || 0);
       }
     } catch (error) {
       console.error('Failed to get recipient count:', error);
+      setRecipientCount(0);
     }
   };
 
