@@ -33,16 +33,15 @@ const Vignettes = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
-  // Fetch photos selected for vignettes directly
-  const { data: vignettePhotos, isLoading, error } = useQuery({
-    queryKey: ['vignette-photos'],
+  // Fetch vignettes with their metadata from past_vignettes table
+  const { data: vignettes, isLoading, error } = useQuery({
+    queryKey: ['active-vignettes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('photos')
+        .from('past_vignettes')
         .select('*')
-        .contains('tags', ['vignette-selected'])
-        .eq('is_approved', true)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
       
       if (error) throw error;
       return data;
@@ -54,8 +53,8 @@ const Vignettes = () => {
 
   useEffect(() => {
     const generateVignetteUrls = async () => {
-      if (!vignettePhotos || vignettePhotos.length === 0) {
-        // Set fallback data if no photos exist
+      if (!vignettes || vignettes.length === 0) {
+        // Set fallback data if no vignettes exist
         setDisplayVignettes([
           {
             id: "fallback-1",
@@ -85,44 +84,58 @@ const Vignettes = () => {
         return;
       }
 
-      // Generate signed URLs for each photo
+      // Generate signed URLs for each vignette's photos
       const vignettesWithUrls = await Promise.all(
-        vignettePhotos.map(async (photo) => {
+        vignettes.map(async (vignette) => {
           try {
+            // Get the first photo ID from the vignette
+            const photoId = vignette.photo_ids?.[0];
+            if (!photoId) {
+              console.warn('No photo ID found for vignette:', vignette.id);
+              return null;
+            }
+
+            // Fetch the photo from the photos table
+            const { data: photo, error: photoError } = await supabase
+              .from('photos')
+              .select('storage_path')
+              .eq('id', photoId)
+              .single();
+
+            if (photoError || !photo) {
+              console.error('Error fetching photo:', photoError);
+              return null;
+            }
+
             // Generate signed URL for gallery bucket
-            const { data } = await supabase.storage
+            const { data: signedUrlData } = await supabase.storage
               .from('gallery')
               .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
             
             return {
-              id: photo.id,
-              title: photo.caption || 'Untitled Memory',
-              description: photo.caption || 'A haunting memory from the past...',
-              year: 2023, // Default year, could be enhanced later
-              theme_tag: 'Twisted Memory', // Default theme
-              imageUrl: data?.signedUrl || '',
-              isActive: true
+              id: vignette.id,
+              title: vignette.title,
+              description: vignette.description,
+              year: vignette.year,
+              theme_tag: vignette.theme_tag,
+              imageUrl: signedUrlData?.signedUrl || '',
+              isActive: vignette.is_active,
+              photoId: photoId,
+              storagePath: photo.storage_path
             };
           } catch (error) {
-            console.error('Error generating signed URL for photo:', photo.id, error);
-            return {
-              id: photo.id,
-              title: photo.caption || 'Untitled Memory',
-              description: photo.caption || 'A haunting memory from the past...',
-              year: 2023,
-              theme_tag: 'Twisted Memory',
-              imageUrl: '', // Will show placeholder
-              isActive: true
-            };
+            console.error('Error generating signed URL for vignette:', vignette.id, error);
+            return null;
           }
         })
       );
 
-      setDisplayVignettes(vignettesWithUrls.filter(v => v.imageUrl)); // Only show vignettes with valid URLs
+      // Filter out nulls and vignettes without valid URLs
+      setDisplayVignettes(vignettesWithUrls.filter(v => v && v.imageUrl) as any[]);
     };
 
     generateVignetteUrls();
-  }, [vignettePhotos]);
+  }, [vignettes]);
 
   // Carousel navigation
   const maxIndex = Math.max(0, displayVignettes.length - itemsPerView);
