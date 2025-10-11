@@ -190,24 +190,24 @@ const Costumes = () => {
               </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="font-heading text-4xl mb-2 text-accent-gold">🏆</div>
-                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Most Creative Twist</h3>
+                  <div className="font-heading text-4xl mb-2 text-accent-gold">💀</div>
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Most Twisted</h3>
                   <p className="font-body text-sm text-muted-foreground">
-                    For the most innovative interpretation of a classic character
+                    The costume that takes the darkest, most creative spin on a classic fairytale
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="font-heading text-4xl mb-2 text-accent-gold">🎭</div>
-                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Best Original Character</h3>
+                  <div className="font-heading text-4xl mb-2 text-accent-gold">📜</div>
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Master Storyteller</h3>
                   <p className="font-body text-sm text-muted-foreground">
-                    For creating an entirely new twisted fairytale persona
+                    The most creative and original fairytale character interpretation
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="font-heading text-4xl mb-2 text-accent-gold">⚡</div>
-                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Most Topical</h3>
+                  <div className="font-heading text-4xl mb-2 text-accent-gold">👥</div>
+                  <h3 className="font-subhead text-lg mb-2 text-accent-gold">Group Effort Excellence</h3>
                   <p className="font-body text-sm text-muted-foreground">
-                    For best incorporation of current events or social commentary
+                    Best coordinated group or couple costume
                   </p>
                 </div>
               </div>

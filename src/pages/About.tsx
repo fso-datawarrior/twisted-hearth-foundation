@@ -71,7 +71,7 @@ const About = () => {
                   <div className="bg-bg-2 p-6 rounded-lg">
                     <h3 className="font-subhead text-xl mb-3 text-accent-gold">Costume Contest</h3>
                     <p className="font-body text-sm text-muted-foreground">
-                      Prizes for most creative, most twisted, and best original fairytale character
+                      Prizes for Most Twisted, Master Storyteller, and Group Effort Excellence
                     </p>
                   </div>
                 </div>

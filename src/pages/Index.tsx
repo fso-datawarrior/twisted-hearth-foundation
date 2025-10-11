@@ -213,7 +213,7 @@ const Index = () => {
               <div className="text-center">
                 <div className="font-heading text-3xl mb-2 text-accent-gold">🕰️</div>
                 <h3 className="font-subhead text-lg mb-1 text-accent-gold">6:30 PM Start</h3>
-                <p className="font-body text-sm text-muted-foreground">Gates open at twilight</p>
+                <p className="font-body text-sm text-muted-foreground">Doors open at twilight</p>
               </div>
               <div className="text-center">
                 <div className="font-heading text-3xl mb-2 text-accent-red">🍺</div>
