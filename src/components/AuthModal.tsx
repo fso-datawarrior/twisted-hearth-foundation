@@ -238,8 +238,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px] border-accent-gold">
         <DialogHeader>
-          <DialogTitle className="font-heading text-2xl text-accent-gold">
-            Sign In to the Bash
+          <DialogTitle className="font-heading text-2xl text-accent-gold uppercase">
+            Enter Twisted Tale
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             {otpSent 
