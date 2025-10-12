@@ -25,7 +25,6 @@ const tabConfig: Record<string, { category: string; label: string; icon: keyof t
   vignettes: { category: "Content", label: "Vignettes", icon: "BookOpen" },
   homepage: { category: "Content", label: "Homepage Vignettes", icon: "Home" },
   guestbook: { category: "Content", label: "Guestbook", icon: "MessageSquare" },
-  hunt: { category: "Content", label: "Hunt Management", icon: "Target" },
   tournament: { category: "Content", label: "Tournament", icon: "Trophy" },
   libations: { category: "Content", label: "Libations", icon: "Wine" },
   email: { category: "Settings", label: "Email Communication", icon: "Mail" },

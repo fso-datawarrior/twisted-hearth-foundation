@@ -9,7 +9,6 @@ import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
-import HuntNavIndicator from "@/components/hunt/HuntNavIndicator";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
 import packageJson from "../../package.json";
 
@@ -85,7 +84,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             >
               The Ruths' Bash
             </Link>
-            <HuntNavIndicator />
             {isDeveloperMode && DEV_MODE_ENABLED && (
               <span className="text-xs text-ink/50 font-mono">
                 v{packageJson.version}

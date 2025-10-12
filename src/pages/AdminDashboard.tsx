@@ -13,7 +13,6 @@ import { useSwipe } from '@/hooks/use-swipe';
 import { useIsMobile } from '@/hooks/use-mobile';
 import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
-import HuntManagement from '@/components/admin/HuntManagement';
 import GuestbookManagement from '@/components/admin/GuestbookManagement';
 import { EmailCommunication } from '@/components/admin/EmailCommunication';
 import VignetteManagementTab from '@/components/admin/VignetteManagementTab';
@@ -30,9 +29,7 @@ import {
   Users, 
   Trophy, 
   Images, 
-  Search,
   Calendar,
-  Map,
   Settings,
   Theater,
   AlertTriangle
@@ -46,7 +43,7 @@ export default function AdminDashboard() {
 
   // Tab order for swipe navigation (grouped by category)
   const tabGroups = {
-    content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'hunt', 'libations'],
+    content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'libations'],
     users: ['rsvps', 'tournament', 'user-management', 'admin-roles'],
     settings: ['email', 'database-reset'],
   };
@@ -195,24 +192,6 @@ export default function AdminDashboard() {
     }
   });
 
-  // Hunt statistics
-  const { data: huntStats, isLoading: huntLoading } = useQuery({
-    queryKey: ['admin-hunt'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('hunt_progress' as any)
-        .select(`
-          id, user_id, hunt_run_id, hint_id, found_at, points_earned,
-          hunt_runs(user_id, started_at, completed_at, total_points),
-          hunt_hints(hint_text, points)
-        `)
-        .order('found_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as any;
-    }
-  });
-
   // Vignettes statistics
   const { data: vignettes, isLoading: vignettesLoading } = useQuery({
     queryKey: ['admin-vignettes'],
@@ -244,7 +223,6 @@ export default function AdminDashboard() {
   const totalGuests = rsvps?.reduce((sum, rsvp) => sum + rsvp.num_guests, 0) || 0;
   const pendingPhotos = photos?.filter(p => !p.is_approved).length || 0;
   const confirmedRsvps = rsvps?.filter(r => r.status === 'confirmed').length || 0;
-  const activeHuntRuns = huntStats?.length || 0;
   const activeVignettes = vignettes?.filter(v => v.is_active).length || 0;
   const totalVignettes = vignettes?.length || 0;
   const selectedVignettePhotos = vignettePhotosCount || 0;
@@ -267,7 +245,6 @@ export default function AdminDashboard() {
               rsvps: rsvps?.length,
               tournamentRegs: tournamentRegs?.length,
               photos: photos?.length,
-              activeHuntRuns,
               selectedVignettePhotos,
               activeLibations,
             }}
@@ -330,20 +307,6 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 relative">
-                    <OnHoldOverlay />
-                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
-                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
-                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
-                        <span className="truncate">Hunt Progress</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                      <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
-                    </CardContent>
-                  </Card>
-
                   <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20">
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
@@ -364,7 +327,7 @@ export default function AdminDashboard() {
                   icon={<Settings className="h-4 w-4 sm:h-5 sm:w-5" />}
                   defaultOpen={true}
                 >
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     <Button 
                       variant="outline" 
                       className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
@@ -392,17 +355,6 @@ export default function AdminDashboard() {
                       <Images className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Approve Photos</span>
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4 relative"
-                      onClick={() => handleTabChange('hunt')}
-                    >
-                      <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                        ON HOLD
-                      </div>
-                      <Map className="h-5 w-5 sm:h-6 sm:w-6" />
-                      <span className="text-xs sm:text-sm text-center">Hunt Stats</span>
-                    </Button>
                   </div>
                 </CollapsibleSection>
               </div>
@@ -412,8 +364,6 @@ export default function AdminDashboard() {
               <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
             ) : activeTab === 'gallery' ? (
               <GalleryManagement photos={photos} isLoading={photosLoading} />
-            ) : activeTab === 'hunt' ? (
-              <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
             ) : activeTab === 'vignettes' ? (
               <VignetteManagementTab />
             ) : activeTab === 'homepage' ? (

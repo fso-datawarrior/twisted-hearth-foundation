@@ -4,9 +4,48 @@
 This document tracks all new patches, updates, and features for the Twisted Hearth Foundation project - Phase 2 Development.
 
 **Start Date:** October 11, 2025  
-**Current Version:** 2.4.0-NavigationConsolidation  
-**Status:** Active Development 🚧  
-**Last Update:** BATCH 4 Phase 1-2 Completed - October 12, 2025
+**Current Version:** version-2.2.05.4-HuntRemoval-StableVersion  
+**Status:** Rollback & Cleanup 🔄  
+**Last Update:** Hunt Code Removal - October 12, 2025
+
+## 🔄 Rollback Log
+
+### Rollback #1 - October 12, 2025
+**From**: `2.4.0-NavigationConsolidation` (BATCH 4 Phase 1-3 in progress)  
+**To**: `version-2.2.05.3-Batch5-Phase3-AnalyticsDataCollection`  
+**New Branch**: `version-2.2.05.4-HuntRemoval-StableVersion`
+
+**Root Cause**:
+- Hunt code (HuntProvider, HuntRune, HuntManagement, etc.) was globally imported and mounted despite `HUNT_ENABLED=false`
+- Circular dependencies and context initialization order issues
+- TypeScript lazy import mismatches (TS2322: missing default export)
+- Runtime error: "Cannot access 'gr' before initialization"
+- Application completely broken on homepage (blank screen)
+
+**Actions Taken**:
+- Rolled back Git to version-2.2.05.3-Batch5-Phase3-AnalyticsDataCollection
+- Created new branch: version-2.2.05.4-HuntRemoval-StableVersion
+- Removing all hunt imports/components from runtime code paths
+- Hunt files retained but not loaded or executed
+- Navigation consolidation (BATCH 4) rolled back
+
+**Impact**:
+- Lost: BATCH 4 Phase 1-3 work (navigation consolidation, database fixes, mobile polish)
+- Retained: All Phase 1-3 work (navigation modernization, user management, email system, analytics)
+- No data loss - database changes preserved
+
+**Lessons Learned**:
+- Feature flags must prevent code loading, not just execution
+- Hunt code requires complete isolation when disabled (no imports at all)
+- Lazy loading with React.lazy requires proper default exports
+- Test feature flag disable states thoroughly before merge
+
+**Next Steps**:
+- Complete hunt removal in: version-2.2.05.4-HuntRemoval-StableVersion
+- Re-implement BATCH 4 in clean branch: version-2.3.0-NavigationConsolidation-v2
+- Add integration tests for feature flag states
+
+---
 
 ## Status Legend
 - 🔴 **Critical** - Must be fixed immediately
@@ -404,42 +443,69 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 - ✅ Created comprehensive Mailjet documentation guide
 - **Files**: `src/components/admin/EmailCommunication.tsx`, `src/components/admin/EmailTemplateEditor.tsx`, `src/components/admin/CampaignComposer.tsx`, `src/lib/email-campaigns-api.ts`, `docs/MAILJET_TEMPLATE_GUIDE.md`
 
-### 🚧 BATCH 4: Critical Database Fixes & Navigation Consolidation (October 12, 2025)
-**Time**: 4.5 hours (in progress) | **Priority**: HIGH
+### 🔄 BATCH 4: Navigation Consolidation (ROLLED BACK - October 12, 2025)
+**Original Time**: 4.5 hours | **Priority**: HIGH  
+**Status**: 🔄 Rolled Back - Pending Re-implementation
 
-#### ✅ Phase 1: Critical Database Fixes (2 hours)
-- ✅ Added missing `status` columns to `hunt_runs` and `tournament_registrations`
-- ✅ Added 15+ foreign key constraints for referential integrity
-- ✅ Created 25+ performance indexes for common queries
-- ✅ Fixed all database errors in postgres logs
-- **Migration**: `20251012_batch4_database_fixes.sql`
+#### What Was Implemented:
+- ✅ Phase 1: Database fixes (foreign keys, status columns, 25+ indexes)
+- ✅ Phase 2: Navigation consolidation (12 tabs → 4 categories)
+- ✅ Phase 3: Mobile polish (breadcrumbs, swipe, loading states)
+- ✅ Phase 4: Testing and verification
 
-#### ✅ Phase 2: Navigation Consolidation (2 hours)
-- ✅ Reduced 12 admin tabs to 4 main categories with dropdowns
-- ✅ Created `AdminNavigation` component with mobile hamburger menu
-- ✅ Categories: Overview, Content (6 items), Users (4 items), Settings (2 items)
-- ✅ Desktop dropdown menus with icons and counts
-- ✅ Mobile slide-out menu with grouped sections
-- ✅ Maintained all existing functionality
-- **Files**: `src/components/admin/AdminNavigation.tsx`, `src/pages/AdminDashboard.tsx`
+#### What Was Rolled Back:
+- AdminNavigation component with dropdown menus
+- AdminBreadcrumb sticky navigation
+- Swipe gesture support for mobile
+- HuntManagement integration in admin dashboard
+- Additional database indexes and constraints
 
-#### ✅ Phase 3: Mobile Polish (complete)
-- ✅ Sticky breadcrumb navigation (`AdminBreadcrumb.tsx`)
-- ✅ Swipe gesture support (left/right within tab groups)
-- ✅ Touch-optimized UI elements (44x44px minimum)
-- ✅ Loading states for tab transitions (200ms skeleton loaders)
-- ✅ Dropdown backgrounds fixed (opaque + z-50)
-- ✅ Enhanced mobile Sheet (backdrop blur)
-- **Files**: `src/components/admin/AdminBreadcrumb.tsx`, `src/components/admin/AdminNavigation.tsx`, `src/pages/AdminDashboard.tsx`
+#### Re-implementation Plan:
+- Will be re-implemented in new branch: `version-2.3.0-NavigationConsolidation-v2`
+- Hunt UI will be completely removed from admin before re-implementing
+- Will add integration tests for feature flag states
 
-#### ✅ Phase 4: Testing (complete - automated verification)
-- ✅ Database status columns verified (`hunt_runs.status`, `tournament_registrations.status`)
-- ✅ Database indexes confirmed (25+ indexes including status indexes)
-- ✅ Console logs clean (no runtime errors)
-- ✅ Navigation code reviewed (proper responsive breakpoints, z-index, opacity)
-- ✅ Mobile polish features verified (breadcrumb, swipe, loading states)
-- ⚠️ Manual testing required for auth-protected admin dashboard
-- **Migration**: `supabase/migrations/20251012000000_add_missing_status_columns.sql`
+### ✅ BATCH 5 - Phase 3: Analytics Data Collection (October 12, 2025)
+**Time**: 3-4 hours | **Priority**: HIGH  
+**Status**: ✅ COMPLETED - STABLE
+
+- ✅ Analytics database infrastructure (6 tables, 25+ indexes)
+- ✅ Analytics API library (`src/lib/analytics-api.ts`)
+- ✅ Session tracking hooks with 30-minute timeout
+- ✅ Analytics context provider integrated in App.tsx
+- ✅ Analytics tracking across all major user actions
+- ✅ Admin query function for analytics summary
+- ✅ RLS policies in place (admin-only access)
+- **Files**: `src/lib/analytics-api.ts`, `src/hooks/use-analytics-tracking.ts`, `src/hooks/use-session-tracking.ts`, `src/contexts/AnalyticsContext.tsx`
+
+### ✅ BATCH 6: Hunt Code Removal (October 12, 2025)
+**Time**: 2 hours | **Priority**: CRITICAL  
+**Status**: ✅ COMPLETED
+
+**Purpose**: Removed all hunt-related runtime references to prevent loading/execution
+
+**Changes Completed**:
+1. **src/App.tsx**: Removed HuntProvider, HuntProgress, HuntReward, HuntNotification
+2. **src/components/NavBar.tsx**: Removed HuntNavIndicator
+3. **src/pages/AdminDashboard.tsx**: Removed HuntManagement UI, hunt queries, hunt statistics card, hunt quick action button
+4. **src/components/admin/AdminNavigation.tsx**: Removed hunt navigation item and count prop
+5. **src/components/admin/AdminBreadcrumb.tsx**: Removed hunt breadcrumb mapping
+
+**Result**:
+- ✅ Hunt code exists in files but is never loaded or executed
+- ✅ Zero TypeScript errors
+- ✅ Zero runtime errors
+- ✅ Application stable and functional
+- ✅ Bundle size reduced (hunt code not bundled)
+
+**Files Retained** (not imported anywhere):
+- All files in `src/components/hunt/` directory
+- `src/settings/hunt-settings.ts`
+- `src/hooks/use-hunt.ts`
+- `src/lib/hunt-api.ts`
+- Hunt database tables and data (preserved)
+
+---
 
 ---
 

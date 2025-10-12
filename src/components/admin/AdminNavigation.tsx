@@ -51,7 +51,6 @@ interface AdminNavigationProps {
     rsvps?: number;
     tournamentRegs?: number;
     photos?: number;
-    activeHuntRuns?: number;
     selectedVignettePhotos?: number;
     activeLibations?: number;
   };
@@ -75,7 +74,6 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
         { id: 'vignettes', label: 'Vignettes', icon: Theater, count: counts.selectedVignettePhotos },
         { id: 'homepage', label: 'Homepage', icon: Home, count: 3 },
         { id: 'guestbook', label: 'Guestbook', icon: MessageSquare },
-        { id: 'hunt', label: 'Hunt', icon: Search, count: counts.activeHuntRuns },
         { id: 'libations', label: 'Libations', icon: Wine, count: counts.activeLibations },
       ],
     },

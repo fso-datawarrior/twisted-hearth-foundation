@@ -5,13 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
-import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
-import HuntProgress from "@/components/hunt/HuntProgress";
-import HuntReward from "@/components/hunt/HuntReward";
-import HuntNotification from "@/components/hunt/HuntNotification";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
@@ -53,8 +49,7 @@ function App() {
         <AnalyticsProvider>
           <AuthProvider>
             <AdminProvider>
-              <HuntProvider>
-                <AudioProvider>
+              <AudioProvider>
                 <SkipLink />
                 <NavBar />
                 <main>
@@ -86,13 +81,7 @@ function App() {
                     </Suspense>
                   </SwipeNavigator>
                 </main>
-                
-                {/* Hunt UI overlays */}
-                <HuntProgress />
-                <HuntReward />
-                <HuntNotification />
-                </AudioProvider>
-              </HuntProvider>
+              </AudioProvider>
             </AdminProvider>
           </AuthProvider>
         </AnalyticsProvider>
