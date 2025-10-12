@@ -196,11 +196,70 @@ export function EmailCommunication() {
 
   if (isCreatingCampaign) {
     return (
-      <CampaignComposer
-        onSave={handleSaveCampaign}
-        onSendTest={handleSendTestEmail}
-        onCancel={() => setIsCreatingCampaign(false)}
-      />
+      <div>
+        <CampaignComposer
+          onSave={handleSaveCampaign}
+          onSendTest={handleSendTestEmail}
+          onCancel={() => setIsCreatingCampaign(false)}
+        />
+
+        {/* Send Campaign Confirmation Dialog (rendered while composing) */}
+        <AlertDialog 
+          open={sendDialogOpen} 
+          onOpenChange={(open) => {
+            console.log('📧 Dialog open state changed (composer branch):', open);
+            setSendDialogOpen(open);
+            if (!open) {
+              setPendingCampaign(null);
+            }
+          }}
+        >
+          <AlertDialogContent className="z-[9999] max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <p>You are about to send an email campaign. Please review the details:</p>
+                  {pendingCampaign && (
+                    <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
+                      <div>
+                        <span className="font-semibold">Subject:</span> {pendingCampaign.subject}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Recipients:</span>{' '}
+                        {pendingCampaign.recipient_list === 'all' ? 'All Guests' :
+                          pendingCampaign.recipient_list === 'rsvp_yes' ? 'Confirmed RSVPs' :
+                          pendingCampaign.recipient_list === 'rsvp_pending' ? 'Pending RSVPs' :
+                          `${pendingCampaign.custom_recipients?.length || 0} custom recipients`}
+                      </div>
+                      {pendingCampaign.scheduled_at && (
+                        <div>
+                          <span className="font-semibold">Scheduled for:</span>{' '}
+                          {new Date(pendingCampaign.scheduled_at).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-destructive font-semibold">⚠️ This action cannot be undone. Emails will be sent immediately.</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                console.log('📧 Cancel clicked (composer branch)');
+                setSendDialogOpen(false);
+                setPendingCampaign(null);
+              }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSend} disabled={isLoading} className="bg-primary hover:bg-primary/90">
+                <Send className="w-4 h-4 mr-2" />
+                {isLoading ? 'Sending...' : pendingCampaign?.scheduled_at ? 'Schedule Campaign' : 'Send Now'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     );
   }
 
