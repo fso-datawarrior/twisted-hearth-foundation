@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createSession, endSession } from '@/lib/analytics-api';
 import { logger } from '@/lib/logger';
 
@@ -9,6 +9,7 @@ export function useSessionTracking() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
+  const isInitialized = useRef(false);
 
   // Start a new session
   const startSession = useCallback(async () => {
@@ -26,6 +27,7 @@ export function useSessionTracking() {
       
       // Store session ID in sessionStorage
       sessionStorage.setItem(SESSION_STORAGE_KEY, newSessionId);
+      sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
       
       logger.info('Session started', { sessionId: newSessionId });
     } catch (error) {
@@ -41,14 +43,24 @@ export function useSessionTracking() {
       await endSession(sessionId);
       setIsActive(false);
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      sessionStorage.removeItem(`${SESSION_STORAGE_KEY}_time`);
       logger.info('Session ended', { sessionId });
     } catch (error) {
       logger.error('Session end error', error as Error);
     }
   }, [sessionId]);
 
-  // Check for existing session on mount
+  // Update last activity time
+  const updateActivity = useCallback(() => {
+    setLastActivity(Date.now());
+    sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
+  }, []);
+
+  // Initialize session on mount (only once)
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
     const existingSessionId = sessionStorage.getItem(SESSION_STORAGE_KEY);
     
     if (existingSessionId) {
@@ -73,25 +85,22 @@ export function useSessionTracking() {
       // No existing session, start new one
       startSession();
     }
-  }, [startSession]);
-
-  // Update last activity time
-  const updateActivity = useCallback(() => {
-    setLastActivity(Date.now());
-    sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
-  }, []);
+  }, []); // Empty dependency array - only run once
 
   // Track user activity
   useEffect(() => {
+    if (!isActive) return;
+
     const handleActivity = () => {
-      updateActivity();
+      setLastActivity(Date.now());
+      sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
     };
 
     // Listen for user interactions
-    window.addEventListener('mousemove', handleActivity);
-    window.addEventListener('keydown', handleActivity);
-    window.addEventListener('click', handleActivity);
-    window.addEventListener('scroll', handleActivity);
+    window.addEventListener('mousemove', handleActivity, { passive: true });
+    window.addEventListener('keydown', handleActivity, { passive: true });
+    window.addEventListener('click', handleActivity, { passive: true });
+    window.addEventListener('scroll', handleActivity, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', handleActivity);
@@ -99,27 +108,39 @@ export function useSessionTracking() {
       window.removeEventListener('click', handleActivity);
       window.removeEventListener('scroll', handleActivity);
     };
-  }, [updateActivity]);
+  }, [isActive]); // Only depend on isActive
 
   // Check for session timeout
   useEffect(() => {
+    if (!isActive) return;
+
     const checkTimeout = setInterval(() => {
-      if (isActive && Date.now() - lastActivity > SESSION_TIMEOUT) {
+      const currentTime = Date.now();
+      const storedTime = sessionStorage.getItem(`${SESSION_STORAGE_KEY}_time`);
+      const lastTime = storedTime ? parseInt(storedTime, 10) : currentTime;
+      
+      if (currentTime - lastTime > SESSION_TIMEOUT) {
         logger.info('Session timed out');
-        endCurrentSession();
+        if (sessionId) {
+          endSession(sessionId).catch(err => logger.error('Failed to end timed out session', err));
+        }
+        setIsActive(false);
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+        sessionStorage.removeItem(`${SESSION_STORAGE_KEY}_time`);
       }
     }, 60000); // Check every minute
 
     return () => clearInterval(checkTimeout);
-  }, [isActive, lastActivity, endCurrentSession]);
+  }, [isActive, sessionId]); // Depend on sessionId for endSession
 
   // End session on page unload
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (sessionId) {
         // Use sendBeacon for reliable unload tracking
-        navigator.sendBeacon?.('/api/analytics/end-session', JSON.stringify({ sessionId }));
-        endCurrentSession();
+        const beaconUrl = `${window.location.origin}/api/analytics/end-session`;
+        const blob = new Blob([JSON.stringify({ sessionId })], { type: 'application/json' });
+        navigator.sendBeacon?.(beaconUrl, blob);
       }
     };
 
@@ -128,7 +149,7 @@ export function useSessionTracking() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [sessionId, endCurrentSession]);
+  }, [sessionId]); // Only depend on sessionId
 
   return {
     sessionId,
