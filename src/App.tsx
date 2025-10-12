@@ -44,17 +44,17 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AnalyticsProvider>
-        <AuthProvider>
-          <AdminProvider>
-            <HuntProvider>
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
-              <AudioProvider>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <AnalyticsProvider>
+          <AuthProvider>
+            <AdminProvider>
+              <HuntProvider>
+                <AudioProvider>
                 <SkipLink />
                 <NavBar />
                 <main>
@@ -91,12 +91,12 @@ function App() {
                 <HuntProgress />
                 <HuntReward />
                 <HuntNotification />
-              </AudioProvider>
-            </BrowserRouter>
-          </HuntProvider>
-        </AdminProvider>
-      </AuthProvider>
-      </AnalyticsProvider>
+                </AudioProvider>
+              </HuntProvider>
+            </AdminProvider>
+          </AuthProvider>
+        </AnalyticsProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
