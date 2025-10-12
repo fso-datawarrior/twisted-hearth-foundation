@@ -6,7 +6,7 @@ import { PopularPagesTable } from './analytics/PopularPagesTable';
 import { DateRangeSelector } from './analytics/DateRangeSelector';
 import { AnalyticsExportMenu } from './analytics/AnalyticsExportMenu';
 import { useQuery } from '@tanstack/react-query';
-import { getAnalyticsSummary } from '@/lib/analytics-api';
+import { getAnalyticsSummary, getPageViewsByDate, getPopularPages } from '@/lib/analytics-api';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -23,30 +23,20 @@ export function AnalyticsWidgets() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: pageViews = [], isLoading: pageViewsLoading } = useQuery({
+  const { data: pageViewsData, isLoading: pageViewsLoading } = useQuery({
     queryKey: ['analytics-page-views', dateRange],
-    queryFn: async () => {
-      // Mock data for page views chart
-      const days = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24));
-      return Array.from({ length: Math.min(days, 30) }, (_, i) => ({
-        date: new Date(dateRange.start.getTime() + i * 24 * 60 * 60 * 1000).toISOString(),
-        total_views: Math.floor(Math.random() * 100) + 20,
-        unique_visitors: Math.floor(Math.random() * 50) + 10,
-      }));
-    },
+    queryFn: () => getPageViewsByDate(dateRange.start, dateRange.end),
+    staleTime: 5 * 60 * 1000,
   });
 
-  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
-    queryKey: ['analytics-sessions', dateRange],
-    queryFn: async () => {
-      const days = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24));
-      return Array.from({ length: Math.min(days, 30) }, (_, i) => ({
-        date: new Date(dateRange.start.getTime() + i * 24 * 60 * 60 * 1000).toISOString(),
-        active_sessions: Math.floor(Math.random() * 50) + 10,
-        new_users: Math.floor(Math.random() * 20) + 5,
-      }));
-    },
-  });
+  const pageViews = pageViewsData?.data || [];
+
+  // Sessions data derived from page views
+  const sessions = pageViews.map((pv: any) => ({
+    date: pv.date,
+    active_sessions: pv.unique_visitors,
+    new_users: Math.floor(pv.unique_visitors * 0.3),
+  }));
 
   const activityBreakdown = summary?.data ? {
     photo_uploads: summary.data.total_photos || 0,
@@ -55,18 +45,13 @@ export function AnalyticsWidgets() {
     hunt_progress: 0,
   } : null;
 
-  const { data: popularPages = [], isLoading: popularPagesLoading } = useQuery({
+  const { data: popularPagesData, isLoading: popularPagesLoading } = useQuery({
     queryKey: ['analytics-popular-pages', dateRange],
-    queryFn: async () => {
-      return [
-        { page_path: '/', view_count: 245, unique_visitors: 189, avg_time: 127 },
-        { page_path: '/gallery', view_count: 189, unique_visitors: 142, avg_time: 203 },
-        { page_path: '/rsvp', view_count: 156, unique_visitors: 134, avg_time: 89 },
-        { page_path: '/about', view_count: 98, unique_visitors: 87, avg_time: 156 },
-        { page_path: '/schedule', view_count: 76, unique_visitors: 68, avg_time: 98 },
-      ];
-    },
+    queryFn: () => getPopularPages(dateRange.start, dateRange.end),
+    staleTime: 5 * 60 * 1000,
   });
+
+  const popularPages = popularPagesData?.data || [];
 
   return (
     <div className="space-y-6">
@@ -92,7 +77,7 @@ export function AnalyticsWidgets() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <PageViewsChart data={pageViews} isLoading={pageViewsLoading} />
-        <UserSessionsChart data={sessions} isLoading={sessionsLoading} />
+        <UserSessionsChart data={sessions} isLoading={pageViewsLoading} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

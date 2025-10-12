@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, type ReactNode } from "react";
 import { useHunt as useHuntDatabase, type UseHuntReturn } from "@/hooks/use-hunt";
 import { HUNT_ENABLED } from "./hunt-config";
 import { trackActivity } from "@/lib/analytics-api";

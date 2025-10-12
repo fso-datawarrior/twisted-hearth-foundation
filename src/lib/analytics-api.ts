@@ -330,7 +330,7 @@ export const getPopularPages = async (
   try {
     const { data, error } = await supabase
       .from('page_views')
-      .select('page_path')
+      .select('page_path, user_id, time_on_page')
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString());
 
