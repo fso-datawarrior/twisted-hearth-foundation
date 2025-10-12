@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 
 interface AdminContextType {
   isAdmin: boolean;
@@ -37,25 +38,28 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const checkAdminStatus = async () => {
     try {
       if (user) {
-        console.log('🔐 AdminContext: Checking admin status for user:', user.email);
+        logger.info('🔐 AdminContext: Checking admin status', { email: user.email });
+        
+        // Ensure admin roles are seeded before status check
+        await supabase.rpc('ensure_admins_seeded');
         
         // Simple check: does user have admin role?
         const { data: isAdminResult, error: adminError } = await supabase.rpc('check_admin_status');
         
         if (!adminError && isAdminResult === true) {
-          console.log('✅ AdminContext: User is admin');
+          logger.info('✅ AdminContext: User is admin');
           setIsAdmin(true);
         } else {
-          console.log('❌ AdminContext: User is not admin');
+          logger.info('❌ AdminContext: User is not admin');
           setIsAdmin(false);
         }
       } else {
-        console.log('🔐 AdminContext: No user, resetting admin state');
+        logger.info('🔐 AdminContext: No user, resetting admin state');
         setIsAdmin(false);
         setIsAdminView(false);
       }
     } catch (error) {
-      console.error('💥 AdminContext: Error checking admin status:', error);
+      logger.error('💥 AdminContext: Error checking admin status', error as Error);
       setIsAdmin(false);
     } finally {
       setLoading(false);

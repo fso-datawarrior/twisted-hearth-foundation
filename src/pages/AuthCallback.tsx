@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 type ErrorType = 'expired' | 'already-used' | 'invalid' | 'generic';
 
@@ -21,11 +22,11 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      console.log('🔐 AuthCallback: Processing magic link authentication...');
+      logger.info('🔐 AuthCallback: Processing magic link authentication...');
       
       // If user is already authenticated, show friendly message
       if (user) {
-        console.log('✅ User already authenticated');
+        logger.info('✅ User already authenticated');
         setStatus('already-signed-in');
         setTimeout(() => {
           navigate('/', { replace: true });
@@ -42,7 +43,7 @@ export default function AuthCallback() {
         
         // Check for error in URL params
         if (errorCode || errorDescription) {
-          console.error('❌ AuthCallback: Error in URL params:', errorCode, errorDescription);
+          logger.error('❌ AuthCallback: Error in URL params', new Error(String(errorCode ?? errorDescription ?? 'unknown')));
           
           // Detect error type
           if (errorDescription?.includes('expired')) {
@@ -58,14 +59,14 @@ export default function AuthCallback() {
         }
         
         if (accessToken) {
-          console.log('✅ AuthCallback: Found auth tokens in URL, establishing session...');
+          logger.info('✅ AuthCallback: Found auth tokens in URL, establishing session...');
         }
 
         // Get the session (this will process the tokens from the URL automatically)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
-          console.error('❌ AuthCallback: Session error:', sessionError);
+          logger.error('❌ AuthCallback: Session error', sessionError);
           
           // Detect error type from session error
           const errorMsg = sessionError.message.toLowerCase();
@@ -82,7 +83,7 @@ export default function AuthCallback() {
         }
 
         if (session) {
-          console.log('✅ AuthCallback: Magic link authentication successful!');
+          logger.info('✅ AuthCallback: Magic link authentication successful!');
           setStatus('success');
           
           // Redirect to home page
@@ -90,13 +91,13 @@ export default function AuthCallback() {
             navigate('/', { replace: true });
           }, 1000);
         } else {
-          console.log('❌ AuthCallback: No active session found');
+          logger.warn('❌ AuthCallback: No active session found');
           setErrorType('already-used');
           setStatus('error');
         }
 
       } catch (error) {
-        console.error('❌ AuthCallback: Unexpected error:', error);
+        logger.error('❌ AuthCallback: Unexpected error', error as Error);
         setErrorType('generic');
         setStatus('error');
       }
