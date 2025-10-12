@@ -62,12 +62,19 @@ Deno.serve(async (req) => {
     if (campaign.recipient_list === 'all') {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('email, display_name')
+        .select(`
+          email, 
+          display_name,
+          rsvps(name, status, dietary_restrictions, num_guests)
+        `)
         .not('email', 'is', null);
       
       recipientsData = profiles?.map(p => ({
         email: p.email,
-        name: p.display_name || p.email.split('@')[0],
+        name: (p.rsvps && p.rsvps[0]?.name) || p.display_name || p.email.split('@')[0],
+        rsvp_status: p.rsvps && p.rsvps[0]?.status,
+        num_guests: p.rsvps && p.rsvps[0]?.num_guests,
+        dietary_restrictions: p.rsvps && p.rsvps[0]?.dietary_restrictions,
       })) || [];
     } else if (campaign.recipient_list === 'rsvp_yes') {
       const { data: rsvps } = await supabase
