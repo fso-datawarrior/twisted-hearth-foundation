@@ -38,6 +38,8 @@ export function EmailCommunication() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'template' | 'campaign'; id: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [pendingCampaign, setPendingCampaign] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -99,12 +101,20 @@ export function EmailCommunication() {
   };
 
   const handleSaveCampaign = async (campaignData: any) => {
+    // Instead of sending immediately, show confirmation dialog
+    setPendingCampaign(campaignData);
+    setSendDialogOpen(true);
+  };
+
+  const handleConfirmSend = async () => {
+    if (!pendingCampaign) return;
+    
     try {
       setIsLoading(true);
-      const campaign = await createCampaign(campaignData);
+      const campaign = await createCampaign(pendingCampaign);
       
       // Send immediately if not scheduled
-      if (!campaignData.scheduled_at) {
+      if (!pendingCampaign.scheduled_at) {
         await sendCampaign(campaign.id);
         toast.success('Campaign sent successfully!');
       } else {
@@ -112,6 +122,8 @@ export function EmailCommunication() {
       }
       
       setIsCreatingCampaign(false);
+      setSendDialogOpen(false);
+      setPendingCampaign(null);
       loadData();
     } catch (error) {
       console.error('Failed to send campaign:', error);
@@ -328,6 +340,59 @@ export function EmailCommunication() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteTemplate}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>You are about to send an email campaign. Please review the details:</p>
+                
+                {pendingCampaign && (
+                  <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
+                    <div>
+                      <span className="font-semibold">Subject:</span> {pendingCampaign.subject}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Recipients:</span>{' '}
+                      {pendingCampaign.recipient_list === 'all' ? 'All Guests' :
+                       pendingCampaign.recipient_list === 'rsvp_yes' ? 'Confirmed RSVPs' :
+                       pendingCampaign.recipient_list === 'rsvp_pending' ? 'Pending RSVPs' :
+                       `${pendingCampaign.custom_recipients?.length || 0} custom recipients`}
+                    </div>
+                    {pendingCampaign.scheduled_at && (
+                      <div>
+                        <span className="font-semibold">Scheduled for:</span>{' '}
+                        {new Date(pendingCampaign.scheduled_at).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <p className="text-destructive font-semibold">
+                  ⚠️ This action cannot be undone. Emails will be sent immediately.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setSendDialogOpen(false);
+              setPendingCampaign(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmSend}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {pendingCampaign?.scheduled_at ? 'Schedule Campaign' : 'Send Now'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

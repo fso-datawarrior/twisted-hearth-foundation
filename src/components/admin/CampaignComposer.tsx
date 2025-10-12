@@ -347,7 +347,7 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
       <div className="flex gap-2">
         <Button onClick={handleSave} disabled={!selectedTemplate || !subject || recipientCount === 0}>
           <Send className="w-4 h-4 mr-2" />
-          Save & Send Campaign
+          Review & Send Campaign
         </Button>
         <Button type="button" variant="outline" onClick={handleSendTest}>
           <TestTube className="w-4 h-4 mr-2" />
