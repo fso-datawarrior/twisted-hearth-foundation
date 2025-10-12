@@ -482,6 +482,12 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 **Time**: 2 hours | **Priority**: CRITICAL  
 **Status**: ✅ COMPLETED
 
+#### VALIDATION TASK (MUST DO FIRST):
+- [x] Review src/App.tsx, NavBar.tsx, AdminDashboard.tsx for hunt code removal
+- [x] Verify hunt components are not imported or executed anywhere
+- [x] Check that hunt database tables still exist (preserved)
+- [x] Document actual status before proceeding with implementation
+
 **Purpose**: Removed all hunt-related runtime references to prevent loading/execution
 
 **Changes Completed**:
@@ -602,6 +608,11 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 **Status**: ✅ **COMPLETED** - October 11, 2025
 **Time Spent**: 3.5 hours
 
+#### VALIDATION TASK (MUST DO FIRST):
+- [x] Review actual code files to verify which tasks are already implemented
+- [x] Check AdminDashboard.tsx and CollapsibleSection.tsx for evidence of completion
+- [x] Document actual status before proceeding with implementation plan
+
 #### Completed Implementation:
 
 **PHASE 1: Navigation Modernization (1.5-2 hours)** ✅
@@ -673,6 +684,12 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 **Completed**: October 11, 2025
 **Time Spent**: ~5 hours
 
+#### VALIDATION TASK (MUST DO FIRST):
+- [x] Review actual code files to verify which tasks are already implemented
+- [x] Check AdminRoleManagement.tsx and UserManagement.tsx components for evidence
+- [x] Verify database migrations and functions for role management
+- [x] Document actual status before proceeding with implementation plan
+
 4. **ADMIN-SETTINGS-02**: Simplified Admin Role Management (1.5-2 hours)
    - Single admin role (no hierarchy)
    - Add/remove admin by email
@@ -698,6 +715,11 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 **Priority**: HIGH  
 **Status**: ✅ COMPLETED (October 11, 2025)  
 **Time Spent**: ~1 hour (system was already implemented, added documentation)
+
+#### VALIDATION TASK (MUST DO FIRST):
+- [ ] Review actual code files to verify which tasks are already implemented
+- [ ] Check edge functions and email API files for evidence of completion
+- [ ] Document actual status before proceeding with implementation plan
 
 #### Implementation Plan:
 
@@ -798,11 +820,19 @@ CREATE POLICY "Admins can view recipients" ON campaign_recipients FOR SELECT USI
 
 ---
 
-### 🚧 BATCH 4: Navigation Consolidation & Database Fixes (5-7 hours) ⚠️ CRITICAL
+### ⚠️ BATCH 4: Navigation Consolidation & Database Fixes (5-7 hours) ⚠️ CRITICAL - PARTIALLY COMPLETE
 **Goal**: Consolidate admin navigation + fix critical database integrity issues  
 **Priority**: CRITICAL - Database integrity at risk + mobile UX improvement  
-**Status**: 🎯 Planned - INCLUDES CRITICAL DATABASE FIXES  
+**Status**: ⚠️ Phase 1 COMPLETED ✅ | Phases 2-4 ROLLED BACK - Needs Re-implementation
+**Time Spent**: ~2 hours (Phase 1 only)
+**Rollback Date**: October 12, 2025
 **Dependencies**: BATCH 3 complete
+
+#### VALIDATION TASK (MUST DO FIRST):
+- [x] Review database migration files for foreign keys, indexes, and status columns
+- [ ] Check AdminNavigation.tsx and related files to confirm rollback status
+- [ ] Verify which navigation consolidation tasks need re-implementation
+- [ ] Document actual status before proceeding with re-implementation plan
 
 ⚠️ **CRITICAL DATABASE ISSUES FOUND**:
 - NO foreign key constraints exist (data integrity at risk)
@@ -902,10 +932,18 @@ CREATE INDEX idx_photos_created_at ON photos(created_at DESC);
 
 ---
 
-### 🎯 BATCH 5: Modern Admin Dashboard Analytics (DEFERRED - ORIGINAL BATCH 4)
+### ⚠️ BATCH 5: Modern Admin Dashboard Analytics (21-28 hours) - PARTIALLY COMPLETE
 **Goal**: Transform admin dashboard into comprehensive analytics and management interface
-**Priority**: MEDIUM - Implement after Batches 1-3
+**Priority**: MEDIUM - Implement incrementally after critical batches
+**Status**: ⚠️ Phase 3 COMPLETED ✅ | Phase 2 PARTIAL ⚠️ | Phases 1, 4-7 NOT STARTED ❌
+**Time Spent**: ~3-4 hours (Phase 3 only)
 **Dependencies**: Batches 1-3 (navigation, user management, email system)
+
+#### VALIDATION TASK (MUST DO FIRST):
+- [ ] Review analytics database tables (user_activity_logs, page_views, user_sessions, analytics_daily_aggregates)
+- [ ] Check analytics-api.ts and use-analytics-tracking.ts for Phase 3 completion
+- [ ] Verify admin dashboard components for styling and "ON HOLD" overlays (Phase 1)
+- [ ] Document actual status of each phase before proceeding with implementation
 
 #### Overview
 Transform the current admin dashboard into a modern, widget-based analytics interface with comprehensive metrics tracking, data visualization, and export capabilities. This includes fixing styling inconsistencies, adding "ON HOLD" indicators for disabled features, and implementing a complete analytics system.
@@ -1554,11 +1592,12 @@ const validatedEmail = emailSchema.parse(inputEmail);
 - ✅ **COMPLETED**: Batch 1 (Navigation & Layout Modernization) - 3.5 hours (Oct 11, 2025)
 - ✅ **COMPLETED**: Batch 2 (User & Role Management) - 5 hours (Oct 11, 2025)
 - ✅ **COMPLETED**: Batch 3 (Email System Phase 1) - 1 hour (Oct 11, 2025) [System already implemented, added documentation]
-- 🔄 **ROLLED BACK**: Batch 4 (Navigation Consolidation & DB Fixes) - Awaiting re-implementation in clean branch
-- ✅ **COMPLETED**: Batch 5 Phase 3 (Analytics Data Collection) - 3-4 hours (Oct 12, 2025)
+- ⚠️ **PARTIAL**: Batch 4 Phase 1 (Database Fixes) - 2 hours (Oct 11, 2025) | Phases 2-4 rolled back
+- ⚠️ **PARTIAL**: Batch 5 Phase 3 (Analytics Data Collection) - 3-4 hours (Oct 12, 2025) | Phases 1-2, 4-7 not started
 - ✅ **COMPLETED**: Batch 6 (Hunt Code Removal) - 2 hours (Oct 12, 2025)
-- 🎯 **NEXT**: Re-implement Batch 4 in new branch (version-2.3.0-NavigationConsolidation-v2)
-- **Total Completed Time**: 14.5-15.5 hours across Batches 1-3, 5, 6
+- 🎯 **NEXT**: Complete remaining Batch 4 (Phases 2-4) and Batch 5 (Phases 1-2, 4-7)
+- **Total Completed Time**: 15.5-16.5 hours
+- **Total Remaining Work**: 19.5-24 hours (Batch 4: 6-8h, Batch 5: 13.5-16h)
 - **Current Stable Version**: version-2.2.05.4-HuntRemoval-StableVersion
 
 **Confirmed Scope Decisions:**
@@ -1582,4 +1621,4 @@ const validatedEmail = emailSchema.parse(inputEmail);
 *Last Updated: October 12, 2025*  
 *Maintained by: Development Team*  
 *Version: version-2.2.05.4-HuntRemoval-StableVersion*  
-*Status: Batches 1-3, 5-6 COMPLETED | Batch 4 rolled back, awaiting re-implementation*
+*Status: Batches 1-3, 6 COMPLETED | Batch 4 Phase 1 & Batch 5 Phase 3 PARTIAL | Phases awaiting completion*
