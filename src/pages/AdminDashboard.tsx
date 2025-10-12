@@ -23,6 +23,7 @@ import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
 import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
+import { AnalyticsWidgets } from '@/components/admin/AnalyticsWidgets';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -406,6 +407,8 @@ export default function AdminDashboard() {
                   </div>
                 </CollapsibleSection>
               </div>
+            ) : activeTab === 'analytics' ? (
+              <AnalyticsWidgets />
             ) : activeTab === 'rsvps' ? (
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
             ) : activeTab === 'tournament' ? (

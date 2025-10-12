@@ -265,6 +265,114 @@ export const getAnalyticsSummary = async (
   }
 };
 
+export const getPageViewsByDate = async (
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: any[]; error: any }> => {
+  try {
+    const { data, error } = await supabase
+      .from('analytics_daily_aggregates')
+      .select('date, total_page_views, unique_visitors')
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', endDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+
+    if (error) {
+      logger.error('Failed to get page views by date', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    logger.error('Page views by date error', error as Error);
+    return { data: [], error };
+  }
+};
+
+export const getActivityBreakdown = async (
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: any; error: any }> => {
+  try {
+    const { data, error } = await supabase
+      .from('analytics_daily_aggregates')
+      .select('photos_uploaded, rsvps_submitted, guestbook_posts')
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', endDate.toISOString().split('T')[0]);
+
+    if (error) {
+      logger.error('Failed to get activity breakdown', error);
+      return { data: null, error };
+    }
+
+    // Aggregate the totals
+    const totals = (data || []).reduce(
+      (acc, row) => ({
+        photo_uploads: acc.photo_uploads + (row.photos_uploaded || 0),
+        rsvps: acc.rsvps + (row.rsvps_submitted || 0),
+        guestbook_posts: acc.guestbook_posts + (row.guestbook_posts || 0),
+        hunt_progress: 0, // Not tracked in daily aggregates yet
+      }),
+      { photo_uploads: 0, rsvps: 0, guestbook_posts: 0, hunt_progress: 0 }
+    );
+
+    return { data: totals, error: null };
+  } catch (error) {
+    logger.error('Activity breakdown error', error as Error);
+    return { data: null, error };
+  }
+};
+
+export const getPopularPages = async (
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: any[]; error: any }> => {
+  try {
+    const { data, error } = await supabase
+      .from('page_views')
+      .select('page_path')
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString());
+
+    if (error) {
+      logger.error('Failed to get popular pages', error);
+      return { data: [], error };
+    }
+
+    // Aggregate by page_path
+    const pageMap = new Map<string, { view_count: number; unique_visitors: Set<string>; total_time: number }>();
+    
+    (data || []).forEach((view: any) => {
+      const existing = pageMap.get(view.page_path) || {
+        view_count: 0,
+        unique_visitors: new Set(),
+        total_time: 0,
+      };
+      
+      existing.view_count++;
+      if (view.user_id) existing.unique_visitors.add(view.user_id);
+      if (view.time_on_page) existing.total_time += view.time_on_page;
+      
+      pageMap.set(view.page_path, existing);
+    });
+
+    const popularPages = Array.from(pageMap.entries())
+      .map(([page_path, stats]) => ({
+        page_path,
+        view_count: stats.view_count,
+        unique_visitors: stats.unique_visitors.size,
+        avg_time: stats.view_count > 0 ? Math.floor(stats.total_time / stats.view_count) : 0,
+      }))
+      .sort((a, b) => b.view_count - a.view_count)
+      .slice(0, 10);
+
+    return { data: popularPages, error: null };
+  } catch (error) {
+    logger.error('Popular pages error', error as Error);
+    return { data: [], error };
+  }
+};
+
 // Helper functions for browser detection
 function getBrowser(): string {
   const userAgent = navigator.userAgent;
