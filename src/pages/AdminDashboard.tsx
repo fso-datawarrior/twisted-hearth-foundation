@@ -302,11 +302,8 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-yellow-500/50 relative">
-                    <OnHoldOverlay 
-                      variant="professional"
-                      message="Tournament features are in development."
-                    />
+                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-yellow-500 relative">
+                    <OnHoldOverlay />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
@@ -316,6 +313,7 @@ export default function AdminDashboard() {
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                       <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
                       <p className="text-[10px] sm:text-xs text-muted-foreground truncate">teams registered</p>
+                      <OnHoldOverlay message="Tournament bracket generation and management features are currently in development. This feature will be available in a future update." />
                     </CardContent>
                   </Card>
                 
@@ -332,11 +330,8 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-yellow-500/50 relative">
-                    <OnHoldOverlay 
-                      variant="professional"
-                      message="Hunt admin features are in development."
-                    />
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-yellow-500 relative">
+                    <OnHoldOverlay />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
@@ -346,6 +341,7 @@ export default function AdminDashboard() {
                     <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                       <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
                       <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
+                      <OnHoldOverlay message="Scavenger hunt admin interface and hint management features are currently in development. This feature will be available in a future update." />
                     </CardContent>
                   </Card>
 

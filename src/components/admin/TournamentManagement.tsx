@@ -39,14 +39,15 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
 
   return (
     <div className="space-y-6">
-      <Card className="border-yellow-500/50 bg-card/50 backdrop-blur-sm">
+      <Card className="border-yellow-500 bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 relative">
         <CardContent className="p-4 sm:p-6">
-          <OnHoldOverlay 
-            variant="professional"
-            message="Tournament bracket generation and management features are currently in development. This feature will be available in a future update."
-          />
+          <OnHoldOverlay message="This feature will be available in a future update." />
+          <div className="text-sm text-muted-foreground">
+            Tournament bracket generation and management features are currently in development.
+          </div>
         </CardContent>
       </Card>
+      
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Tournament Management</h2>
       </div>
