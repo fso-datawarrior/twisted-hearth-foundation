@@ -19,6 +19,7 @@ import { LibationsManagement } from '@/components/admin/LibationsManagement';
 import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -250,18 +251,20 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
-                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
-                        <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
-                        <span className="truncate">Tournament</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                      <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">teams registered</p>
-                    </CardContent>
-                  </Card>
+                  <OnHoldOverlay reason="Tournament bracket generation and management features are currently in development">
+                    <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+                      <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                        <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                          <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
+                          <span className="truncate">Tournament</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">teams registered</p>
+                      </CardContent>
+                    </Card>
+                  </OnHoldOverlay>
                 
                   <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
@@ -276,18 +279,20 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
-                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
-                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
-                        <span className="truncate">Hunt Progress</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                      <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
-                    </CardContent>
-                  </Card>
+                  <OnHoldOverlay reason="Scavenger hunt admin interface and hint management features are currently in development">
+                    <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                      <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                        <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                          <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
+                          <span className="truncate">Hunt Progress</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                        <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
+                      </CardContent>
+                    </Card>
+                  </OnHoldOverlay>
 
                   <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20">
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
@@ -353,7 +358,9 @@ export default function AdminDashboard() {
             </TabsContent>
             
             <TabsContent value="tournament" className="mt-0">
-              <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
+              <OnHoldOverlay reason="Tournament bracket generation and team management features are currently in development">
+                <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
+              </OnHoldOverlay>
             </TabsContent>
             
             <TabsContent value="gallery" className="mt-0">
@@ -361,7 +368,9 @@ export default function AdminDashboard() {
             </TabsContent>
             
             <TabsContent value="hunt" className="mt-0">
-              <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
+              <OnHoldOverlay reason="Scavenger hunt admin interface with hint editing and progress tracking is currently in development">
+                <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
+              </OnHoldOverlay>
             </TabsContent>
             
             <TabsContent value="vignettes" className="mt-0">

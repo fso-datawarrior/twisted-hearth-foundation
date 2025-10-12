@@ -36,6 +36,8 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     --accent-foreground: var(--bg);
     --destructive: var(--accent-red);
     --destructive-foreground: var(--ink);
+    --warning: 44 96% 57%; /* Amber/gold warning color */
+    --warning-foreground: var(--bg);
     --border: 226 35% 25%;
     --input: var(--bg-2);
     --ring: var(--accent-purple);
