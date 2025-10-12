@@ -71,9 +71,6 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('/src/pages/AdminDashboard') || id.includes('/src/components/admin/')) {
             return 'admin-chunk';
           }
-          if (id.includes('/src/components/hunt/') || id.includes('/src/hooks/use-hunt')) {
-            return 'hunt-chunk';
-          }
           if (id.includes('/src/pages/Gallery') || id.includes('/src/components/gallery/')) {
             return 'gallery-chunk';
           }

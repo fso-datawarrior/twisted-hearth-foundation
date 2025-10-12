@@ -2,7 +2,6 @@ import { useState } from "react";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import Carousel from "@/components/Carousel";
-import HuntRune from "@/components/hunt/HuntRune";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Costumes = () => {
@@ -91,11 +90,6 @@ const Costumes = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
-              <HuntRune 
-                id="5" 
-                label="Masks within masks"
-                className="absolute top-0 right-4"
-              />
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
                 Costume Inspiration Gallery
               </h1>
@@ -109,12 +103,6 @@ const Costumes = () => {
             {/* Filter Chips */}
             <div className="mb-8">
               <div className="flex flex-wrap justify-center gap-3" id="costumes.filter">
-                <HuntRune 
-                  id="9" 
-                  label="Choose your mask wisely"
-                  bonus={true}
-                  className="absolute -top-2 -right-2"
-                />
                 {filterCategories.map((category) => (
                   <button
                     key={category}
@@ -180,11 +168,6 @@ const Costumes = () => {
             
             {/* Contest Info */}
             <div className="relative bg-bg-2 p-8 rounded-lg border border-accent-red/50">
-              <HuntRune
-                id="10"
-                label="Seams stitched with secrets"
-                className="absolute bottom-4 right-4"
-              />
               <h2 className="font-subhead text-3xl text-center mb-6 text-accent-red">
                 Costume Contest Prizes
               </h2>
