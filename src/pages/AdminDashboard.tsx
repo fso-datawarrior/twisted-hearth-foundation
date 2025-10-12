@@ -34,7 +34,8 @@ import {
   Calendar,
   Map,
   Settings,
-  Theater
+  Theater,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -303,17 +304,24 @@ export default function AdminDashboard() {
                   </Card>
                 
                   <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-yellow-500 relative">
-                    <OnHoldOverlay />
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 text-yellow-500 z-10">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-bold text-xs">ON HOLD</span>
+                    </div>
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
                         <span className="truncate">Tournament</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                      <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">teams registered</p>
-                      <OnHoldOverlay message="Tournament bracket generation and management features are currently in development. This feature will be available in a future update." />
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0 space-y-3">
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-secondary">{tournamentRegs?.length || 0}</div>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">teams registered</p>
+                      </div>
+                      <div className="pt-2 border-t border-border text-xs text-muted-foreground text-center">
+                        Tournament bracket generation and management features are currently in development. This feature will be available in a future update.
+                      </div>
                     </CardContent>
                   </Card>
                 
@@ -331,17 +339,24 @@ export default function AdminDashboard() {
                   </Card>
                 
                   <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-yellow-500 relative">
-                    <OnHoldOverlay />
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 text-yellow-500 z-10">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-bold text-xs">ON HOLD</span>
+                    </div>
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
                         <span className="truncate">Hunt Progress</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                      <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">active participants</p>
-                      <OnHoldOverlay message="Scavenger hunt admin interface and hint management features are currently in development. This feature will be available in a future update." />
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0 space-y-3">
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-green-600">{activeHuntRuns}</div>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">active participants</p>
+                      </div>
+                      <div className="pt-2 border-t border-border text-xs text-muted-foreground text-center">
+                        Scavenger hunt admin interface and hint management features are currently in development. This feature will be available in a future update.
+                      </div>
                     </CardContent>
                   </Card>
 
