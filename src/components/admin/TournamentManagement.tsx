@@ -38,9 +38,15 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
   }), { total: 0, confirmed: 0, pending: 0 }) : { total: 0, confirmed: 0, pending: 0 };
 
   return (
-    <div className="relative">
-      <OnHoldOverlay />
-      <div className="space-y-6">
+    <div className="space-y-6">
+      <Card className="border-yellow-500/50 bg-card/50 backdrop-blur-sm">
+        <CardContent className="p-4 sm:p-6">
+          <OnHoldOverlay 
+            variant="professional"
+            message="Tournament bracket generation and management features are currently in development. This feature will be available in a future update."
+          />
+        </CardContent>
+      </Card>
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Tournament Management</h2>
       </div>
@@ -131,7 +137,6 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
           )}
         </CardContent>
       </Card>
-      </div>
     </div>
   );
 }

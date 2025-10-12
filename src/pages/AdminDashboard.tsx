@@ -302,8 +302,11 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 relative">
-                    <OnHoldOverlay />
+                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-yellow-500/50 relative">
+                    <OnHoldOverlay 
+                      variant="professional"
+                      message="Tournament features are in development."
+                    />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
@@ -329,8 +332,11 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 relative">
-                    <OnHoldOverlay />
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-yellow-500/50 relative">
+                    <OnHoldOverlay 
+                      variant="professional"
+                      message="Hunt admin features are in development."
+                    />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
