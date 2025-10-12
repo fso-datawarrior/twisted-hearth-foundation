@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
       'react/jsx-runtime',
       'react/jsx-dev-runtime',
       '@tanstack/react-query',
