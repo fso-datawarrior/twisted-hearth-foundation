@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { trackActivity } from './analytics-api';
 
 // ================================================================
 // PHOTO GALLERY DATABASE API  
@@ -86,6 +87,19 @@ export const uploadPhotoMetadata = async (
     p_category: category
   });
 
+  // Track photo upload
+  if (data && !error) {
+    const sessionId = sessionStorage.getItem('analytics_session_id');
+    if (sessionId) {
+      await trackActivity({
+        action_type: 'photo_upload',
+        action_category: 'content',
+        action_details: { photo_id: data.id, category: category },
+        session_id: sessionId,
+      });
+    }
+  }
+
   return { data: data as any, error };
 };
 
@@ -100,6 +114,19 @@ export const togglePhotoReaction = async (
     p_photo_id: photoId,
     p_reaction_type: reactionType
   });
+
+  // Track photo reaction
+  if (data !== null && !error) {
+    const sessionId = sessionStorage.getItem('analytics_session_id');
+    if (sessionId) {
+      await trackActivity({
+        action_type: 'photo_reaction',
+        action_category: 'interaction',
+        action_details: { photo_id: photoId, reaction_type: reactionType, added: data },
+        session_id: sessionId,
+      });
+    }
+  }
 
   return { data: data as boolean | null, error };
 };
@@ -186,6 +213,19 @@ export const deletePhoto = async (photoId: string, storagePath: string): Promise
   const { error: storageError } = await supabase.storage
     .from('gallery')
     .remove([storagePath]);
+
+  // Track photo deletion
+  if (!storageError) {
+    const sessionId = sessionStorage.getItem('analytics_session_id');
+    if (sessionId) {
+      await trackActivity({
+        action_type: 'photo_delete',
+        action_category: 'content',
+        action_details: { photo_id: photoId },
+        session_id: sessionId,
+      });
+    }
+  }
 
   return { error: storageError };
 };

@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { trackActivity } from '@/lib/analytics-api';
 import { MessageCircle } from 'lucide-react';
 
 interface MessageComposerProps {
@@ -50,9 +51,11 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
 
     setIsLoading(true);
     try {
+      let insertedPostId: string | null = null;
+
       if (isReply && postId) {
         // Insert reply
-        const { error } = await supabase
+        const { data: replyData, error } = await supabase
           .from('guestbook_replies')
           .insert({
             post_id: postId,
@@ -60,20 +63,35 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
             display_name: isAnonymous ? 'Anonymous' : displayName.trim(),
             message: message.trim(),
             is_anonymous: isAnonymous
-          });
+          })
+          .select('id')
+          .single();
 
         if (error) throw error;
+        insertedPostId = replyData?.id || null;
         toast({ title: "Reply posted!" });
       } else {
         // Insert main post using RPC
-        const { error } = await supabase.rpc('guestbook_insert_message', {
+        const { data: postData, error } = await supabase.rpc('guestbook_insert_message', {
           p_display_name: isAnonymous ? 'Anonymous' : displayName.trim(),
           p_message: message.trim(),
           p_is_anonymous: isAnonymous
         });
 
         if (error) throw error;
+        insertedPostId = postData;
         toast({ title: "Message posted!", description: "Your note has been added to the guestbook." });
+      }
+
+      // Track guestbook post
+      const sessionId = sessionStorage.getItem('analytics_session_id');
+      if (sessionId && insertedPostId) {
+        await trackActivity({
+          action_type: 'guestbook_post',
+          action_category: 'engagement',
+          action_details: { post_id: insertedPostId, is_reply: isReply },
+          session_id: sessionId,
+        });
       }
 
       // Reset form

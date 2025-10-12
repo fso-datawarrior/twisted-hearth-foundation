@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { z } from "zod";
+import { trackActivity } from "@/lib/analytics-api";
 
 interface PotluckItem {
   id: string;
@@ -295,6 +296,17 @@ const RSVP = () => {
             console.warn("Email function error:", emailErr);
           }
 
+          // Track RSVP update
+          const sessionId = sessionStorage.getItem('analytics_session_id');
+          if (sessionId) {
+            await trackActivity({
+              action_type: 'rsvp_update',
+              action_category: 'engagement',
+              action_details: { rsvp_id: existingRsvp.id, num_guests: formData.guestCount },
+              session_id: sessionId,
+            });
+          }
+
           toast({
             title: "RSVP Updated!",
             description: "Your reservation has been updated successfully. Check your email for confirmation.\n🎃 Check your spam crypt if it doesn't appear!",
@@ -354,6 +366,17 @@ const RSVP = () => {
             console.warn("Email function error:", emailErr);
           }
           
+          // Track RSVP submission
+          const sessionId = sessionStorage.getItem('analytics_session_id');
+          if (sessionId) {
+            await trackActivity({
+              action_type: 'rsvp_submit',
+              action_category: 'engagement',
+              action_details: { rsvp_id: data.id, num_guests: formData.guestCount },
+              session_id: sessionId,
+            });
+          }
+
           toast({
             title: "RSVP Received!",
             description: "Your twisted tale reservation has been confirmed. Check your email for location details.\n🎃 Check your spam crypt if it doesn't appear!",

@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useHunt as useHuntDatabase, type UseHuntReturn } from "@/hooks/use-hunt";
 import { HUNT_ENABLED } from "./hunt-config";
+import { trackActivity } from "@/lib/analytics-api";
 
 // Re-export the hook interface for backward compatibility
 type HuntAPI = {
@@ -40,10 +41,33 @@ export function HuntProvider({ children }: { children: ReactNode }) {
     return !isNaN(hintId) && hunt.isFound(hintId);
   };
 
-  const markFound = (id: string): void => {
+  const markFound = async (id: string): Promise<void> => {
     const hintId = parseInt(id, 10);
     if (!isNaN(hintId)) {
       hunt.markFound(hintId);
+      
+      // Track rune discovery
+      const sessionId = sessionStorage.getItem('analytics_session_id');
+      if (sessionId) {
+        await trackActivity({
+          action_type: 'hunt_rune_found',
+          action_category: 'engagement',
+          action_details: { hint_id: hintId, total_found: hunt.foundCount + 1 },
+          session_id: sessionId,
+        });
+      }
+
+      // Track hunt completion if this was the last rune
+      if (hunt.foundCount + 1 === hunt.totalCount) {
+        if (sessionId) {
+          await trackActivity({
+            action_type: 'hunt_completed',
+            action_category: 'engagement',
+            action_details: { total_runes: hunt.totalCount },
+            session_id: sessionId,
+          });
+        }
+      }
     }
   };
 

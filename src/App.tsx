@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
+import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import HuntProgress from "@/components/hunt/HuntProgress";
 import HuntReward from "@/components/hunt/HuntReward";
 import HuntNotification from "@/components/hunt/HuntNotification";
@@ -43,9 +44,10 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AdminProvider>
-          <HuntProvider>
+      <AnalyticsProvider>
+        <AuthProvider>
+          <AdminProvider>
+            <HuntProvider>
             <BrowserRouter
               future={{
                 v7_startTransition: true,
@@ -94,6 +96,7 @@ function App() {
           </HuntProvider>
         </AdminProvider>
       </AuthProvider>
+      </AnalyticsProvider>
     </QueryClientProvider>
   );
 }
