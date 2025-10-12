@@ -22,6 +22,7 @@ import { LibationsManagement } from '@/components/admin/LibationsManagement';
 import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -301,7 +302,8 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 relative">
+                    <OnHoldOverlay />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-secondary flex-shrink-0" />
@@ -327,7 +329,8 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 
-                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 relative">
+                    <OnHoldOverlay />
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
                         <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-green-600 flex-shrink-0" />
@@ -371,9 +374,12 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4 relative"
                       onClick={() => handleTabChange('tournament')}
                     >
+                      <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                        ON HOLD
+                      </div>
                       <Trophy className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Tournament Bracket</span>
                     </Button>
@@ -387,9 +393,12 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4 relative"
                       onClick={() => handleTabChange('hunt')}
                     >
+                      <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                        ON HOLD
+                      </div>
                       <Map className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Hunt Stats</span>
                     </Button>
