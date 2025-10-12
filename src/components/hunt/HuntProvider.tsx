@@ -6,7 +6,7 @@ import { trackActivity } from "@/lib/analytics-api";
 // Re-export the hook interface for backward compatibility
 type HuntAPI = {
   isFound: (id: string) => boolean;
-  markFound: (id: string) => void;
+  markFound: (id: string) => Promise<void>; // Changed to async
   reset: () => void;
   progress: number; // number of found
   total: number; // total hints available
@@ -22,7 +22,7 @@ export function HuntProvider({ children }: { children: ReactNode }) {
   if (!HUNT_ENABLED) {
     const noOpApi: HuntAPI = {
       isFound: () => false,
-      markFound: () => {},
+      markFound: async () => {},
       reset: () => {},
       progress: 0,
       total: 0,
@@ -49,23 +49,23 @@ export function HuntProvider({ children }: { children: ReactNode }) {
       // Track rune discovery
       const sessionId = sessionStorage.getItem('analytics_session_id');
       if (sessionId) {
-        await trackActivity({
+        trackActivity({
           action_type: 'hunt_rune_found',
           action_category: 'engagement',
           action_details: { hint_id: hintId, total_found: hunt.foundCount + 1 },
           session_id: sessionId,
-        });
+        }).catch(err => console.warn('Failed to track rune discovery:', err));
       }
 
       // Track hunt completion if this was the last rune
       if (hunt.foundCount + 1 === hunt.totalCount) {
         if (sessionId) {
-          await trackActivity({
+          trackActivity({
             action_type: 'hunt_completed',
             action_category: 'engagement',
             action_details: { total_runes: hunt.totalCount },
             session_id: sessionId,
-          });
+          }).catch(err => console.warn('Failed to track hunt completion:', err));
         }
       }
     }

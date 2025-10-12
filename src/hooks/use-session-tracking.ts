@@ -137,10 +137,10 @@ export function useSessionTracking() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (sessionId) {
-        // Use sendBeacon for reliable unload tracking
-        const beaconUrl = `${window.location.origin}/api/analytics/end-session`;
-        const blob = new Blob([JSON.stringify({ sessionId })], { type: 'application/json' });
-        navigator.sendBeacon?.(beaconUrl, blob);
+        // Attempt to end session on unload (best effort)
+        endSession(sessionId).catch(() => {
+          // Silently fail - this is best effort only
+        });
       }
     };
 

@@ -86,12 +86,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       // Track guestbook post
       const sessionId = sessionStorage.getItem('analytics_session_id');
       if (sessionId && insertedPostId) {
-        await trackActivity({
+        trackActivity({
           action_type: 'guestbook_post',
           action_category: 'engagement',
           action_details: { post_id: insertedPostId, is_reply: isReply },
           session_id: sessionId,
-        });
+        }).catch(err => console.warn('Failed to track guestbook post:', err));
       }
 
       // Reset form

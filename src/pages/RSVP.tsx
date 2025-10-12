@@ -299,12 +299,12 @@ const RSVP = () => {
           // Track RSVP update
           const sessionId = sessionStorage.getItem('analytics_session_id');
           if (sessionId) {
-            await trackActivity({
+            trackActivity({
               action_type: 'rsvp_update',
               action_category: 'engagement',
               action_details: { rsvp_id: existingRsvp.id, num_guests: formData.guestCount },
               session_id: sessionId,
-            });
+            }).catch(err => console.warn('Failed to track RSVP update:', err));
           }
 
           toast({
@@ -369,12 +369,12 @@ const RSVP = () => {
           // Track RSVP submission
           const sessionId = sessionStorage.getItem('analytics_session_id');
           if (sessionId) {
-            await trackActivity({
+            trackActivity({
               action_type: 'rsvp_submit',
               action_category: 'engagement',
               action_details: { rsvp_id: data.id, num_guests: formData.guestCount },
               session_id: sessionId,
-            });
+            }).catch(err => console.warn('Failed to track RSVP submission:', err));
           }
 
           toast({

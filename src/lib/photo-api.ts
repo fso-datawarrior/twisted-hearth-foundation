@@ -91,12 +91,12 @@ export const uploadPhotoMetadata = async (
   if (data && !error) {
     const sessionId = sessionStorage.getItem('analytics_session_id');
     if (sessionId) {
-      await trackActivity({
+      trackActivity({
         action_type: 'photo_upload',
         action_category: 'content',
-        action_details: { photo_id: data.id, category: category },
+        action_details: { photo_id: data, category: category },
         session_id: sessionId,
-      });
+      }).catch(err => console.warn('Failed to track photo upload:', err));
     }
   }
 
@@ -119,12 +119,12 @@ export const togglePhotoReaction = async (
   if (data !== null && !error) {
     const sessionId = sessionStorage.getItem('analytics_session_id');
     if (sessionId) {
-      await trackActivity({
+      trackActivity({
         action_type: 'photo_reaction',
         action_category: 'interaction',
         action_details: { photo_id: photoId, reaction_type: reactionType, added: data },
         session_id: sessionId,
-      });
+      }).catch(err => console.warn('Failed to track photo reaction:', err));
     }
   }
 
@@ -218,12 +218,12 @@ export const deletePhoto = async (photoId: string, storagePath: string): Promise
   if (!storageError) {
     const sessionId = sessionStorage.getItem('analytics_session_id');
     if (sessionId) {
-      await trackActivity({
+      trackActivity({
         action_type: 'photo_delete',
         action_category: 'content',
         action_details: { photo_id: photoId },
         session_id: sessionId,
-      });
+      }).catch(err => console.warn('Failed to track photo deletion:', err));
     }
   }
 
