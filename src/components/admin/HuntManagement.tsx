@@ -171,7 +171,6 @@ export default function HuntManagement({ huntStats, isLoading }: HuntManagementP
           )}
         </CardContent>
       </Card>
-      </div>
     </div>
   );
 }

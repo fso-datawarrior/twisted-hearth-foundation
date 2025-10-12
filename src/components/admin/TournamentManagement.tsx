@@ -140,7 +140,6 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
           )}
         </CardContent>
       </Card>
-      </div>
     </div>
   );
 }
