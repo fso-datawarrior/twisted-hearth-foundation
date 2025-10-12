@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Trophy, Users, Target, AlertTriangle } from 'lucide-react';
+import { Search, Trophy, Users, Target } from 'lucide-react';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 
 interface HuntProgress {
   id: string;
@@ -61,22 +62,9 @@ export default function HuntManagement({ huntStats, isLoading }: HuntManagementP
   const leaderboard = Object.values(userProgress).sort((a: any, b: any) => b.totalPoints - a.totalPoints);
 
   return (
-    <div className="space-y-6">
-      <Card className="border-yellow-500 bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 relative">
-        <div className="absolute top-4 right-4 flex items-center gap-2 text-yellow-500 z-10">
-          <AlertTriangle className="h-5 w-5" />
-          <span className="font-bold text-sm">ON HOLD</span>
-        </div>
-        <CardContent className="p-6 text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Scavenger hunt admin interface and hint management features are currently in development.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            This feature will be available in a future update.
-          </p>
-        </CardContent>
-      </Card>
-      
+    <div className="relative">
+      <OnHoldOverlay />
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Scavenger Hunt Management</h2>
       </div>
@@ -174,6 +162,7 @@ export default function HuntManagement({ huntStats, isLoading }: HuntManagementP
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

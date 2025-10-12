@@ -2,8 +2,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Users, Calendar, AlertTriangle } from 'lucide-react';
+import { Trophy, Users, Calendar } from 'lucide-react';
 import { TournamentRegistration } from '@/lib/tournament-api';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 
 interface TournamentManagementProps {
   tournaments: TournamentRegistration[];
@@ -37,22 +38,9 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
   }), { total: 0, confirmed: 0, pending: 0 }) : { total: 0, confirmed: 0, pending: 0 };
 
   return (
-    <div className="space-y-6">
-      <Card className="border-yellow-500 bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 relative">
-        <div className="absolute top-4 right-4 flex items-center gap-2 text-yellow-500 z-10">
-          <AlertTriangle className="h-5 w-5" />
-          <span className="font-bold text-sm">ON HOLD</span>
-        </div>
-        <CardContent className="p-6 text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Tournament bracket generation and management features are currently in development.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            This feature will be available in a future update.
-          </p>
-        </CardContent>
-      </Card>
-      
+    <div className="relative">
+      <OnHoldOverlay />
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Tournament Management</h2>
       </div>
@@ -143,6 +131,7 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
