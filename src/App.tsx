@@ -9,9 +9,7 @@ import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
-import HuntProgress from "@/components/hunt/HuntProgress";
-import HuntReward from "@/components/hunt/HuntReward";
-import HuntNotification from "@/components/hunt/HuntNotification";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
@@ -31,6 +29,10 @@ const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+// Lazy load hunt overlays to avoid loading when disabled
+const HuntProgress = lazy(() => import("@/components/hunt/HuntProgress"));
+const HuntReward = lazy(() => import("@/components/hunt/HuntReward"));
+const HuntNotification = lazy(() => import("@/components/hunt/HuntNotification"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,9 +90,13 @@ function App() {
                 </main>
                 
                 {/* Hunt UI overlays */}
-                <HuntProgress />
-                <HuntReward />
-                <HuntNotification />
+                {HUNT_ENABLED && (
+                  <Suspense fallback={null}>
+                    <HuntProgress />
+                    <HuntReward />
+                    <HuntNotification />
+                  </Suspense>
+                )}
                 </AudioProvider>
               </HuntProvider>
             </AdminProvider>

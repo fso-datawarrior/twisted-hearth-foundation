@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useHunt as useHuntDatabase } from "@/hooks/use-hunt";
+import { useHunt } from "./HuntProvider";
 import { HUNT_ENABLED } from "./hunt-config";
 import { Button } from "@/components/ui/button";
 import { X, Code2 } from "lucide-react";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 
 export default function HuntProgress() {
-  const { isFound, foundCount, totalCount, hints, loading, error } = useHuntDatabase();
+  const { isFound, progress, total, hints, loading, error } = useHunt();
+  const foundCount = progress;
+  const totalCount = total;
   const [showPanel, setShowPanel] = useState(false);
   const { isDeveloperMode } = useDeveloperMode();
   

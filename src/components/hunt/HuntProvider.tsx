@@ -8,9 +8,13 @@ type HuntAPI = {
   isFound: (id: string) => boolean;
   markFound: (id: string) => Promise<void>; // Changed to async
   reset: () => void;
-  progress: number; // number of found
+  // Counts
+  progress: number; // number found
   total: number; // total hints available
   completed: boolean;
+  // Data
+  hints: UseHuntReturn['hints'];
+  // State
   loading?: boolean;
   error?: string | null;
 };
@@ -27,6 +31,7 @@ export function HuntProvider({ children }: { children: ReactNode }) {
       progress: 0,
       total: 0,
       completed: false,
+      hints: [],
       loading: false,
       error: null,
     };
@@ -84,6 +89,7 @@ export function HuntProvider({ children }: { children: ReactNode }) {
     progress: hunt.foundCount,
     total: hunt.totalCount,
     completed: hunt.completed,
+    hints: hunt.hints,
     loading: hunt.loading,
     error: hunt.error,
   };
