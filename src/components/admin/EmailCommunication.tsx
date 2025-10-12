@@ -101,9 +101,14 @@ export function EmailCommunication() {
   };
 
   const handleSaveCampaign = async (campaignData: any) => {
-    // Instead of sending immediately, show confirmation dialog
+    console.log('📧 Review & Send clicked - Opening confirmation dialog', campaignData);
+    toast.info('Preparing campaign for review...');
+    
+    // Set state to show confirmation dialog
     setPendingCampaign(campaignData);
     setSendDialogOpen(true);
+    
+    console.log('📧 Dialog state updated - sendDialogOpen should be true');
   };
 
   const handleConfirmSend = async () => {
@@ -344,8 +349,14 @@ export function EmailCommunication() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog open={sendDialogOpen} onOpenChange={(open) => {
+        console.log('📧 Dialog open state changed:', open);
+        setSendDialogOpen(open);
+        if (!open) {
+          setPendingCampaign(null);
+        }
+      }}>
+        <AlertDialogContent className="z-[200]">
           <AlertDialogHeader>
             <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -381,6 +392,7 @@ export function EmailCommunication() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
+              console.log('📧 Cancel clicked');
               setSendDialogOpen(false);
               setPendingCampaign(null);
             }}>
@@ -388,10 +400,11 @@ export function EmailCommunication() {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmSend}
+              disabled={isLoading}
               className="bg-primary hover:bg-primary/90"
             >
               <Send className="w-4 h-4 mr-2" />
-              {pendingCampaign?.scheduled_at ? 'Schedule Campaign' : 'Send Now'}
+              {isLoading ? 'Sending...' : pendingCampaign?.scheduled_at ? 'Schedule Campaign' : 'Send Now'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

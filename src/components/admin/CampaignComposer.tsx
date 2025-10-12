@@ -135,6 +135,8 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
   };
 
   const handleSave = () => {
+    console.log('📧 Campaign Composer - handleSave called');
+    
     if (!selectedTemplate || !subject) {
       toast.error('Please select a template and enter a subject');
       return;
@@ -145,14 +147,17 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
       return;
     }
 
-    onSave({
+    const campaignData = {
       template_id: selectedTemplate,
       recipient_list: recipientList,
       custom_recipients: recipientList === 'custom' ? customRecipients : undefined,
       subject,
       scheduled_at: isScheduled ? scheduledAt : undefined,
       status: 'draft',
-    });
+    };
+    
+    console.log('📧 Calling onSave with campaign data:', campaignData);
+    onSave(campaignData);
   };
 
   const handleSendTest = () => {
