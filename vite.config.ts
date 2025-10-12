@@ -25,9 +25,6 @@ export default defineConfig(({ mode }) => ({
       'date-fns',
       '@radix-ui/react-checkbox'
     ],
-    exclude: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'scheduler'],
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'scheduler'],
-    force: true
   },
   build: {
     rollupOptions: {
