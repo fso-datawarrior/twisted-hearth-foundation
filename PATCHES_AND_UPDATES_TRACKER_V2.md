@@ -4,11 +4,46 @@
 This document tracks all new patches, updates, and features for the Twisted Hearth Foundation project - Phase 2 Development.
 
 **Start Date:** October 11, 2025  
-**Current Version:** version-2.2.05.4-HuntRemoval-StableVersion  
-**Status:** Rollback & Cleanup 🔄  
-**Last Update:** Hunt Code Removal - October 12, 2025
+**Current Version:** version-2.2.05.5-ViteConfigFix-Stable  
+**Status:** Stable & Ready for Phase 2 ✅  
+**Last Update:** Vite Config React Duplication Fix - October 12, 2025
 
-## 🔄 Rollback Log
+## 🔄 Rollback Log & Critical Fixes
+
+### ✅ Critical Fix #1 - React Duplication Issue - October 12, 2025
+**Issue**: Blank screen with `TypeError: Cannot read properties of undefined (reading 'createContext')` in production build  
+**Root Cause**: Vite configuration created duplicate React instances across chunks due to overly aggressive manual chunking and conflicting React alias/dedupe settings
+
+**Symptoms**:
+- Blank screen on all pages (dev and production)
+- Console error: `de.Component_` undefined (React binding issue)
+- Error occurred in gallery-chunk, but affected entire app
+- Persisted even after Hunt code removal
+
+**Root Cause Analysis**:
+- `vite.config.ts` had explicit React path aliases (`"react": path.resolve(...)`)
+- `optimizeDeps` had both `include` and `exclude` for React (conflicting)
+- `manualChunks` split React into `react-vendor` but caused duplicate React instances
+- Multiple React resolution paths led to components from one chunk trying to use React from another
+
+**Fix Applied** (vite.config.ts):
+1. **Removed all explicit React aliases** - let Vite resolve React naturally
+2. **Simplified resolve.alias** - kept only `"@": "./src"` 
+3. **Simplified resolve.dedupe** - kept only `["react", "react-dom"]`
+4. **Simplified optimizeDeps** - only `exclude: ['react', 'react-dom']` (removed include, force, dedupe)
+5. **Removed manualChunks entirely** - let Rollup decide chunking automatically
+6. **Bumped SW cleanup** - `sw_cleanup_done_v6` in main.tsx for cache invalidation
+
+**Result**: ✅ Application renders correctly, all pages working, no React duplication errors
+
+**Lessons Learned**:
+- Vite's default React resolution is usually correct - don't override unless absolutely necessary
+- Manual chunking can break React singleton pattern if not done carefully
+- Conflicting optimizeDeps settings (include + exclude) cause unpredictable behavior
+- Always test production builds after Vite config changes
+- Service worker cache invalidation is critical after build config changes
+
+---
 
 ### Rollback #1 - October 12, 2025
 **From**: `2.4.0-NavigationConsolidation` (BATCH 4 Phase 1-3 in progress)  
@@ -61,13 +96,31 @@ This document tracks all new patches, updates, and features for the Twisted Hear
 
 ## 📋 CURRENT EXECUTION PLAN (October 12, 2025)
 
-**Prioritized Order:**
-1. ✅ **BATCH 5 Phase 1** - ON HOLD overlays & styling fixes (1.5-2h) - COMPLETE
-2. ✅ **BATCH 4 Phases 2-4** - Navigation Consolidation (6-8h) - COMPLETE (Already implemented + database fix)
-3. ✅ **BATCH 5 Phase 2** - Complete analytics DB infrastructure (1-2h) - COMPLETE
-4. 🎯 **BATCH 5 Phases 4-7** - Analytics Dashboard widgets & charts (13.5-18h) - NEXT UP
+**Current Status**: ✅ Stable baseline achieved - Hunt removed, Vite config fixed, app rendering correctly
 
-**Total Remaining Work:** ~13.5-18 hours
+**Completed Today**:
+1. ✅ Hunt code complete removal from codebase
+2. ✅ Critical Vite config fix (React duplication resolved)
+3. ✅ Service worker cache invalidation (v6)
+
+**Next Steps** (Prioritized):
+1. 🎯 **BATCH 5 Phases 4-7** - Analytics Dashboard widgets & charts (13.5-18h)
+   - Overview widgets (user engagement, content metrics, RSVP stats)
+   - Charts and visualizations (Recharts integration)
+   - Time-based filtering and date range selectors
+   - Export functionality (CSV/PDF)
+   
+2. 🎯 **ADMIN-SETTINGS-03** - Navigation Reorganization (2.5-3h)
+   - Consolidate 10 tabs into 4 main categories
+   - Mobile-first dropdown navigation
+   - Settings group for admin tools
+   
+3. 🎯 **ADMIN-SETTINGS-05** - System Configuration Panel (1.5-2h)
+   - Feature toggles (hunt, tournament, gallery, guestbook)
+   - Event settings (date, registration open/close)
+   - Maintenance mode toggle
+
+**Total Remaining Work:** ~17.5-23 hours
 
 ---
 
