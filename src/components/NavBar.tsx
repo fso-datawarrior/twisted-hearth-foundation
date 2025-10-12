@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,9 +9,11 @@ import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
-import HuntNavIndicator from "@/components/hunt/HuntNavIndicator";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
 import packageJson from "../../package.json";
+
+const LazyHuntNavIndicator = lazy(() => import("@/components/hunt/HuntNavIndicator"));
 
 interface NavBarProps {
   variant?: "public";
@@ -85,7 +87,11 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             >
               The Ruths' Bash
             </Link>
-            <HuntNavIndicator />
+            {HUNT_ENABLED && (
+              <Suspense fallback={null}>
+                <LazyHuntNavIndicator />
+              </Suspense>
+            )}
             {isDeveloperMode && DEV_MODE_ENABLED && (
               <span className="text-xs text-ink/50 font-mono">
                 v{packageJson.version}
