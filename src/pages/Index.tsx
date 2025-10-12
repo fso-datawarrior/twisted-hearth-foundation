@@ -9,10 +9,6 @@ import Footer from "@/components/Footer";
 import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
-import { Suspense, lazy } from "react";
-import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
-const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
-const LazyHuntDebug = lazy(() => import("@/components/hunt/HuntDebug"));
 import PrepLinks from "@/components/PrepLinks";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
@@ -105,16 +101,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Debug component for showing all runes */}
-      {HUNT_ENABLED && (
-        <Suspense fallback={null}>
-          <LazyHuntDebug />
-        </Suspense>
-      )}
-      
-      {/* Hunt triggers moved below hero to avoid hero overlay */}
-      
-      {/* Hero Section (no runes on hero) */}
+      {/* Hero Section */}
       <div className="relative">
         <HeroVideo
           src="/hero-video.mp4"
@@ -132,17 +119,6 @@ const Index = () => {
       <main id="main" className="py-16 px-6 relative z-10">
         {/* Positioned hunt triggers below hero and away from page edges */}
         <div className="container mx-auto max-w-6xl relative">
-          <div className="relative h-24">
-            {HUNT_ENABLED && (
-              <Suspense fallback={null}>
-                <LazyHuntRune 
-                  id="1" 
-                  label="Hidden mark near the crest" 
-                  className="absolute top-4 left-1/4 z-30" 
-                />
-              </Suspense>
-            )}
-          </div>
         </div>
         {/* GLSL animated smoke effect for main content areas only */}
         {/* <CSSFogBackground /> */}
@@ -191,28 +167,8 @@ const Index = () => {
                 >
                   See more about the theme <span aria-hidden="true">→</span>
                 </Link>
-                {/* Feather rune inline for small screens */}
-                {HUNT_ENABLED && (
-                  <Suspense fallback={null}>
-                    <LazyHuntRune 
-                      id="2" 
-                      label="Something stirs beneath the moon"
-                      className="ml-2 align-middle md:hidden"
-                    />
-                  </Suspense>
-                )}
               </div>
             </div>
-            {/* Feather rune positioned under the third card (desktop and up) */}
-            {HUNT_ENABLED && (
-              <Suspense fallback={null}>
-                <LazyHuntRune 
-                  id="2" 
-                  label="Something stirs beneath the moon"
-                  className="hidden md:block absolute -bottom-6 right-[10%] z-30"
-                />
-              </Suspense>
-            )}
           </section>
 
           {/* Event Overview */}
@@ -330,17 +286,8 @@ const Index = () => {
         )}
       </Modal>
       
-      {/* Footer with hunt trigger */}
+      {/* Footer */}
       <div className="relative">
-        {HUNT_ENABLED && (
-          <Suspense fallback={null}>
-            <LazyHuntRune 
-              id="15" 
-              label="A faint crown in the dark"
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
-            />
-          </Suspense>
-        )}
         <Footer />
       </div>
     </div>

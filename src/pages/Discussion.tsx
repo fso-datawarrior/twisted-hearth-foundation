@@ -2,9 +2,6 @@ import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import { Button } from "@/components/ui/button";
-import { lazy, Suspense } from "react";
-import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
-const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import MessageComposer from "@/components/guestbook/MessageComposer";
@@ -130,15 +127,6 @@ const Discussion = () => {
               <h1 className="font-heading text-4xl md:text-6xl text-shadow-gothic">
                 The Dark Guestbook
               </h1>
-              {HUNT_ENABLED && (
-                <Suspense fallback={null}>
-                  <LazyHuntRune 
-                    id="8" 
-                    label="Hidden Message"
-                    hint="Look for messages that reveal more than they say..."
-                  />
-                </Suspense>
-              )}
             </div>
             
             <p className="font-body text-lg text-center mb-12 text-muted-foreground max-w-3xl mx-auto">

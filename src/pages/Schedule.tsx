@@ -1,9 +1,6 @@
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import { formatEventTime } from "@/lib/event";
-import { lazy, Suspense } from "react";
-import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
-const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 
 const Schedule = () => {
   const scheduleItems = [
@@ -79,15 +76,6 @@ const Schedule = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="relative">
-              {HUNT_ENABLED && (
-                <Suspense fallback={null}>
-                  <LazyHuntRune 
-                    id="13" 
-                    label="Time keeps darker promises"
-                    className="absolute top-0 right-4"
-                  />
-                </Suspense>
-              )}
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
                 Schedule of Dark Delights
               </h1>
@@ -105,17 +93,6 @@ const Schedule = () => {
                     key={index}
                     className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
                   >
-                    {/* Add bonus hunt rune to the final toast */}
-                    {item.type === "finale" && HUNT_ENABLED && (
-                      <Suspense fallback={null}>
-                        <LazyHuntRune 
-                          id="14" 
-                          label="Midnight keeps its own time"
-                          bonus={true}
-                          className="absolute top-4 right-4"
-                        />
-                      </Suspense>
-                    )}
                     
                     <div className="flex flex-col md:flex-row md:items-start gap-4">
                       <div className="flex-shrink-0">
