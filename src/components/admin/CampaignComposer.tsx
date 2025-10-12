@@ -5,15 +5,26 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { Send, TestTube, Upload, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Send, TestTube, Upload, Users, X, Check, ChevronsUpDown } from 'lucide-react';
 import { getActiveTemplates, getRecipientCount, parseEmailCSV, type EmailTemplate } from '@/lib/email-campaigns-api';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface CampaignComposerProps {
   onSave: (campaign: any) => void;
   onCancel: () => void;
   onSendTest: (campaign: any) => void;
+}
+
+interface User {
+  id: string;
+  email: string;
+  display_name?: string;
 }
 
 export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignComposerProps) {
@@ -26,9 +37,13 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
   const [recipientCount, setRecipientCount] = useState(0);
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [manualEmails, setManualEmails] = useState('');
 
   useEffect(() => {
     loadTemplates();
+    loadAllUsers();
   }, []);
 
   useEffect(() => {
@@ -42,6 +57,20 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
     } catch (error) {
       console.error('Failed to load templates:', error);
       setTemplates([]);
+    }
+  };
+
+  const loadAllUsers = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, email, display_name')
+        .order('email');
+
+      if (error) throw error;
+      setAllUsers(profiles || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
     }
   };
 
@@ -82,11 +111,27 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
   };
 
   const handleCustomRecipientsChange = (value: string) => {
+    setManualEmails(value);
     const emails = value
       .split(/[,\n]/)
       .map(e => e.trim())
       .filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
     setCustomRecipients(emails);
+  };
+
+  const addUserToRecipients = (userId: string) => {
+    const user = allUsers.find(u => u.id === userId);
+    if (user && !customRecipients.includes(user.email)) {
+      setCustomRecipients([...customRecipients, user.email]);
+    }
+    setComboboxOpen(false);
+  };
+
+  const removeRecipient = (email: string) => {
+    setCustomRecipients(customRecipients.filter(e => e !== email));
+    // Also update manual emails field
+    const remainingEmails = customRecipients.filter(e => e !== email).join(', ');
+    setManualEmails(remainingEmails);
   };
 
   const handleSave = () => {
@@ -180,7 +225,82 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
           </div>
 
           {recipientList === 'custom' && (
-            <div className="space-y-2">
+            <div className="space-y-4">
+              {/* User Selector */}
+              <div>
+                <Label className="mb-2 block">Select from existing users:</Label>
+                <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={comboboxOpen}
+                      className="w-full justify-between min-h-[44px]"
+                    >
+                      Select user...
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 bg-popover z-50" align="start">
+                    <Command className="bg-popover">
+                      <CommandInput placeholder="Search users..." />
+                      <CommandList>
+                        <CommandEmpty>No user found.</CommandEmpty>
+                        <CommandGroup>
+                          {allUsers
+                            .filter(u => !customRecipients.includes(u.email))
+                            .map((u) => (
+                              <CommandItem
+                                key={u.id}
+                                value={u.email}
+                                onSelect={() => addUserToRecipients(u.id)}
+                              >
+                                <Check className="mr-2 h-4 w-4 opacity-0" />
+                                <div className="flex flex-col">
+                                  <span>{u.email}</span>
+                                  {u.display_name && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {u.display_name}
+                                    </span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Selected Recipients */}
+              {customRecipients.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-muted/50">
+                  {customRecipients.map((email) => (
+                    <Badge key={email} variant="secondary" className="gap-1">
+                      {email}
+                      <button
+                        onClick={() => removeRecipient(email)}
+                        className="ml-1 hover:bg-background/50 rounded-full p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or</span>
+                </div>
+              </div>
+
+              {/* CSV Upload */}
               <div className="flex items-center gap-2">
                 <Label htmlFor="csv-upload">Upload CSV</Label>
                 <Button
@@ -201,10 +321,12 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
                 />
               </div>
               
+              {/* Manual Entry */}
               <div>
                 <Label htmlFor="custom-emails">Or Enter Emails (comma or newline separated)</Label>
                 <Textarea
                   id="custom-emails"
+                  value={manualEmails}
                   placeholder="email1@example.com, email2@example.com"
                   className="min-h-[100px]"
                   onChange={(e) => handleCustomRecipientsChange(e.target.value)}
