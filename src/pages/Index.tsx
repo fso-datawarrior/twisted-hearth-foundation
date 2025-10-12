@@ -11,11 +11,11 @@ import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import { Suspense, lazy } from "react";
 import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
-import HuntDebug from "@/components/hunt/HuntDebug";
+const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
+const LazyHuntDebug = lazy(() => import("@/components/hunt/HuntDebug"));
 import PrepLinks from "@/components/PrepLinks";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
-const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 
 const LINES = [
   "A cottage too cozy to trust… where the meal is already waiting.",
@@ -106,7 +106,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Debug component for showing all runes */}
-      <HuntDebug />
+      {HUNT_ENABLED && (
+        <Suspense fallback={null}>
+          <LazyHuntDebug />
+        </Suspense>
+      )}
       
       {/* Hunt triggers moved below hero to avoid hero overlay */}
       

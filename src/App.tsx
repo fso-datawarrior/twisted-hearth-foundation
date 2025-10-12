@@ -29,7 +29,8 @@ const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-// Lazy load hunt overlays to avoid loading when disabled
+// Lazy load hunt UI and providers when needed
+const LazyHuntProvider = lazy(() => import("@/components/hunt/HuntProvider"));
 const HuntProgress = lazy(() => import("@/components/hunt/HuntProgress"));
 const HuntReward = lazy(() => import("@/components/hunt/HuntReward"));
 const HuntNotification = lazy(() => import("@/components/hunt/HuntNotification"));
@@ -55,50 +56,86 @@ function App() {
         <AnalyticsProvider>
           <AuthProvider>
             <AdminProvider>
-              <HuntProvider>
+              {HUNT_ENABLED ? (
+                <Suspense fallback={null}>
+                  <LazyHuntProvider>
+                    <AudioProvider>
+                      <SkipLink />
+                      <NavBar />
+                      <main>
+                        <SwipeNavigator>
+                          <Toaster />
+                          <Sonner />
+                          <Suspense fallback={
+                              <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+                            }>
+                            <ErrorBoundary>
+                              <Routes>
+                                <Route path="/" element={<Index />} />
+                                <Route path="/about" element={<About />} />
+                                <Route path="/vignettes" element={<Vignettes />} />
+                                <Route path="/schedule" element={<Schedule />} />
+                                <Route path="/costumes" element={<Costumes />} />
+                                <Route path="/feast" element={<Feast />} />
+                                <Route path="/rsvp" element={<RSVP />} />
+                                <Route path="/gallery" element={<Gallery />} />
+                                <Route path="/discussion" element={<Discussion />} />
+                                <Route path="/contact" element={<Contact />} />
+                                <Route path="/auth" element={<AuthCallback />} />
+                                <Route path="/test" element={<TestPage />} />
+                                <Route path="/admin" element={<AdminDashboard />} />
+                                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                                <Route path="*" element={<NotFound />} />
+                              </Routes>
+                            </ErrorBoundary>
+                          </Suspense>
+                        </SwipeNavigator>
+                      </main>
+                      
+                      {/* Hunt UI overlays */}
+                      <Suspense fallback={null}>
+                        <HuntProgress />
+                        <HuntReward />
+                        <HuntNotification />
+                      </Suspense>
+                    </AudioProvider>
+                  </LazyHuntProvider>
+                </Suspense>
+              ) : (
                 <AudioProvider>
-                <SkipLink />
-                <NavBar />
-                <main>
-                  <SwipeNavigator>
-                    <Toaster />
-                    <Sonner />
-                    <Suspense fallback={
-                        <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-                      }>
-                      <ErrorBoundary>
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="/vignettes" element={<Vignettes />} />
-                          <Route path="/schedule" element={<Schedule />} />
-                          <Route path="/costumes" element={<Costumes />} />
-                          <Route path="/feast" element={<Feast />} />
-                          <Route path="/rsvp" element={<RSVP />} />
-                          <Route path="/gallery" element={<Gallery />} />
-                          <Route path="/discussion" element={<Discussion />} />
-                          <Route path="/contact" element={<Contact />} />
-                          <Route path="/auth" element={<AuthCallback />} />
-                          <Route path="/test" element={<TestPage />} />
-                          <Route path="/admin" element={<AdminDashboard />} />
-                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </ErrorBoundary>
-                    </Suspense>
-                  </SwipeNavigator>
-                </main>
-                
-                {/* Hunt UI overlays */}
-                {HUNT_ENABLED && (
-                  <Suspense fallback={null}>
-                    <HuntProgress />
-                    <HuntReward />
-                    <HuntNotification />
-                  </Suspense>
-                )}
+                  <SkipLink />
+                  <NavBar />
+                  <main>
+                    <SwipeNavigator>
+                      <Toaster />
+                      <Sonner />
+                      <Suspense fallback={
+                          <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+                        }>
+                        <ErrorBoundary>
+                          <Routes>
+                            <Route path="/" element={<Index />} />
+                            <Route path="/about" element={<About />} />
+                            <Route path="/vignettes" element={<Vignettes />} />
+                            <Route path="/schedule" element={<Schedule />} />
+                            <Route path="/costumes" element={<Costumes />} />
+                            <Route path="/feast" element={<Feast />} />
+                            <Route path="/rsvp" element={<RSVP />} />
+                            <Route path="/gallery" element={<Gallery />} />
+                            <Route path="/discussion" element={<Discussion />} />
+                            <Route path="/contact" element={<Contact />} />
+                            <Route path="/auth" element={<AuthCallback />} />
+                            <Route path="/test" element={<TestPage />} />
+                            <Route path="/admin" element={<AdminDashboard />} />
+                            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </ErrorBoundary>
+                      </Suspense>
+                    </SwipeNavigator>
+                  </main>
                 </AudioProvider>
-              </HuntProvider>
+              )}
             </AdminProvider>
           </AuthProvider>
         </AnalyticsProvider>
