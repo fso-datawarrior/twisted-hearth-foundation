@@ -4,7 +4,9 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import HuntRune from "@/components/hunt/HuntRune";
+import { lazy, Suspense } from "react";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
+const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
@@ -329,12 +331,16 @@ const Gallery = () => {
 
             {/* Upload Section */}
             <div className="mb-8 text-center relative">
-              <HuntRune 
-                id="7" 
-                label="A picture is a promise"
-                bonus={true}
-                className="absolute -top-2 -right-2"
-              />
+              {HUNT_ENABLED && (
+                <Suspense fallback={null}>
+                  <LazyHuntRune 
+                    id="7" 
+                    label="A picture is a promise"
+                    bonus={true}
+                    className="absolute -top-2 -right-2"
+                  />
+                </Suspense>
+              )}
               <div className="bg-card p-6 rounded-lg border border-accent-purple/30 max-w-4xl mx-auto">
                 <h2 className="font-subhead text-2xl mb-4 text-accent-gold">Share Your Photos</h2>
                 <Label htmlFor="image-upload" className="cursor-pointer">

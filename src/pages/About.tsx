@@ -1,5 +1,7 @@
 import Footer from "@/components/Footer";
-import HuntRune from "@/components/hunt/HuntRune";
+import { lazy, Suspense } from "react";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
+const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const About = () => {
@@ -81,11 +83,15 @@ const About = () => {
       </main>
       
       <div className="relative z-10">
-        <HuntRune 
-          id="14" 
-          label="Ink that won't dry"
-          className="absolute top-4 left-8"
-        />
+        {HUNT_ENABLED && (
+          <Suspense fallback={null}>
+            <LazyHuntRune 
+              id="14" 
+              label="Ink that won't dry"
+              className="absolute top-4 left-8"
+            />
+          </Suspense>
+        )}
         <Footer />
       </div>
     </div>

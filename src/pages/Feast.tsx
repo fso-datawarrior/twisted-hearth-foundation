@@ -14,7 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import HuntRune from "@/components/hunt/HuntRune";
+import { lazy, Suspense } from "react";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
+const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -272,11 +274,15 @@ const Feast = () => {
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="relative">
-              <HuntRune 
-                id="11" 
-                label="Flavor sharp as a blade"
-                className="absolute top-0 right-4"
-              />
+              {HUNT_ENABLED && (
+                <Suspense fallback={null}>
+                  <LazyHuntRune 
+                    id="11" 
+                    label="Flavor sharp as a blade"
+                    className="absolute top-0 right-4"
+                  />
+                </Suspense>
+              )}
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
                 Feast of Dark Delights
               </h1>
@@ -309,12 +315,14 @@ const Feast = () => {
                       key={drink.id}
                       className="bg-card p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors motion-safe relative"
                     >
-                      {index === 0 && (
-                        <HuntRune 
-                          id="12" 
-                          label="A diced confession"
-                          className="absolute top-2 right-2"
-                        />
+                      {index === 0 && HUNT_ENABLED && (
+                        <Suspense fallback={null}>
+                          <LazyHuntRune 
+                            id="12" 
+                            label="A diced confession"
+                            className="absolute top-2 right-2"
+                          />
+                        </Suspense>
                       )}
                       {drink.image_url && (
                         <div className="text-4xl mb-3 text-center">
@@ -380,12 +388,16 @@ const Feast = () => {
             
             {/* Potluck Contributions Panel */}
             <div className="mb-16 relative">
-              <HuntRune 
-                id="13" 
-                label="What's shared tastes sweeter"
-                bonus={true}
-                className="absolute -top-2 -right-2 z-10"
-              />
+              {HUNT_ENABLED && (
+                <Suspense fallback={null}>
+                  <LazyHuntRune 
+                    id="13" 
+                    label="What's shared tastes sweeter"
+                    bonus={true}
+                    className="absolute -top-2 -right-2 z-10"
+                  />
+                </Suspense>
+              )}
               <h2 className="font-subhead text-3xl text-center mb-8 text-accent-gold">
                 Potluck Contributions
               </h2>

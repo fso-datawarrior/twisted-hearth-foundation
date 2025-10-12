@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 import Card from "@/components/Card";
-import HuntRune from "@/components/hunt/HuntRune";
+import { lazy, Suspense } from "react";
+import { HUNT_ENABLED } from "@/components/hunt/hunt-config";
+const LazyHuntRune = lazy(() => import("@/components/hunt/HuntRune"));
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
 import { Photo } from "@/lib/photo-api";
@@ -254,15 +256,19 @@ const Vignettes = () => {
                           style={{ width: `${100 / displayVignettes.length}%` }}
                         >
                           <div className="h-full">
-                            <HuntRune
-                              id={index === 0 ? "5" : index === 1 ? "6" : "7"}
-                              label={
-                                index === 0 ? "Knives gleam where spoons should lie" :
-                                index === 1 ? "Coins seldom tell a clean story" :
-                                "Glass remembers every breath"
-                              }
-                              className="absolute top-2 right-2 z-10"
-                            />
+                            {HUNT_ENABLED && (
+                              <Suspense fallback={null}>
+                                <LazyHuntRune
+                                  id={index === 0 ? "5" : index === 1 ? "6" : "7"}
+                                  label={
+                                    index === 0 ? "Knives gleam where spoons should lie" :
+                                    index === 1 ? "Coins seldom tell a clean story" :
+                                    "Glass remembers every breath"
+                                  }
+                                  className="absolute top-2 right-2 z-10"
+                                />
+                              </Suspense>
+                            )}
                             <Card
                               variant="vignette"
                               image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
@@ -303,15 +309,19 @@ const Vignettes = () => {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {displayVignettes.map((vignette, index) => (
                     <div key={vignette.id} className="relative">
-                      <HuntRune
-                        id={index === 0 ? "5" : index === 1 ? "6" : "7"}
-                        label={
-                          index === 0 ? "Knives gleam where spoons should lie" :
-                          index === 1 ? "Coins seldom tell a clean story" :
-                          "Glass remembers every breath"
-                        }
-                        className="absolute top-2 right-2 z-10"
-                      />
+                      {HUNT_ENABLED && (
+                        <Suspense fallback={null}>
+                          <LazyHuntRune
+                            id={index === 0 ? "5" : index === 1 ? "6" : "7"}
+                            label={
+                              index === 0 ? "Knives gleam where spoons should lie" :
+                              index === 1 ? "Coins seldom tell a clean story" :
+                              "Glass remembers every breath"
+                            }
+                            className="absolute top-2 right-2 z-10"
+                          />
+                        </Suspense>
+                      )}
                       <Card
                         variant="vignette"
                         image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
@@ -343,11 +353,15 @@ const Vignettes = () => {
                   "Not all who wander are lost... but some should be."
                 </div>
               </div>
-              <HuntRune 
-                id="8" 
-                label="Stories have roots"
-                className="absolute bottom-4 right-4"
-              />
+              {HUNT_ENABLED && (
+                <Suspense fallback={null}>
+                  <LazyHuntRune 
+                    id="8" 
+                    label="Stories have roots"
+                    className="absolute bottom-4 right-4"
+                  />
+                </Suspense>
+              )}
             </div>
           </div>
         </section>

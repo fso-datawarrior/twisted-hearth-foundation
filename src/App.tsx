@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
-import { HuntProvider } from "@/components/hunt/HuntProvider";
+// HuntProvider dynamically imported when HUNT_ENABLED is true
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
@@ -30,7 +30,7 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 // Lazy load hunt UI and providers when needed
-// Removed LazyHuntProvider - using direct HuntProvider import
+const HuntProvider = lazy(() => import("@/components/hunt/HuntProvider").then(m => ({ default: m.HuntProvider })));
 const HuntProgress = lazy(() => import("@/components/hunt/HuntProgress"));
 const HuntReward = lazy(() => import("@/components/hunt/HuntReward"));
 const HuntNotification = lazy(() => import("@/components/hunt/HuntNotification"));
