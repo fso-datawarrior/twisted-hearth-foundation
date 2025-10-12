@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_daily_aggregates: {
+        Row: {
+          active_sessions: number | null
+          avg_page_load_time: number | null
+          avg_session_duration: number | null
+          created_at: string
+          date: string
+          error_count: number | null
+          guestbook_posts: number | null
+          id: string
+          new_users: number | null
+          photos_uploaded: number | null
+          popular_photos: Json | null
+          rsvps_confirmed: number | null
+          rsvps_submitted: number | null
+          top_pages: Json | null
+          total_page_views: number | null
+          total_users: number | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          active_sessions?: number | null
+          avg_page_load_time?: number | null
+          avg_session_duration?: number | null
+          created_at?: string
+          date: string
+          error_count?: number | null
+          guestbook_posts?: number | null
+          id?: string
+          new_users?: number | null
+          photos_uploaded?: number | null
+          popular_photos?: Json | null
+          rsvps_confirmed?: number | null
+          rsvps_submitted?: number | null
+          top_pages?: Json | null
+          total_page_views?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active_sessions?: number | null
+          avg_page_load_time?: number | null
+          avg_session_duration?: number | null
+          created_at?: string
+          date?: string
+          error_count?: number | null
+          guestbook_posts?: number | null
+          id?: string
+          new_users?: number | null
+          photos_uploaded?: number | null
+          popular_photos?: Json | null
+          rsvps_confirmed?: number | null
+          rsvps_submitted?: number | null
+          top_pages?: Json | null
+          total_page_views?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       campaign_recipients: {
         Row: {
           campaign_id: string
@@ -51,6 +114,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_interactions: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          interaction_type: string
+          interaction_value: string | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          interaction_type: string
+          interaction_value?: string | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          interaction_value?: string | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       email_campaigns: {
         Row: {
@@ -404,6 +500,48 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          exited_at: string | null
+          id: string
+          page_path: string
+          page_title: string | null
+          referrer: string | null
+          session_id: string
+          time_on_page: number | null
+          user_id: string | null
+          viewport_height: number | null
+          viewport_width: number | null
+        }
+        Insert: {
+          created_at?: string
+          exited_at?: string | null
+          id?: string
+          page_path: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id: string
+          time_on_page?: number | null
+          user_id?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
+        }
+        Update: {
+          created_at?: string
+          exited_at?: string | null
+          id?: string
+          page_path?: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id?: string
+          time_on_page?: number | null
+          user_id?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
+        }
+        Relationships: []
+      }
       past_vignettes: {
         Row: {
           created_at: string
@@ -732,6 +870,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_metrics: {
+        Row: {
+          details: Json | null
+          id: string
+          metric_type: string
+          metric_unit: string
+          metric_value: number
+          recorded_at: string
+        }
+        Insert: {
+          details?: Json | null
+          id?: string
+          metric_type: string
+          metric_unit: string
+          metric_value: number
+          recorded_at?: string
+        }
+        Update: {
+          details?: Json | null
+          id?: string
+          metric_type?: string
+          metric_unit?: string
+          metric_value?: number
+          recorded_at?: string
+        }
+        Relationships: []
+      }
       tournament_matches: {
         Row: {
           created_at: string
@@ -847,6 +1012,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_logs: {
+        Row: {
+          action_category: string
+          action_details: Json | null
+          action_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_category: string
+          action_details?: Json | null
+          action_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action_category?: string
+          action_details?: Json | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -868,6 +1066,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          actions_taken: number | null
+          browser: string | null
+          country: string | null
+          device_type: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          os: string | null
+          pages_viewed: number | null
+          region: string | null
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          actions_taken?: number | null
+          browser?: string | null
+          country?: string | null
+          device_type?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          pages_viewed?: number | null
+          region?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          actions_taken?: number | null
+          browser?: string | null
+          country?: string | null
+          device_type?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          pages_viewed?: number | null
+          region?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -875,6 +1121,10 @@ export type Database = {
     Functions: {
       admin_update_rsvp_status: {
         Args: { p_is_approved?: boolean; p_rsvp_id: string; p_status: string }
+        Returns: undefined
+      }
+      aggregate_daily_stats: {
+        Args: { p_date?: string }
         Returns: undefined
       }
       check_admin_status: {
@@ -901,6 +1151,10 @@ export type Database = {
           updated_by: string
           year: number
         }[]
+      }
+      get_analytics_dashboard: {
+        Args: { p_end_date?: string; p_start_date?: string }
+        Returns: Json
       }
       get_hunt_stats: {
         Args: { p_user_id?: string }
@@ -983,6 +1237,26 @@ export type Database = {
       toggle_vignette_selection: {
         Args: { p_photo_id: string; p_selected: boolean }
         Returns: Json
+      }
+      track_activity: {
+        Args: {
+          p_action_category: string
+          p_action_details?: Json
+          p_action_type: string
+          p_session_id?: string
+        }
+        Returns: string
+      }
+      track_page_view: {
+        Args: {
+          p_page_path: string
+          p_page_title: string
+          p_referrer?: string
+          p_session_id?: string
+          p_viewport_height?: number
+          p_viewport_width?: number
+        }
+        Returns: string
       }
       upload_photo: {
         Args: {
