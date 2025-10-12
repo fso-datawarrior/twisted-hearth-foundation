@@ -517,6 +517,118 @@ All database functions use `SECURITY DEFINER` to run with elevated privileges wh
 - Email functions validate recipient filters
 - File uploads go through proper validation
 
+## Phase 4: Analytics Infrastructure (COMPLETED - 2025-01-12)
+
+### Overview
+Comprehensive analytics tracking system to monitor user engagement, content interactions, and system performance.
+
+### Tables Created
+
+#### 1. user_activity_logs
+Tracks all significant user actions throughout the application.
+- **Columns**: id, user_id, session_id, action_type, action_category, action_details, metadata, created_at
+- **Action Types**: rsvp_submit, photo_upload, guestbook_post, hunt_progress, tournament_register, admin_action
+- **Indexes**: user_id, session_id, created_at, action_category, action_type
+
+#### 2. page_views
+Tracks page navigation and time spent on pages.
+- **Columns**: id, user_id, session_id, page_path, page_title, referrer, time_on_page, viewport_width, viewport_height, created_at, exited_at
+- **Indexes**: user_id, session_id, page_path, created_at
+
+#### 3. user_sessions
+Tracks user sessions with device and browser information.
+- **Columns**: id, user_id, started_at, ended_at, duration_seconds, pages_viewed, actions_taken, device_type, browser, os, ip_address, country, region
+- **Indexes**: user_id, started_at, device_type
+
+#### 4. content_interactions
+Tracks interactions with specific content (photos, posts, hunt hints).
+- **Columns**: id, user_id, session_id, content_type, content_id, interaction_type, interaction_value, created_at
+- **Content Types**: photo, guestbook_post, hunt_hint, vignette
+- **Interaction Types**: view, like, comment, share, download
+- **Indexes**: user_id, (content_type, content_id), interaction_type, created_at
+
+#### 5. system_metrics
+Tracks system-level performance and health metrics.
+- **Columns**: id, metric_type, metric_value, metric_unit, details, recorded_at
+- **Metric Types**: api_response_time, error_rate, db_query_time, storage_usage
+- **Indexes**: metric_type, recorded_at
+
+#### 6. analytics_daily_aggregates
+Pre-computed daily statistics for fast dashboard loading.
+- **Columns**: date, total_users, new_users, active_sessions, avg_session_duration, photos_uploaded, guestbook_posts, total_page_views, unique_visitors, rsvps_submitted, rsvps_confirmed, hunt_completions, tournament_registrations, top_pages, popular_photos, avg_page_load_time, error_count, created_at, updated_at
+- **Indexes**: date (DESC)
+
+### Database Functions
+
+#### track_activity(p_action_type, p_action_category, p_action_details, p_session_id)
+Inserts activity logs for user actions.
+- **Returns**: UUID (activity_id)
+- **Security**: SECURITY DEFINER
+- **Usage**: `SELECT track_activity('photo_upload', 'gallery', '{"photo_id": "uuid"}'::jsonb, 'session-uuid')`
+
+#### track_page_view(p_page_path, p_page_title, p_referrer, p_session_id, p_viewport_width, p_viewport_height)
+Records page views with viewport information.
+- **Returns**: UUID (page_view_id)
+- **Security**: SECURITY DEFINER
+- **Usage**: `SELECT track_page_view('/gallery', 'Photo Gallery', 'https://referrer.com', 'session-uuid', 1920, 1080)`
+
+#### get_analytics_dashboard(p_start_date, p_end_date)
+Retrieves aggregated analytics for admin dashboard (admin-only).
+- **Returns**: JSONB (comprehensive analytics object)
+- **Security**: SECURITY DEFINER with admin check
+- **Default Range**: Last 30 days
+- **Usage**: `SELECT get_analytics_dashboard('2025-01-01', '2025-01-31')`
+
+#### aggregate_daily_stats(p_date)
+Populates analytics_daily_aggregates table with daily statistics.
+- **Returns**: VOID
+- **Security**: SECURITY DEFINER
+- **Called by**: Cron job (daily at 1 AM UTC)
+- **Usage**: `SELECT aggregate_daily_stats('2025-01-11')`
+
+### Row-Level Security Policies
+
+All analytics tables implement RLS with the following pattern:
+- **Users**: Can view their own data only
+- **Admins**: Can view all data via `is_admin()` function
+- **System**: Can insert data without user context (for tracking anonymous sessions)
+
+### Cron Job
+Daily aggregation scheduled via pg_cron:
+- **Schedule**: `0 1 * * *` (1 AM UTC daily)
+- **Function**: `aggregate_daily_stats(CURRENT_DATE - 1)`
+- **Purpose**: Pre-compute metrics for fast dashboard loading
+
+### Usage Examples
+
+```typescript
+// Track user action
+await supabase.rpc('track_activity', {
+  p_action_type: 'photo_upload',
+  p_action_category: 'gallery',
+  p_action_details: { photo_id: photoId, category: 'event' },
+  p_session_id: sessionId
+});
+
+// Track page view
+await supabase.rpc('track_page_view', {
+  p_page_path: window.location.pathname,
+  p_page_title: document.title,
+  p_referrer: document.referrer,
+  p_session_id: sessionId,
+  p_viewport_width: window.innerWidth,
+  p_viewport_height: window.innerHeight
+});
+
+// Get analytics (admin only)
+const { data } = await supabase.rpc('get_analytics_dashboard', {
+  p_start_date: '2025-01-01',
+  p_end_date: '2025-01-31'
+});
+```
+
+---
+
 ## Migration Strategy
 
 ### Safe Migrations

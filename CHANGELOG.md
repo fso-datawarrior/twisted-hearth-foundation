@@ -1,5 +1,29 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## v3.3 — Analytics Infrastructure: Comprehensive tracking system with 6 tables, 4 functions, and daily aggregation
+
+### 📊 Analytics Database Infrastructure
+
+#### Added
+- **Analytics Database Infrastructure** (2025-01-12)
+  - 6 new analytics tables for comprehensive tracking:
+    - `user_activity_logs`: Track all user actions (RSVP, gallery, guestbook, hunt, tournament, admin)
+    - `page_views`: Monitor page navigation and time on page
+    - `user_sessions`: Session tracking with device/browser info
+    - `content_interactions`: Detailed content engagement metrics
+    - `system_metrics`: System performance and health monitoring
+    - `analytics_daily_aggregates`: Pre-computed daily statistics
+  - 4 new database functions:
+    - `track_activity()`: Log user actions
+    - `track_page_view()`: Record page visits
+    - `get_analytics_dashboard()`: Admin-only analytics retrieval
+    - `aggregate_daily_stats()`: Daily metric computation
+  - Row-Level Security policies for all analytics tables
+  - Automated daily aggregation cron job (1 AM UTC)
+  - Comprehensive indexes for query optimization
+
+---
+
 ## v3.2 — Motion & accessibility polish: proximity-based hunt reveals, section animations, skip link, global focus ring.
 
 ### 🎨 Motion & Accessibility Enhancements
