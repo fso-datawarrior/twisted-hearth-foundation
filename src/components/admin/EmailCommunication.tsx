@@ -101,14 +101,23 @@ export function EmailCommunication() {
   };
 
   const handleSaveCampaign = async (campaignData: any) => {
-    console.log('📧 Review & Send clicked - Opening confirmation dialog', campaignData);
-    toast.info('Preparing campaign for review...');
+    console.log('🔴 START handleSaveCampaign - campaignData:', campaignData);
+    console.log('🔴 Current sendDialogOpen state:', sendDialogOpen);
+    console.log('🔴 Current pendingCampaign state:', pendingCampaign);
+    
+    toast.info('Opening confirmation dialog...');
     
     // Set state to show confirmation dialog
     setPendingCampaign(campaignData);
     setSendDialogOpen(true);
     
-    console.log('📧 Dialog state updated - sendDialogOpen should be true');
+    // Force a delay to ensure state updates
+    setTimeout(() => {
+      console.log('🔴 AFTER setState - sendDialogOpen:', sendDialogOpen);
+      console.log('🔴 AFTER setState - pendingCampaign:', pendingCampaign);
+    }, 100);
+    
+    console.log('🔴 END handleSaveCampaign function');
   };
 
   const handleConfirmSend = async () => {
@@ -196,7 +205,7 @@ export function EmailCommunication() {
   }
 
   return (
-    <>
+    <div>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -334,6 +343,7 @@ export function EmailCommunication() {
         </CardContent>
       </Card>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -349,14 +359,18 @@ export function EmailCommunication() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={sendDialogOpen} onOpenChange={(open) => {
-        console.log('📧 Dialog open state changed:', open);
-        setSendDialogOpen(open);
-        if (!open) {
-          setPendingCampaign(null);
-        }
-      }}>
-        <AlertDialogContent className="z-[200]">
+      {/* Send Campaign Confirmation Dialog */}
+      <AlertDialog 
+        open={sendDialogOpen} 
+        onOpenChange={(open) => {
+          console.log('📧 Dialog open state changed:', open);
+          setSendDialogOpen(open);
+          if (!open) {
+            setPendingCampaign(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="z-[9999] max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -409,6 +423,6 @@ export function EmailCommunication() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }
