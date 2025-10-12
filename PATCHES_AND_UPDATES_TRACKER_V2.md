@@ -1199,8 +1199,33 @@ export function useAnalyticsTracking() {
 - MODIFY: `src/components/admin/AdminBreadcrumb.tsx` ✅
 
 **Status**: ✅ **COMPLETE** - All 7+ widgets built and integrated
-**Time Spent**: ~6.5 hours
+**Time Spent**: ~5 hours + 15m fix
 **Date Completed**: October 12, 2025
+
+### 🔧 INCIDENT: React Context Failure After Phase 4 (15m fix time)
+
+**Problem**: Blank screen on `/` with error:
+```
+TypeError: Cannot read properties of undefined (reading 'createContext')
+T.sscreateContext is not a function (hunt-chunk)
+```
+
+**Root Cause**: 
+- Vite `optimizeDeps.include` contained React modules, creating ambiguous pre-bundling
+- This caused symbol map mismatches between `react-vendor` chunk and feature chunks
+- Hunt chunk loaded with broken React context reference (`T.ss` instead of `T.`)
+
+**Fix Applied**:
+1. **vite.config.ts**: Removed React modules from `optimizeDeps.include`, kept only in `exclude` and `dedupe`
+2. **src/main.tsx**: Bumped cache key `sw_cleanup_done_v3` → `v4`, added React version logging
+3. **index.html**: Updated cache buster query `?v=2025-10-12-18-45`
+
+**Verification**:
+- ✅ Load `/` - UI renders without errors
+- ✅ Navigate to `/admin` - Analytics tab accessible
+- ✅ Check console - No "createContext" errors
+- ✅ Network tab - All chunks load successfully
+- ✅ Build works - Clean compilation
 
 **Completed Tasks**:
 1. ✅ Created WidgetWrapper component for consistent styling
