@@ -1,186 +1,331 @@
-# Mailjet Template Guide for Twisted Hearth Foundation
+# Mailjet Template Guide
 
-This guide explains how to use Mailjet for sending email campaigns through the admin dashboard.
+This guide covers how to use Mailjet for email campaigns in the Twisted Tale application.
 
-## Overview
-
-The Twisted Hearth Foundation email system uses Mailjet as the email service provider. All email campaigns are sent through Mailjet's API with proper tracking and delivery management.
-
-## Email System Architecture
-
-- **Templates**: Created and managed within the application
-- **Campaigns**: Composed using templates and sent to recipient lists
-- **Delivery**: Handled by Mailjet with automatic batching and rate limiting
-- **Tracking**: Basic statistics (sent, delivered, bounced, failed)
-
-## Setting Up Email Campaigns
-
-### 1. Create an Email Template
-
-1. Go to Admin Dashboard → Email (Settings menu)
-2. Click "New Template"
-3. Fill in:
-   - **Template Name**: Internal reference (e.g., "Welcome Email")
-   - **Subject Line**: Email subject (supports variables)
-   - **Preview Text**: Short preview text shown in inbox
-   - **HTML Content**: Full email body (supports variables)
-
-### 2. Using Variables in Templates
-
-You can insert dynamic content using double curly braces:
-
-```html
-<h1>Hello {{name}}!</h1>
-<p>Your RSVP status is: {{rsvp_status}}</p>
-<p>Event date: {{event_date}}</p>
-```
-
-**Available Variables**:
-- `{{name}}` - Guest name
-- `{{email}}` - Guest email address
-- `{{rsvp_status}}` - RSVP status (confirmed, pending, etc.)
-- `{{event_date}}` - Event date
-
-### 3. Compose a Campaign
-
-1. Click "New Campaign" in the Campaigns tab
-2. Select a template
-3. Choose recipient list:
-   - **All Guests**: Everyone in the system
-   - **Confirmed RSVPs**: Only confirmed attendees
-   - **Pending RSVPs**: Only pending RSVPs
-   - **Custom List**: Upload CSV or paste emails
-4. Review recipient count
-5. Send test email to yourself first
-6. Send or schedule the campaign
-
-## Rate Limiting & Best Practices
-
-### Mailjet Free Tier Limits
-- **500 emails/day** (free tier)
-- Campaigns are automatically batched in groups of 50
-- 1-second delay between batches to respect rate limits
-
-### Best Practices
-1. **Always send a test email first** before sending to all recipients
-2. **Keep subject lines under 60 characters** for better open rates
-3. **Write clear, mobile-friendly HTML** (most guests read on phones)
-4. **Include an unsubscribe option** for compliance
-5. **Don't send too frequently** - max once per week recommended
-
-## Troubleshooting
-
-### Campaign Status: Failed
-- Check Mailjet dashboard for specific error messages
-- Verify email addresses are valid
-- Ensure HTML content is properly formatted
-- Check that Mailjet API credentials are set correctly
-
-### Emails Show "via bnc3.mailjet.com" in Sender Name
-This is normal for newly configured domains and will automatically resolve once your domain is fully authenticated:
-
-**What causes this:**
-- Email clients (Gmail, Outlook) show "via" when the Return-Path domain differs from the sender domain
-- This is a security indicator while Mailjet validates your domain
-
-**How it gets fixed (automatic):**
-1. ✅ SPF record must be configured (`v=spf1 include:spf.mailjet.com ~all`)
-2. ✅ DKIM record must be verified (`mailjet._domainkey.yourdomain.com`)
-3. ✅ Bounce subdomain CNAME must be added (`bounce.yourdomain.com` → `bnc3.mailjet.com`)
-4. ⏳ Wait 24-48 hours for DNS propagation and Mailjet validation
-5. ⏳ Send several successful email campaigns to establish sender reputation
-
-**Timeline:** 
-- DNS propagation: 24-48 hours
-- Mailjet validation: Automatic after propagation
-- "via" text removal: Happens automatically, no code changes needed
-
-**Important:** 
-- DO NOT try to manually set Return-Path headers in code
-- Mailjet handles Return-Path automatically based on authenticated domains
-- The edge function should NOT include custom Return-Path headers
-
-### Low Delivery Rate
-- Some emails may be marked as spam
-- Encourage guests to whitelist your sender email
-- Avoid spam trigger words in subject lines
-- Keep email content relevant and valuable
-
-### Test Email Not Received
-- Check spam folder
-- Verify your email in the admin system is correct
-- Check Mailjet logs for delivery status
+## Table of Contents
+- [Accessing Mailjet Dashboard](#accessing-mailjet-dashboard)
+- [Email Template Variables](#email-template-variables)
+- [Creating Templates](#creating-templates)
+- [Testing Templates](#testing-templates)
+- [Best Practices](#best-practices)
+- [Compliance & Legal](#compliance--legal)
 
 ## Accessing Mailjet Dashboard
 
-1. Visit: https://app.mailjet.com/
-2. Log in with admin credentials
-3. Check delivery statistics, bounce reports, and detailed logs
+1. Log in to your Mailjet account at [https://app.mailjet.com](https://app.mailjet.com)
+2. Navigate to **Templates** in the left sidebar
+3. View campaign statistics under **Statistics** > **Campaign Statistics**
+4. Manage API keys under **Account Settings** > **API Key Management**
 
-## Email Statistics
+### Required Configuration
 
-The system tracks:
-- **Sent**: Total emails attempted
-- **Delivered**: Successfully delivered emails
-- **Bounced**: Invalid/unreachable addresses
-- **Failed**: System errors during sending
+Ensure the following environment variables are set in your Supabase Edge Function secrets:
 
-## Security & Compliance
+- `MAILJET_API_KEY` - Your Mailjet API key
+- `MAILJET_API_SECRET` - Your Mailjet API secret
+- `MAILJET_FROM_EMAIL` - Verified sender email address
+- `MAILJET_FROM_NAME` - Display name for sender
 
-- All emails are sent through Mailjet's secure API
-- API credentials stored as encrypted secrets
-- Only admins can send email campaigns
-- All campaign activity is logged for audit purposes
+## Email Template Variables
 
-## Support
+The application supports the following template variables that will be automatically replaced with recipient data:
 
-For issues with:
-- **Email System**: Check edge function logs in Supabase
-- **Mailjet Service**: Contact Mailjet support
-- **Template Design**: Test in the preview pane before sending
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `{{name}}` | Recipient's full name | "John Doe" |
+| `{{email}}` | Recipient's email address | "guest@example.com" |
+| `{{rsvp_status}}` | Current RSVP status | "confirmed", "pending" |
+| `{{event_date}}` | Event date | "November 1st, 2025" |
+| `{{event_time}}` | Event start time | "6:30 PM" |
+| `{{event_address}}` | Event location | "Denver, Colorado" |
+| `{{costume_idea}}` | Guest's costume concept | "Little Red Riding Hood" |
+| `{{num_guests}}` | Number of guests attending | "2" |
+| `{{dietary_restrictions}}` | Dietary preferences/restrictions | "Vegetarian, Nut allergy" |
+| `{{gallery_link}}` | Link to photo gallery | "https://twisted-tale.lovable.app/gallery" |
 
-## Example Email Template
+### Using Variables in Templates
+
+Include variables in your HTML content using double curly braces:
+
+```html
+<h1>Hello {{name}}!</h1>
+<p>Thank you for your RSVP! Your status is: <strong>{{rsvp_status}}</strong></p>
+<p>We're looking forward to seeing you on {{event_date}} at {{event_time}}.</p>
+```
+
+## Creating Templates
+
+### 1. Using the Template Editor
+
+1. Navigate to **Admin Dashboard** > **Email Communication** > **Templates** tab
+2. Click **"New Template"**
+3. Fill in template details:
+   - **Template Name**: Internal reference name (e.g., "RSVP Confirmation")
+   - **Subject Line**: Email subject (can include variables)
+   - **Preview Text**: Text shown in email previews
+   - **HTML Content**: Full email HTML
+
+4. Click **"Show Preview"** to see live rendering
+5. Switch between **Desktop** and **Mobile** preview modes
+6. Click **"Save Template"**
+
+### 2. Template Structure
+
+Recommended HTML structure for email templates:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{subject}}</title>
   <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; }
-    .content { padding: 20px; background: white; }
-    .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: #8B5CF6;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #8B5CF6;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Twisted Hearth Foundation</h1>
-    </div>
-    <div class="content">
-      <h2>Hello {{name}}!</h2>
-      <p>We're excited to welcome you to our Twisted Tale event!</p>
-      <p>Your RSVP status: <strong>{{rsvp_status}}</strong></p>
-      <p>Event date: <strong>{{event_date}}</strong></p>
-    </div>
-    <div class="footer">
-      <p>Twisted Hearth Foundation</p>
-      <p>If you wish to unsubscribe, please reply to this email.</p>
-    </div>
+  <div class="header">
+    <h1>Twisted Tale Halloween Party</h1>
+  </div>
+  
+  <div class="content">
+    <h2>Hello {{name}}!</h2>
+    <p>Your content goes here...</p>
+    
+    <a href="{{gallery_link}}" class="button">View Gallery</a>
+  </div>
+  
+  <div class="footer">
+    <p>Event Date: {{event_date}} at {{event_time}}</p>
+    <p>Location: {{event_address}}</p>
+    <p><a href="[unsubscribe_link]">Unsubscribe</a></p>
   </div>
 </body>
 </html>
 ```
 
-## Rate Limit Monitoring
+### 3. Mobile-Responsive Design
 
-The edge function automatically handles rate limiting by:
-1. Batching emails in groups of 50
-2. Waiting 1 second between batches
-3. Tracking send counts and failures
-4. Updating campaign statistics in real-time
+Always use responsive design principles:
 
-If you need to send more than 500 emails/day, consider upgrading your Mailjet plan.
+```css
+@media only screen and (max-width: 600px) {
+  body {
+    padding: 10px !important;
+  }
+  .content {
+    padding: 15px 10px !important;
+  }
+  h1 {
+    font-size: 24px !important;
+  }
+  .button {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
+```
+
+## Testing Templates
+
+### 1. Send Test Email
+
+Before sending to all guests:
+
+1. Complete campaign setup
+2. Click **"Send Test Email"** button
+3. Test email will be sent to your logged-in admin email
+4. Verify:
+   - Subject line renders correctly
+   - All variables are replaced with sample data
+   - Links work properly
+   - Images load correctly
+   - Layout displays properly on mobile and desktop
+
+### 2. Test Recipient Lists
+
+When creating a campaign, test with small recipient lists first:
+
+1. Use **"Custom List"** recipient option
+2. Add 2-3 test email addresses
+3. Send campaign and verify delivery
+4. Check spam folders
+5. Verify all content renders correctly
+
+### 3. Preview Modes
+
+Use the template editor's preview modes:
+
+- **Rendered**: See how the email will look to recipients
+- **HTML**: Review the raw HTML code
+- **Desktop**: Preview on desktop email clients (600px width)
+- **Mobile**: Preview on mobile devices (375px width)
+
+## Best Practices
+
+### Email Design
+
+1. **Keep it Simple**: Use clear, concise content
+2. **Single Column Layout**: Works best across email clients
+3. **Clear Call-to-Action**: Make buttons/links obvious
+4. **Use Inline CSS**: Email clients strip `<style>` tags
+5. **Alt Text for Images**: Always include descriptive alt text
+6. **Test Across Clients**: Gmail, Outlook, Apple Mail, etc.
+
+### Content Guidelines
+
+1. **Personalization**: Use `{{name}}` to address recipients
+2. **Clear Subject Lines**: 50 characters or less
+3. **Preview Text**: 90-100 characters, complements subject
+4. **Responsive Design**: Test on mobile devices
+5. **Accessible**: Good contrast, readable fonts (14px+)
+
+### Sending Strategy
+
+1. **Start Small**: Test with 5-10 recipients first
+2. **Rate Limiting**: System enforces 500 emails/hour via Mailjet
+3. **Monitor Stats**: Check delivery, bounce, and failure rates
+4. **Time Zone Awareness**: Schedule sends for optimal engagement
+5. **Avoid Spam Triggers**: No ALL CAPS, excessive punctuation!!!
+
+### Image Hosting
+
+- Host images on reliable CDN (Supabase Storage)
+- Use full URLs (not relative paths)
+- Keep images optimized (< 1MB each)
+- Provide alt text for accessibility
+
+## Compliance & Legal
+
+### GDPR & Privacy
+
+1. **Consent**: Only email users who have explicitly opted in
+2. **Unsubscribe Link**: Required in all marketing emails
+3. **Privacy Policy**: Link to your privacy policy
+4. **Data Protection**: Handle personal data responsibly
+
+### CAN-SPAM Act (US)
+
+1. **Physical Address**: Include in footer
+2. **Clear Identification**: Show who the email is from
+3. **Honest Subject Lines**: No deceptive subjects
+4. **Opt-Out Option**: Honor unsubscribe requests within 10 days
+5. **Monitor Compliance**: You're responsible even if outsourced
+
+### CASL (Canada)
+
+1. **Express Consent**: Required for commercial emails
+2. **Identification**: Clearly identify sender
+3. **Contact Information**: Provide valid contact details
+4. **Unsubscribe Mechanism**: Simple and free to use
+
+### Example Footer with Compliance
+
+```html
+<div class="footer">
+  <p>Twisted Tale Halloween Party</p>
+  <p>Denver, Colorado, USA</p>
+  <p><a href="https://twisted-tale.lovable.app/privacy">Privacy Policy</a></p>
+  <p><a href="[unsubscribe_link]">Unsubscribe</a></p>
+  <p style="font-size: 11px; color: #999;">
+    You received this email because you RSVP'd to the Twisted Tale event.
+  </p>
+</div>
+```
+
+## Troubleshooting
+
+### Emails Not Sending
+
+1. Verify Mailjet credentials in Supabase secrets
+2. Check sender email is verified in Mailjet
+3. Review Edge Function logs for errors
+4. Ensure recipient list has valid email addresses
+
+### Variable Not Replacing
+
+1. Use exact variable names: `{{name}}` not `{{Name}}`
+2. Check variable spelling matches database field
+3. Ensure variables are in double curly braces
+4. Test with known good data first
+
+### High Bounce Rate
+
+1. Verify email addresses are valid
+2. Check sender reputation in Mailjet dashboard
+3. Review email content for spam triggers
+4. Ensure SPF/DKIM records are configured
+
+### Emails Going to Spam
+
+1. Use verified sender domain
+2. Avoid spam trigger words
+3. Balance text/image ratio
+4. Include physical address
+5. Provide clear unsubscribe option
+6. Build sender reputation gradually
+
+## Support Resources
+
+- **Mailjet Documentation**: [https://dev.mailjet.com](https://dev.mailjet.com)
+- **Email on Acid**: Test emails across clients
+- **Litmus**: Email testing and analytics
+- **Can I Email**: HTML/CSS support across email clients
+- **Supabase Edge Functions**: [https://supabase.com/docs/guides/functions](https://supabase.com/docs/guides/functions)
+
+## Campaign Workflow
+
+1. **Create Template**: Design and save reusable template
+2. **Test Template**: Send test email to yourself
+3. **Create Campaign**: Select template and recipients
+4. **Review**: Check recipient count and subject
+5. **Send Test**: Send to small test group
+6. **Monitor**: Check delivery stats in Admin Dashboard
+7. **Send Campaign**: Send to full recipient list
+8. **Analyze**: Review statistics and engagement
+
+## Rate Limits
+
+The application enforces the following limits:
+
+- **Batch Size**: 50 emails per batch
+- **Rate Limit**: 500 emails per hour (Mailjet free tier)
+- **Delay Between Batches**: 1 second
+- **Daily Limit**: 200 emails/day (Mailjet free tier)
+
+Upgrade your Mailjet plan for higher limits.
