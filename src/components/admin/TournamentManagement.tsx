@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Users, Calendar } from 'lucide-react';
 import { TournamentRegistration } from '@/lib/tournament-api';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 
 interface TournamentManagementProps {
   tournaments: TournamentRegistration[];
@@ -37,7 +38,9 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
   }), { total: 0, confirmed: 0, pending: 0 }) : { total: 0, confirmed: 0, pending: 0 };
 
   return (
-    <div className="space-y-6">
+    <div className="relative">
+      <OnHoldOverlay />
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Tournament Management</h2>
       </div>
@@ -128,6 +131,7 @@ export default function TournamentManagement({ tournaments, isLoading }: Tournam
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

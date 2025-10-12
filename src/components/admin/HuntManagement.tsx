@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Trophy, Users, Target } from 'lucide-react';
+import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 
 interface HuntProgress {
   id: string;
@@ -61,7 +62,9 @@ export default function HuntManagement({ huntStats, isLoading }: HuntManagementP
   const leaderboard = Object.values(userProgress).sort((a: any, b: any) => b.totalPoints - a.totalPoints);
 
   return (
-    <div className="space-y-6">
+    <div className="relative">
+      <OnHoldOverlay />
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-primary">Scavenger Hunt Management</h2>
       </div>
@@ -159,6 +162,7 @@ export default function HuntManagement({ huntStats, isLoading }: HuntManagementP
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
