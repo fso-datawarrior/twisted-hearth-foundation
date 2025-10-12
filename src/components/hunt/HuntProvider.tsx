@@ -94,7 +94,17 @@ export function HuntProvider({ children }: { children: ReactNode }) {
 export function useHunt(): HuntAPI {
   const context = useContext(HuntContext);
   if (!context) {
-    throw new Error("useHunt must be used within HuntProvider");
+    // Return safe no-op API when provider is not mounted (feature disabled/removed)
+    return {
+      isFound: () => false,
+      markFound: async () => {},
+      reset: () => {},
+      progress: 0,
+      total: 0,
+      completed: false,
+      loading: false,
+      error: null,
+    };
   }
   return context;
 }
