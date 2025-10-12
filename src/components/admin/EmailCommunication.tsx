@@ -192,12 +192,22 @@ export function EmailCommunication() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="templates">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+            <TabsList className="h-auto p-0 bg-transparent gap-1 justify-start border-b border-border">
+              <TabsTrigger 
+                value="templates"
+                className="rounded-t-lg rounded-b-none border border-border border-b-0 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=inactive]:bg-muted/30 data-[state=inactive]:text-muted-foreground relative data-[state=active]:z-10 data-[state=active]:-mb-px px-6 py-3"
+              >
+                Templates
+              </TabsTrigger>
+              <TabsTrigger 
+                value="campaigns"
+                className="rounded-t-lg rounded-b-none border border-border border-b-0 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=inactive]:bg-muted/30 data-[state=inactive]:text-muted-foreground relative data-[state=active]:z-10 data-[state=active]:-mb-px px-6 py-3"
+              >
+                Campaigns
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="templates" className="space-y-4">
+            <TabsContent value="templates" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Email Templates</h3>
                 <Button onClick={() => setIsCreatingTemplate(true)}>
@@ -247,7 +257,7 @@ export function EmailCommunication() {
               </div>
             </TabsContent>
 
-            <TabsContent value="campaigns" className="space-y-4">
+            <TabsContent value="campaigns" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Email Campaigns</h3>
                 <Button onClick={() => setIsCreatingCampaign(true)} disabled={templates.length === 0}>
