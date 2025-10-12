@@ -803,6 +803,8 @@ const RSVP = () => {
                               onChange={(value) => handleAdditionalGuestChange(index, 'name', value)}
                               error={errors[`guest-${index}-name`]}
                               placeholder="Enter guest's full name"
+                              autoComplete="name"
+                              enterKeyHint="next"
                             />
                             
                             <FormField
@@ -813,6 +815,9 @@ const RSVP = () => {
                               onChange={(value) => handleAdditionalGuestChange(index, 'email', value)}
                               error={errors[`guest-${index}-email`]}
                               placeholder="guest@example.com (optional)"
+                              inputMode="email"
+                              autoComplete="email"
+                              enterKeyHint="next"
                             />
                           </div>
                         </div>
@@ -836,6 +841,8 @@ const RSVP = () => {
                       onChange={(value) => handleInputChange("costumeIdea", value)}
                       placeholder="What twisted fairytale character will you embody? Give us a hint..."
                       rows={3}
+                      autoComplete="off"
+                      enterKeyHint="next"
                     />
                     
                     <FormField
@@ -846,6 +853,8 @@ const RSVP = () => {
                       onChange={(value) => handleInputChange("dietary", value)}
                       placeholder="Any allergies, dietary preferences, or foods that might poison you?"
                       rows={2}
+                      autoComplete="off"
+                      enterKeyHint="done"
                     />
                   </div>
                 </div>

@@ -130,7 +130,11 @@ export const PhotoCard = ({
             {imageUrl ? (
               <img
                 src={imageUrl}
+                srcSet={`${imageUrl}?w=400 400w, ${imageUrl}?w=800 800w`}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                 alt={photo.caption || 'Gallery photo'}
+                width="800"
+                height="450"
                 className="w-full h-full object-contain transition-transform group-hover:scale-105"
                 loading="lazy"
                 onError={(e) => {

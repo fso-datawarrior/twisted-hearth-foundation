@@ -77,6 +77,8 @@ export default function HeroVideo({
       {/* Poster shows immediately; fades out once video is ready (or stays visible if video fails) */}
       <img
         src={poster}
+        srcSet={`${poster}?w=480 480w, ${poster}?w=800 800w, ${poster}?w=1200 1200w, ${poster} 1920w`}
+        sizes="100vw"
         alt="Halloween party scene with pumpkins, trees, and a cozy house"
         width="1920"
         height="1080"
