@@ -20,18 +20,11 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: [
-      'react',
-      'react-dom',
-      'react-dom/client',
-      'react/jsx-runtime',
-      'react/jsx-dev-runtime',
       '@tanstack/react-query',
       'react-router-dom',
       'date-fns',
       '@radix-ui/react-checkbox'
     ],
-    exclude: ['scheduler'],
-    force: true
   },
   build: {
     rollupOptions: {
@@ -64,9 +57,6 @@ export default defineConfig(({ mode }) => ({
           // Split heavy components by file path
           if (id.includes('/src/pages/AdminDashboard') || id.includes('/src/components/admin/')) {
             return 'admin-chunk';
-          }
-          if (id.includes('/src/components/hunt/') || id.includes('/src/hooks/use-hunt')) {
-            return 'hunt-chunk';
           }
           if (id.includes('/src/pages/Gallery') || id.includes('/src/components/gallery/')) {
             return 'gallery-chunk';

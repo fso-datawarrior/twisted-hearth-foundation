@@ -1,4 +1,5 @@
 import React from "react";
+import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
@@ -23,33 +24,11 @@ async function start() {
 
   const rootEl = document.getElementById('root');
   if (rootEl) {
-    try {
-      const mod: any = await import('react-dom/client');
-      const createRootFn = mod?.createRoot;
-      if (typeof createRootFn === 'function') {
-        createRootFn(rootEl).render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>
-        );
-      } else {
-        const ReactDOM: any = await import('react-dom');
-        ReactDOM.render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>,
-          rootEl
-        );
-      }
-    } catch (e) {
-      const ReactDOM: any = await import('react-dom');
-      ReactDOM.render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>,
-        rootEl
-      );
-    }
+    createRoot(rootEl).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
   }
 }
 
