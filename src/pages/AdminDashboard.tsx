@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CollapsibleSection from '@/components/admin/CollapsibleSection';
@@ -6,6 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import RequireAdmin from '@/components/RequireAdmin';
 import RSVPManagement from '@/components/admin/RSVPManagement';
+import { AdminNavigation } from '@/components/admin/AdminNavigation';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useSwipe } from '@/hooks/use-swipe';
+import { useIsMobile } from '@/hooks/use-mobile';
 import TournamentManagement from '@/components/admin/TournamentManagement';
 import GalleryManagement from '@/components/admin/GalleryManagement';
 import HuntManagement from '@/components/admin/HuntManagement';
@@ -17,7 +22,6 @@ import { LibationsManagement } from '@/components/admin/LibationsManagement';
 import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
-import { AdminNavigation } from '@/components/admin/AdminNavigation';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -34,6 +38,74 @@ import {
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const isMobile = useIsMobile();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Tab order for swipe navigation (grouped by category)
+  const tabGroups = {
+    content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'hunt', 'libations'],
+    users: ['rsvps', 'tournament', 'user-management', 'admin-roles'],
+    settings: ['email', 'database-reset'],
+  };
+
+  const getCurrentGroup = (tab: string): string[] | null => {
+    for (const [_, tabs] of Object.entries(tabGroups)) {
+      if (tabs.includes(tab)) return tabs;
+    }
+    return null;
+  };
+
+  const handleTabChange = (newTab: string) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveTab(newTab);
+      setIsTransitioning(false);
+    }, 200);
+  };
+
+  // Swipe gesture handlers for mobile
+  const handleSwipeLeft = () => {
+    if (!isMobile || activeTab === 'overview') return;
+    const group = getCurrentGroup(activeTab);
+    if (!group) return;
+    
+    const currentIndex = group.indexOf(activeTab);
+    if (currentIndex < group.length - 1) {
+      handleTabChange(group[currentIndex + 1]);
+    }
+  };
+
+  const handleSwipeRight = () => {
+    if (!isMobile || activeTab === 'overview') return;
+    const group = getCurrentGroup(activeTab);
+    if (!group) return;
+    
+    const currentIndex = group.indexOf(activeTab);
+    if (currentIndex > 0) {
+      handleTabChange(group[currentIndex - 1]);
+    }
+  };
+
+  const swipeHandlers = useSwipe({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+  });
+
+  useEffect(() => {
+    if (!contentRef.current || !isMobile) return;
+    
+    const element = contentRef.current;
+    element.addEventListener('touchstart', swipeHandlers.onTouchStart as any);
+    element.addEventListener('touchmove', swipeHandlers.onTouchMove as any);
+    element.addEventListener('touchend', swipeHandlers.onTouchEnd as any);
+    
+    return () => {
+      element.removeEventListener('touchstart', swipeHandlers.onTouchStart as any);
+      element.removeEventListener('touchmove', swipeHandlers.onTouchMove as any);
+      element.removeEventListener('touchend', swipeHandlers.onTouchEnd as any);
+    };
+  }, [isMobile, swipeHandlers]);
 
   // RSVPs query - include all tracking fields
   const { data: rsvps, isLoading: rsvpsLoading } = useQuery({
@@ -188,7 +260,7 @@ export default function AdminDashboard() {
           {/* Consolidated Navigation */}
           <AdminNavigation
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             counts={{
               rsvps: rsvps?.length,
               tournamentRegs: tournamentRegs?.length,
@@ -199,9 +271,18 @@ export default function AdminDashboard() {
             }}
           />
 
-          {/* Content Area */}
-          <div className="mt-0">
-            {activeTab === 'overview' && (
+          {/* Breadcrumb Navigation (Mobile Only) */}
+          <AdminBreadcrumb activeTab={activeTab} onNavigate={handleTabChange} />
+
+          {/* Content Area with Swipe Support */}
+          <div ref={contentRef} className="mt-0">
+            {isTransitioning ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            ) : activeTab === 'overview' ? (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-accent-gold">OVERVIEW</h2>
                 
@@ -283,7 +364,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
-                      onClick={() => setActiveTab('rsvps')}
+                      onClick={() => handleTabChange('rsvps')}
                     >
                       <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Export RSVPs</span>
@@ -291,7 +372,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
-                      onClick={() => setActiveTab('tournament')}
+                      onClick={() => handleTabChange('tournament')}
                     >
                       <Trophy className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Tournament Bracket</span>
@@ -299,7 +380,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
-                      onClick={() => setActiveTab('gallery')}
+                      onClick={() => handleTabChange('gallery')}
                     >
                       <Images className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Approve Photos</span>
@@ -307,7 +388,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
-                      onClick={() => setActiveTab('hunt')}
+                      onClick={() => handleTabChange('hunt')}
                     >
                       <Map className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Hunt Stats</span>
@@ -315,55 +396,31 @@ export default function AdminDashboard() {
                   </div>
                 </CollapsibleSection>
               </div>
-            )}
-
-            {activeTab === 'rsvps' && (
+            ) : activeTab === 'rsvps' ? (
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
-            )}
-            
-            {activeTab === 'tournament' && (
+            ) : activeTab === 'tournament' ? (
               <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
-            )}
-            
-            {activeTab === 'gallery' && (
+            ) : activeTab === 'gallery' ? (
               <GalleryManagement photos={photos} isLoading={photosLoading} />
-            )}
-            
-            {activeTab === 'hunt' && (
+            ) : activeTab === 'hunt' ? (
               <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
-            )}
-            
-            {activeTab === 'vignettes' && (
+            ) : activeTab === 'vignettes' ? (
               <VignetteManagementTab />
-            )}
-            
-            {activeTab === 'homepage' && (
+            ) : activeTab === 'homepage' ? (
               <HomepageVignettesManagement />
-            )}
-            
-            {activeTab === 'libations' && (
+            ) : activeTab === 'libations' ? (
               <LibationsManagement />
-            )}
-            
-            {activeTab === 'guestbook' && (
+            ) : activeTab === 'guestbook' ? (
               <GuestbookManagement />
-            )}
-            
-            {activeTab === 'email' && (
+            ) : activeTab === 'email' ? (
               <EmailCommunication />
-            )}
-            
-            {activeTab === 'admin-roles' && (
+            ) : activeTab === 'admin-roles' ? (
               <AdminRoleManagement />
-            )}
-            
-            {activeTab === 'user-management' && (
+            ) : activeTab === 'user-management' ? (
               <UserManagement />
-            )}
-            
-            {activeTab === 'database-reset' && (
+            ) : activeTab === 'database-reset' ? (
               <DatabaseResetPanel />
-            )}
+            ) : null}
           </div>
         </div>
       </div>

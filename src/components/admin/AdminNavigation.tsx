@@ -163,7 +163,7 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
             <ChevronDown className="h-3 w-3 ml-1" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm">
+        <DropdownMenuContent align="start" className="w-56 bg-background backdrop-blur-sm z-50">
           {category.items.map((item) => {
             const ItemIcon = item.icon;
             return (
@@ -209,7 +209,7 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
             <ChevronDown className="h-4 w-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72 overflow-y-auto">
+        <SheetContent side="left" className="w-72 overflow-y-auto backdrop-blur-md">
           <div className="space-y-6 mt-6">
             {categories.map((category) => (
               <div key={category.id} className="space-y-2">
