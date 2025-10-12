@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { trackPhotoUpload, trackPhotoLike } from './analytics';
 
 // ================================================================
 // PHOTO GALLERY DATABASE API  
@@ -86,6 +87,11 @@ export const uploadPhotoMetadata = async (
     p_category: category
   });
 
+  // Track photo upload analytics
+  if (data && !error) {
+    trackPhotoUpload(data, category);
+  }
+
   return { data: data as any, error };
 };
 
@@ -100,6 +106,11 @@ export const togglePhotoReaction = async (
     p_photo_id: photoId,
     p_reaction_type: reactionType
   });
+
+  // Track photo like analytics (only if reaction was added, not removed)
+  if (data === true && !error) {
+    trackPhotoLike(photoId);
+  }
 
   return { data: data as boolean | null, error };
 };

@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCircle } from 'lucide-react';
+import { trackGuestbookPost } from '@/lib/analytics';
 
 interface MessageComposerProps {
   onMessagePosted?: () => void;
@@ -66,13 +67,19 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         toast({ title: "Reply posted!" });
       } else {
         // Insert main post using RPC
-        const { error } = await supabase.rpc('guestbook_insert_message', {
+        const { data, error } = await supabase.rpc('guestbook_insert_message', {
           p_display_name: isAnonymous ? 'Anonymous' : displayName.trim(),
           p_message: message.trim(),
           p_is_anonymous: isAnonymous
         });
 
         if (error) throw error;
+        
+        // Track analytics
+        if (data) {
+          trackGuestbookPost(data, isAnonymous);
+        }
+        
         toast({ title: "Message posted!", description: "Your note has been added to the guestbook." });
       }
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import RequireAuth from "@/components/RequireAuth";
+import { trackRSVPSubmit } from "@/lib/analytics";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -359,6 +360,9 @@ const RSVP = () => {
             description: "Your twisted tale reservation has been confirmed. Check your email for location details.\n🎃 Check your spam crypt if it doesn't appear!",
             variant: "default"
           });
+
+          // Track analytics
+          trackRSVPSubmit(formData.guestCount);
 
           setIsEditing(false); // Show sealed state
         }

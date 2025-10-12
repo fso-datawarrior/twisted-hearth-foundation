@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { HuntProvider } from "@/components/hunt/HuntProvider";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
@@ -30,6 +31,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,8 +46,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AdminProvider>
-          <HuntProvider>
+        <AnalyticsProvider>
+          <AdminProvider>
+            <HuntProvider>
             <BrowserRouter
               future={{
                 v7_startTransition: true,
@@ -77,6 +80,7 @@ function App() {
                           <Route path="/auth" element={<AuthCallback />} />
                           <Route path="/test" element={<TestPage />} />
                           <Route path="/admin" element={<AdminDashboard />} />
+                          <Route path="/admin/analytics" element={<AdminAnalytics />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
@@ -93,6 +97,7 @@ function App() {
             </BrowserRouter>
           </HuntProvider>
         </AdminProvider>
+      </AnalyticsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
