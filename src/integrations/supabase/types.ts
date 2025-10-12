@@ -481,6 +481,7 @@ export type Database = {
           completed_at: string | null
           id: string
           started_at: string
+          status: string
           total_points: number | null
           user_id: string
         }
@@ -488,6 +489,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           started_at?: string
+          status?: string
           total_points?: number | null
           user_id: string
         }
@@ -495,6 +497,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           started_at?: string
+          status?: string
           total_points?: number | null
           user_id?: string
         }
@@ -958,6 +961,7 @@ export type Database = {
           created_at: string
           id: string
           special_requirements: string | null
+          status: string
           team_name: string
           tournament_name: string
           user_id: string
@@ -967,6 +971,7 @@ export type Database = {
           created_at?: string
           id?: string
           special_requirements?: string | null
+          status?: string
           team_name: string
           tournament_name: string
           user_id: string
@@ -976,6 +981,7 @@ export type Database = {
           created_at?: string
           id?: string
           special_requirements?: string | null
+          status?: string
           team_name?: string
           tournament_name?: string
           user_id?: string
