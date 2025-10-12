@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CollapsibleSection from '@/components/admin/CollapsibleSection';
@@ -8,6 +8,7 @@ import RequireAdmin from '@/components/RequireAdmin';
 import RSVPManagement from '@/components/admin/RSVPManagement';
 import { AdminNavigation } from '@/components/admin/AdminNavigation';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+const LazyAnalyticsWidgets = lazy(() => import('@/components/admin/AnalyticsWidgets'));
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSwipe } from '@/hooks/use-swipe';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -228,14 +229,14 @@ export default function AdminDashboard() {
   const selectedVignettePhotos = vignettePhotosCount || 0;
   const activeLibations = libations?.filter(l => l.is_active).length || 0;
 
-  return (
-    <RequireAdmin>
-      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6 sm:mb-8 mt-20 sm:mt-24">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
-          </div>
+   return (
+     <RequireAdmin>
+       <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
+         <div className="max-w-7xl mx-auto">
+           <div className="mb-6 sm:mb-8 mt-20 sm:mt-24">
+             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
+             <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
+           </div>
           
           {/* Consolidated Navigation */}
           <AdminNavigation
@@ -260,13 +261,13 @@ export default function AdminDashboard() {
                 <Skeleton className="h-8 w-64" />
                 <Skeleton className="h-64 w-full" />
                 <Skeleton className="h-32 w-full" />
-              </div>
-            ) : activeTab === 'overview' ? (
-              <div className="space-y-4 sm:space-y-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-accent-gold">OVERVIEW</h2>
-                
-                {/* Stats Overview */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+               </div>
+             ) : activeTab === 'overview' ? (
+               <div className="space-y-4 sm:space-y-6">
+                 <h2 className="text-xl sm:text-2xl font-bold text-accent-gold">OVERVIEW</h2>
+                 
+                 {/* Stats Overview */}
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
                   <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                     <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
                       <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
@@ -356,9 +357,14 @@ export default function AdminDashboard() {
                       <span className="text-xs sm:text-sm text-center">Approve Photos</span>
                     </Button>
                   </div>
-                </CollapsibleSection>
-              </div>
-            ) : activeTab === 'rsvps' ? (
+                 </CollapsibleSection>
+
+                 {/* Analytics Widgets (lazy-loaded) */}
+                 <Suspense fallback={<div className="space-y-2"><Skeleton className="h-6 w-40" /><Skeleton className="h-48 w-full" /></div>}>
+                   <LazyAnalyticsWidgets />
+                 </Suspense>
+               </div>
+             ) : activeTab === 'rsvps' ? (
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
             ) : activeTab === 'tournament' ? (
               <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
