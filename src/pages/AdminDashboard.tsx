@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CollapsibleSection from '@/components/admin/CollapsibleSection';
+import { AdminNavigation } from '@/components/admin/AdminNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import RequireAdmin from '@/components/RequireAdmin';
@@ -18,6 +17,7 @@ import HomepageVignettesManagement from '@/components/admin/HomepageVignettesMan
 import { LibationsManagement } from '@/components/admin/LibationsManagement';
 import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
+import AdminAnalytics from './AdminAnalytics';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
 import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
@@ -27,21 +27,17 @@ import {
   Users, 
   Trophy, 
   Images, 
-  MessageSquare,
+  Theater,
   Search,
   Calendar,
   Map,
-  Settings,
-  Mail,
-  Theater,
-  Home,
-  Wine,
-  Shield,
-  UserCog
+  Settings
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const isMobile = useIsMobile();
 
   // RSVPs query - include all tracking fields
   const { data: rsvps, isLoading: rsvpsLoading } = useQuery({
@@ -184,21 +180,6 @@ export default function AdminDashboard() {
   const selectedVignettePhotos = vignettePhotosCount || 0;
   const activeLibations = libations?.filter(l => l.is_active).length || 0;
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: Settings, count: null },
-    { id: 'rsvps', label: 'RSVPs', icon: Users, count: rsvps?.length },
-    { id: 'tournament', label: 'Tournament', icon: Trophy, count: tournamentRegs?.length },
-    { id: 'gallery', label: 'Gallery', icon: Images, count: photos?.length },
-    { id: 'hunt', label: 'Hunt', icon: Search, count: activeHuntRuns },
-    { id: 'vignettes', label: 'Vignettes', icon: Theater, count: selectedVignettePhotos },
-    { id: 'homepage', label: 'Homepage', icon: Home, count: 3 },
-    { id: 'libations', label: 'Libations', icon: Wine, count: activeLibations },
-    { id: 'guestbook', label: 'Guestbook', icon: MessageSquare, count: null },
-    { id: 'email', label: 'Email', icon: Mail, count: null },
-    { id: 'admin-roles', label: 'Admins', icon: Shield, count: null },
-    { id: 'users', label: 'Users', icon: UserCog, count: null }
-  ];
-
   return (
     <RequireAdmin>
       <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
@@ -208,31 +189,24 @@ export default function AdminDashboard() {
             <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
           </div>
           
-          {/* Navigation Tabs - Mobile Optimized */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full h-auto flex-wrap justify-start gap-1 p-1 bg-muted/50 mb-6">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
-                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className="sm:hidden">{tab.label.length > 8 ? tab.label.slice(0, 7) + '...' : tab.label}</span>
-                    {tab.count !== null && tab.count !== undefined && (
-                      <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-[10px] sm:text-xs px-1 sm:px-1.5 py-0">
-                        {tab.count}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+          {/* New Consolidated Navigation */}
+          <AdminNavigation
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            counts={{
+              rsvps: rsvps?.length,
+              tournament: tournamentRegs?.length,
+              photos: photos?.length,
+              hunt: activeHuntRuns,
+              vignettes: selectedVignettePhotos,
+              libations: activeLibations
+            }}
+            isMobile={isMobile}
+          />
 
-            <TabsContent value="overview" className="mt-0">
+          {/* Tab Content */}
+          <div className="w-full">
+            {activeTab === 'overview' && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-accent-gold">OVERVIEW</h2>
                 
@@ -350,60 +324,65 @@ export default function AdminDashboard() {
                   </div>
                 </CollapsibleSection>
               </div>
-            </TabsContent>
+            )}
 
-            {/* Tab Content */}
-            <TabsContent value="rsvps" className="mt-0">
+            {activeTab === 'rsvps' && (
               <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
-            </TabsContent>
+            )}
             
-            <TabsContent value="tournament" className="mt-0">
+            {activeTab === 'tournament' && (
               <OnHoldOverlay reason="Tournament bracket generation and team management features are currently in development">
                 <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
               </OnHoldOverlay>
-            </TabsContent>
+            )}
             
-            <TabsContent value="gallery" className="mt-0">
+            {activeTab === 'gallery' && (
               <GalleryManagement photos={photos} isLoading={photosLoading} />
-            </TabsContent>
+            )}
             
-            <TabsContent value="hunt" className="mt-0">
+            {activeTab === 'hunt' && (
               <OnHoldOverlay reason="Scavenger hunt admin interface with hint editing and progress tracking is currently in development">
                 <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
               </OnHoldOverlay>
-            </TabsContent>
+            )}
             
-            <TabsContent value="vignettes" className="mt-0">
+            {activeTab === 'vignettes' && (
               <VignetteManagementTab />
-            </TabsContent>
+            )}
             
-            <TabsContent value="homepage" className="mt-0">
+            {activeTab === 'homepage' && (
               <HomepageVignettesManagement />
-            </TabsContent>
+            )}
             
-            <TabsContent value="libations" className="mt-0">
+            {activeTab === 'libations' && (
               <LibationsManagement />
-            </TabsContent>
+            )}
             
-            <TabsContent value="guestbook" className="mt-0">
+            {activeTab === 'guestbook' && (
               <GuestbookManagement />
-            </TabsContent>
+            )}
             
-            <TabsContent value="email" className="mt-0">
+            {activeTab === 'email' && (
               <EmailCommunication />
-            </TabsContent>
+            )}
             
-            <TabsContent value="admin-roles" className="mt-0">
+            {activeTab === 'analytics' && (
+              <AdminAnalytics />
+            )}
+            
+            {activeTab === 'admin-roles' && (
               <AdminRoleManagement />
-            </TabsContent>
+            )}
             
-            <TabsContent value="users" className="mt-0">
-              <UserManagement />
-              <div className="mt-6">
-                <DatabaseResetPanel />
+            {activeTab === 'user-management' && (
+              <div>
+                <UserManagement />
+                <div className="mt-6">
+                  <DatabaseResetPanel />
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </div>
       </div>
     </RequireAdmin>
