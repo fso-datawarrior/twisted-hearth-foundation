@@ -169,24 +169,21 @@ Deno.serve(async (req) => {
       const batch = recipientsData.slice(i, i + batchSize);
       console.log(`📤 Sending batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(recipientsData.length / batchSize)}`);
 
-        const messages = batch.map(recipient => ({
-          From: {
-            Email: mailjetFromEmail,
-            Name: mailjetFromName,
+      const messages = batch.map(recipient => ({
+        From: {
+          Email: mailjetFromEmail,
+          Name: mailjetFromName,
+        },
+        To: [
+          {
+            Email: recipient.email,
+            Name: recipient.name,
           },
-          To: [
-            {
-              Email: recipient.email,
-              Name: recipient.name,
-            },
-          ],
-          Subject: campaign.subject,
-          HTMLPart: replaceVariables(campaign.email_templates?.html_content || '<p>No content</p>', recipient),
-          TextPart: campaign.email_templates?.preview_text || '',
-          Headers: {
-            'Return-Path': 'bounce@data-warrior.com'
-          }
-        }));
+        ],
+        Subject: campaign.subject,
+        HTMLPart: replaceVariables(campaign.email_templates?.html_content || '<p>No content</p>', recipient),
+        TextPart: campaign.email_templates?.preview_text || '',
+      }));
 
       try {
         const mailjetResponse = await fetch('https://api.mailjet.com/v3.1/send', {

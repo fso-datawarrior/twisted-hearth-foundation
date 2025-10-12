@@ -76,6 +76,30 @@ You can insert dynamic content using double curly braces:
 - Ensure HTML content is properly formatted
 - Check that Mailjet API credentials are set correctly
 
+### Emails Show "via bnc3.mailjet.com" in Sender Name
+This is normal for newly configured domains and will automatically resolve once your domain is fully authenticated:
+
+**What causes this:**
+- Email clients (Gmail, Outlook) show "via" when the Return-Path domain differs from the sender domain
+- This is a security indicator while Mailjet validates your domain
+
+**How it gets fixed (automatic):**
+1. ✅ SPF record must be configured (`v=spf1 include:spf.mailjet.com ~all`)
+2. ✅ DKIM record must be verified (`mailjet._domainkey.yourdomain.com`)
+3. ✅ Bounce subdomain CNAME must be added (`bounce.yourdomain.com` → `bnc3.mailjet.com`)
+4. ⏳ Wait 24-48 hours for DNS propagation and Mailjet validation
+5. ⏳ Send several successful email campaigns to establish sender reputation
+
+**Timeline:** 
+- DNS propagation: 24-48 hours
+- Mailjet validation: Automatic after propagation
+- "via" text removal: Happens automatically, no code changes needed
+
+**Important:** 
+- DO NOT try to manually set Return-Path headers in code
+- Mailjet handles Return-Path automatically based on authenticated domains
+- The edge function should NOT include custom Return-Path headers
+
 ### Low Delivery Rate
 - Some emails may be marked as spam
 - Encourage guests to whitelist your sender email
