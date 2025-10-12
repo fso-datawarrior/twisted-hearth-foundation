@@ -1,4 +1,4 @@
-import React, { createContext, useContext, type ReactNode } from "react";
+import React, { useContext, type ReactNode } from "react";
 import { useHunt as useHuntDatabase, type UseHuntReturn } from "@/hooks/use-hunt";
 import { HUNT_ENABLED } from "./hunt-config";
 import { trackActivity } from "@/lib/analytics-api";
@@ -15,7 +15,7 @@ type HuntAPI = {
   error?: string | null;
 };
 
-const HuntContext = createContext<HuntAPI | null>(null);
+const HuntContext = React.createContext<HuntAPI | null>(null);
 
 export function HuntProvider({ children }: { children: ReactNode }) {
   // Early return when hunt is disabled - provide no-op API
