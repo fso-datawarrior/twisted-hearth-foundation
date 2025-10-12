@@ -18,8 +18,11 @@ interface AdminBreadcrumbProps {
 // Map tab names to categories and display info
 const tabConfig: Record<string, { category: string; label: string; icon: keyof typeof Icons }> = {
   overview: { category: "Admin", label: "Overview", icon: "LayoutDashboard" },
+  analytics: { category: "Admin", label: "Analytics", icon: "BarChart3" },
   rsvps: { category: "Users", label: "RSVPs", icon: "Calendar" },
   users: { category: "Users", label: "User Management", icon: "Users" },
+  "user-management": { category: "Users", label: "User Management", icon: "UserCog" },
+  "admin-roles": { category: "Users", label: "Admin Roles", icon: "Shield" },
   roles: { category: "Users", label: "Role Management", icon: "Shield" },
   gallery: { category: "Content", label: "Gallery", icon: "Image" },
   vignettes: { category: "Content", label: "Vignettes", icon: "BookOpen" },
@@ -29,6 +32,7 @@ const tabConfig: Record<string, { category: string; label: string; icon: keyof t
   libations: { category: "Content", label: "Libations", icon: "Wine" },
   email: { category: "Settings", label: "Email Communication", icon: "Mail" },
   campaigns: { category: "Settings", label: "Campaign Composer", icon: "Send" },
+  "database-reset": { category: "Settings", label: "Database Reset", icon: "Database" },
   database: { category: "Settings", label: "Database Reset", icon: "Database" },
 };
 

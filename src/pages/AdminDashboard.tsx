@@ -25,6 +25,14 @@ import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
+import { UserEngagementWidget } from '@/components/admin/analytics/UserEngagementWidget';
+import { ContentMetricsWidget } from '@/components/admin/analytics/ContentMetricsWidget';
+import { RsvpTrendsWidget } from '@/components/admin/analytics/RsvpTrendsWidget';
+import { PhotoPopularityWidget } from '@/components/admin/analytics/PhotoPopularityWidget';
+import { GuestbookActivityWidget } from '@/components/admin/analytics/GuestbookActivityWidget';
+import { SystemHealthWidget } from '@/components/admin/analytics/SystemHealthWidget';
+import { RealtimeActivityFeed } from '@/components/admin/analytics/RealtimeActivityFeed';
+import { AnalyticsTimeRangeSelector, getTimeRange, TimeRangeOption } from '@/components/admin/analytics/AnalyticsTimeRangeSelector';
 import { 
   Users, 
   Trophy, 
@@ -32,12 +40,14 @@ import {
   Calendar,
   Settings,
   Theater,
-  AlertTriangle
+  AlertTriangle,
+  BarChart3
 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [timeRange, setTimeRange] = useState<TimeRangeOption>('7days');
   const isMobile = useIsMobile();
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +55,7 @@ export default function AdminDashboard() {
   const tabGroups = {
     content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'libations'],
     users: ['rsvps', 'tournament', 'user-management', 'admin-roles'],
+    analytics: ['analytics'],
     settings: ['email', 'database-reset'],
   };
 
@@ -380,6 +391,34 @@ export default function AdminDashboard() {
               <UserManagement />
             ) : activeTab === 'database-reset' ? (
               <DatabaseResetPanel />
+            ) : activeTab === 'analytics' ? (
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-accent-gold flex items-center gap-2">
+                      <BarChart3 className="h-6 w-6" />
+                      ANALYTICS DASHBOARD
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Comprehensive insights and metrics
+                    </p>
+                  </div>
+                  <AnalyticsTimeRangeSelector 
+                    value={timeRange} 
+                    onChange={setTimeRange} 
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  <UserEngagementWidget timeRange={getTimeRange(timeRange)} />
+                  <ContentMetricsWidget timeRange={getTimeRange(timeRange)} />
+                  <RsvpTrendsWidget timeRange={getTimeRange(timeRange)} />
+                  <PhotoPopularityWidget timeRange={getTimeRange(timeRange)} />
+                  <GuestbookActivityWidget timeRange={getTimeRange(timeRange)} />
+                  <SystemHealthWidget />
+                  <RealtimeActivityFeed />
+                </div>
+              </div>
             ) : null}
           </div>
         </div>

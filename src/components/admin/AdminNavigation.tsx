@@ -26,7 +26,8 @@ import {
   UserCog,
   Shield,
   Mail,
-  Database
+  Database,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -64,6 +65,11 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
       id: 'overview',
       label: 'Overview',
       icon: LayoutDashboard,
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
     },
     {
       id: 'content',
