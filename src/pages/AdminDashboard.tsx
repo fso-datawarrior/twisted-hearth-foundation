@@ -238,7 +238,7 @@ export default function AdminDashboard() {
           {/* Tab Content Placeholders */}
           <div className="bg-card rounded-lg border p-6">
             {activeTab === 'rsvps' && (
-              <RSVPManagement rsvps={rsvps} isLoading={rsvpsLoading} />
+              <RSVPManagement rsvps={rsvps as any} isLoading={rsvpsLoading} />
             )}
             {activeTab === 'tournament' && (
               <TournamentManagement tournaments={tournamentRegs} isLoading={tournamentLoading} />
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
               <GalleryManagement photos={photos} isLoading={photosLoading} />
             )}
             {activeTab === 'hunt' && (
-              <HuntManagement huntStats={huntStats} isLoading={huntLoading} />
+              <HuntManagement huntStats={huntStats as any} isLoading={huntLoading} />
             )}
             {activeTab === 'guestbook' && (
               <GuestbookManagement />

@@ -1,5 +1,5 @@
 // Service Worker for Twisted Fairytale Halloween Bash
-const CACHE_NAME = 'twisted-halloween-v3';
+const CACHE_NAME = 'twisted-halloween-v5';
 const STATIC_ASSETS = [
   '/hero-poster.jpg',
   '/costumeWalk.mp4',
@@ -31,61 +31,55 @@ self.addEventListener('install', (event) => {
 // Fetch event - enhanced SPA handling and auth-safe network-first
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
   // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return;
-  }
+  if (!event.request.url.startsWith(self.location.origin)) return;
 
   const url = new URL(event.request.url);
+  const dest = (event.request as any).destination || '';
 
-  // For navigations (HTML), use network-first to avoid stale app shells
-  if (event.request.mode === 'navigate') {
+  // Always network-first for app shell and code assets to avoid stale bundles
+  if (
+    event.request.mode === 'navigate' ||
+    ['script', 'style', 'worker', 'font'].includes(dest) ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.includes('/assets/') ||
+    url.pathname.startsWith('/src/')
+  ) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/index.html'))
+      fetch(event.request).catch(() => caches.match(event.request))
     );
     return;
   }
   
-  // Network first for auth routes to avoid token consumption issues and caching
+  // Network-first for auth and callback routes
   if (url.pathname.includes('/auth') || url.pathname.includes('/verify') || url.pathname.includes('/callback')) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => response)
-        .catch(() => caches.match(event.request))
+      fetch(event.request).catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Cache first for other requests
+  // Cache-first for media only (images/video/audio)
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(event.request)
-          .then((response) => {
-            // Only cache successful, same-origin, non-HTML responses
-            const contentType = response.headers.get('content-type') || '';
-            if (response && response.status === 200 && response.type === 'basic' && !contentType.includes('text/html')) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-            }
-            return response;
-          })
-          .catch(() => {
-            // Fallback: try cache match
-            return caches.match(event.request);
-          });
-      })
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request)
+        .then((response) => {
+          const contentType = response.headers.get('content-type') || '';
+          if (
+            response && response.status === 200 && response.type === 'basic' &&
+            (contentType.startsWith('image/') || contentType.startsWith('video/') || contentType.startsWith('audio/'))
+          ) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request));
+    })
   );
 });
 
