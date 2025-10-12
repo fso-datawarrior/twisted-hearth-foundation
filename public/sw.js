@@ -1,5 +1,5 @@
 // Service Worker for Twisted Fairytale Halloween Bash
-const CACHE_NAME = 'twisted-halloween-v3';
+const CACHE_NAME = 'twisted-halloween-v6';
 const STATIC_ASSETS = [
   '/hero-poster.jpg',
   '/costumeWalk.mp4',
@@ -42,6 +42,13 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
+  // Bypass dev/HMR and app code requests to avoid caching/runtime issues
+  const dest = event.request.destination;
+  const isDevAsset = url.pathname.startsWith('/@vite') || url.pathname.startsWith('/@react-refresh') || url.pathname.includes('/node_modules/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
+  if (isDevAsset || dest === 'script' || dest === 'style') {
+    return; // Let the browser handle these without SW
+  }
+
   // For navigations (HTML), use network-first to avoid stale app shells
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -60,32 +67,37 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache first for other requests
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(event.request)
-          .then((response) => {
-            // Only cache successful, same-origin, non-HTML responses
-            const contentType = response.headers.get('content-type') || '';
-            if (response && response.status === 200 && response.type === 'basic' && !contentType.includes('text/html')) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-            }
-            return response;
-          })
-          .catch(() => {
-            // Fallback: try cache match
-            return caches.match(event.request);
-          });
+  // Smart caching strategy: static media cache-first; others network-first
+  if (['image','video','audio','font'].includes(event.request.destination)) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then((response) => {
+          const contentType = response.headers.get('content-type') || '';
+          if (response && response.status === 200 && response.type === 'basic' && !contentType.includes('text/html')) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return response;
+        });
       })
+    );
+    return;
+  }
+
+  // Default network-first for everything else (avoid caching JS/CSS)
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        const contentType = response.headers.get('content-type') || '';
+        const isCode = contentType.includes('javascript') || contentType.includes('css');
+        if (response && response.status === 200 && response.type === 'basic' && !isCode) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
 
