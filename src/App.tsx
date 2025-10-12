@@ -30,7 +30,7 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 // Lazy load hunt UI and providers when needed
-const LazyHuntProvider = lazy(() => import("@/components/hunt/HuntProvider"));
+// Removed LazyHuntProvider - using direct HuntProvider import
 const HuntProgress = lazy(() => import("@/components/hunt/HuntProgress"));
 const HuntReward = lazy(() => import("@/components/hunt/HuntReward"));
 const HuntNotification = lazy(() => import("@/components/hunt/HuntNotification"));
@@ -58,7 +58,7 @@ function App() {
             <AdminProvider>
               {HUNT_ENABLED ? (
                 <Suspense fallback={null}>
-                  <LazyHuntProvider>
+                  <HuntProvider>
                     <AudioProvider>
                       <SkipLink />
                       <NavBar />
@@ -99,7 +99,7 @@ function App() {
                         <HuntNotification />
                       </Suspense>
                     </AudioProvider>
-                  </LazyHuntProvider>
+                  </HuntProvider>
                 </Suspense>
               ) : (
                 <AudioProvider>
