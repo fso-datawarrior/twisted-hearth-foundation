@@ -16,65 +16,15 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "react": path.resolve(__dirname, "./node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime.js"),
-      "react/jsx-dev-runtime": path.resolve(__dirname, "./node_modules/react/jsx-dev-runtime.js"),
-      "scheduler": path.resolve(__dirname, "./node_modules/scheduler"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "scheduler"],
+    dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react/jsx-runtime',
-      'react/jsx-dev-runtime',
-      '@tanstack/react-query',
-      'react-router-dom',
-      'date-fns',
-      '@radix-ui/react-checkbox'
-    ],
-    exclude: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'scheduler'],
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'scheduler'],
-    force: true
+    exclude: ['react', 'react-dom'],
   },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Vendor chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('react-router-dom')) {
-              return 'router-vendor';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
-            }
-            if (id.includes('three') || id.includes('@react-three')) {
-              return 'three-vendor';
-            }
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
-            }
-            if (id.includes('@supabase/supabase-js')) {
-              return 'supabase-vendor';
-            }
-            if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
-              return 'utils-vendor';
-            }
-          }
-          // Split heavy components by file path
-          if (id.includes('/src/pages/AdminDashboard') || id.includes('/src/components/admin/')) {
-            return 'admin-chunk';
-          }
-          if (id.includes('/src/pages/Gallery') || id.includes('/src/components/gallery/')) {
-            return 'gallery-chunk';
-          }
-        },
         // Add version to chunk names for better cache busting
         chunkFileNames: (chunkInfo) => {
           const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
