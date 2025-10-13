@@ -199,7 +199,7 @@ const Vignettes = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <main className="pt-20 relative z-10">
+      <main className="pt-20 md:pt-24 relative z-10">
         {/* CSS animated fog effect */}
         {/* <CSSFogBackground /> */}
         <section className="py-16 px-6">

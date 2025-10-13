@@ -627,7 +627,7 @@ const RSVP = () => {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background relative">
-        <main className="pt-20 relative z-10">
+        <main className="pt-20 md:pt-24 relative z-10">
           <section className="py-16 px-6">
             <div className="container mx-auto max-w-3xl">
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">

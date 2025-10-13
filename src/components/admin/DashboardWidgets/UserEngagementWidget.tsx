@@ -172,7 +172,7 @@ function MetricCard({ icon, label, value, color }: MetricCardProps) {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} border rounded-lg p-3`}>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} border-2 rounded-lg p-3`}>
       <div className="flex items-center gap-2 mb-1">
         {icon}
         <span className="text-xs text-muted-foreground">{label}</span>

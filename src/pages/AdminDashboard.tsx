@@ -23,6 +23,7 @@ import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import DatabaseResetPanel from '@/components/admin/DatabaseResetPanel';
 import { OnHoldOverlay } from '@/components/admin/OnHoldOverlay';
+import { AdminFooter } from '@/components/admin/AdminFooter';
 import { getTournamentRegistrationsAdmin } from '@/lib/tournament-api';
 import { getAllVignettes } from '@/lib/vignette-api';
 import { getAllLibations } from '@/lib/libations-api';
@@ -388,6 +389,9 @@ export default function AdminDashboard() {
               <DatabaseResetPanel />
             ) : null}
           </div>
+          
+          {/* Admin Footer with Version */}
+          <AdminFooter />
         </div>
       </div>
     </RequireAdmin>

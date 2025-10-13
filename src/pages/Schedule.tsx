@@ -72,7 +72,7 @@ const Schedule = () => {
       {/* GLSL animated smoke effect */}
       {/* <CSSFogBackground /> */}
       
-      <main className="pt-20 relative z-10">
+      <main className="pt-20 md:pt-24 relative z-10">
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="relative">
