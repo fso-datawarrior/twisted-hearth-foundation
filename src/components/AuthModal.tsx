@@ -17,7 +17,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  const { devSignIn, signUpWithPassword, signInWithPassword } = useAuth();
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const { devSignIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
 
@@ -27,11 +28,38 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setEmail("");
       setPassword("");
       setIsSignUp(false);
+      setIsForgotPassword(false);
     }, 200);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isForgotPassword) {
+      if (!email.trim()) return;
+      
+      setLoading(true);
+      try {
+        await resetPasswordForEmail(email.trim().toLowerCase());
+        toast({
+          title: "Password reset link sent!",
+          description: "Check your email for the password reset link.",
+          duration: 5000,
+        });
+        handleClose();
+      } catch (error: any) {
+        toast({
+          title: "Failed to send reset link",
+          description: error?.message || "Please try again or contact support.",
+          variant: "destructive",
+          duration: 6000,
+        });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!email.trim() || !password.trim()) {
       return;
     }
@@ -66,7 +94,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       } else if (error?.message?.includes('network')) {
         errorMsg = "Network error. Please check your connection and try again.";
       } else if (error?.message?.includes('already registered')) {
-        errorMsg = "This email is already registered. Try signing in instead.";
+        errorMsg = "This email is already registered. Forgot your password?";
       }
       
       toast({
@@ -111,10 +139,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <DialogContent className="sm:max-w-[425px] border-accent-gold">
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl text-accent-gold uppercase">
-            Enter Twisted Tale
+            {isForgotPassword ? "Reset Password" : "Enter Twisted Tale"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {isSignUp
+            {isForgotPassword
+              ? "Enter your email to receive a password reset link."
+              : isSignUp
               ? "Create an account with email and password."
               : "Sign in with your email and password."
             }
@@ -138,43 +168,65 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="font-subhead text-accent-gold">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              minLength={6}
-              className="bg-background border-accent-purple/30 focus:border-accent-gold"
-            />
-          </div>
+          {!isForgotPassword && (
+            <div className="space-y-2">
+              <Label htmlFor="password" className="font-subhead text-accent-gold">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={loading}
+                minLength={6}
+                className="bg-background border-accent-purple/30 focus:border-accent-gold"
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-between text-xs">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-accent-gold hover:text-accent-gold/80 underline"
-            >
-              {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
-            </button>
-            <span className="text-muted-foreground">
-              {isSignUp ? "" : ""}
-            </span>
+            {isForgotPassword ? (
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(false)}
+                className="text-accent-gold hover:text-accent-gold/80 underline"
+              >
+                Back to Sign In
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-accent-gold hover:text-accent-gold/80 underline"
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+                </button>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-accent-gold hover:text-accent-gold/80 underline"
+                  >
+                    Forgot Password?
+                  </button>
+                )}
+              </>
+            )}
           </div>
 
           <Button
             type="submit"
-            disabled={loading || !email.trim() || !password.trim()}
+            disabled={loading || !email.trim() || (!isForgotPassword && !password.trim())}
             className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
           >
             {loading 
               ? "Processing..." 
+              : isForgotPassword
+              ? "Send Reset Link"
               : isSignUp
               ? "Sign Up"
               : "Sign In"
