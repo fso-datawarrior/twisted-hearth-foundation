@@ -133,16 +133,19 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
   };
 
   return (
-    <div className="bg-black/90 backdrop-blur-sm p-6 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
-      <div className="flex justify-between items-start mb-4">
+    <div className="bg-black/90 backdrop-blur-sm p-4 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+      <div className="flex justify-between items-start gap-3 mb-2">
         <div>
-          <h3 className="font-subhead text-lg text-accent-gold">
-            {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
-          </h3>
-          <p className="font-body text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-            {post.updated_at && post.updated_at !== post.created_at && ' (edited)'}
-          </p>
+          <div className="flex items-center gap-2 text-xs">
+            <h3 className="font-subhead text-base text-accent-gold">
+              {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
+            </h3>
+            <span className="text-muted-foreground">•</span>
+            <p className="font-body text-muted-foreground">
+              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+              {post.updated_at && post.updated_at !== post.created_at && ' (edited)'}
+            </p>
+          </div>
         </div>
 
         {user && (
@@ -182,9 +185,9 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-3 ml-11">
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <textarea
               value={editMessage}
               onChange={(e) => setEditMessage(e.target.value)}
@@ -220,7 +223,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 ml-11">
         <EmojiReactions postId={post.id} />
         
         <div className="flex gap-2 text-sm">
@@ -262,18 +265,17 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
 
         {showReplies && replies.length > 0 && (
-          <div className="ml-8 space-y-3 border-l border-accent-purple/20 pl-4">
+          <div className="ml-11 space-y-2 border-l border-accent-purple/20 pl-4">
             {replies.map((reply) => (
-              <div key={reply.id} className="bg-bg-2 p-4 rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h4 className="font-subhead text-sm text-accent-gold">
-                      {reply.is_anonymous ? 'Anonymous Guest' : reply.display_name}
-                    </h4>
-                    <p className="font-body text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
-                    </p>
-                  </div>
+              <div key={reply.id} className="bg-bg-2 p-3 rounded-lg">
+                <div className="flex items-center gap-2 text-xs mb-2">
+                  <h4 className="font-subhead text-sm text-accent-gold">
+                    {reply.is_anonymous ? 'Anonymous Guest' : reply.display_name}
+                  </h4>
+                  <span className="text-muted-foreground">•</span>
+                  <p className="font-body text-muted-foreground">
+                    {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
+                  </p>
                 </div>
                 <p className="font-body text-sm text-muted-foreground whitespace-pre-wrap">
                   {reply.message}

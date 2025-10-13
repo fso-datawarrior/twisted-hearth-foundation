@@ -19,7 +19,7 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
   render() {
     if (this.state.hasError) {
       return (
-        <div role="alert" className="mx-auto my-12 max-w-prose rounded-lg bg-black/90 backdrop-blur-sm p-6 text-[--ink]">
+        <div role="alert" className="mx-auto mt-20 md:mt-24 my-12 max-w-prose rounded-lg bg-black/90 backdrop-blur-sm p-6 text-[--ink]">
           <h2 className="mb-2 text-xl font-semibold">Something went wrong.</h2>
           <p>Try refreshing the page. If the problem persists, please let the hosts know.</p>
         </div>

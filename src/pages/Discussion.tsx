@@ -119,9 +119,9 @@ const Discussion = () => {
   };
   return (
     <div className="min-h-screen bg-background relative">
-      <main className="pt-20 relative z-10">
+      <main className="pt-20 md:pt-24 relative z-10">
         {/* <CSSFogBackground /> */}
-        <section className="py-16 px-6">
+        <section className="py-8 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="flex justify-between items-center mb-8">
               <h1 className="font-heading text-4xl md:text-6xl text-shadow-gothic">
@@ -162,7 +162,7 @@ const Discussion = () => {
             )}
 
             {/* Guestbook Feed */}
-            <div className="space-y-6">
+            <div className="space-y-3">
               {isLoading && posts.length === 0 ? (
                 <div className="text-center py-12">
                   <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-4 text-accent-gold" />
