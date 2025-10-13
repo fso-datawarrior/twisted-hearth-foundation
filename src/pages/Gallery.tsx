@@ -73,23 +73,6 @@ const Gallery = () => {
     loadImages();
   }, []);
 
-  // Cleanup photo URLs when component unmounts (Edge memory fix)
-  useEffect(() => {
-    return () => {
-      // Revoke any object URLs to prevent memory leaks
-      approvedPhotos.forEach(photo => {
-        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
-          URL.revokeObjectURL(photo.storage_path);
-        }
-      });
-      userPhotos.forEach(photo => {
-        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
-          URL.revokeObjectURL(photo.storage_path);
-        }
-      });
-    };
-  }, [approvedPhotos, userPhotos]);
-
   const loadImages = async (loadMore: boolean = false) => {
     // Performance monitoring
     const startTime = performance.now();
