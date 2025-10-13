@@ -110,8 +110,19 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 }
 
 @layer components {
+  /* Vignettes Carousel Smooth Scrolling */
+  .vignettes-carousel-track {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .vignettes-carousel-item {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
   /* Hunt rune found state enhancement */
-  .hunt-rune[aria-pressed="true"] { 
+  .hunt-rune[aria-pressed="true"] {
     filter: saturate(1.1) brightness(1.1); 
   }
   

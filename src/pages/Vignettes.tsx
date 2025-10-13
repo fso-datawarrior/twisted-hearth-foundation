@@ -55,34 +55,12 @@ const Vignettes = () => {
 
   useEffect(() => {
     const generateVignetteUrls = async () => {
+      // Don't set any data during initial loading
+      if (isLoading) return;
+      
       if (!vignettes || vignettes.length === 0) {
-        // Set fallback data if no vignettes exist
-        setDisplayVignettes([
-          {
-            id: "fallback-1",
-            title: "Goldilocks: Home Invasion",
-            description: "What really happened when Goldilocks broke into the Bears' house? A tale of obsession, surveillance, and the price of curiosity.",
-            year: 2023,
-            theme_tag: "Breaking & Entering",
-            imageUrl: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"
-          },
-          {
-            id: "fallback-2", 
-            title: "Jack & The Corporate Ladder",
-            description: "Jack's beanstalk led not to a giant's castle, but to the top of a corporate empire built on the bones of the working class.",
-            year: 2022,
-            theme_tag: "Economic Horror",
-            imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop"
-          },
-          {
-            id: "fallback-3",
-            title: "Snow White: Mirror, Mirror", 
-            description: "The magic mirror showed more than vanity - it revealed the darkest truths about beauty standards and self-worth in a social media age.",
-            year: 2021,
-            theme_tag: "Digital Dystopia",
-            imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c55a?w=800&h=600&fit=crop"
-          }
-        ]);
+        // Only set empty array if loading is complete and still no data
+        setDisplayVignettes([]);
         return;
       }
 
@@ -140,10 +118,10 @@ const Vignettes = () => {
     };
 
     generateVignetteUrls();
-  }, [vignettes]);
+  }, [vignettes, isLoading]);
 
   // Carousel navigation
-  const maxIndex = Math.max(0, displayVignettes.length - itemsPerView);
+  const maxIndex = Math.max(0, displayVignettes.length - 1);
   
   const nextSlide = () => {
     setCurrentIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
@@ -213,19 +191,42 @@ const Vignettes = () => {
               Browse our previous performances and see how far down the rabbit hole we've gone.
             </p>
             
+            {/* LOADING STATE */}
             {isLoading && (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground">Loading past vignettes...</div>
+              <div className="relative max-w-6xl mx-auto">
+                <div className="overflow-hidden rounded-lg">
+                  <div className="flex gap-4 p-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div 
+                        key={i}
+                        className="flex-shrink-0 w-full md:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] aspect-[4/5] bg-muted/50 rounded-lg animate-pulse"
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="text-center mt-8 text-muted-foreground">
+                  Loading past vignettes...
+                </div>
               </div>
             )}
 
-            {error && (
+            {/* ERROR STATE */}
+            {!isLoading && error && (
               <div className="text-center py-12">
-                <div className="text-destructive">Failed to load vignettes. Showing archived versions.</div>
+                <div className="text-destructive mb-4">Failed to load vignettes.</div>
+                <p className="text-muted-foreground">Please try refreshing the page.</p>
               </div>
             )}
             
-            {/* Carousel Container */}
+            {/* EMPTY STATE */}
+            {!isLoading && !error && displayVignettes.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground">No past vignettes available at this time.</div>
+              </div>
+            )}
+            
+            {/* CAROUSEL - Only render when data is ready */}
+            {!isLoading && !error && displayVignettes.length > 0 && (
             <div className="relative max-w-6xl mx-auto">
               {displayVignettes.length > itemsPerView ? (
                 <>
@@ -249,7 +250,7 @@ const Vignettes = () => {
                   </Button>
 
                   {/* Carousel Track */}
-                  <div className="overflow-hidden rounded-lg">
+                  <div className="overflow-hidden rounded-lg vignettes-carousel-track">
                     <div 
                       className="flex transition-transform duration-500 ease-in-out"
                       style={{ 
@@ -260,7 +261,7 @@ const Vignettes = () => {
                       {displayVignettes.map((vignette, index) => (
                         <div 
                           key={vignette.id} 
-                          className="relative flex-shrink-0 px-4"
+                          className="relative flex-shrink-0 px-4 vignettes-carousel-item"
                           style={{ width: `${100 / displayVignettes.length}%` }}
                         >
                           <div className="h-full">
@@ -299,7 +300,7 @@ const Vignettes = () => {
                     ))}
                   </div>
                 </>
-              ) : (
+              ) : displayVignettes.length > 0 ? (
                 /* Static Grid for Small Number of Items */
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {displayVignettes.map((vignette, index) => (
@@ -320,8 +321,9 @@ const Vignettes = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
+            )}
             
             <div className="mt-16 text-center relative">
               <div className="bg-card p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">

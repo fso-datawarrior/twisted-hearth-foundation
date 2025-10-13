@@ -214,7 +214,7 @@ export function EmailCommunication() {
             }
           }}
         >
-          <AlertDialogContent className="z-[9999] max-w-md">
+          <AlertDialogContent className="z-[9999] max-w-[calc(100vw-32px)] sm:max-w-md mx-4">
             <AlertDialogHeader>
               <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
               <AlertDialogDescription asChild>
@@ -429,7 +429,7 @@ export function EmailCommunication() {
           }
         }}
       >
-        <AlertDialogContent className="z-[9999] max-w-md">
+        <AlertDialogContent className="z-[9999] max-w-[calc(100vw-32px)] sm:max-w-md mx-4">
           <AlertDialogHeader>
             <AlertDialogTitle>Send Email Campaign?</AlertDialogTitle>
             <AlertDialogDescription asChild>
