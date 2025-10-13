@@ -24,6 +24,7 @@ const RSVP = lazy(() => import("./pages/RSVP"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Discussion = lazy(() => import("./pages/Discussion"));
 const Contact = lazy(() => import("./pages/Contact"));
+const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const TestPage = lazy(() => import("./pages/TestPage"));
@@ -76,6 +77,7 @@ function App() {
                           <Route path="/gallery" element={<Gallery />} />
                           <Route path="/discussion" element={<Discussion />} />
                           <Route path="/contact" element={<Contact />} />
+                          <Route path="/settings" element={<UserSettings />} />
                           <Route path="/auth" element={<AuthCallback />} />
                           <Route path="/reset-password" element={<ResetPassword />} />
                           <Route path="/test" element={<TestPage />} />

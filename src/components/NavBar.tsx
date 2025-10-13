@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useAuth } from "@/lib/auth";
@@ -179,6 +179,12 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                         <div className="w-full h-px bg-accent-purple/30 my-1"></div>
                       </>
                     )}
+                    <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
+                      <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
+                        <User size={16} />
+                        Settings
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem 
                       onClick={() => setShowChangePasswordModal(true)}
                       className="flex items-center gap-2 font-subhead text-accent-gold hover:bg-accent-gold/10 cursor-pointer"
@@ -339,6 +345,17 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                         </div>
                       </>
                     )}
+                    
+                    <Link to="/settings">
+                      <Button
+                        onClick={() => setIsMenuOpen(false)}
+                        variant="ghost"
+                        className="w-full text-ink hover:bg-accent-purple/10 font-subhead"
+                      >
+                        <User size={16} className="mr-2" />
+                        Settings
+                      </Button>
+                    </Link>
                     
                     <Button
                       onClick={() => { setShowChangePasswordModal(true); setIsMenuOpen(false); }}

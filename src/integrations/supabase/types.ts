@@ -755,6 +755,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -762,6 +763,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -769,6 +771,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -1281,6 +1284,20 @@ export type Database = {
           p_viewport_width?: number
         }
         Returns: string
+      }
+      update_user_email: {
+        Args: { p_new_email: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
+      update_user_profile: {
+        Args: { p_avatar_url?: string; p_display_name?: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
       }
       upload_photo: {
         Args: {
