@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import WidgetWrapper from '../AnalyticsWidgets/WidgetWrapper';
-import { Calendar, CheckCircle, Clock, Users, TrendingUp } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { LineChart } from '@/components/admin/Analytics/Charts/LineChart';
 
 interface RsvpMetrics {
   confirmed: number;
@@ -120,30 +120,15 @@ export default function RsvpTrendsWidget() {
           </div>
 
           <div className="border-t border-border pt-3">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">7-Day Trend</span>
-            </div>
-            <ResponsiveContainer width="100%" height={100}>
-              <BarChart data={metrics.trend}>
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 10 }} 
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis hide />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                    fontSize: '12px'
-                  }}
-                />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <LineChart
+              title="7-Day Trend"
+              data={metrics.trend}
+              lines={[{ dataKey: 'count', color: '#3b82f6', name: 'RSVPs' }]}
+              height={120}
+              showGrid={false}
+              showLegend={false}
+              xAxisKey="date"
+            />
           </div>
         </div>
       )}
