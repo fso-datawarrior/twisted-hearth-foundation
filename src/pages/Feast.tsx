@@ -446,6 +446,7 @@ const Feast = () => {
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="vegan"
+                              name="vegan"
                               checked={isVegan}
                               onCheckedChange={(checked) => setIsVegan(checked as boolean)}
                               disabled={isLoading}
@@ -458,6 +459,7 @@ const Feast = () => {
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="gluten-free"
+                              name="gluten-free"
                               checked={isGlutenFree}
                               onCheckedChange={(checked) => setIsGlutenFree(checked as boolean)}
                               disabled={isLoading}

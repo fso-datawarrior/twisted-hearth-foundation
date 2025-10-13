@@ -52,11 +52,27 @@ export function getPublicImageUrlSync(storagePath: string): string {
       return '/img/no-photos-placeholder.jpg';
     }
 
+    // Ensure storage path doesn't contain protocol (avoid CORB issues)
+    const cleanPath = storagePath.replace(/^https?:\/\/[^/]+\//, '');
+
     const { data } = supabase.storage
       .from('gallery')
-      .getPublicUrl(storagePath);
+      .getPublicUrl(cleanPath);
 
-    return data?.publicUrl || '/img/no-photos-placeholder.jpg';
+    // Validate the URL is from the expected domain
+    if (data?.publicUrl) {
+      try {
+        const url = new URL(data.publicUrl);
+        // Only return URLs from Supabase storage domain
+        if (url.hostname.includes('supabase.co')) {
+          return data.publicUrl;
+        }
+      } catch {
+        // Invalid URL, use placeholder
+      }
+    }
+
+    return '/img/no-photos-placeholder.jpg';
   } catch (error) {
     logger.error('[getPublicImageUrlSync] Exception for: ' + storagePath, error as Error);
     return '/img/no-photos-placeholder.jpg';

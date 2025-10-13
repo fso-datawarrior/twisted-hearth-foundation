@@ -156,6 +156,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         <div className="flex items-center space-x-2">
           <Checkbox
             id="anonymous"
+            name="anonymous"
             checked={isAnonymous}
             onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
           />
