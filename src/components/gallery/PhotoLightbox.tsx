@@ -45,20 +45,20 @@ export const PhotoLightbox = ({
 
   // Handle orientation changes for mobile rotation
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleOrientationChange = () => {
-      // Force re-render to adapt to new orientation
-      // The CSS max-w-[98vw] max-h-[98vh] will automatically adapt
-      window.dispatchEvent(new Event('resize'));
+      // CSS max-w-[98vw] max-h-[98vh] already handles responsive sizing
+      // No need to force re-render - keeping this for future hooks if needed
     };
     
+    // Only listen to orientationchange, NOT resize (to prevent infinite loop)
     window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
     
     return () => {
       window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
     };
-  }, []);
+  }, [isOpen]);
 
   const loadImageUrl = async (photo: Photo) => {
     setLoading(true);
