@@ -506,6 +506,7 @@ export type Database = {
       page_views: {
         Row: {
           created_at: string
+          duration_seconds: number | null
           exited_at: string | null
           id: string
           page_path: string
@@ -519,6 +520,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          duration_seconds?: number | null
           exited_at?: string | null
           id?: string
           page_path: string
@@ -532,6 +534,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          duration_seconds?: number | null
           exited_at?: string | null
           id?: string
           page_path?: string
@@ -1164,6 +1167,14 @@ export type Database = {
       get_analytics_dashboard: {
         Args: { p_end_date?: string; p_start_date?: string }
         Returns: Json
+      }
+      get_analytics_date_range: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          days_count: number
+          end_date: string
+          start_date: string
+        }[]
       }
       get_analytics_summary: {
         Args: { p_end_date?: string; p_start_date?: string }
