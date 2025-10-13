@@ -115,7 +115,7 @@ export default function GuestbookActivityWidget() {
               <div className="text-xl font-bold text-primary">{stats.totalPosts}</div>
               <div className="text-xs text-muted-foreground">Total Posts</div>
             </div>
-            <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-2 text-center">
+            <div className="bg-secondary/10 border-2 border-secondary/50 rounded-lg p-2 text-center">
               <div className="text-xl font-bold text-secondary">{stats.topContributors.length}</div>
               <div className="text-xs text-muted-foreground">Contributors</div>
             </div>
