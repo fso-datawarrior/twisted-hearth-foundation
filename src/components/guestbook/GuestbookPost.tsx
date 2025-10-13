@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import EmojiReactions from './EmojiReactions';
 import MessageComposer from './MessageComposer';
 import { formatDistanceToNow } from 'date-fns';
+import { useAnalytics } from '@/contexts/AnalyticsContext';
 
 interface GuestbookPostProps {
   post: {
@@ -40,12 +41,15 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { trackInteraction } = useAnalytics();
 
   const isOwner = user?.id === post.user_id;
 
   useEffect(() => {
     loadReplies();
-  }, [post.id]);
+    // Track guestbook post view
+    trackInteraction('guestbook', post.id, 'view');
+  }, [post.id, trackInteraction]);
 
   const loadReplies = async () => {
     const { data, error } = await supabase

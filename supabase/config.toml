@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-contribution-confirmation]
 verify_jwt = false
+
+[functions.daily-analytics-aggregation]
+verify_jwt = false

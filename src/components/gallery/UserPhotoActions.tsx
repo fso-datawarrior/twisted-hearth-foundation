@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, Star } from 'lucide-react';
+import { useAnalytics } from '@/contexts/AnalyticsContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,15 @@ const UserPhotoActions: React.FC<UserPhotoActionsProps> = ({
   onDelete,
   onFavorite,
 }) => {
+  const { trackInteraction } = useAnalytics();
+
+  const handleFavorite = () => {
+    if (onFavorite) {
+      onFavorite(photo.id);
+      trackInteraction('photo', photo.id, 'favorite', photo.is_favorite ? 'remove' : 'add');
+    }
+  };
+
   return (
     <div className="flex gap-2">
       {/* Favorite Button */}
@@ -32,7 +42,7 @@ const UserPhotoActions: React.FC<UserPhotoActionsProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onFavorite(photo.id)}
+          onClick={handleFavorite}
           className={`h-8 px-2 ${
             photo.is_favorite
               ? 'text-accent-gold hover:text-accent-gold/80'
