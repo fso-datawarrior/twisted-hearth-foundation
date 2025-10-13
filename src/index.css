@@ -916,3 +916,21 @@ body {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
+
+@keyframes type-in {
+  from { 
+    opacity: 0;
+    max-width: 0;
+  }
+  to { 
+    opacity: 1;
+    max-width: 100%;
+  }
+}
+
+.animate-type-in {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: type-in 1.2s ease-out forwards;
+}
