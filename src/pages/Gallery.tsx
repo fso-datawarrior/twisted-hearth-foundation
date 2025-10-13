@@ -46,25 +46,30 @@ const Gallery = () => {
   // Dynamic photos per view based on window width (with throttling for Edge)
   useEffect(() => {
     const updatePhotosPerView = () => {
-      if (window.innerWidth >= 1280) setPhotosPerView(5);
-      else if (window.innerWidth >= 1024) setPhotosPerView(4);
-      else if (window.innerWidth >= 640) setPhotosPerView(3);
-      else setPhotosPerView(2);
+      const next =
+        window.innerWidth >= 1280 ? 5 :
+        window.innerWidth >= 1024 ? 4 :
+        window.innerWidth >= 640 ? 3 : 2;
+      
+      // Only update if value actually changes to prevent unnecessary re-renders
+      setPhotosPerView(prev => (prev === next ? prev : next));
     };
     
     updatePhotosPerView();
     
     // Throttle resize listener for Edge performance
-    let timeoutId: NodeJS.Timeout;
+    let resizeTimeout: number;
     const throttledUpdate = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(updatePhotosPerView, 150);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(() => {
+        requestAnimationFrame(updatePhotosPerView);
+      }, 150);
     };
     
     window.addEventListener('resize', throttledUpdate);
     
     return () => {
-      clearTimeout(timeoutId);
+      clearTimeout(resizeTimeout);
       window.removeEventListener('resize', throttledUpdate);
     };
   }, []);
@@ -72,23 +77,6 @@ const Gallery = () => {
   useEffect(() => {
     loadImages();
   }, []);
-
-  // Cleanup photo URLs when component unmounts (Edge memory fix)
-  useEffect(() => {
-    return () => {
-      // Revoke any object URLs to prevent memory leaks
-      approvedPhotos.forEach(photo => {
-        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
-          URL.revokeObjectURL(photo.storage_path);
-        }
-      });
-      userPhotos.forEach(photo => {
-        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
-          URL.revokeObjectURL(photo.storage_path);
-        }
-      });
-    };
-  }, [approvedPhotos, userPhotos]);
 
   const loadImages = async (loadMore: boolean = false) => {
     // Performance monitoring

@@ -38,27 +38,27 @@ export const PhotoLightbox = ({
   useEffect(() => {
     if (isOpen && photos[currentPhotoIndex]) {
       loadImageUrl(photos[currentPhotoIndex]);
-      // Track photo view
+      // Track photo view (trackInteraction is stable, excluded from deps to prevent infinite loop)
       trackInteraction('photo', photos[currentPhotoIndex].id, 'view');
     }
-  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen, trackInteraction]);
+  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen]);
 
   // Handle orientation changes for mobile rotation
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleOrientationChange = () => {
-      // Force re-render to adapt to new orientation
-      // The CSS max-w-[98vw] max-h-[98vh] will automatically adapt
-      window.dispatchEvent(new Event('resize'));
+      // CSS max-w-[98vw] max-h-[98vh] already handles responsive sizing
+      // No need to force re-render - keeping this for future hooks if needed
     };
     
+    // Only listen to orientationchange, NOT resize (to prevent infinite loop)
     window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
     
     return () => {
       window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
     };
-  }, []);
+  }, [isOpen]);
 
   const loadImageUrl = async (photo: Photo) => {
     setLoading(true);
@@ -93,6 +93,8 @@ export const PhotoLightbox = ({
 
   // Keyboard navigation
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       
@@ -110,7 +112,7 @@ export const PhotoLightbox = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, photos.length]);
+  }, [isOpen, goToPrevious, goToNext]);
 
   // Touch gesture support
   const handleTouchStart = (e: React.TouchEvent) => {
