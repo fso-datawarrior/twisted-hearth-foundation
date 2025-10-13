@@ -28,6 +28,10 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
+// Memoize expensive providers for performance optimization
+const MemoizedAnalyticsProvider = React.memo(AnalyticsProvider);
+const MemoizedAuthProvider = React.memo(AuthProvider);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -46,8 +50,8 @@ function App() {
           v7_relativeSplatPath: true,
         }}
       >
-        <AnalyticsProvider>
-          <AuthProvider>
+        <MemoizedAnalyticsProvider>
+          <MemoizedAuthProvider>
             <AdminProvider>
               <AudioProvider>
                 <SkipLink />
@@ -83,8 +87,8 @@ function App() {
                 </main>
               </AudioProvider>
             </AdminProvider>
-          </AuthProvider>
-        </AnalyticsProvider>
+          </MemoizedAuthProvider>
+        </MemoizedAnalyticsProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
