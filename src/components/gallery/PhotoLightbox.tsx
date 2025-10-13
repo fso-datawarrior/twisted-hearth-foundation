@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/Modal";
 import { Photo } from "@/lib/photo-api";
+import { useAnalytics } from "@/contexts/AnalyticsContext";
 
 interface PhotoLightboxProps {
   photos: Photo[];
@@ -26,18 +27,21 @@ export const PhotoLightbox = ({
   const [loading, setLoading] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const { trackInteraction } = useAnalytics();
 
   // Sync with prop changes
   useEffect(() => {
     setCurrentPhotoIndex(currentIndex);
   }, [currentIndex]);
 
-  // Load current image URL
+  // Load current image URL and track view
   useEffect(() => {
     if (isOpen && photos[currentPhotoIndex]) {
       loadImageUrl(photos[currentPhotoIndex]);
+      // Track photo view
+      trackInteraction('photo', photos[currentPhotoIndex].id, 'view');
     }
-  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen]);
+  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen, trackInteraction]);
 
   // Handle orientation changes for mobile rotation
   useEffect(() => {

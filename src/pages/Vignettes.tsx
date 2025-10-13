@@ -9,12 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
 import { Photo } from "@/lib/photo-api";
 import { getPublicImageUrlSync } from "@/lib/image-url";
+import { useAnalytics } from "@/contexts/AnalyticsContext";
 
 const Vignettes = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const { trackInteraction } = useAnalytics();
 
   // Responsive items per view
   useEffect(() => {
@@ -177,6 +179,8 @@ const Vignettes = () => {
     if (index !== -1) {
       setLightboxIndex(index);
       setLightboxOpen(true);
+      // Track vignette interaction
+      trackInteraction('vignette', vignetteId, 'view');
     }
   };
 
