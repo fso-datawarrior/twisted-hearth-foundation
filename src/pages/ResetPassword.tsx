@@ -17,15 +17,24 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have the recovery token in the URL
-    const type = searchParams.get("type");
-    if (type !== "recovery") {
-      toast({
-        title: "Invalid reset link",
-        description: "This password reset link is invalid or has expired.",
-        variant: "destructive",
-      });
-      navigate("/");
+    // Check if we have the recovery token in the URL (hash or query params)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = searchParams.get("type") || hashParams.get("type");
+    const accessToken = searchParams.get("access_token") || hashParams.get("access_token");
+    
+    // If we have neither type=recovery nor an access_token, it might be invalid
+    // But give the auth provider a moment to process the session from the hash
+    if (type !== "recovery" && !accessToken) {
+      const timer = setTimeout(() => {
+        toast({
+          title: "Invalid reset link",
+          description: "This password reset link is invalid or has expired.",
+          variant: "destructive",
+        });
+        navigate("/");
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
   }, [searchParams, navigate, toast]);
 
