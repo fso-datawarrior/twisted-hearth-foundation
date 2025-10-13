@@ -3,17 +3,27 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// Global error handlers to catch initialization errors
+window.onerror = (msg, url, lineNo, columnNo, error) => {
+  console.error('Global error:', { msg, url, lineNo, columnNo, error });
+  return false; // Let default handler run
+};
+
+window.onunhandledrejection = (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+};
+
 // Safe bootstrap with one-time SW/cache cleanup to prevent mixed React chunks
 async function start() {
   try {
-    if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleanup_done_v6')) {
+    if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleanup_done_v7')) {
       const regs = await navigator.serviceWorker.getRegistrations();
       if (regs.length) await Promise.all(regs.map((r) => r.unregister()));
       if ('caches' in window) {
         const keys = await caches.keys();
         if (keys.length) await Promise.all(keys.map((k) => caches.delete(k)));
       }
-      sessionStorage.setItem('sw_cleanup_done_v6', '1');
+      sessionStorage.setItem('sw_cleanup_done_v7', '1');
       // Reload once to ensure the page is no longer controlled by any SW
       location.reload();
       return; // Do not render on this pass

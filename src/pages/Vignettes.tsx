@@ -113,7 +113,14 @@ const Vignettes = () => {
       const vignettesWithUrls = vignettes.map((v: any) => {
         const pid = v.photo_ids?.[0];
         const photo = pid ? photoMap.get(pid) : undefined;
-        const imageUrl = photo ? getPublicImageUrlSync(photo.storage_path) : '';
+        const imageUrl = photo ? (() => {
+          try {
+            return getPublicImageUrlSync(photo.storage_path) || '/img/no-photos-placeholder.jpg';
+          } catch (err) {
+            console.error('Failed to generate image URL:', err);
+            return '/img/no-photos-placeholder.jpg';
+          }
+        })() : '';
         return {
           id: v.id,
           title: v.title,

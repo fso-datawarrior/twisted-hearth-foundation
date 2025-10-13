@@ -48,27 +48,35 @@ export async function getPublicImageUrl(
  */
 export function getPublicImageUrlSync(storagePath: string): string {
   try {
-    if (!storagePath) {
+    // Validate input more strictly
+    if (!storagePath || typeof storagePath !== 'string') {
+      logger.warn('[getPublicImageUrlSync] Invalid storage path:', storagePath);
       return '/img/no-photos-placeholder.jpg';
     }
 
     // Ensure storage path doesn't contain protocol (avoid CORB issues)
     const cleanPath = storagePath.replace(/^https?:\/\/[^/]+\//, '');
+    
+    if (!cleanPath) {
+      logger.warn('[getPublicImageUrlSync] Empty path after cleaning');
+      return '/img/no-photos-placeholder.jpg';
+    }
 
     const { data } = supabase.storage
       .from('gallery')
       .getPublicUrl(cleanPath);
 
-    // Validate the URL is from the expected domain
-    if (data?.publicUrl) {
+    // Validate the URL is from the expected domain with better error handling
+    if (data?.publicUrl && typeof data.publicUrl === 'string') {
       try {
         const url = new URL(data.publicUrl);
         // Only return URLs from Supabase storage domain
-        if (url.hostname.includes('supabase.co')) {
+        if (url.hostname && url.hostname.includes('supabase.co')) {
           return data.publicUrl;
         }
-      } catch {
-        // Invalid URL, use placeholder
+        logger.warn('[getPublicImageUrlSync] URL not from Supabase domain:', url.hostname);
+      } catch (urlError) {
+        logger.error('[getPublicImageUrlSync] Invalid URL format: ' + data.publicUrl);
       }
     }
 
