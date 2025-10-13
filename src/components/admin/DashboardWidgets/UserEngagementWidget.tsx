@@ -168,7 +168,7 @@ interface MetricCardProps {
 function MetricCard({ icon, label, value, color }: MetricCardProps) {
   const colorClasses = {
     primary: 'from-primary/10 to-primary/5 border-primary/20',
-    secondary: 'from-secondary/10 to-secondary/5 border-secondary/50',
+    secondary: 'from-secondary/10 to-secondary/5 border-accent-purple/30',
     accent: 'from-accent/10 to-accent/5 border-accent/20',
     'accent-gold': 'from-accent-gold/10 to-accent-gold/5 border-accent-gold/20',
   };
