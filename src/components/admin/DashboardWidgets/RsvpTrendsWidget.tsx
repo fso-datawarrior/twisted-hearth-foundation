@@ -5,6 +5,7 @@ import { Calendar, CheckCircle, Clock, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LineChart } from '@/components/admin/Analytics/Charts/LineChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface RsvpMetrics {
   confirmed: number;
@@ -147,7 +148,7 @@ interface MetricCardProps {
 function MetricCard({ icon, label, value, color }: MetricCardProps) {
   const colorClasses = {
     primary: 'from-primary/10 to-primary/5 border-primary/20',
-    secondary: 'from-secondary/10 to-secondary/5 border-secondary/20',
+    secondary: 'from-secondary/10 to-secondary/5 border-secondary/50',
     accent: 'from-accent/10 to-accent/5 border-accent/20',
     'accent-gold': 'from-accent-gold/10 to-accent-gold/5 border-accent-gold/20',
   };
@@ -160,7 +161,7 @@ function MetricCard({ icon, label, value, color }: MetricCardProps) {
   };
 
   return (
-    <Card className={`bg-gradient-to-br ${colorClasses[color]} border-2`}>
+    <Card className={cn("bg-gradient-to-br border-2", colorClasses[color])}>
       <CardHeader className="pb-1 p-3">
         <CardTitle className="text-xs font-medium flex items-center gap-2">
           {icon}
