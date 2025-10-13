@@ -1,10 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Download, FileText } from "lucide-react";
 import { getAnalyticsSummary } from "@/lib/analytics-api";
+import { exportToCSV, exportToPDF } from "@/lib/analytics-export";
+import { DashboardSettings, WidgetVisibility } from "./DashboardSettings";
 import {
   UserEngagementWidget,
   ContentMetricsWidget,
@@ -14,11 +18,78 @@ import {
   SystemHealthWidget,
   RealtimeActivityFeed,
 } from './DashboardWidgets';
+import { toast } from "sonner";
 
 // Comprehensive Admin analytics dashboard with 8+ advanced widgets
 
+const DEFAULT_VISIBILITY: WidgetVisibility = {
+  userEngagement: true,
+  contentMetrics: true,
+  rsvpTrends: true,
+  photoPopularity: true,
+  guestbookActivity: true,
+  systemHealth: true,
+  realtimeActivity: true,
+};
+
 export default function AnalyticsWidgets() {
   const [range, setRange] = useState<"7d" | "30d">("30d");
+  const [widgetVisibility, setWidgetVisibility] = useState<WidgetVisibility>(() => {
+    const saved = localStorage.getItem('dashboard-widget-visibility');
+    return saved ? JSON.parse(saved) : DEFAULT_VISIBILITY;
+  });
+
+  // Save visibility changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('dashboard-widget-visibility', JSON.stringify(widgetVisibility));
+  }, [widgetVisibility]);
+
+  const handleSaveSettings = (newVisibility: WidgetVisibility) => {
+    setWidgetVisibility(newVisibility);
+    toast.success('Dashboard settings saved');
+  };
+
+  const handleExportCSV = () => {
+    const exportData = {
+      title: 'Analytics Dashboard Export',
+      dateRange: `Last ${range === '7d' ? '7 days' : '30 days'}`,
+      metrics: [
+        { label: 'Total Sessions', value: totals.sessions || 0 },
+        { label: 'Total Page Views', value: totals.page_views || 0 },
+        { label: 'Total Actions', value: totals.actions || 0 },
+      ],
+      tables: [
+        {
+          title: 'Traffic Trends',
+          headers: ['Date', 'Sessions', 'Page Views', 'Actions'],
+          rows: series.map(s => [s.date, s.sessions, s.page_views, s.actions]),
+        },
+      ],
+    };
+    exportToCSV(exportData);
+    toast.success('CSV exported successfully');
+  };
+
+  const handleExportPDF = () => {
+    const exportData = {
+      title: 'Analytics Dashboard Report',
+      dateRange: `Last ${range === '7d' ? '7 days' : '30 days'}`,
+      metrics: [
+        { label: 'Total Sessions', value: totals.sessions || 0 },
+        { label: 'Total Page Views', value: totals.page_views || 0 },
+        { label: 'Total Actions', value: totals.actions || 0 },
+      ],
+      tables: [
+        {
+          title: 'Traffic Trends',
+          headers: ['Date', 'Sessions', 'Page Views', 'Actions'],
+          rows: series.map(s => [s.date, s.sessions, s.page_views, s.actions]),
+        },
+      ],
+    };
+    exportToPDF(exportData);
+    toast.success('PDF exported successfully');
+  };
 
   const { startDate, endDate } = useMemo(() => {
     const end = new Date();
@@ -42,23 +113,37 @@ export default function AnalyticsWidgets() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h3 className="text-lg sm:text-xl font-semibold text-primary">Analytics Dashboard</h3>
-        <div className="inline-flex items-center gap-1 rounded-md border border-border p-1">
-          <button
-            type="button"
-            className={`px-2 py-1 text-xs rounded ${range === "7d" ? "bg-accent/20 text-foreground" : "text-muted-foreground"}`}
-            onClick={() => setRange("7d")}
-          >
-            7d
-          </button>
-          <button
-            type="button"
-            className={`px-2 py-1 text-xs rounded ${range === "30d" ? "bg-accent/20 text-foreground" : "text-muted-foreground"}`}
-            onClick={() => setRange("30d")}
-          >
-            30d
-          </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-1 rounded-md border border-border p-1">
+            <button
+              type="button"
+              className={`px-2 py-1 text-xs rounded ${range === "7d" ? "bg-accent/20 text-foreground" : "text-muted-foreground"}`}
+              onClick={() => setRange("7d")}
+            >
+              7d
+            </button>
+            <button
+              type="button"
+              className={`px-2 py-1 text-xs rounded ${range === "30d" ? "bg-accent/20 text-foreground" : "text-muted-foreground"}`}
+              onClick={() => setRange("30d")}
+            >
+              30d
+            </button>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+          <DashboardSettings 
+            visibility={widgetVisibility}
+            onSave={handleSaveSettings}
+          />
         </div>
       </div>
 
@@ -159,16 +244,16 @@ export default function AnalyticsWidgets() {
 
       {/* Advanced Dashboard Widgets - Responsive Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        <UserEngagementWidget />
-        <ContentMetricsWidget />
-        <RsvpTrendsWidget />
-        <PhotoPopularityWidget />
-        <GuestbookActivityWidget />
-        <SystemHealthWidget />
+        {widgetVisibility.userEngagement && <UserEngagementWidget />}
+        {widgetVisibility.contentMetrics && <ContentMetricsWidget />}
+        {widgetVisibility.rsvpTrends && <RsvpTrendsWidget />}
+        {widgetVisibility.photoPopularity && <PhotoPopularityWidget />}
+        {widgetVisibility.guestbookActivity && <GuestbookActivityWidget />}
+        {widgetVisibility.systemHealth && <SystemHealthWidget />}
       </div>
 
       {/* Full-width Realtime Activity Feed */}
-      <RealtimeActivityFeed />
+      {widgetVisibility.realtimeActivity && <RealtimeActivityFeed />}
     </div>
   );
 }
