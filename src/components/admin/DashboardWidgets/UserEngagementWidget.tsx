@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import WidgetWrapper from '../AnalyticsWidgets/WidgetWrapper';
 import { Users, Activity, Clock, UserCheck, UserPlus, TrendingUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface EngagementMetrics {
   totalUsers: number;
@@ -171,13 +172,24 @@ function MetricCard({ icon, label, value, color }: MetricCardProps) {
     'accent-gold': 'from-accent-gold/10 to-accent-gold/5 border-accent-gold/20',
   };
 
+  const textColorClasses = {
+    primary: 'text-primary',
+    secondary: 'text-secondary',
+    accent: 'text-accent',
+    'accent-gold': 'text-accent-gold',
+  };
+
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} border-2 rounded-lg p-3`}>
-      <div className="flex items-center gap-2 mb-1">
-        {icon}
-        <span className="text-xs text-muted-foreground">{label}</span>
-      </div>
-      <div className={`text-2xl font-bold text-${color}`}>{value}</div>
-    </div>
+    <Card className={`bg-gradient-to-br ${colorClasses[color]} border-2`}>
+      <CardHeader className="pb-1 p-3">
+        <CardTitle className="text-xs font-medium flex items-center gap-2">
+          {icon}
+          <span className="text-muted-foreground">{label}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 pt-0">
+        <div className={`text-2xl font-bold ${textColorClasses[color]}`}>{value}</div>
+      </CardContent>
+    </Card>
   );
 }

@@ -65,19 +65,21 @@ function HalloweenIcons() {
         </span>
       </div>
 
-      {/* Twisted Quote Display */}
-      {hoveredIcon && activeQuote && (
-        <div 
-          className="text-center text-sm min-h-[3em] max-w-md px-4 animate-fade-in"
-          style={{ 
-            fontFamily: 'Creepster, cursive',
-            color: '#c084fc',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-          }}
-        >
-          {activeQuote}
-        </div>
-      )}
+      {/* Twisted Quote Display - Fixed height to prevent layout shift */}
+      <div 
+        className="text-center text-sm h-[4em] max-w-md px-4 flex items-center justify-center"
+        style={{ 
+          fontFamily: 'Creepster, cursive',
+          color: '#c084fc',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+        }}
+      >
+        {hoveredIcon && activeQuote && (
+          <span className="animate-type-in">
+            {activeQuote}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
