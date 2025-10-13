@@ -70,7 +70,7 @@ export default function UserSettings() {
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
+              <Link to="/discussion">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Link>
@@ -82,7 +82,7 @@ export default function UserSettings() {
           </div>
 
           {/* Settings Tabs */}
-          <Card>
+          <Card className="border-accent-purple/30">
             <Tabs defaultValue="profile" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-muted/50">
                 <TabsTrigger value="profile" className="flex items-center gap-2">

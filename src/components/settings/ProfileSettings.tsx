@@ -257,6 +257,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={handleAvatarChange}
             className="hidden"
+            aria-label="Upload avatar image"
           />
         </CardContent>
       </Card>
