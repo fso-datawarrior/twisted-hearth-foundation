@@ -894,3 +894,25 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Batch 1 Quick Wins: Footer Halloween Animations */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg) scale(1.25); }
+  25% { transform: rotate(-5deg) scale(1.3); }
+  75% { transform: rotate(5deg) scale(1.3); }
+}
+
+.hover\:animate-shake:hover {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}

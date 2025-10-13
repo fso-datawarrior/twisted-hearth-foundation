@@ -5,6 +5,7 @@ import { MessageSquare, Users, Smile } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface GuestbookStats {
   totalPosts: number;
@@ -115,10 +116,17 @@ export default function GuestbookActivityWidget() {
               <div className="text-xl font-bold text-primary">{stats.totalPosts}</div>
               <div className="text-xs text-muted-foreground">Total Posts</div>
             </div>
-            <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-2 text-center">
-              <div className="text-xl font-bold text-secondary">{stats.topContributors.length}</div>
-              <div className="text-xs text-muted-foreground">Contributors</div>
-            </div>
+            <Card className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/20 p-2 text-center">
+              <CardHeader className="pb-1 p-0">
+                <CardTitle className="text-xs font-medium flex items-center justify-center">
+                  <MessageSquare className="h-3.5 w-3.5 mr-1.5 text-accent-gold flex-shrink-0" />
+                  <span className="truncate">Contributors</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 pt-1">
+                <div className="text-xl font-bold text-accent-gold">{stats.topContributors.length}</div>
+              </CardContent>
+            </Card>
             <div className="bg-accent/10 border border-accent/20 rounded-lg p-2 text-center">
               <div className="text-xl font-bold text-accent">{stats.emojiStats.reduce((sum, e) => sum + e.count, 0)}</div>
               <div className="text-xs text-muted-foreground">Reactions</div>

@@ -1,4 +1,86 @@
-import { Ghost, Moon, Sparkles } from "lucide-react";
+import { useState } from "react";
+
+const TWISTED_QUOTES = [
+  "👻 Mirror mirror on the wall... showed me my LinkedIn profile.",
+  "😴 Sleeping Beauty hit snooze one too many times...",
+  "🐺 The Big Bad Wolf just wanted to talk about your car's extended warranty.",
+  "📶 Rapunzel's tower had terrible Wi-Fi.",
+  "🎃 Cinderella's pumpkin carriage got towed at midnight.",
+  "🧥 Little Red Riding Hood's grandmother was just really into fur coats.",
+  "🏠 Hansel and Gretel found the gingerbread house on Zillow.",
+  "⛏️ Snow White's seven dwarves formed a union.",
+  "🐷 The Three Little Pigs filed an insurance claim.",
+  "⭐ Goldilocks was just checking Airbnb reviews.",
+  "💋 The prince's kiss came with terms and conditions...",
+  "⏰ Happily ever after was just the free trial period.",
+  "🍪 The witch's gingerbread was actually keto-friendly.",
+  "🌹 Beauty's Beast was just having a really bad hair day.",
+  "🧵 Rumpelstiltskin wanted payment in cryptocurrency.",
+];
+
+function HalloweenIcons() {
+  const [activeQuote, setActiveQuote] = useState<string | null>(null);
+  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+
+  const getRandomQuote = () => {
+    const randomIndex = Math.floor(Math.random() * TWISTED_QUOTES.length);
+    return TWISTED_QUOTES[randomIndex];
+  };
+
+  const handleHover = (iconName: string) => {
+    setHoveredIcon(iconName);
+    setActiveQuote(getRandomQuote());
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 mb-6">
+      {/* Icons */}
+      <div className="flex justify-center gap-6 text-5xl">
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-orange-400 hover:text-orange-300"
+          onMouseEnter={() => handleHover('ghost')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          role="button"
+          aria-label="Twisted fairytale ghost"
+        >
+          👻
+        </span>
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-purple-400 hover:text-purple-300"
+          onMouseEnter={() => handleHover('bat')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          role="button"
+          aria-label="Twisted fairytale bat"
+        >
+          🦇
+        </span>
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-orange-500 hover:text-orange-400"
+          onMouseEnter={() => handleHover('pumpkin')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          role="button"
+          aria-label="Twisted fairytale pumpkin"
+        >
+          🎃
+        </span>
+      </div>
+
+      {/* Twisted Quote Display */}
+      {hoveredIcon && activeQuote && (
+        <div 
+          className="text-center text-sm min-h-[3em] max-w-md px-4 animate-fade-in"
+          style={{ 
+            fontFamily: 'Creepster, cursive',
+            color: '#c084fc',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+          }}
+        >
+          {activeQuote}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -7,21 +89,8 @@ const Footer = () => {
     <footer className="bg-bg-2 border-t border-accent-purple/30 py-6 px-6 pb-[max(env(safe-area-inset-bottom),1rem)]">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center">
-          {/* Halloween Icons */}
-          <div className="flex justify-center items-center gap-6 mb-6">
-            <Ghost 
-              className="w-6 h-6 text-accent-gold hover:text-accent-purple transition-colors motion-safe cursor-pointer" 
-              aria-label="Ghost icon"
-            />
-            <Moon 
-              className="w-6 h-6 text-accent-purple hover:text-accent-gold transition-colors motion-safe cursor-pointer" 
-              aria-label="Moon icon"
-            />
-            <Sparkles 
-              className="w-6 h-6 text-accent-gold hover:text-accent-purple transition-colors motion-safe cursor-pointer" 
-              aria-label="Sparkles icon"
-            />
-          </div>
+          {/* Halloween Icons with Hover Quotes */}
+          <HalloweenIcons />
           
           {/* Event Title */}
           <h2 className="font-heading text-xl mb-3 text-accent-gold">
@@ -33,40 +102,36 @@ const Footer = () => {
             Hosted by Jamie & Kat Ruth
           </p>
           
-          {/* Domain and Contact */}
+          {/* Website Links */}
           <div className="mb-4 space-y-2">
             <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">This year: </span>
+              <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                <span className="text-muted-foreground">👑 This year's twisted tales:</span>
                 <a 
-                  href="https://2025.twistedhearth.foundation" 
+                  href="https://2025.partytillyou.rip" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-accent-gold hover:underline transition-colors motion-safe"
+                  className="text-amber-400 hover:text-amber-300 hover:underline transition-all font-semibold"
                 >
-                  2025.twistedhearth.foundation
+                  2025.partytillyou.rip
                 </a>
-              </div>
-              <span className="hidden sm:inline text-muted-foreground">•</span>
-              <div>
-                <span className="text-muted-foreground">Last year: </span>
-                <a 
-                  href="https://2024.twistedhearth.foundation" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-accent-gold transition-colors motion-safe"
-                >
-                  2024.twistedhearth.foundation
-                </a>
+                <span className="text-xs text-muted-foreground italic">(Twisted Fairytales)</span>
               </div>
             </div>
-            <div>
-              <a 
-                href="https://partytillyou.rip" 
-                className="font-body text-sm text-accent-gold hover:text-accent-red transition-colors motion-safe no-underline focus:no-underline"
-              >
-                partytillyou.rip
-              </a>
+            
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 text-sm">
+              <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                <span className="text-muted-foreground">🎬 Last year's retro party:</span>
+                <a 
+                  href="https://partytillyou.rip" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-purple-400 hover:text-purple-300 hover:underline transition-all font-semibold"
+                >
+                  partytillyou.rip
+                </a>
+                <span className="text-xs text-muted-foreground italic">(80's Movies)</span>
+              </div>
             </div>
             <div>
               <a 
