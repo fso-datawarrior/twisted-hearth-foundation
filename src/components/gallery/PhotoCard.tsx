@@ -7,6 +7,7 @@ import { Photo } from "@/lib/photo-api";
 import { PhotoEditControls } from "./PhotoEditControls";
 import UserPhotoActions from "./UserPhotoActions";
 import PhotoEmojiReactions from "./PhotoEmojiReactions";
+import { useLazyImage } from "@/hooks/useLazyImage";
 
 interface PhotoCardProps {
   photo: Photo;
@@ -45,7 +46,15 @@ export const PhotoCard = ({
   const [editedCaption, setEditedCaption] = useState(photo.caption || '');
   const [charCount, setCharCount] = useState(photo.caption?.length || 0);
 
+  // Lazy loading with Intersection Observer
+  const { ref, isInView, hasLoaded } = useLazyImage(true, {
+    threshold: 0.1,
+    rootMargin: '100px', // Start loading 100px before visible
+  });
+
   useEffect(() => {
+    if (!isInView && !hasLoaded) return; // Don't load until visible
+
     const loadUrl = async () => {
       try {
         // If getPhotoUrl is not provided, use storage_path directly (for static images)
@@ -63,7 +72,7 @@ export const PhotoCard = ({
       }
     };
     loadUrl();
-  }, [photo.storage_path, getPhotoUrl]);
+  }, [photo.storage_path, getPhotoUrl, isInView, hasLoaded]);
 
   const getStatusBadge = () => {
     if (!showStatus) return null;
@@ -115,13 +124,13 @@ export const PhotoCard = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-2 w-full" ref={ref}>
       {/* Photo Container */}
       <div 
         className={`group relative aspect-[16/9] min-h-[150px] bg-bg-2 rounded-lg overflow-hidden border border-accent-purple/30 transition-all [@media(hover:hover)]:hover:border-accent-gold/50 ${onImageClick ? 'cursor-pointer' : ''}`}
         onClick={() => onImageClick?.(photo)}
       >
-        {loading ? (
+        {loading || !isInView ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-gold"></div>
           </div>
@@ -137,6 +146,7 @@ export const PhotoCard = ({
                 height="450"
                 className="w-full h-full object-contain transition-transform group-hover:scale-105"
                 loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   console.error('[PhotoCard] Image load failed:', {
                     photoId: photo.id,

@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
@@ -30,9 +31,19 @@ const Gallery = () => {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [photosPerView, setPhotosPerView] = useState(1);
+  
+  // Pagination state
+  const [approvedPage, setApprovedPage] = useState(1);
+  const [approvedTotal, setApprovedTotal] = useState(0);
+  const [userPage, setUserPage] = useState(1);
+  const [userTotal, setUserTotal] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  const PAGE_SIZE = 20; // Load 20 photos at a time
+  
   const { toast } = useToast();
 
-  // Dynamic photos per view based on window width
+  // Dynamic photos per view based on window width (with throttling for Edge)
   useEffect(() => {
     const updatePhotosPerView = () => {
       if (window.innerWidth >= 1280) setPhotosPerView(5);
@@ -42,30 +53,108 @@ const Gallery = () => {
     };
     
     updatePhotosPerView();
-    window.addEventListener('resize', updatePhotosPerView);
-    return () => window.removeEventListener('resize', updatePhotosPerView);
+    
+    // Throttle resize listener for Edge performance
+    let timeoutId: NodeJS.Timeout;
+    const throttledUpdate = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updatePhotosPerView, 150);
+    };
+    
+    window.addEventListener('resize', throttledUpdate);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', throttledUpdate);
+    };
   }, []);
 
   useEffect(() => {
     loadImages();
   }, []);
 
-  const loadImages = async () => {
-    setLoading(true);
-    try {
-      // Load approved photos for public gallery
-      const { data: approved, error: approvedError } = await getApprovedPhotos();
-      if (approvedError) throw approvedError;
-      setApprovedPhotos(approved || []);
+  // Cleanup photo URLs when component unmounts (Edge memory fix)
+  useEffect(() => {
+    return () => {
+      // Revoke any object URLs to prevent memory leaks
+      approvedPhotos.forEach(photo => {
+        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
+          URL.revokeObjectURL(photo.storage_path);
+        }
+      });
+      userPhotos.forEach(photo => {
+        if (photo.storage_path && photo.storage_path.startsWith('blob:')) {
+          URL.revokeObjectURL(photo.storage_path);
+        }
+      });
+    };
+  }, [approvedPhotos, userPhotos]);
 
-      // Load user's own photos (including pending)
-      const { data: user, error: userError } = await getUserPhotos();
+  const loadImages = async (loadMore: boolean = false) => {
+    // Performance monitoring
+    const startTime = performance.now();
+    console.log(`[Gallery] Loading images - loadMore: ${loadMore}`);
+
+    if (loadMore) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      // Load approved photos with pagination
+      const currentApprovedPage = loadMore ? approvedPage + 1 : 1;
+      const { data: approved, error: approvedError, totalCount: approvedCount } = 
+        await getApprovedPhotos(currentApprovedPage, PAGE_SIZE);
+      
+      if (approvedError) throw approvedError;
+      
+      if (loadMore) {
+        // Append to existing photos
+        setApprovedPhotos(prev => [...prev, ...(approved || [])]);
+        setApprovedPage(currentApprovedPage);
+      } else {
+        // Replace photos
+        setApprovedPhotos(approved || []);
+        setApprovedPage(1);
+      }
+      setApprovedTotal(approvedCount);
+
+      // Load user photos with pagination
+      const currentUserPage = loadMore ? userPage + 1 : 1;
+      const { data: user, error: userError, totalCount: userCount } = 
+        await getUserPhotos(currentUserPage, PAGE_SIZE);
+      
       if (userError) throw userError;
-      setUserPhotos(user || []);
+      
+      if (loadMore) {
+        setUserPhotos(prev => [...prev, ...(user || [])]);
+        setUserPage(currentUserPage);
+      } else {
+        setUserPhotos(user || []);
+        setUserPage(1);
+      }
+      setUserTotal(userCount);
+
+      // Performance logging
+      const loadTime = performance.now() - startTime;
+      console.log(`[Gallery] Images loaded in ${loadTime.toFixed(2)}ms - Approved: ${approved?.length}/${approvedCount}, User: ${user?.length}/${userCount}`);
+      
+      // Memory usage (Edge debugging)
+      if ((performance as any).memory) {
+        const memoryMB = ((performance as any).memory.usedJSHeapSize / 1048576).toFixed(2);
+        console.log(`[Gallery] Memory usage: ${memoryMB} MB`);
+      }
     } catch (error) {
       console.error('Error loading images:', error);
+      toast({
+        title: "Error loading photos",
+        description: "Please try refreshing the page",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -298,7 +387,7 @@ const Gallery = () => {
               </h2>
 
               {/* Gallery Carousel */}
-              <div className="w-full">
+              <div className="w-full gallery-container">
                 {loading ? (
                   <div className="space-y-4">
                     <Skeleton className="w-full h-[400px] rounded-lg" />
@@ -309,13 +398,35 @@ const Gallery = () => {
                     </div>
                   </div>
                 ) : (
-                  <MultiPreviewCarousel
-                    defaultCategory="all"
-                    showCategoryTabs={false}
-                    autoPlay={true}
-                    autoPlayInterval={5000}
-                    previewPhotos={approvedPhotos}
-                  />
+                  <>
+                    <MultiPreviewCarousel
+                      defaultCategory="all"
+                      showCategoryTabs={false}
+                      autoPlay={true}
+                      autoPlayInterval={5000}
+                      previewPhotos={approvedPhotos}
+                    />
+                    
+                    {/* Load More button */}
+                    {approvedPhotos.length < approvedTotal && (
+                      <div className="flex justify-center mt-6">
+                        <Button
+                          onClick={() => loadImages(true)}
+                          disabled={loadingMore}
+                          className="bg-accent-gold text-ink hover:bg-accent-gold/80"
+                        >
+                          {loadingMore ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-ink mr-2" />
+                              Loading...
+                            </>
+                          ) : (
+                            `Load More Photos (${approvedPhotos.length} of ${approvedTotal})`
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               {!loading && (!approvedPhotos || approvedPhotos.length === 0) && (
@@ -385,6 +496,26 @@ const Gallery = () => {
                   photosPerView={photosPerView}
                   className="mb-4"
                 />
+                
+                {/* Load More button for user photos */}
+                {userPhotos.length < userTotal && (
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      onClick={() => loadImages(true)}
+                      disabled={loadingMore}
+                      className="bg-accent-gold text-ink hover:bg-accent-gold/80"
+                    >
+                      {loadingMore ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-ink mr-2" />
+                          Loading...
+                        </>
+                      ) : (
+                        `Load More (${userPhotos.length} of ${userTotal})`
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
             
