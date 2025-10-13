@@ -187,14 +187,14 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
 
   // Desktop navigation
   const desktopNav = (
-    <div className="hidden md:flex items-center gap-2 mb-6 p-2 bg-muted/50 rounded-lg">
+    <div className="hidden md:flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
       {categories.map(renderCategory)}
     </div>
   );
 
   // Mobile navigation
   const mobileNav = (
-    <div className="md:hidden mb-6">
+    <div className="md:hidden">
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" className="w-full gap-2 min-h-[44px]">
@@ -233,9 +233,9 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
   );
 
   return (
-    <>
+    <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border pb-2 mb-6">
       {desktopNav}
       {mobileNav}
-    </>
+    </div>
   );
 }
