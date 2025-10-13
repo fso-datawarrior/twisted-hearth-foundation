@@ -38,10 +38,10 @@ export const PhotoLightbox = ({
   useEffect(() => {
     if (isOpen && photos[currentPhotoIndex]) {
       loadImageUrl(photos[currentPhotoIndex]);
-      // Track photo view
+      // Track photo view (trackInteraction is stable, excluded from deps to prevent infinite loop)
       trackInteraction('photo', photos[currentPhotoIndex].id, 'view');
     }
-  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen, trackInteraction]);
+  }, [currentPhotoIndex, photos, getPhotoUrl, isOpen]);
 
   // Handle orientation changes for mobile rotation
   useEffect(() => {
@@ -93,6 +93,8 @@ export const PhotoLightbox = ({
 
   // Keyboard navigation
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       
@@ -110,7 +112,7 @@ export const PhotoLightbox = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, photos.length]);
+  }, [isOpen, goToPrevious, goToNext]);
 
   // Touch gesture support
   const handleTouchStart = (e: React.TouchEvent) => {
