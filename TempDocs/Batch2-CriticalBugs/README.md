@@ -11,14 +11,16 @@
 
 | Document | Purpose | Status |
 |----------|---------|--------|
-| `ITEM15_COMPLETE_SUMMARY.md` | **✅ Item 15 Summary** | ✅ DONE |
-| `ITEM15_VERIFICATION_REPORT.md` | **📊 Full Code Review** | ✅ VERIFIED |
-| `SEND_TO_LOVABLE.md` | Lovable prompt template | ✅ Used |
+| **ITEM 15 (COMPLETE):** |
+| `ITEM15_COMPLETE_SUMMARY.md` | Item 15 Summary | ✅ DONE |
+| `ITEM15_VERIFICATION_REPORT.md` | Full Code Review | ✅ VERIFIED |
+| `SEND_TO_LOVABLE.md` | Lovable prompt (Item 15) | ✅ Used |
 | `L-R-2.1.md` | Lovable's response | ✅ Archived |
-| `ITEM15_LOVABLE_QUICK_MESSAGE.md` | Quick message (original) | Reference |
-| `LOVABLE-PROMPT-Item15-Email-Fixes.md` | Implementation guide | Reference |
-| `ITEM15_BEFORE_AFTER.md` | Visual examples | Reference |
-| `ITEM15_EMAIL_FIXES.md` | Technical specification | Reference |
+| **ITEMS 6 & 24 (READY):** |
+| `SEND_TO_LOVABLE_GALLERY.md` | **⭐ SEND THIS TO LOVABLE** | 🟢 READY |
+| `LOVABLE-PROMPT-Items6-24-Gallery-Optimization.md` | **📚 Complete Implementation Guide** | 🟢 READY |
+| `ITEMS6-24_READY.md` | Quick Start Summary | 🟢 READY |
+| **REFERENCE:** |
 | `BATCH2_QUICK_START.md` | Batch overview | Reference |
 | `BATCH2_PLANNING.md` | Detailed planning | Reference |
 | `README.md` | This file - navigation | You are here |
@@ -51,30 +53,57 @@
 
 ---
 
-## 📋 REMAINING BATCH 2 ITEMS
+## 🔜 ITEMS 6 & 24: GALLERY OPTIMIZATION - **READY TO START**
 
-### **Item 24**: Gallery Performance Optimization (NEXT)
-- Status: ⏳ Planning
-- Priority: 🔴 CRITICAL
-- Time: 4-5 hours
-- Focus: Lazy loading, pagination, image optimization
+### **Combined Approach**: Fix Both Together
+We're tackling Items 6 and 24 together because:
+- Performance fixes (Item 24) likely solve freezing issues (Item 6)
+- Same codebase areas
+- Complementary solutions
+- More efficient implementation
 
-### **Item 6**: Gallery Freezing in Edge (LAST)
-- Status: ⏳ Planning
-- Priority: 🔴 CRITICAL
-- Time: 4-6 hours
-- Dependencies: Item 24 (performance fixes first)
-- Focus: Browser-specific debugging, memory management
+### **What We're Fixing:**
+
+#### **Item 6: Gallery Freezing in Edge**
+- **Problem**: Gallery freezes on Edge mobile
+- **User**: Kat's phone (Edge browser)
+- **Impact**: Cannot view photos
+
+#### **Item 24: Gallery Performance**
+- **Problem**: All 100+ photos load at once
+- **Impact**: 10s load, >200MB memory, stuttering
+
+### **The Solution (6 Phases):**
+
+1. **Database Pagination** (1 hr) - Only fetch 20 photos at a time
+2. **Lazy Loading Hook** (1 hr) - Create IntersectionObserver hook
+3. **PhotoCard Updates** (1 hr) - Load images only when visible
+4. **Gallery Pagination UI** (2 hrs) - Add "Load More" buttons
+5. **Edge Optimizations** (1 hr) - Browser-specific fixes
+6. **Performance Monitoring** (30 min) - Debug logging
+
+**Total Time**: 6.5 hours
+
+### **Quick Start:**
+1. Open `SEND_TO_LOVABLE_GALLERY.md`
+2. Copy the message
+3. Paste in Lovable Chat
+4. Review Lovable's plan
+5. Approve execution
+6. Verify completion report
+
+### **Full Details:**
+- `ITEMS6-24_READY.md` - Quick overview
+- `LOVABLE-PROMPT-Items6-24-Gallery-Optimization.md` - Complete implementation guide
 
 ---
 
 ## 🚀 BATCH 2 PROGRESS
 
 1. ✅ **Item 15** (Email fixes) - **COMPLETE** ✨
-2. ⏳ **Item 24** (Gallery performance) - **NEXT UP**
-3. ⏳ **Item 6** (Gallery freezing) - After performance fixes
+2. 🟢 **Items 6 & 24** (Gallery optimization) - **READY TO START** (YOU ARE HERE)
 
-**Completion**: 1/3 items (33%) | Estimated remaining: 8-11 hours
+**Completion**: 1/2 tasks (50% by count, 33% by time) | Estimated remaining: 6-8 hours
 
 ---
 
