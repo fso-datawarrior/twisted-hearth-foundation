@@ -31,9 +31,10 @@ export default function UserEngagementWidget() {
       const { data: activeSessions } = await supabase
         .from('user_sessions')
         .select('user_id')
-        .gte('started_at', sevenDaysAgo.toISOString());
+        .gte('started_at', sevenDaysAgo.toISOString())
+        .not('user_id', 'is', null);
       
-      const activeUsers7d = new Set(activeSessions?.map(s => s.user_id).filter(Boolean)).size;
+      const activeUsers7d = new Set(activeSessions?.map(s => s.user_id) ?? []).size;
 
       // Average session duration
       const { data: sessions } = await supabase
@@ -74,9 +75,9 @@ export default function UserEngagementWidget() {
           acc[s.user_id] = (acc[s.user_id] || 0) + 1;
         }
         return acc;
-      }, {} as Record<string, number>);
+      }, {} as Record<string, number>) ?? {};
       
-      const returningUsers = Object.values(userSessionCounts || {}).filter(count => count > 1).length;
+      const returningUsers = Object.values(userSessionCounts).filter(count => count > 1).length;
 
       return {
         totalUsers: totalUsers || 0,

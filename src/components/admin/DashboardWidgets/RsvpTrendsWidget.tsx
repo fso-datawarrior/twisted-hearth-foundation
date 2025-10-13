@@ -23,9 +23,14 @@ export default function RsvpTrendsWidget() {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       // Get all RSVPs
-      const { data: rsvps } = await supabase
+      const { data: rsvps, error: rsvpError } = await supabase
         .from('rsvps')
         .select('status, num_guests, created_at');
+
+      if (rsvpError) {
+        console.error('Error fetching RSVPs:', rsvpError);
+        throw rsvpError;
+      }
 
       const confirmed = rsvps?.filter(r => r.status === 'confirmed').length || 0;
       const pending = rsvps?.filter(r => r.status === 'pending').length || 0;
