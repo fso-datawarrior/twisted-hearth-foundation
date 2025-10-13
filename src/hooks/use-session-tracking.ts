@@ -56,7 +56,7 @@ export function useSessionTracking() {
     sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
   }, []);
 
-  // Initialize session on mount (only once)
+  // Initialize session on mount (only once) - NON-BLOCKING
   useEffect(() => {
     if (isInitialized.current) return;
     isInitialized.current = true;
@@ -69,21 +69,21 @@ export function useSessionTracking() {
       const lastTime = storedTime ? parseInt(storedTime, 10) : 0;
       
       if (Date.now() - lastTime < SESSION_TIMEOUT) {
-        // Resume existing session
+        // Resume existing session immediately (non-blocking)
         setSessionId(existingSessionId);
         setIsActive(true);
         setLastActivity(Date.now());
         sessionStorage.setItem(`${SESSION_STORAGE_KEY}_time`, Date.now().toString());
         logger.info('Session resumed', { sessionId: existingSessionId });
       } else {
-        // Session timed out, start new one
+        // Session timed out, start new one in background (don't await)
         sessionStorage.removeItem(SESSION_STORAGE_KEY);
         sessionStorage.removeItem(`${SESSION_STORAGE_KEY}_time`);
-        startSession();
+        startSession(); // Fire and forget - don't block rendering
       }
     } else {
-      // No existing session, start new one
-      startSession();
+      // No existing session, start new one in background (don't await)
+      startSession(); // Fire and forget - don't block rendering
     }
   }, []); // Empty dependency array - only run once
 

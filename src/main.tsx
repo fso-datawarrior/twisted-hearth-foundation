@@ -15,6 +15,7 @@ window.onunhandledrejection = (event) => {
 
 // Safe bootstrap with one-time SW/cache cleanup to prevent mixed React chunks
 async function start() {
+  const startTime = performance.now();
   try {
     if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleanup_done_v7')) {
       const regs = await navigator.serviceWorker.getRegistrations();
@@ -39,6 +40,10 @@ async function start() {
         <App />
       </React.StrictMode>
     );
+    
+    // Log performance metrics
+    const loadTime = (performance.now() - startTime).toFixed(0);
+    console.log(`⚡ App startup time: ${loadTime}ms`);
   }
 }
 

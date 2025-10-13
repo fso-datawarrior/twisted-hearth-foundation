@@ -25,8 +25,13 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const Discussion = lazy(() => import("./pages/Discussion"));
 const Contact = lazy(() => import("./pages/Contact"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+
+// Memoize expensive providers for performance optimization
+const MemoizedAnalyticsProvider = React.memo(AnalyticsProvider);
+const MemoizedAuthProvider = React.memo(AuthProvider);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,8 +51,8 @@ function App() {
           v7_relativeSplatPath: true,
         }}
       >
-        <AnalyticsProvider>
-          <AuthProvider>
+        <MemoizedAnalyticsProvider>
+          <MemoizedAuthProvider>
             <AdminProvider>
               <AudioProvider>
                 <SkipLink />
@@ -72,6 +77,7 @@ function App() {
                           <Route path="/discussion" element={<Discussion />} />
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/auth" element={<AuthCallback />} />
+                          <Route path="/reset-password" element={<ResetPassword />} />
                           <Route path="/test" element={<TestPage />} />
                           <Route path="/admin" element={<AdminDashboard />} />
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -83,8 +89,8 @@ function App() {
                 </main>
               </AudioProvider>
             </AdminProvider>
-          </AuthProvider>
-        </AnalyticsProvider>
+          </MemoizedAuthProvider>
+        </MemoizedAnalyticsProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

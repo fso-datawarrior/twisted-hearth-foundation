@@ -3,8 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -21,6 +22,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
@@ -178,6 +180,13 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       </>
                     )}
                     <DropdownMenuItem 
+                      onClick={() => setShowChangePasswordModal(true)}
+                      className="flex items-center gap-2 font-subhead text-accent-gold hover:bg-accent-gold/10 cursor-pointer"
+                    >
+                      <Key size={16} />
+                      Change Password
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
                       onClick={() => signOut()}
                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
                     >
@@ -332,6 +341,15 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                     )}
                     
                     <Button
+                      onClick={() => { setShowChangePasswordModal(true); setIsMenuOpen(false); }}
+                      variant="ghost"
+                      className="w-full text-accent-gold hover:bg-accent-gold/10 font-subhead"
+                    >
+                      <Key size={16} className="mr-2" />
+                      Change Password
+                    </Button>
+                    
+                    <Button
                       onClick={() => { signOut(); setIsMenuOpen(false); }}
                       variant="ghost"
                       className="w-full text-accent-red hover:bg-accent-red/10 font-subhead"
@@ -355,6 +373,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       </div>
       
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <ChangePasswordModal isOpen={showChangePasswordModal} onClose={() => setShowChangePasswordModal(false)} />
     </nav>
   );
 };
