@@ -43,7 +43,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Event facts (server-only source of truth)
 const EVENT_TITLE = "The Ruths' Twisted Fairytale Halloween Bash";
-const EVENT_START_ISO = "2025-10-18T19:00:00-06:00"; // America/Denver
+const EVENT_START_ISO = "2025-11-01T18:30:00-06:00"; // November 1st, 6:30 PM America/Denver
 const EVENT_DURATION_MIN = 240;
 
 function mjAuth() {
@@ -140,7 +140,7 @@ serve(async (req) => {
   const text = `Hi ${body.name},
 
 We have ${isUpdate ? 'updated' : 'received'} your RSVP for ${body.guests} ${body.guests > 1 ? "guests" : "guest"}.
-Date: Saturday, October 18, 2025 — 7:00 PM
+Date: Friday, November 1st, 2025 — 6:30 PM
 Where: ${PRIVATE_ADDRESS}
 
 This address is private. Please don't share it publicly.
@@ -156,7 +156,7 @@ This address is private. Please don't share it publicly.
       <p style="font-size: 16px; margin-top: 0;">Hi ${body.name},</p>
       <p>We have ${actionText} your RSVP for <strong>${body.guests}</strong> ${body.guests > 1 ? "guests" : "guest"}.</p>
       ${additionalGuestsHtml}
-      <p><strong>Date:</strong> Saturday, October 18, 2025 — 7:00 PM</p>
+      <p><strong>Date:</strong> Friday, November 1st, 2025 — 6:30 PM</p>
       <p><strong>Where:</strong> ${PRIVATE_ADDRESS}</p>
       <p style="opacity:.8; font-size: 14px;">This address is private. Please don't share it publicly.</p>
       <p style="margin-top: 30px;">— Jamie &amp; Kat Ruth</p>

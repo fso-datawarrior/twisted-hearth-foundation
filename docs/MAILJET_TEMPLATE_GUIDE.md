@@ -37,7 +37,7 @@ The application supports the following template variables that will be automatic
 | `{{rsvp_status}}` | Current RSVP status | "confirmed", "pending" |
 | `{{event_date}}` | Event date | "November 1st, 2025" |
 | `{{event_time}}` | Event start time | "6:30 PM" |
-| `{{event_address}}` | Event location | "Denver, Colorado" |
+| `{{event_address}}` | Event location | "1816 White Feather Drive, Longmont, CO 80504" |
 | `{{costume_idea}}` | Guest's costume concept | "Little Red Riding Hood" |
 | `{{num_guests}}` | Number of guests attending | "2" |
 | `{{dietary_restrictions}}` | Dietary preferences/restrictions | "Vegetarian, Nut allergy" |
@@ -259,7 +259,7 @@ Use the template editor's preview modes:
 ```html
 <div class="footer">
   <p>Twisted Tale Halloween Party</p>
-  <p>Denver, Colorado, USA</p>
+  <p>1816 White Feather Drive, Longmont, Colorado 80504</p>
   <p><a href="https://twisted-tale.lovable.app/privacy">Privacy Policy</a></p>
   <p><a href="[unsubscribe_link]">Unsubscribe</a></p>
   <p style="font-size: 11px; color: #999;">

@@ -27,7 +27,7 @@ All templates include:
 - 🎭 Gothic/fairytale aesthetic matching your site
 - 📱 Mobile responsive design
 - 🔒 Security notices where appropriate
-- 📍 Event details (November 1st, 2025 • Denver, Colorado)
+- 📍 Event details (November 1st, 2025 • 1816 White Feather Drive, Longmont, CO 80504)
 
 ## Customization
 
