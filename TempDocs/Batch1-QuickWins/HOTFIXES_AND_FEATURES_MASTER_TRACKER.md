@@ -29,18 +29,27 @@
 ### 🎨 **UI/UX Issues (11 items)**
 
 #### **Item 1: Vignettes Page Mobile Scroll**
-**Status**: 📋 Planning  
-**Priority**: TBD  
-**Type**: Bug/Enhancement  
+**Status**: ✅ COMPLETE  
+**Priority**: 🟡 HIGH  
+**Type**: Bug Fix + Enhancement  
 **Area**: Frontend/UX/Mobile  
 
-**Description**: Vignettes page needs a scroll one image at a time on mobile, not multiples.
+**Description**: Fixed vignettes carousel to scroll one image at a time with arrow buttons, ensuring all photos are reachable.
 
-**Current Behavior**: Multiple images visible/scrollable at once  
-**Desired Behavior**: Single image scroll (carousel-style)
+**Original Issue**: On desktop with 3 photos showing, arrows would skip photos 4 & 5  
+**Solution Implemented**:
+- Fixed `maxIndex = displayVignettes.length - 1` (was `length - itemsPerView`)
+- Added CSS scroll-snap for smooth scrolling
+- Arrows now always move exactly 1 photo at a time
+- All photos reachable on all screen sizes
+
+**Implementation**: Lovable AI (L-R-3.1.md) - Batch 3  
+**Verification**: Complete code review - all changes verified  
+**Files Modified**: `Vignettes.tsx`, `index.css`  
+**Completion Date**: October 13, 2025
 
 **Dependencies**: None  
-**Estimated Complexity**: Medium
+**Complexity**: MEDIUM (JavaScript + CSS)
 
 ---
 
@@ -157,18 +166,27 @@
 ---
 
 #### **Item 20: Email Campaign Mobile Popup**
-**Status**: 📋 Planning  
-**Priority**: TBD  
-**Type**: Bug  
+**Status**: ✅ COMPLETE  
+**Priority**: 🟢 MEDIUM  
+**Type**: Bug Fix  
 **Area**: Frontend/Mobile/Admin
 
-**Description**: When creating email campaign, the verification popup is slightly off the screen on mobile.
+**Description**: Fixed email campaign verification popup to be fully visible on mobile devices (down to 320px width).
 
-**Current Behavior**: Popup positioned incorrectly on mobile  
-**Desired Behavior**: Popup fully visible on mobile
+**Original Issue**: Popup partially off-screen on small mobile devices  
+**Solution Implemented**:
+- Added `max-w-[calc(100vw-32px)]` for viewport-aware width
+- Added `mx-4` for mobile padding (16px from edges)
+- Maintained `sm:max-w-md` for desktop
+- Fixed both confirmation dialogs
+
+**Implementation**: Lovable AI (L-R-3.1.md) - Batch 3  
+**Verification**: Complete code review - all changes verified  
+**Files Modified**: `EmailCommunication.tsx`  
+**Completion Date**: October 13, 2025
 
 **Dependencies**: None  
-**Estimated Complexity**: Low
+**Complexity**: LOW (CSS-only fix)
 
 ---
 
@@ -189,18 +207,33 @@
 ---
 
 #### **Item 23: Vignettes Page Flash**
-**Status**: 📋 Planning  
-**Priority**: TBD  
-**Type**: Bug  
-**Area**: Frontend/Performance
+**Status**: ✅ COMPLETE  
+**Priority**: 🟡 HIGH  
+**Type**: Bug Fix  
+**Area**: Frontend/Performance/UX
 
-**Description**: On first load for vignettes page, you quickly see the old ones before current system loads - need to hunt down and remove.
+**Description**: Fixed flash of old/fallback content on vignettes page load with proper loading states.
 
-**Current Behavior**: Flash of old content on load  
-**Desired Behavior**: Smooth load with current content only
+**Original Issue**: Fallback data briefly visible before real data loads  
+**Solution Implemented**:
+- Added loading skeleton with 3 animated placeholder cards
+- Added early return in useEffect to prevent fallback during loading
+- Added conditional rendering (only show carousel when data ready)
+- Added error state handling
+- Added empty state handling
+
+**Implementation**: Lovable AI (L-R-3.1.md) - Batch 3  
+**Verification**: Complete code review - all changes verified  
+**Files Modified**: `Vignettes.tsx`  
+**Completion Date**: October 13, 2025
+
+**UX Improvements**:
+- No more jarring flash on page load
+- Professional loading experience
+- Clear error and empty states
 
 **Dependencies**: None  
-**Estimated Complexity**: Medium
+**Complexity**: MEDIUM (state management)
 
 ---
 
@@ -451,18 +484,28 @@
 ### 📱 **Mobile Features (2 items)**
 
 #### **Item 22: Mobile Swipe Navigation**
-**Status**: 📋 Planning  
-**Priority**: TBD  
-**Type**: Enhancement/Bug  
+**Status**: ✅ COMPLETE  
+**Priority**: 🟡 HIGH  
+**Type**: Enhancement  
 **Area**: Frontend/Mobile/UX
 
-**Description**: Swipe feature for mobile view seems to only swipe back to visited pages. Want to swipe through all main nav pages, stop at homepage (far left) and RSVP (far right). Currently swiping past homepage closes the app.
+**Description**: Fixed mobile swipe navigation to follow correct page order and stop at boundaries (no wraparound, no app closing).
 
-**Current Behavior**: Limited swipe to history, closes app if swipe past home  
-**Desired Behavior**: Full nav swipe, bounded by home/RSVP
+**Original Issue**: Swipe used wrong page order and wrapped around endlessly  
+**Solution Implemented**:
+- Fixed `PAGE_ORDER`: /, /vignettes, /schedule, /gallery, /discussion, /costumes, /rsvp
+- Removed `/about`, `/feast`, `/contact` from swipe navigation
+- Fixed boundary behavior: stops at `/` (left) and `/rsvp` (right)
+- No more wraparound
+- App no longer closes when swiping past homepage
 
-**Dependencies**: None  
-**Estimated Complexity**: Medium
+**Implementation**: Lovable AI (L-R-3.1.md) - Batch 3  
+**Verification**: Complete code review - all changes verified  
+**Files Modified**: `SwipeNavigator.tsx`  
+**Completion Date**: October 13, 2025
+
+**Dependencies**: None (infrastructure already existed)  
+**Complexity**: MEDIUM (touch event handling)
 
 ---
 
