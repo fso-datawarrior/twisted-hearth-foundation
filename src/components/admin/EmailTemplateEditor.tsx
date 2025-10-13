@@ -43,7 +43,7 @@ export function EmailTemplateEditor({ template, onSave, onCancel }: EmailTemplat
       .replace(/{{rsvp_status}}/g, 'confirmed')
       .replace(/{{event_date}}/g, 'November 1st, 2025')
       .replace(/{{event_time}}/g, '6:30 PM')
-      .replace(/{{event_address}}/g, 'Denver, Colorado')
+      .replace(/{{event_address}}/g, '1816 White Feather Drive, Longmont, Colorado 80504')
       .replace(/{{costume_idea}}/g, 'Little Red Riding Hood')
       .replace(/{{num_guests}}/g, '2')
       .replace(/{{dietary_restrictions}}/g, 'Vegetarian')

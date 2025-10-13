@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
         .replace(/{{rsvp_status}}/g, data.rsvp_status || 'pending')
         .replace(/{{event_date}}/g, 'November 1st, 2025')
         .replace(/{{event_time}}/g, '6:30 PM')
-        .replace(/{{event_address}}/g, 'Denver, Colorado')
+        .replace(/{{event_address}}/g, '1816 White Feather Drive, Longmont, Colorado 80504')
         .replace(/{{costume_idea}}/g, data.costume_idea || 'your creative costume')
         .replace(/{{num_guests}}/g, String(data.num_guests || 1))
         .replace(/{{dietary_restrictions}}/g, data.dietary_restrictions || 'none specified')
