@@ -8,16 +8,13 @@ interface SwipeNavigatorProps {
 }
 
 const PAGE_ORDER = [
-  '/',
-  '/about',
+  '/',           // LEFT BOUNDARY
   '/vignettes', 
   '/schedule',
-  '/costumes',
-  '/feast',
   '/gallery',
   '/discussion',
-  '/contact',
-  '/rsvp'
+  '/costumes',
+  '/rsvp'        // RIGHT BOUNDARY
 ];
 
 export const SwipeNavigator = ({ children }: SwipeNavigatorProps) => {
@@ -33,14 +30,17 @@ export const SwipeNavigator = ({ children }: SwipeNavigatorProps) => {
     const currentIndex = getCurrentPageIndex();
     if (currentIndex === -1) return; // Unknown route
 
-    let nextIndex;
     if (direction === 'next') {
-      nextIndex = (currentIndex + 1) % PAGE_ORDER.length;
+      // Stop at right boundary (don't wrap)
+      if (currentIndex < PAGE_ORDER.length - 1) {
+        navigate(PAGE_ORDER[currentIndex + 1]);
+      }
     } else {
-      nextIndex = currentIndex === 0 ? PAGE_ORDER.length - 1 : currentIndex - 1;
+      // Stop at left boundary (don't wrap)
+      if (currentIndex > 0) {
+        navigate(PAGE_ORDER[currentIndex - 1]);
+      }
     }
-
-    navigate(PAGE_ORDER[nextIndex]);
   };
 
   const shouldPreventSwipe = (target: EventTarget | null): boolean => {
