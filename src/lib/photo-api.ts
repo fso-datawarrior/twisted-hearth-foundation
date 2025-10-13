@@ -37,36 +37,64 @@ export interface PhotoReaction {
 // ================================================================
 
 /**
- * Get approved photos for public gallery
+ * Get approved photos for public gallery with pagination
  */
-export const getApprovedPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
+export const getApprovedPhotos = async (
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ data: Photo[] | null; error: any; totalCount: number }> => {
+  // Get total count first
+  const { count } = await supabase
+    .from('photos')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_approved', true);
+
+  // Get paginated data
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   const { data, error } = await supabase
     .from('photos')
     .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, is_favorite, likes_count, created_at, updated_at')
     .eq('is_approved', true)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-  return { data: data as any, error };
+  return { data: data as any, error, totalCount: count || 0 };
 };
 
 /**
- * Get user's own photos (including unapproved)
+ * Get user's own photos (including unapproved) with pagination
  */
-export const getUserPhotos = async (): Promise<{ data: Photo[] | null; error: any }> => {
+export const getUserPhotos = async (
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ data: Photo[] | null; error: any; totalCount: number }> => {
   // Ensure we only fetch the current user's photos for the "My Photos" section
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    return { data: [], error: userError || new Error('Not authenticated') };
+    return { data: [], error: userError || new Error('Not authenticated'), totalCount: 0 };
   }
   const userId = userData.user.id;
+
+  // Get total count first
+  const { count } = await supabase
+    .from('photos')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  // Get paginated data
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   const { data, error } = await supabase
     .from('photos')
     .select('id, user_id, storage_path, filename, caption, tags, category, is_approved, is_featured, is_favorite, likes_count, created_at, updated_at')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-  return { data: data as any, error };
+  return { data: data as any, error, totalCount: count || 0 };
 };
 
 /**

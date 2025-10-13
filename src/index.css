@@ -934,3 +934,31 @@ body {
   white-space: nowrap;
   animation: type-in 1.2s ease-out forwards;
 }
+
+/* ============================================
+   GALLERY EDGE BROWSER OPTIMIZATIONS
+   ============================================ */
+
+/* Fix Edge rendering issues */
+.gallery-container {
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+/* Optimize touch scrolling for Edge mobile */
+.gallery-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent memory leaks from transforms */
+.photo-card-container {
+  contain: layout style paint;
+}
+
+/* Edge image rendering optimization */
+img[loading="lazy"] {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
