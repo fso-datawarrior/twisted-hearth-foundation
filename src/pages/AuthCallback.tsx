@@ -38,8 +38,16 @@ export default function AuthCallback() {
         // Parse the hash fragment for token parameters
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
+        const type = hashParams.get('type');
         const errorCode = hashParams.get('error_code');
         const errorDescription = hashParams.get('error_description');
+        
+        // If this is a password recovery link, redirect to reset-password page
+        if (type === 'recovery') {
+          logger.info('🔐 AuthCallback: Detected password recovery, redirecting to reset-password');
+          navigate('/reset-password' + window.location.hash, { replace: true });
+          return;
+        }
         
         // Check for error in URL params
         if (errorCode || errorDescription) {
