@@ -149,33 +149,41 @@ export default function GuestbookActivityWidget() {
 
           {/* Top Contributors & Emojis */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            <div className="p-3 bg-card/50 rounded-lg border border-border/50">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Top Contributors</span>
               </div>
               <div className="space-y-1">
-                {stats.topContributors.slice(0, 3).map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="truncate">{c.display_name}</span>
-                    <Badge variant="secondary" className="text-xs">{c.post_count}</Badge>
-                  </div>
-                ))}
+                {stats.topContributors.length === 0 ? (
+                  <div className="text-xs text-muted-foreground py-2">No contributors yet</div>
+                ) : (
+                  stats.topContributors.slice(0, 3).map((c, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="truncate">{c.display_name}</span>
+                      <Badge variant="secondary" className="text-xs">{c.post_count}</Badge>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
-            <div>
+            <div className="p-3 bg-card/50 rounded-lg border border-border/50">
               <div className="flex items-center gap-2 mb-2">
                 <Smile className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Popular Reactions</span>
               </div>
               <div className="space-y-1">
-                {stats.emojiStats.slice(0, 3).map((e, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="text-base">{e.emoji}</span>
-                    <Badge variant="secondary" className="text-xs">{e.count}</Badge>
-                  </div>
-                ))}
+                {stats.emojiStats.length === 0 ? (
+                  <div className="text-xs text-muted-foreground py-2">No reactions yet</div>
+                ) : (
+                  stats.emojiStats.slice(0, 3).map((e, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-base">{e.emoji}</span>
+                      <Badge variant="secondary" className="text-xs">{e.count}</Badge>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
