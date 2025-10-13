@@ -5,10 +5,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts";
 import { getAnalyticsSummary } from "@/lib/analytics-api";
+import {
+  UserEngagementWidget,
+  ContentMetricsWidget,
+  RsvpTrendsWidget,
+  PhotoPopularityWidget,
+  GuestbookActivityWidget,
+  SystemHealthWidget,
+  RealtimeActivityFeed,
+} from './DashboardWidgets';
 
-// Minimal, isolated Admin analytics widgets
-// - No hunt imports
-// - Lazy loaded only inside AdminDashboard overview
+// Comprehensive Admin analytics dashboard with 8+ advanced widgets
 
 export default function AnalyticsWidgets() {
   const [range, setRange] = useState<"7d" | "30d">("30d");
@@ -36,7 +43,7 @@ export default function AnalyticsWidgets() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg sm:text-xl font-semibold text-primary">Traffic & Engagement</h3>
+        <h3 className="text-lg sm:text-xl font-semibold text-primary">Analytics Dashboard</h3>
         <div className="inline-flex items-center gap-1 rounded-md border border-border p-1">
           <button
             type="button"
@@ -55,7 +62,7 @@ export default function AnalyticsWidgets() {
         </div>
       </div>
 
-      {/* KPIs */}
+      {/* Quick Overview KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <CardHeader className="pb-2 p-3 sm:p-4">
@@ -97,10 +104,10 @@ export default function AnalyticsWidgets() {
         </Card>
       </div>
 
-      {/* Time Series */}
+      {/* Time Series Chart */}
       <Card className="border-border/50">
         <CardHeader className="p-3 sm:p-4">
-          <CardTitle className="text-xs sm:text-sm">Last {range} Trends</CardTitle>
+          <CardTitle className="text-xs sm:text-sm">Traffic Trends - Last {range}</CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 pt-0">
           {isLoading ? (
@@ -149,6 +156,19 @@ export default function AnalyticsWidgets() {
           )}
         </CardContent>
       </Card>
+
+      {/* Advanced Dashboard Widgets - Responsive Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <UserEngagementWidget />
+        <ContentMetricsWidget />
+        <RsvpTrendsWidget />
+        <PhotoPopularityWidget />
+        <GuestbookActivityWidget />
+        <SystemHealthWidget />
+      </div>
+
+      {/* Full-width Realtime Activity Feed */}
+      <RealtimeActivityFeed />
     </div>
   );
 }
