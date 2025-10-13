@@ -13,8 +13,8 @@
 |-------|------|-------|----------|----------------|--------|
 | **Batch 1** | Quick Wins | 10 | 🟢 Medium | 6-8 hours | ✅ READY |
 | **Batch 2** | Critical Bugs | 3 | 🔴 Critical | 8-12 hours | ⏳ Planning |
-| **Batch 3** | Mobile UX | 4 | 🟡 High | 6-10 hours | ⏳ Planning |
-| **Batch 4** | Admin Enhancements | 5 | 🟢 Medium | 10-15 hours | ⏳ Planning |
+| **Batch 3** | Gallery & Mobile UX | 5 | 🟡 High | 9-14 hours | ⏳ Planning |
+| **Batch 4** | Admin Enhancements | 4 | 🟢 Medium | 7-11 hours | ⏳ Planning |
 | **Batch 5** | Email System | 4 | 🟡 High | 12-16 hours | ⏳ Planning |
 | **Batch 6** | Major Features | 2 | 🎯 Projects | 20-30 hours | ⏳ Planning |
 
@@ -101,11 +101,11 @@
 
 ---
 
-## 📱 BATCH 3: MOBILE UX
+## 📱 BATCH 3: GALLERY & MOBILE UX
 
-**Priority**: 🟡 HIGH (Mobile experience)  
-**Items**: 4  
-**Time**: 6-10 hours  
+**Priority**: 🟡 HIGH (User experience)  
+**Items**: 5  
+**Time**: 9-14 hours  
 **Risk**: MEDIUM  
 **Dependencies**: None
 
@@ -158,8 +158,21 @@
 - **Complexity**: LOW
 - **Time**: 1 hour
 
+#### **Item 9: Gallery View Mode** 🟡 HIGH
+- **Issue**: Only one view mode for gallery
+- **Impact**: Limited user experience options
+- **Approach**:
+  - Add grid/list view toggle
+  - Masonry layout option
+  - Slideshow mode
+  - Full-screen viewer
+  - User preference persistence
+- **Complexity**: MEDIUM
+- **Time**: 3-4 hours
+
 ### Why This Batch?
 - Mobile experience is critical (most users on phones)
+- Gallery improvements for better user engagement
 - Related items (navigation + UX)
 - Quick wins with high visibility
 - Foundation for mobile-first approach
@@ -169,8 +182,8 @@
 ## 🎨 BATCH 4: ADMIN ENHANCEMENTS
 
 **Priority**: 🟢 MEDIUM (Admin productivity)  
-**Items**: 5  
-**Time**: 10-15 hours  
+**Items**: 4  
+**Time**: 7-11 hours  
 **Risk**: LOW  
 **Dependencies**: None
 
@@ -223,18 +236,6 @@
   - Visual indicator (lock icon)
 - **Complexity**: MEDIUM
 - **Time**: 2-3 hours
-
-#### **Item 9: Gallery View Mode** 🟢 MEDIUM
-- **Issue**: Only one view mode for gallery
-- **Impact**: Limited user experience
-- **Approach**:
-  - Add grid/list view toggle
-  - Masonry layout option
-  - Slideshow mode
-  - Full-screen viewer
-  - User preference persistence
-- **Complexity**: MEDIUM
-- **Time**: 3-4 hours
 
 ### Why This Batch?
 - Improves admin productivity
@@ -462,7 +463,7 @@ Batch 6 (Major Features) ← Depends on security review, can be phased
 | Batch 1 | High | Medium | Low | Low | ⭐⭐⭐⭐⭐ |
 | Batch 2 | Critical | Low | High | Medium | ⭐⭐⭐⭐⭐ |
 | Batch 3 | High | Low | Medium | Medium | ⭐⭐⭐⭐ |
-| Batch 4 | Low | High | Low | Medium | ⭐⭐⭐ |
+| Batch 4 | Low | High | Low | Low-Medium | ⭐⭐⭐ |
 | Batch 5 | Medium | High | Medium | High | ⭐⭐⭐ |
 | Batch 6 | Medium | Low | High | High | ⭐⭐ |
 
