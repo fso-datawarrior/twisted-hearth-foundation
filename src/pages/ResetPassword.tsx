@@ -12,6 +12,7 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isValidRecovery, setIsValidRecovery] = useState<boolean | null>(null);
   const { updatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -22,20 +23,25 @@ export default function ResetPassword() {
     const type = searchParams.get("type") || hashParams.get("type");
     const accessToken = searchParams.get("access_token") || hashParams.get("access_token");
     
-    // If we have neither type=recovery nor an access_token, it might be invalid
-    // But give the auth provider a moment to process the session from the hash
-    if (type !== "recovery" && !accessToken) {
-      const timer = setTimeout(() => {
-        toast({
-          title: "Invalid reset link",
-          description: "This password reset link is invalid or has expired.",
-          variant: "destructive",
-        });
-        navigate("/");
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+    // If we detect recovery parameters, mark as valid
+    if (type === "recovery" || accessToken) {
+      setIsValidRecovery(true);
+      return;
     }
+    
+    // Give the auth provider a moment to process the session from the hash
+    const timer = setTimeout(() => {
+      // After waiting, if still no recovery session detected, it's invalid
+      setIsValidRecovery(false);
+      toast({
+        title: "Invalid reset link",
+        description: "This password reset link is invalid or has expired.",
+        variant: "destructive",
+      });
+      navigate("/");
+    }, 3000);
+    
+    return () => clearTimeout(timer);
   }, [searchParams, navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,6 +85,27 @@ export default function ResetPassword() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking recovery session
+  if (isValidRecovery === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <Card className="w-full max-w-md border-accent-gold">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-gold mx-auto"></div>
+              <p className="text-muted-foreground">Processing your reset link...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Don't render form if not a valid recovery session
+  if (!isValidRecovery) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
