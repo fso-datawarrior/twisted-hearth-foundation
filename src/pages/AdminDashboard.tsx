@@ -34,8 +34,10 @@ import {
   Calendar,
   Settings,
   Theater,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare
 } from 'lucide-react';
+import SupportReportManagement from '@/components/admin/SupportReportManagement';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -47,7 +49,7 @@ export default function AdminDashboard() {
   const tabGroups = {
     content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'libations'],
     users: ['rsvps', 'tournament', 'user-management', 'admin-roles'],
-    settings: ['email', 'database-reset'],
+    settings: ['email', 'support-reports', 'database-reset'],
   };
 
   const getCurrentGroup = (tab: string): string[] | null => {
@@ -230,6 +232,21 @@ export default function AdminDashboard() {
   const selectedVignettePhotos = vignettePhotosCount || 0;
   const activeLibations = libations?.filter(l => l.is_active).length || 0;
 
+  // Support reports count
+  const { data: supportReportsCount } = useQuery({
+    queryKey: ['support-reports-count'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('support_reports')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'open');
+      
+      if (error) throw error;
+      return data;
+    },
+    select: (data) => (data as any)?.length || 0,
+  });
+
    return (
      <RequireAdmin>
        <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
@@ -240,7 +257,7 @@ export default function AdminDashboard() {
            </div>
           
           {/* Consolidated Navigation */}
-          <AdminNavigation
+           <AdminNavigation
             activeTab={activeTab}
             onTabChange={handleTabChange}
             counts={{
@@ -249,6 +266,7 @@ export default function AdminDashboard() {
               photos: photos?.length,
               selectedVignettePhotos,
               activeLibations,
+              supportReports: supportReportsCount,
             }}
           />
 
@@ -381,6 +399,8 @@ export default function AdminDashboard() {
               <GuestbookManagement />
             ) : activeTab === 'email' ? (
               <EmailCommunication />
+            ) : activeTab === 'support-reports' ? (
+              <SupportReportManagement />
             ) : activeTab === 'admin-roles' ? (
               <AdminRoleManagement />
             ) : activeTab === 'user-management' ? (

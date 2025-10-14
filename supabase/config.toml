@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.daily-analytics-aggregation]
 verify_jwt = false
+
+[functions.send-support-report]
+verify_jwt = false
