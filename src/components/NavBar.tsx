@@ -396,7 +396,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
         )}
       </div>
       
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       <ChangePasswordModal isOpen={showChangePasswordModal} onClose={() => setShowChangePasswordModal(false)} />
     </nav>
   );
