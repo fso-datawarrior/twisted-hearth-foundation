@@ -16,6 +16,7 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isValidRecovery, setIsValidRecovery] = useState<boolean | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const { updatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function ResetPassword() {
       return;
     }
     
-    // Give the auth provider a moment to process the session from the hash
+    // Give the auth provider more time to process the session (8 seconds for slow networks)
     const timer = setTimeout(() => {
       // After waiting, if still no recovery session detected, it's invalid
       setIsValidRecovery(false);
@@ -42,7 +43,7 @@ export default function ResetPassword() {
         variant: "destructive",
       });
       navigate("/");
-    }, 3000);
+    }, 8000);
     
     return () => clearTimeout(timer);
   }, [searchParams, navigate, toast]);
@@ -71,19 +72,39 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       await updatePassword(newPassword);
+      
       toast({
         title: "Password updated!",
         description: "Your password has been successfully reset.",
         duration: 3000,
       });
+      
+      // Clear tokens from URL for security
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
       setTimeout(() => navigate("/"), 2000);
     } catch (error: any) {
-      toast({
-        title: "Failed to reset password",
-        description: error?.message || "Please try again or request a new reset link.",
-        variant: "destructive",
-        duration: 6000,
-      });
+      const errorMsg = error?.message || "Please try again or request a new reset link.";
+      
+      // Check if we should allow retry
+      if (retryCount < 2 && !errorMsg.includes("expired")) {
+        setRetryCount(prev => prev + 1);
+        toast({
+          title: "Update failed",
+          description: `${errorMsg} Retry ${retryCount + 1} of 2...`,
+          variant: "destructive",
+          duration: 4000,
+        });
+      } else {
+        toast({
+          title: "Failed to reset password",
+          description: errorMsg,
+          variant: "destructive",
+          duration: 6000,
+        });
+      }
     } finally {
       setLoading(false);
     }

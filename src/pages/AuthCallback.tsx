@@ -57,11 +57,9 @@ export default function AuthCallback() {
           }
           
           if (session) {
-            logger.info('✅ AuthCallback: Recovery session established, redirecting to home with modal');
-            // Wait a moment for the auth context to update, then redirect
-            setTimeout(() => {
-              navigate('/?modal=change-password', { replace: true });
-            }, 500);
+            logger.info('✅ AuthCallback: Recovery session established, redirecting to reset password page');
+            // Redirect to reset password page with hash params preserved
+            navigate('/reset-password' + window.location.hash, { replace: true });
             return;
           } else {
             logger.error('❌ AuthCallback: No recovery session found');

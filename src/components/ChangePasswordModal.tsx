@@ -55,6 +55,11 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     try {
       await updatePassword(newPassword);
       
+      // Clear recovery tokens from URL for security
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
       toast({
         title: "Password updated!",
         description: "Your password has been successfully changed.",
