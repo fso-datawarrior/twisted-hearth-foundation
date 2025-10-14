@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { isPartyOver } from './event';
 import { logger } from './logger';
+import type { Profile } from './profile-api';
 
 type SessionUser = { 
   id: string; 
@@ -12,6 +13,7 @@ type SessionUser = {
 type AuthCtx = { 
   user: SessionUser | null; 
   session: Session | null;
+  profile: Profile | null;
   signIn: (email: string) => Promise<void>; 
   signOut: () => Promise<void>; 
   devSignIn: (email: string) => Promise<void>;
@@ -21,6 +23,7 @@ type AuthCtx = {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   resetPasswordForEmail: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
   loading: boolean;
 };
 
@@ -29,7 +32,30 @@ const AuthContext = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<SessionUser | null>(null);
   const [session, setSession] = React.useState<Session | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
   const [loading, setLoading] = React.useState(true);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data) {
+        setProfile(data);
+      }
+    } catch (error) {
+      logger.error('Failed to fetch profile', error);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  };
 
   useEffect(() => {
     logger.info('🔐 AuthProvider: Initializing auth state...');
@@ -39,11 +65,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         logger.info('🔐 AuthProvider: Auth state changed', { event, hasSession: !!session });
         setSession(session);
-        setUser(session?.user ? { 
+        const newUser = session?.user ? { 
           id: session.user.id, 
           email: session.user.email,
           user_metadata: session.user.user_metadata 
-        } : null);
+        } : null;
+        setUser(newUser);
+        
+        // Fetch profile when user signs in
+        if (newUser?.id) {
+          fetchProfile(newUser.id);
+        } else {
+          setProfile(null);
+        }
+        
         setLoading(false);
       }
     );
@@ -57,11 +92,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           logger.info('🔐 AuthProvider: Got existing session', { hasSession: !!session });
         }
         setSession(session);
-        setUser(session?.user ? { 
+        const existingUser = session?.user ? { 
           id: session.user.id, 
           email: session.user.email,
           user_metadata: session.user.user_metadata 
-        } : null);
+        } : null;
+        setUser(existingUser);
+        
+        // Fetch profile for existing session
+        if (existingUser?.id) {
+          fetchProfile(existingUser.id);
+        }
+        
         setLoading(false);
       })
       .catch((error) => {
@@ -292,7 +334,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, signUpWithPassword, signInWithPassword, resetPasswordForEmail, updatePassword, loading }}>
+    <AuthContext.Provider value={{ user, session, profile, signIn, signOut, devSignIn, signInWithOtp, verifyOtp, signUpWithPassword, signInWithPassword, resetPasswordForEmail, updatePassword, refreshProfile, loading }}>
       {children}
     </AuthContext.Provider>
   );

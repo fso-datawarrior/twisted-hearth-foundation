@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Upload, Trash2 } from 'lucide-react';
 import { Profile, updateUserProfile, uploadAvatar, deleteAvatar } from '@/lib/profile-api';
+import { useAuth } from '@/lib/auth';
 
 interface ProfileSettingsProps {
   profile: Profile | null;
@@ -15,6 +16,7 @@ interface ProfileSettingsProps {
 
 export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSettingsProps) {
   const { toast } = useToast();
+  const { refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -91,6 +93,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
       setAvatarFile(null);
       setAvatarPreview(null);
       onProfileUpdate();
+      await refreshProfile();
     } catch (error: any) {
       console.error('Avatar upload error:', error);
       toast({
@@ -157,6 +160,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
       });
 
       onProfileUpdate();
+      await refreshProfile();
     } catch (error: any) {
       console.error('Profile update error:', error);
       toast({

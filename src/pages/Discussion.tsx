@@ -8,9 +8,11 @@ import MessageComposer from "@/components/guestbook/MessageComposer";
 import GuestbookPost from "@/components/guestbook/GuestbookPost";
 import { AuthModal } from "@/components/AuthModal";
 import { LoaderIcon } from "lucide-react";
+import type { Profile } from "@/lib/profile-api";
 
 const Discussion = () => {
   const [posts, setPosts] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -93,6 +95,26 @@ const Discussion = () => {
       if (error) throw error;
       
       if (data) {
+        // Extract unique user IDs from posts
+        const userIds = [...new Set(data.map(p => p.user_id).filter(Boolean))] as string[];
+        
+        // Batch fetch profiles for all users
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', userIds);
+          
+          // Update profiles map
+          if (profilesData) {
+            setProfiles(prev => {
+              const newMap = new Map(prev);
+              profilesData.forEach(p => newMap.set(p.id, p));
+              return newMap;
+            });
+          }
+        }
+        
         if (reset) {
           setPosts(data);
         } else {
@@ -174,6 +196,7 @@ const Discussion = () => {
                     <GuestbookPost
                       key={post.id}
                       post={post}
+                      authorProfile={profiles.get(post.user_id)}
                       onUpdate={() => loadPosts(true)}
                     />
                   ))}

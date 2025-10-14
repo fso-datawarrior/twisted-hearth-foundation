@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +10,8 @@ import EmojiReactions from './EmojiReactions';
 import MessageComposer from './MessageComposer';
 import { formatDistanceToNow } from 'date-fns';
 import { useAnalytics } from '@/contexts/AnalyticsContext';
+import { UserProfileCard } from '@/components/UserProfileCard';
+import type { Profile } from '@/lib/profile-api';
 
 interface GuestbookPostProps {
   post: {
@@ -20,6 +23,7 @@ interface GuestbookPostProps {
     created_at: string;
     updated_at?: string;
   };
+  authorProfile?: Profile;
   onUpdate?: () => void;
 }
 
@@ -32,13 +36,14 @@ interface Reply {
   created_at: string;
 }
 
-const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
+const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUpdate }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(post.message);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showProfileCard, setShowProfileCard] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { trackInteraction } = useAnalytics();
@@ -133,20 +138,44 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
   };
 
   return (
-    <div className="bg-black/90 backdrop-blur-sm p-4 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
-      <div className="flex justify-between items-start gap-3 mb-2">
-        <div>
-          <div className="flex items-center gap-2 text-xs">
-            <h3 className="font-subhead text-base text-accent-gold">
-              {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
-            </h3>
-            <span className="text-muted-foreground">•</span>
-            <p className="font-body text-muted-foreground">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-              {post.updated_at && post.updated_at !== post.created_at && ' (edited)'}
-            </p>
+    <>
+      <div className="bg-black/90 backdrop-blur-sm p-4 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+        <div className="flex justify-between items-start gap-3 mb-2">
+          <div className="flex items-start gap-3 flex-1">
+            {/* Avatar */}
+            <button
+              onClick={() => !post.is_anonymous && setShowProfileCard(true)}
+              className={`flex-shrink-0 ${!post.is_anonymous ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+              disabled={post.is_anonymous}
+            >
+              <Avatar className="h-10 w-10 border-2 border-accent-purple/30 hover:border-accent-gold transition-colors">
+                <AvatarImage 
+                  src={authorProfile?.avatar_url || undefined} 
+                  alt={post.display_name} 
+                />
+                <AvatarFallback className="bg-accent-purple/20 text-accent-gold">
+                  {post.display_name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  onClick={() => !post.is_anonymous && setShowProfileCard(true)}
+                  className={`font-subhead text-base text-accent-gold ${!post.is_anonymous ? 'hover:underline cursor-pointer' : 'cursor-default'}`}
+                  disabled={post.is_anonymous}
+                >
+                  {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
+                </button>
+                <span className="text-muted-foreground">•</span>
+                <p className="font-body text-muted-foreground">
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  {post.updated_at && post.updated_at !== post.created_at && ' (edited)'}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
         {user && (
           <DropdownMenu>
@@ -185,7 +214,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
       </div>
 
-      <div className="mb-3 ml-11">
+      <div className="mb-3 ml-14">
         {isEditing ? (
           <div className="space-y-2">
             <textarea
@@ -223,7 +252,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
       </div>
 
-      <div className="space-y-3 ml-11">
+      <div className="space-y-3 ml-14">
         <EmojiReactions postId={post.id} />
         
         <div className="flex gap-2 text-sm">
@@ -286,6 +315,16 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, onUpdate }) => {
         )}
       </div>
     </div>
+    
+    {/* Profile Card Dialog */}
+    {!post.is_anonymous && post.user_id && (
+      <UserProfileCard
+        userId={post.user_id}
+        isOpen={showProfileCard}
+        onClose={() => setShowProfileCard(false)}
+      />
+    )}
+  </>
   );
 };
 
