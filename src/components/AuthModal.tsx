@@ -18,7 +18,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const { devSignIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail } = useAuth();
+  const [useMagicLink, setUseMagicLink] = useState(false);
+  const { devSignIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail, signIn } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
 
@@ -29,6 +30,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setPassword("");
       setIsSignUp(false);
       setIsForgotPassword(false);
+      setUseMagicLink(false);
     }, 200);
   };
 
@@ -36,7 +38,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     e.preventDefault();
     
     if (isForgotPassword) {
-      if (!email.trim()) return;
+      if (!email.trim()) {
+        return;
+      }
       
       setLoading(true);
       try {
@@ -60,7 +64,44 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
 
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim()) {
+      return;
+    }
+
+    // Magic Link Sign In (no password required)
+    if (useMagicLink) {
+      setLoading(true);
+      try {
+        await signIn(email.trim().toLowerCase());
+        toast({
+          title: "Magic Link Sent! ✨",
+          description: "Check your email for the magic sign-in link.\n🎃 Check your spam crypt if it doesn't appear!",
+          duration: 5000,
+        });
+        handleClose();
+      } catch (error: any) {
+        let errorMsg = "Failed to send magic link. Please try again.";
+        
+        if (error?.message?.includes('rate limit')) {
+          errorMsg = "Rate limit exceeded. Please wait a few minutes before trying again.";
+        } else if (error?.message?.includes('network')) {
+          errorMsg = "Network error. Please check your connection and try again.";
+        }
+        
+        toast({
+          title: "Magic Link Failed",
+          description: errorMsg,
+          variant: "destructive",
+          duration: 6000,
+        });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Password-based authentication
+    if (!password.trim()) {
       return;
     }
 
@@ -144,6 +185,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <DialogDescription className="text-muted-foreground">
             {isForgotPassword
               ? "Enter your email to receive a password reset link."
+              : useMagicLink
+              ? "We'll send you a magic link to sign in instantly - no password needed!"
               : isSignUp
               ? "Create an account with email and password."
               : "Sign in with your email and password."
@@ -168,7 +211,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             />
           </div>
 
-          {!isForgotPassword && (
+          {!isForgotPassword && !useMagicLink && (
             <div className="space-y-2">
               <Label htmlFor="password" className="font-subhead text-accent-gold">
                 Password
@@ -184,6 +227,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 minLength={6}
                 className="bg-background border-accent-purple/30 focus:border-accent-gold"
               />
+            </div>
+          )}
+
+          {!isForgotPassword && !isSignUp && (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 py-2">
+                <input
+                  type="checkbox"
+                  id="magic-link-toggle"
+                  checked={useMagicLink}
+                  onChange={(e) => setUseMagicLink(e.target.checked)}
+                  className="rounded border-accent-purple/30 text-accent-gold focus:ring-accent-gold focus:ring-offset-0"
+                  disabled={loading}
+                  aria-label="Use Magic Link authentication instead of password"
+                />
+                <Label 
+                  htmlFor="magic-link-toggle" 
+                  className="text-sm cursor-pointer text-muted-foreground hover:text-accent-gold transition-colors"
+                >
+                  ✨ Use Magic Link instead (no password needed)
+                </Label>
+              </div>
+              
+              {useMagicLink && (
+                <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
+                  <p className="text-xs text-accent-gold font-medium mb-1">🪄 Magic Link Sign-In</p>
+                  <p className="text-xs text-muted-foreground">
+                    We'll send you a secure link that signs you in instantly. No passwords to remember - just click the link in your email!
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -220,13 +294,15 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Button
             type="submit"
-            disabled={loading || !email.trim() || (!isForgotPassword && !password.trim())}
+            disabled={loading || !email.trim() || (!isForgotPassword && !useMagicLink && !password.trim())}
             className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
           >
             {loading 
               ? "Processing..." 
               : isForgotPassword
               ? "Send Reset Link"
+              : useMagicLink
+              ? "Send Magic Link ✨"
               : isSignUp
               ? "Sign Up"
               : "Sign In"
