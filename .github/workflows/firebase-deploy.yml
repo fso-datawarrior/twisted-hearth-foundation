@@ -17,24 +17,25 @@ jobs:
         with:
           node-version: 20
 
-      # Fix npm dependency resolution for React (temporary until all libs update)
+      # Install deps (tolerate peer mismatches from React 18/19 libs)
       - run: npm ci --legacy-peer-deps
 
-      # Build your production bundle
+      # Build production bundle
       - run: npm run build
 
-      # Authenticate via Google Workload Identity Federation
+      # Authenticate to Google Cloud via Workload Identity Federation (no JSON key)
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          token_format: access_token
           workload_identity_provider: "projects/1017057598145/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
           service_account: "firebase-adminsdk-fbsvc@twisted-hearth-foundation.iam.gserviceaccount.com"
+          create_credentials_file: true
+          export_environment_variables: true
 
-      # Install Firebase CLI globally (required for deploy)
+      # Ensure Firebase CLI is available
       - run: npm install -g firebase-tools
 
-      # Deploy to Firebase Hosting
+      # Deploy to Firebase Hosting (uses ADC from the auth step)
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
