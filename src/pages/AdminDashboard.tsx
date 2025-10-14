@@ -234,7 +234,7 @@ export default function AdminDashboard() {
      <RequireAdmin>
        <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
          <div className="max-w-7xl mx-auto">
-           <div className="mb-6 sm:mb-8 mt-20 sm:mt-24">
+           <div className="mb-6 sm:mb-8 mt-28 sm:mt-32 md:mt-36">
              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">Admin Control Tower</h1>
              <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
            </div>
