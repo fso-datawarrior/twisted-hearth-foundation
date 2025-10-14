@@ -3,9 +3,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
+import { Mail, KeyRound, Lock } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,10 +17,12 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [useMagicLink, setUseMagicLink] = useState(false);
+  const [authMethod, setAuthMethod] = useState<"magic" | "otp" | "password">("magic");
+  const [otpSent, setOtpSent] = useState(false);
   const { devSignIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail, signIn } = useAuth();
   const { toast } = useToast();
   const { isDeveloperMode } = useDeveloperMode();
@@ -28,9 +32,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setTimeout(() => {
       setEmail("");
       setPassword("");
+      setOtp("");
       setIsSignUp(false);
       setIsForgotPassword(false);
-      setUseMagicLink(false);
+      setOtpSent(false);
+      setAuthMethod("magic");
     }, 200);
   };
 
@@ -64,33 +70,23 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
 
-    if (!email.trim()) {
-      return;
-    }
+    if (!email.trim()) return;
 
-    // Magic Link Sign In (no password required)
-    if (useMagicLink) {
+    // Magic Link Sign In
+    if (authMethod === "magic") {
       setLoading(true);
       try {
         await signIn(email.trim().toLowerCase());
         toast({
           title: "Magic Link Sent! ✨",
-          description: "Check your email for the magic sign-in link.\n🎃 Check your spam crypt if it doesn't appear!",
+          description: "Check your email for the magic sign-in link.",
           duration: 5000,
         });
         handleClose();
       } catch (error: any) {
-        let errorMsg = "Failed to send magic link. Please try again.";
-        
-        if (error?.message?.includes('rate limit')) {
-          errorMsg = "Rate limit exceeded. Please wait a few minutes before trying again.";
-        } else if (error?.message?.includes('network')) {
-          errorMsg = "Network error. Please check your connection and try again.";
-        }
-        
         toast({
-          title: "Magic Link Failed",
-          description: errorMsg,
+          title: "Failed to send magic link",
+          description: error?.message || "Please try again.",
           variant: "destructive",
           duration: 6000,
         });
@@ -100,13 +96,68 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
 
-    // Password-based authentication
-    if (!password.trim()) {
+    // OTP Sign In
+    if (authMethod === "otp") {
+      if (!otpSent) {
+        // Send OTP
+        setLoading(true);
+        try {
+          const { supabase } = await import("@/integrations/supabase/client");
+          await supabase.auth.signInWithOtp({
+            email: email.trim().toLowerCase(),
+          });
+          setOtpSent(true);
+          toast({
+            title: "OTP Sent! 🔑",
+            description: "Check your email for the one-time password.",
+            duration: 5000,
+          });
+        } catch (error: any) {
+          toast({
+            title: "Failed to send OTP",
+            description: error?.message || "Please try again.",
+            variant: "destructive",
+            duration: 6000,
+          });
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Verify OTP
+        if (!otp.trim()) return;
+        setLoading(true);
+        try {
+          const { supabase } = await import("@/integrations/supabase/client");
+          const { error } = await supabase.auth.verifyOtp({
+            email: email.trim().toLowerCase(),
+            token: otp.trim(),
+            type: 'email',
+          });
+          if (error) throw error;
+          toast({
+            title: "Welcome back!",
+            description: "You're now signed in.",
+            duration: 3000,
+          });
+          handleClose();
+        } catch (error: any) {
+          toast({
+            title: "Invalid OTP",
+            description: "Please check the code and try again.",
+            variant: "destructive",
+            duration: 6000,
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
       return;
     }
 
+    // Password-based authentication
+    if (!password.trim()) return;
+
     setLoading(true);
-    
     try {
       if (isSignUp) {
         await signUpWithPassword(email.trim().toLowerCase(), password);
@@ -130,12 +181,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         ? "Unable to create account. Please try again."
         : "Invalid email or password.";
       
-      if (error?.message?.includes('invalid')) {
+      if (error?.message?.includes('Email not confirmed')) {
+        errorMsg = "Please check your email and click the confirmation link before signing in.";
+      } else if (error?.message?.includes('invalid')) {
         errorMsg = "Please check your email and password.";
-      } else if (error?.message?.includes('network')) {
-        errorMsg = "Network error. Please check your connection and try again.";
       } else if (error?.message?.includes('already registered')) {
-        errorMsg = "This email is already registered. Forgot your password?";
+        errorMsg = "This email is already registered. Try signing in instead.";
       }
       
       toast({
@@ -177,16 +228,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] border-accent-gold">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[425px] mx-auto border-accent-gold">
         <DialogHeader>
-          <DialogTitle className="font-heading text-2xl text-accent-gold uppercase">
-            {isForgotPassword ? "Reset Password" : "Enter Twisted Tale"}
+          <DialogTitle className="font-heading text-xl sm:text-2xl text-accent-gold uppercase">
+            {isForgotPassword ? "Reset Password" : "Sign In to The Bash"}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-muted-foreground text-sm">
             {isForgotPassword
               ? "Enter your email to receive a password reset link."
-              : useMagicLink
-              ? "We'll send you a magic link to sign in instantly - no password needed!"
+              : authMethod === "magic"
+              ? "Enter your email to receive a magic link for instant access."
+              : authMethod === "otp"
+              ? otpSent
+                ? "Enter the OTP code sent to your email."
+                : "We'll send a one-time password to your email."
               : isSignUp
               ? "Create an account with email and password."
               : "Sign in with your email and password."
@@ -194,9 +249,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </DialogDescription>
         </DialogHeader>
 
+        {!isForgotPassword && (
+          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as typeof authMethod)} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-accent-gold/20">
+              <TabsTrigger 
+                value="magic" 
+                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
+              >
+                <Mail className="w-4 h-4 mr-1" />
+                Magic
+              </TabsTrigger>
+              <TabsTrigger 
+                value="otp"
+                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
+              >
+                <KeyRound className="w-4 h-4 mr-1" />
+                OTP
+              </TabsTrigger>
+              <TabsTrigger 
+                value="password"
+                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
+              >
+                <Lock className="w-4 h-4 mr-1" />
+                Password
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-subhead text-accent-gold">
+            <Label htmlFor="email" className="font-subhead text-accent-gold text-sm uppercase">
               Email Address
             </Label>
             <Input
@@ -206,14 +289,33 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.email@example.com"
               required
-              disabled={loading}
+              disabled={loading || (authMethod === "otp" && otpSent)}
               className="bg-background border-accent-purple/30 focus:border-accent-gold"
             />
           </div>
 
-          {!isForgotPassword && !useMagicLink && (
+          {authMethod === "otp" && otpSent && (
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-subhead text-accent-gold">
+              <Label htmlFor="otp" className="font-subhead text-accent-gold text-sm uppercase">
+                One-Time Password
+              </Label>
+              <Input
+                id="otp"
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter 6-digit code"
+                required
+                disabled={loading}
+                maxLength={6}
+                className="bg-background border-accent-purple/30 focus:border-accent-gold text-center text-lg tracking-widest"
+              />
+            </div>
+          )}
+
+          {authMethod === "password" && !isForgotPassword && (
+            <div className="space-y-2">
+              <Label htmlFor="password" className="font-subhead text-accent-gold text-sm uppercase">
                 Password
               </Label>
               <Input
@@ -230,38 +332,25 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
           )}
 
-          {!isForgotPassword && !isSignUp && (
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 py-2">
-                <input
-                  type="checkbox"
-                  id="magic-link-toggle"
-                  checked={useMagicLink}
-                  onChange={(e) => setUseMagicLink(e.target.checked)}
-                  className="rounded border-accent-purple/30 text-accent-gold focus:ring-accent-gold focus:ring-offset-0"
-                  disabled={loading}
-                  aria-label="Use Magic Link authentication instead of password"
-                />
-                <Label 
-                  htmlFor="magic-link-toggle" 
-                  className="text-sm cursor-pointer text-muted-foreground hover:text-accent-gold transition-colors"
-                >
-                  ✨ Use Magic Link instead (no password needed)
-                </Label>
-              </div>
-              
-              {useMagicLink && (
-                <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
-                  <p className="text-xs text-accent-gold font-medium mb-1">🪄 Magic Link Sign-In</p>
-                  <p className="text-xs text-muted-foreground">
-                    We'll send you a secure link that signs you in instantly. No passwords to remember - just click the link in your email!
-                  </p>
-                </div>
-              )}
+          {authMethod === "magic" && !isForgotPassword && (
+            <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
+              <p className="text-xs text-accent-gold font-medium mb-1">✨ Magic link sign-in</p>
+              <p className="text-xs text-muted-foreground">
+                No password needed. Just click the link in your email.
+              </p>
             </div>
           )}
 
-          <div className="flex items-center justify-between text-xs">
+          {authMethod === "otp" && !otpSent && !isForgotPassword && (
+            <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
+              <p className="text-xs text-accent-gold font-medium mb-1">🔑 One-time password</p>
+              <p className="text-xs text-muted-foreground">
+                We'll send a secure code to your email that you can use to sign in.
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between text-xs flex-wrap gap-2">
             {isForgotPassword ? (
               <button
                 type="button"
@@ -272,14 +361,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </button>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-accent-gold hover:text-accent-gold/80 underline"
-                >
-                  {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
-                </button>
-                {!isSignUp && (
+                {authMethod === "password" && (
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUp(!isSignUp)}
+                    className="text-accent-gold hover:text-accent-gold/80 underline"
+                  >
+                    {isSignUp ? "Sign in instead" : "Create account"}
+                  </button>
+                )}
+                {authMethod === "password" && !isSignUp && (
                   <button
                     type="button"
                     onClick={() => setIsForgotPassword(true)}
@@ -294,15 +385,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
           <Button
             type="submit"
-            disabled={loading || !email.trim() || (!isForgotPassword && !useMagicLink && !password.trim())}
+            disabled={
+              loading || 
+              !email.trim() || 
+              (authMethod === "password" && !isForgotPassword && !password.trim()) ||
+              (authMethod === "otp" && otpSent && !otp.trim())
+            }
             className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
           >
             {loading 
               ? "Processing..." 
               : isForgotPassword
               ? "Send Reset Link"
-              : useMagicLink
-              ? "Send Magic Link ✨"
+              : authMethod === "magic"
+              ? "Send Magic Link"
+              : authMethod === "otp"
+              ? otpSent
+                ? "Verify OTP"
+                : "Send OTP"
               : isSignUp
               ? "Sign Up"
               : "Sign In"
