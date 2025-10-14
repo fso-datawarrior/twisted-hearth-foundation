@@ -11,6 +11,8 @@ import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import PrepLinks from "@/components/PrepLinks";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
@@ -69,6 +71,8 @@ const Index = () => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, session } = useAuth();
+  const { toast } = useToast();
   
   // Section reveals
   const vigReveal = useReveal();
@@ -80,13 +84,26 @@ const Index = () => {
   useEffect(() => {
     const modalParam = searchParams.get('modal');
     if (modalParam === 'change-password') {
-      setShowChangePasswordModal(true);
-      // Remove the modal parameter from URL after opening
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('modal');
-      setSearchParams(newSearchParams, { replace: true });
+      // Check if user has a valid session for password reset
+      if (session) {
+        setShowChangePasswordModal(true);
+        // Remove the modal parameter from URL after opening
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('modal');
+        setSearchParams(newSearchParams, { replace: true });
+      } else {
+        // No valid session, show error and redirect
+        toast({
+          title: "Invalid reset link",
+          description: "This password reset link is invalid or has expired. Please request a new one.",
+          variant: "destructive",
+        });
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('modal');
+        setSearchParams(newSearchParams, { replace: true });
+      }
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, session, toast]);
 
   // Fetch homepage vignettes from database
   const { data: pastVignettes = [], isLoading: vignettesLoading } = useQuery({

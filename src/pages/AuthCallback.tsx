@@ -42,11 +42,33 @@ export default function AuthCallback() {
         const errorCode = hashParams.get('error_code');
         const errorDescription = hashParams.get('error_description');
         
-        // If this is a password recovery link, redirect to home page with modal parameter
+        // If this is a password recovery link, let Supabase process it first, then redirect
         if (type === 'recovery') {
-          logger.info('🔐 AuthCallback: Detected password recovery, redirecting to home with modal');
-          navigate('/?modal=change-password' + window.location.hash, { replace: true });
-          return;
+          logger.info('🔐 AuthCallback: Detected password recovery, processing recovery session...');
+          
+          // Let Supabase process the recovery session from the URL hash
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            logger.error('❌ AuthCallback: Error processing recovery session', sessionError);
+            setErrorType('invalid');
+            setStatus('error');
+            return;
+          }
+          
+          if (session) {
+            logger.info('✅ AuthCallback: Recovery session established, redirecting to home with modal');
+            // Wait a moment for the auth context to update, then redirect
+            setTimeout(() => {
+              navigate('/?modal=change-password', { replace: true });
+            }, 500);
+            return;
+          } else {
+            logger.error('❌ AuthCallback: No recovery session found');
+            setErrorType('invalid');
+            setStatus('error');
+            return;
+          }
         }
         
         // Check for error in URL params
