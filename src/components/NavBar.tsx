@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User, ChevronDown } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useAuth } from "@/lib/auth";
@@ -30,17 +30,24 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
   const { isMuted, toggleMute } = useAudio();
 
-  const navLinks = [
+  // Main navigation links (always visible in desktop nav bar)
+  const mainNavLinks = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
+    { to: "/gallery", label: "Gallery" },
+  ];
+
+  // Dropdown navigation links (under "More" dropdown)
+  const moreDropdownLinks = [
     { to: "/vignettes", label: "Vignettes" },
     { to: "/schedule", label: "Schedule" },
     { to: "/costumes", label: "Costumes" },
     { to: "/feast", label: "Feast" },
-    { to: "/gallery", label: "Gallery" },
     { to: "/discussion", label: "Discussion" },
-    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ];
+
+  // Combined for mobile menu current page detection
+  const allNavLinks = [...mainNavLinks, ...moreDropdownLinks];
   
   useEffect(() => {
     const handleScroll = () => {
@@ -64,12 +71,87 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
 
   // Get current page name for mobile display
   const getCurrentPageName = () => {
-    const currentLink = navLinks.find(link => link.to === location.pathname);
+    const currentLink = allNavLinks.find(link => link.to === location.pathname);
     return currentLink ? currentLink.label : "Home";
   };
 
+  // More dropdown component
+  interface MoreDropdownProps {
+    links: Array<{ to: string; label: string }>;
+    currentPath: string;
+  }
+
+  function MoreDropdown({ links, currentPath }: MoreDropdownProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          setIsOpen(false);
+        }
+      };
+
+      if (isOpen) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [isOpen]);
+
+    // Close dropdown on navigation
+    useEffect(() => {
+      setIsOpen(false);
+    }, [currentPath]);
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 min-h-[44px] flex items-center gap-1 touch-manipulation ${
+            links.some(link => link.to === currentPath)
+              ? "text-accent-gold"
+              : "text-ink hover:text-accent-gold"
+          }`}
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          aria-label="More navigation options"
+        >
+          More
+          <ChevronDown 
+            className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          />
+        </button>
+        
+        {isOpen && (
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 rounded-md shadow-elegant bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 z-50 animate-fade-in">
+            <div className="py-2">
+              {links.map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`block px-4 py-2 text-sm font-subhead uppercase tracking-wider transition-colors ${
+                    currentPath === to 
+                      ? 'bg-accent-purple/10 text-accent-gold' 
+                      : 'text-ink hover:bg-accent-purple/10 hover:text-accent-gold'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <nav 
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 motion-safe pt-[max(env(safe-area-inset-top),1rem)] ${
         isScrolled ? "backdrop-blur-md shadow-lg bg-bg-2/20" : "bg-transparent"
       }`}
@@ -111,7 +193,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
 
           {/* Centered Desktop Navigation */}
           <div className="hidden nav-compact:flex items-center space-x-8">
-            {navLinks.map(({ to, label }) => (
+            {/* Main navigation links */}
+            {mainNavLinks.map(({ to, label }) => (
               <Link
                 key={to}
                 to={to}
@@ -124,6 +207,23 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                 {label}
               </Link>
             ))}
+            
+            {/* More dropdown */}
+            <MoreDropdown links={moreDropdownLinks} currentPath={location.pathname} />
+            
+            {/* Admin link (separate from dropdown) */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 min-h-[44px] flex items-center touch-manipulation ${
+                  location.pathname === '/admin'
+                    ? "text-accent-gold"
+                    : "text-ink hover:text-accent-gold"
+                }`}
+              >
+                Admin
+              </Link>
+            )}
           </div>
             
           {/* Auth Section - Positioned just to the right of nav links */}
@@ -262,7 +362,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
             className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
           >
               <div className="px-6 py-4 space-y-4">
-                {navLinks.map(({ to, label }) => (
+                {/* Main nav links */}
+                {mainNavLinks.map(({ to, label }) => (
                   <Link
                     key={to}
                     to={to}
@@ -276,6 +377,44 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                     {label}
                   </Link>
                 ))}
+                
+                {/* More section with divider */}
+                <div className="pt-2 border-t border-accent-purple/30">
+                  <div className="text-xs text-muted-foreground px-1 py-2 uppercase font-semibold tracking-wider">
+                    More
+                  </div>
+                  {moreDropdownLinks.map(({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block py-3 pl-4 font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                        location.pathname === to
+                          ? "text-accent-gold"
+                          : "text-ink hover:text-accent-gold"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Admin link (if admin) - separate section */}
+                {isAdmin && (
+                  <div className="pt-2 border-t border-accent-purple/30">
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                        location.pathname === '/admin'
+                          ? "text-accent-gold"
+                          : "text-ink hover:text-accent-gold"
+                      }`}
+                    >
+                      Admin
+                    </Link>
+                  </div>
+                )}
                 
                 {/* Mobile Audio Toggle */}
                 <div className="pt-2 border-t border-accent-purple/30">
