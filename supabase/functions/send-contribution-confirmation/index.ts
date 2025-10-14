@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { getDisplayName } from '../_shared/display-name.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -41,7 +42,13 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const { contributorEmail, contributorName, dishName, notes, isVegan, isGlutenFree }: ContributionData = validated.data;
 
-    console.log('Sending contribution confirmation emails for:', { contributorEmail, dishName });
+    // Use display name helper as safeguard
+    const displayName = getDisplayName({
+      name: contributorName,
+      email: contributorEmail
+    });
+
+    console.log('Sending contribution confirmation emails for:', { contributorEmail, dishName, displayName });
 
     const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY');
     const MAILJET_API_SECRET = Deno.env.get('MAILJET_API_SECRET');
@@ -74,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
           <h1 style="color: white; margin: 0; font-size: 28px;">🎃 Contribution Confirmed!</h1>
         </div>
         <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-          <p style="font-size: 16px; margin-top: 0;">Hi ${contributorName},</p>
+          <p style="font-size: 16px; margin-top: 0;">Hi ${displayName},</p>
           <p>Thank you for contributing to the Twisted Tale Feast! Your dish has been successfully added:</p>
           <div style="background: white; padding: 20px; border-left: 4px solid #ff6b35; margin: 20px 0; border-radius: 4px;">
             <h2 style="margin: 0 0 12px 0; color: #ff6b35; font-size: 20px;">📌 ${dishName}</h2>
@@ -129,7 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
           To: [
             {
               Email: contributorEmail,
-              Name: contributorName,
+              Name: displayName,
             },
           ],
           Subject: `🎃 Your Feast Contribution: ${dishName}`,

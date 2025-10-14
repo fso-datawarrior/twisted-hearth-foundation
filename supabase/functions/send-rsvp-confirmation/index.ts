@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { getDisplayName, getFullName } from "../_shared/display-name.ts";
 
 interface AdditionalGuest {
   name: string;
@@ -9,23 +10,14 @@ interface AdditionalGuest {
 
 type Payload = { 
   rsvpId: string; 
-  name: string; 
-  email: string; 
-  guests: number;
+  email: string;
   isUpdate?: boolean;
-  additionalGuests?: AdditionalGuest[];
 };
 
 const PayloadSchema = z.object({
   rsvpId: z.string().uuid(),
-  name: z.string().min(1).max(100),
   email: z.string().email(),
-  guests: z.number().int().min(1).max(8),
-  isUpdate: z.boolean().optional(),
-  additionalGuests: z.array(z.object({
-    name: z.string().min(1).max(100),
-    email: z.union([z.string().email(), z.literal('')]).optional()
-  })).optional()
+  isUpdate: z.boolean().optional()
 });
 
 const MJ_API = Deno.env.get("MAILJET_API_KEY")!;
@@ -122,11 +114,49 @@ serve(async (req) => {
     return new Response("Bad Request", { status: 400, headers: cors(origin) }); 
   }
 
+  // Fetch RSVP and profile data from database
+  const { data: rsvpData, error: rsvpError } = await supabase
+    .from('rsvps')
+    .select(`
+      *,
+      profiles:user_id (
+        display_name,
+        email
+      )
+    `)
+    .eq('id', body.rsvpId)
+    .single();
+
+  if (rsvpError || !rsvpData) {
+    console.error('Failed to fetch RSVP:', rsvpError);
+    return new Response(JSON.stringify({ error: 'RSVP not found' }), { 
+      status: 404, 
+      headers: cors(origin) 
+    });
+  }
+
+  // Extract name data
+  const nameData = {
+    display_name: rsvpData.profiles?.display_name,
+    first_name: rsvpData.first_name,
+    last_name: rsvpData.last_name,
+    name: rsvpData.name, // Legacy field
+    email: rsvpData.email
+  };
+
+  const displayName = getDisplayName(nameData);
+  const fullName = getFullName(nameData);
+  const guests = rsvpData.num_guests;
+  const additionalGuests = (rsvpData.additional_guests as AdditionalGuest[]) || [];
+
   console.log('Processing RSVP confirmation:', { 
-    email: body.email, 
-    guests: body.guests, 
+    rsvpId: body.rsvpId,
+    email: rsvpData.email,
+    displayName,
+    fullName,
+    guests,
     isUpdate: body.isUpdate,
-    hasAdditionalGuests: (body.additionalGuests?.length || 0) > 0
+    hasAdditionalGuests: additionalGuests.length > 0
   });
 
   const isUpdate = body.isUpdate || false;
@@ -135,11 +165,11 @@ serve(async (req) => {
   
   const subject = `${actionTitle} — Twisted Fairytale Bash`;
   
-  const additionalGuestsHtml = buildAdditionalGuestsList(body.additionalGuests || []);
+  const additionalGuestsHtml = buildAdditionalGuestsList(additionalGuests);
   
-  const text = `Hi ${body.name},
+  const text = `Hi ${displayName},
 
-We have ${isUpdate ? 'updated' : 'received'} your RSVP for ${body.guests} ${body.guests > 1 ? "guests" : "guest"}.
+We have ${isUpdate ? 'updated' : 'received'} your RSVP for ${guests} ${guests > 1 ? "guests" : "guest"}.
 Date: Friday, November 1st, 2025 — 6:30 PM
 Where: ${PRIVATE_ADDRESS}
 
@@ -153,8 +183,8 @@ This address is private. Please don't share it publicly.
       <h1 style="color: white; margin: 0; font-size: 28px;">🎃 ${actionTitle}</h1>
     </div>
     <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-      <p style="font-size: 16px; margin-top: 0;">Hi ${body.name},</p>
-      <p>We have ${actionText} your RSVP for <strong>${body.guests}</strong> ${body.guests > 1 ? "guests" : "guest"}.</p>
+      <p style="font-size: 16px; margin-top: 0;">Hi ${displayName},</p>
+      <p>We have ${actionText} your RSVP for <strong>${guests}</strong> ${guests > 1 ? "guests" : "guest"}.</p>
       ${additionalGuestsHtml}
       <p><strong>Date:</strong> Friday, November 1st, 2025 — 6:30 PM</p>
       <p><strong>Where:</strong> ${PRIVATE_ADDRESS}</p>
@@ -163,19 +193,20 @@ This address is private. Please don't share it publicly.
     </div>
   </div>`;
 
-  // Admin notification email
-  const adminSubject = `🔔 RSVP ${isUpdate ? 'Updated' : 'Received'}: ${body.name}`;
+  // Admin notification email - show both display name and full name
+  const adminSubject = `🔔 RSVP ${isUpdate ? 'Updated' : 'Received'}: ${fullName}`;
   const adminHtml = `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <div style="background: #1f2937; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
       <h1 style="color: white; margin: 0; font-size: 24px;">🔔 RSVP ${isUpdate ? 'Updated' : 'Received'}</h1>
     </div>
     <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-      <p style="font-size: 16px; margin-top: 0;"><strong>${body.name}</strong> has ${actionText} their RSVP.</p>
+      <p style="font-size: 16px; margin-top: 0;"><strong>${fullName}</strong> has ${actionText} their RSVP.</p>
       <div style="background: white; padding: 20px; border-left: 4px solid #1f2937; margin: 20px 0; border-radius: 4px;">
-        <p style="margin: 8px 0;"><strong>Name:</strong> ${body.name}</p>
-        <p style="margin: 8px 0;"><strong>Email:</strong> ${body.email}</p>
-        <p style="margin: 8px 0;"><strong>Total Guests:</strong> ${body.guests}</p>
+        <p style="margin: 8px 0;"><strong>Full Name:</strong> ${fullName}</p>
+        <p style="margin: 8px 0;"><strong>Display Name:</strong> ${displayName}</p>
+        <p style="margin: 8px 0;"><strong>Email:</strong> ${rsvpData.email}</p>
+        <p style="margin: 8px 0;"><strong>Total Guests:</strong> ${guests}</p>
         ${additionalGuestsHtml}
       </div>
       <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">RSVP ID: ${body.rsvpId}</p>
@@ -185,14 +216,14 @@ This address is private. Please don't share it publicly.
   const messages = [
     {
       From: { Email: FROM_EMAIL, Name: FROM_NAME },
-      To: [{ Email: body.email, Name: body.name }],
+      To: [{ Email: rsvpData.email, Name: displayName }],
       Subject: subject,
       TextPart: text,
       HTMLPart: html,
       Attachments: [{
         ContentType: "text/calendar",
         Filename: "twisted-fairytale.ics",
-        Base64Content: buildICS(body.name)
+        Base64Content: buildICS(fullName)
       }],
       CustomID: body.rsvpId
     },

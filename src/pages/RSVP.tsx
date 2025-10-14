@@ -285,11 +285,8 @@ const RSVP = () => {
             await supabase.functions.invoke("send-rsvp-confirmation", {
               body: {
                 rsvpId: existingRsvp.id,
-                name: formData.name,
                 email: formData.email,
-                guests: formData.guestCount,
                 isUpdate: true,
-                additionalGuests: formData.guestCount > 1 ? additionalGuests : [],
               },
             });
           } catch (emailErr) {
@@ -355,11 +352,8 @@ const RSVP = () => {
             await supabase.functions.invoke("send-rsvp-confirmation", {
               body: {
                 rsvpId: data.id,
-                name: formData.name,
                 email: formData.email,
-                guests: formData.guestCount,
                 isUpdate: false,
-                additionalGuests: formData.guestCount > 1 ? additionalGuests : [],
               },
             });
           } catch (emailErr) {

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { getDisplayName } from '../_shared/display-name.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -65,27 +66,44 @@ Deno.serve(async (req) => {
         .select(`
           email, 
           display_name,
-          rsvps(name, status, dietary_restrictions, num_guests)
+          rsvps(first_name, last_name, display_name, name, status, dietary_restrictions, num_guests)
         `)
         .not('email', 'is', null);
       
-      recipientsData = profiles?.map(p => ({
-        email: p.email,
-        name: (p.rsvps && p.rsvps[0]?.name) || p.display_name || p.email.split('@')[0],
-        rsvp_status: p.rsvps && p.rsvps[0]?.status,
-        num_guests: p.rsvps && p.rsvps[0]?.num_guests,
-        dietary_restrictions: p.rsvps && p.rsvps[0]?.dietary_restrictions,
-      })) || [];
+      recipientsData = profiles?.map(p => {
+        const rsvp = p.rsvps?.[0];
+        const nameData = {
+          display_name: rsvp?.display_name || p.display_name,
+          first_name: rsvp?.first_name,
+          last_name: rsvp?.last_name,
+          name: rsvp?.name,
+          email: p.email
+        };
+        
+        return {
+          email: p.email,
+          name: getDisplayName(nameData),
+          rsvp_status: rsvp?.status,
+          num_guests: rsvp?.num_guests,
+          dietary_restrictions: rsvp?.dietary_restrictions,
+        };
+      }) || [];
     } else if (campaign.recipient_list === 'rsvp_yes') {
       const { data: rsvps } = await supabase
         .from('rsvps')
-        .select('email, name, status, dietary_restrictions, num_guests')
+        .select('email, first_name, last_name, display_name, name, status, dietary_restrictions, num_guests')
         .eq('status', 'confirmed')
         .eq('is_approved', true);
       
       recipientsData = rsvps?.map(r => ({
         email: r.email,
-        name: r.name,
+        name: getDisplayName({
+          display_name: r.display_name,
+          first_name: r.first_name,
+          last_name: r.last_name,
+          name: r.name,
+          email: r.email
+        }),
         rsvp_status: r.status,
         num_guests: r.num_guests,
         dietary_restrictions: r.dietary_restrictions,
@@ -93,12 +111,18 @@ Deno.serve(async (req) => {
     } else if (campaign.recipient_list === 'rsvp_pending') {
       const { data: rsvps } = await supabase
         .from('rsvps')
-        .select('email, name, status, dietary_restrictions, num_guests')
+        .select('email, first_name, last_name, display_name, name, status, dietary_restrictions, num_guests')
         .eq('status', 'pending');
       
       recipientsData = rsvps?.map(r => ({
         email: r.email,
-        name: r.name,
+        name: getDisplayName({
+          display_name: r.display_name,
+          first_name: r.first_name,
+          last_name: r.last_name,
+          name: r.name,
+          email: r.email
+        }),
         rsvp_status: r.status,
         num_guests: r.num_guests,
         dietary_restrictions: r.dietary_restrictions,
@@ -106,7 +130,7 @@ Deno.serve(async (req) => {
     } else if (campaign.recipient_list === 'custom' && campaign.custom_recipients) {
       recipientsData = campaign.custom_recipients.map(email => ({
         email,
-        name: email.split('@')[0],
+        name: getDisplayName({ email }),
       }));
     }
 
