@@ -14,23 +14,25 @@ export default function SecuritySettings() {
         <CardHeader>
           <CardTitle>Password & Authentication</CardTitle>
           <CardDescription>
-            Manage your password and authentication settings
+            Manage your password and authentication settings. Change your password anytime without needing your current one.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <Key className="h-5 w-5 text-accent-gold" />
+          <div className="flex items-center justify-between p-6 border-2 border-accent-purple/30 rounded-lg bg-accent-purple/5 hover:border-accent-gold/50 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-accent-gold/10 rounded-full">
+                <Key className="h-6 w-6 text-accent-gold" />
+              </div>
               <div>
-                <p className="font-medium">Password</p>
+                <p className="font-semibold text-lg">Password</p>
                 <p className="text-sm text-muted-foreground">
-                  Last changed: Recently
+                  Update your password - no current password required
                 </p>
               </div>
             </div>
             <Button
-              variant="outline"
               onClick={() => setShowPasswordModal(true)}
+              className="bg-accent-gold hover:bg-accent-gold/80 text-background font-semibold"
             >
               Change Password
             </Button>

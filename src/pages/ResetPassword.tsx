@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye, EyeOff, Settings } from "lucide-react";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isValidRecovery, setIsValidRecovery] = useState<boolean | null>(null);
   const { updatePassword } = useAuth();
@@ -109,7 +112,40 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md border-accent-gold">
+      <div className="w-full max-w-md space-y-4">
+        {/* Settings Alternative Notice */}
+        <Card className="border-accent-purple/30 bg-accent-purple/5">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-3">
+              <div className="flex justify-center">
+                <Settings className="h-8 w-8 text-accent-gold" />
+              </div>
+              <h3 className="font-heading text-lg text-accent-gold">
+                Alternative: Use Settings
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Already logged in? You can also change your password by going to{" "}
+                <Link to="/settings?tab=security" className="text-accent-gold hover:underline font-medium">
+                  Settings → Security
+                </Link>
+                {" "}and clicking "Change Password".
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild 
+                className="border-accent-gold text-accent-gold hover:bg-accent-gold/10"
+              >
+                <Link to="/settings?tab=security">
+                  Go to Settings
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Reset Form */}
+        <Card className="w-full border-accent-gold">
         <CardHeader>
           <CardTitle className="font-heading text-2xl text-accent-gold uppercase text-center">
             Reset Your Password
@@ -124,34 +160,64 @@ export default function ResetPassword() {
               <Label htmlFor="new-password" className="font-subhead text-accent-gold">
                 New Password
               </Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={loading}
-                minLength={6}
-                className="bg-background border-accent-purple/30 focus:border-accent-gold"
-              />
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                  minLength={6}
+                  className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors p-2 -m-1 rounded"
+                  aria-label={showNewPassword ? "Hide password" : "Show password"}
+                  disabled={loading}
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-5 w-5 md:h-4 md:w-4" />
+                  ) : (
+                    <Eye className="h-5 w-5 md:h-4 md:w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirm-password" className="font-subhead text-accent-gold">
                 Confirm Password
               </Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={loading}
-                minLength={6}
-                className="bg-background border-accent-purple/30 focus:border-accent-gold"
-              />
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                  minLength={6}
+                  className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors p-2 -m-1 rounded"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 md:h-4 md:w-4" />
+                  ) : (
+                    <Eye className="h-5 w-5 md:h-4 md:w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="text-xs text-muted-foreground space-y-1">
@@ -181,6 +247,7 @@ export default function ResetPassword() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

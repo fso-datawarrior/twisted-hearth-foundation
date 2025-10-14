@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -13,17 +13,19 @@ interface ChangePasswordModalProps {
 }
 
 export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { updatePassword } = useAuth();
   const { toast } = useToast();
 
   const handleClose = () => {
-    setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
     onClose();
   };
 
@@ -51,27 +53,11 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
     setLoading(true);
     try {
-      // Verify current password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: (await supabase.auth.getUser()).data.user?.email || "",
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        toast({
-          title: "Incorrect password",
-          description: "Your current password is incorrect.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update password
       await updatePassword(newPassword);
       
       toast({
-        title: "Password changed!",
-        description: "Your password has been successfully updated.",
+        title: "Password updated!",
+        description: "Your password has been successfully changed.",
       });
       
       handleClose();
@@ -94,59 +80,73 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
             Change Password
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Enter your current password and choose a new one
+            Choose a new password for your account
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password" className="font-subhead text-accent-gold">
-              Current Password
-            </Label>
-            <Input
-              id="current-password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              className="bg-background border-accent-purple/30 focus:border-accent-gold"
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="new-password" className="font-subhead text-accent-gold">
               New Password
             </Label>
-            <Input
-              id="new-password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              minLength={6}
-              className="bg-background border-accent-purple/30 focus:border-accent-gold"
-            />
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={loading}
+                minLength={6}
+                className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors p-2 -m-1 rounded"
+                aria-label={showNewPassword ? "Hide password" : "Show password"}
+                disabled={loading}
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-5 w-5 md:h-4 md:w-4" />
+                ) : (
+                  <Eye className="h-5 w-5 md:h-4 md:w-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirm-new-password" className="font-subhead text-accent-gold">
               Confirm New Password
             </Label>
-            <Input
-              id="confirm-new-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              minLength={6}
-              className="bg-background border-accent-purple/30 focus:border-accent-gold"
-            />
+            <div className="relative">
+              <Input
+                id="confirm-new-password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={loading}
+                minLength={6}
+                className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors p-2 -m-1 rounded"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                disabled={loading}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5 md:h-4 md:w-4" />
+                ) : (
+                  <Eye className="h-5 w-5 md:h-4 md:w-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1">
@@ -160,7 +160,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
           <div className="flex gap-2 pt-2">
             <Button
               type="submit"
-              disabled={loading || !currentPassword || !newPassword || !confirmPassword}
+              disabled={loading || !newPassword || !confirmPassword}
               className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
             >
               {loading ? "Updating..." : "Update Password"}
