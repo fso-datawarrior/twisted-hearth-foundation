@@ -45,7 +45,9 @@ export default function UserManagement() {
         .select('id, email, display_name, created_at')
         .order('created_at', { ascending: false });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        throw profileError;
+      }
 
       // Get admin roles
       const { data: adminRoles, error: roleError } = await supabase
@@ -53,7 +55,9 @@ export default function UserManagement() {
         .select('user_id')
         .eq('role', 'admin');
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        throw roleError;
+      }
 
       const adminIds = new Set(adminRoles?.map(r => r.user_id) || []);
 
@@ -100,7 +104,7 @@ export default function UserManagement() {
       setActionLoading(true);
 
       // Delete related data first (respects cascade rules)
-      await Promise.all([
+      const relatedDataResults = await Promise.allSettled([
         supabase.from('photos').delete().eq('user_id', deleteTarget.id),
         supabase.from('guestbook').delete().eq('user_id', deleteTarget.id),
         supabase.from('rsvps').delete().eq('user_id', deleteTarget.id),
@@ -109,22 +113,51 @@ export default function UserManagement() {
         supabase.from('user_roles').delete().eq('user_id', deleteTarget.id),
       ]);
 
+      // Check for any failures in related data deletion
+      const failedDeletions = relatedDataResults.filter(result => result.status === 'rejected');
+      if (failedDeletions.length > 0) {
+        console.error('Failed to delete some related data:', failedDeletions);
+        toast.error('Warning: Some user data may not have been deleted completely');
+      }
+
       // Delete profile (which cascades to auth.users)
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from('profiles')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', deleteTarget.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile deletion error:', error);
+        
+        // Check for specific RLS policy violation
+        if (error.message?.includes('policy') || error.code === 'PGRST301') {
+          throw new Error('Permission denied: Admin privileges required to delete users. Please contact system administrator.');
+        }
+        
+        throw error;
+      }
 
-      toast.success(`User ${deleteTarget.email} has been deleted`);
+      // Verify deletion actually occurred
+      if (count === 0) {
+        throw new Error('User deletion failed: No records were deleted. This may be due to insufficient permissions.');
+      }
+
+      toast.success(`User ${deleteTarget.email} has been deleted successfully`);
       setDeleteTarget(null);
       setConfirmEmail('');
       setDeleteStats(null);
       await loadUsers();
     } catch (error: any) {
       console.error('Error deleting user:', error);
-      toast.error(error.message || 'Failed to delete user');
+      
+      // More specific error messages
+      if (error.message?.includes('Permission denied')) {
+        toast.error(error.message);
+      } else if (error.message?.includes('insufficient permissions')) {
+        toast.error(error.message);
+      } else {
+        toast.error(error.message || 'Failed to delete user. Please try again or contact administrator.');
+      }
     } finally {
       setActionLoading(false);
     }
