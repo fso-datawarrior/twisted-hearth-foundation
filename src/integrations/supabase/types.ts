@@ -759,7 +759,9 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          first_name: string | null
           id: string
+          last_name: string | null
           updated_at: string
         }
         Insert: {
@@ -767,7 +769,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           id: string
+          last_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -775,7 +779,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -785,10 +791,13 @@ export type Database = {
           additional_guests: Json | null
           created_at: string
           dietary_restrictions: string | null
+          display_name: string | null
           email: string
           email_sent_at: string | null
+          first_name: string | null
           id: string
           is_approved: boolean | null
+          last_name: string | null
           name: string
           num_guests: number
           status: string | null
@@ -799,10 +808,13 @@ export type Database = {
           additional_guests?: Json | null
           created_at?: string
           dietary_restrictions?: string | null
+          display_name?: string | null
           email: string
           email_sent_at?: string | null
+          first_name?: string | null
           id?: string
           is_approved?: boolean | null
+          last_name?: string | null
           name: string
           num_guests?: number
           status?: string | null
@@ -813,10 +825,13 @@ export type Database = {
           additional_guests?: Json | null
           created_at?: string
           dietary_restrictions?: string | null
+          display_name?: string | null
           email?: string
           email_sent_at?: string | null
+          first_name?: string | null
           id?: string
           is_approved?: boolean | null
+          last_name?: string | null
           name?: string
           num_guests?: number
           status?: string | null
@@ -1329,7 +1344,14 @@ export type Database = {
         }[]
       }
       update_user_profile: {
-        Args: { p_avatar_url?: string; p_display_name?: string }
+        Args:
+          | { p_avatar_url?: string; p_display_name?: string }
+          | {
+              p_avatar_url?: string
+              p_display_name?: string
+              p_first_name?: string
+              p_last_name?: string
+            }
         Returns: {
           message: string
           success: boolean

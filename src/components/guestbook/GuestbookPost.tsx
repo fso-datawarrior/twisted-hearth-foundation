@@ -11,6 +11,7 @@ import MessageComposer from './MessageComposer';
 import { formatDistanceToNow } from 'date-fns';
 import { useAnalytics } from '@/contexts/AnalyticsContext';
 import { UserProfileCard } from '@/components/UserProfileCard';
+import { getDisplayName } from '@/lib/display-name-utils';
 import type { Profile } from '@/lib/profile-api';
 
 interface GuestbookPostProps {
@@ -44,17 +45,31 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
   const [showReplies, setShowReplies] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
+  const [authorRsvp, setAuthorRsvp] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { trackInteraction } = useAnalytics();
 
   const isOwner = user?.id === post.user_id;
+  const displayNameToShow = post.is_anonymous 
+    ? 'Anonymous Guest' 
+    : getDisplayName(authorProfile, authorRsvp);
 
   useEffect(() => {
     loadReplies();
     // Track guestbook post view
     trackInteraction('guestbook', post.id, 'view');
-  }, [post.id, trackInteraction]);
+    
+    // Fetch author's RSVP for display name
+    if (post.user_id && !post.is_anonymous) {
+      supabase
+        .from('rsvps')
+        .select('first_name, last_name, display_name, name')
+        .eq('user_id', post.user_id)
+        .maybeSingle()
+        .then(({ data }) => setAuthorRsvp(data));
+    }
+  }, [post.id, post.user_id, post.is_anonymous, trackInteraction]);
 
   const loadReplies = async () => {
     const { data, error } = await supabase
@@ -151,10 +166,10 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
               <Avatar className="h-10 w-10 border-2 border-accent-purple/30 hover:border-accent-gold transition-colors">
                 <AvatarImage 
                   src={authorProfile?.avatar_url || undefined} 
-                  alt={post.display_name} 
+                  alt={displayNameToShow} 
                 />
                 <AvatarFallback className="bg-accent-purple/20 text-accent-gold">
-                  {post.display_name.charAt(0).toUpperCase()}
+                  {displayNameToShow.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </button>
@@ -166,7 +181,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
                   className={`font-subhead text-base text-accent-gold ${!post.is_anonymous ? 'hover:underline cursor-pointer' : 'cursor-default'}`}
                   disabled={post.is_anonymous}
                 >
-                  {post.is_anonymous ? 'Anonymous Guest' : post.display_name}
+                  {displayNameToShow}
                 </button>
                 <span className="text-muted-foreground">•</span>
                 <p className="font-body text-muted-foreground">

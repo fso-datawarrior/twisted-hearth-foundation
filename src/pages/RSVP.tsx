@@ -55,7 +55,9 @@ const RSVP = () => {
   const { user } = useAuth();
   const startRef = useRef(Date.now());
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
+    displayName: "",
     email: "",
     guestCount: 1,
     costumeIdea: "",
@@ -108,7 +110,9 @@ const RSVP = () => {
         });
         
         setFormData({
-          name: data.name,
+          firstName: data.first_name || data.name?.split(' ')[0] || "",
+          lastName: data.last_name || data.name?.split(' ').slice(1).join(' ') || "",
+          displayName: data.display_name || "",
           email: data.email,
           guestCount: data.num_guests,
           costumeIdea: '',
@@ -189,8 +193,12 @@ const RSVP = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
     }
     
     if (!formData.email.trim()) {
@@ -243,7 +251,10 @@ const RSVP = () => {
           const { error: updateError } = await supabase
             .from('rsvps')
             .update({
-              name: formData.name,
+              first_name: formData.firstName.trim(),
+              last_name: formData.lastName.trim(),
+              display_name: formData.displayName.trim() || null,
+              name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
@@ -317,7 +328,10 @@ const RSVP = () => {
             .from('rsvps')
             .insert([{
               user_id: user!.id,
-              name: formData.name,
+              first_name: formData.firstName.trim(),
+              last_name: formData.lastName.trim(),
+              display_name: formData.displayName.trim() || null,
+              name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
               email: formData.email.toLowerCase().trim(),
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
@@ -401,7 +415,9 @@ const RSVP = () => {
     if (existingRsvp) {
       // Restore original values
       setFormData({
-        name: existingRsvp.name,
+        firstName: existingRsvp.name?.split(' ')[0] || "",
+        lastName: existingRsvp.name?.split(' ').slice(1).join(' ') || "",
+        displayName: "",
         email: existingRsvp.email,
         guestCount: existingRsvp.num_guests,
         costumeIdea: '',
@@ -736,30 +752,58 @@ const RSVP = () => {
                 {/* Required Fields */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <FormField
-                    label="Full Name *"
-                    name="name"
+                    label="First Name *"
+                    name="firstName"
                     type="text"
-                    value={formData.name}
-                    onChange={(value) => handleInputChange("name", value)}
-                    error={errors.name}
-                    placeholder="Enter your real name... or your character's"
-                    autoComplete="name"
+                    value={formData.firstName}
+                    onChange={(value) => handleInputChange("firstName", value)}
+                    error={errors.firstName}
+                    placeholder="Your first name"
+                    autoComplete="given-name"
                     enterKeyHint="next"
                   />
                   
                   <FormField
-                    label="Email Address *"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(value) => handleInputChange("email", value)}
-                    error={errors.email}
-                    placeholder="your.email@domain.com"
-                    inputMode="email"
-                    autoComplete="email"
+                    label="Last Name *"
+                    name="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(value) => handleInputChange("lastName", value)}
+                    error={errors.lastName}
+                    placeholder="Your last name"
+                    autoComplete="family-name"
                     enterKeyHint="next"
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <FormField
+                    label="Display Name (Optional)"
+                    name="displayName"
+                    type="text"
+                    value={formData.displayName}
+                    onChange={(value) => handleInputChange("displayName", value)}
+                    placeholder="How you want to appear on the site"
+                    autoComplete="off"
+                    enterKeyHint="next"
+                  />
+                  <p className="text-xs text-muted-foreground ml-1">
+                    This is what other users will see. If left blank, we'll use your first name.
+                  </p>
+                </div>
+                
+                <FormField
+                  label="Email Address *"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(value) => handleInputChange("email", value)}
+                  error={errors.email}
+                  placeholder="your.email@domain.com"
+                  inputMode="email"
+                  autoComplete="email"
+                  enterKeyHint="next"
+                />
                 
                 <div>
                   <Label className="font-subhead text-accent-gold mb-2 block">

@@ -3,6 +3,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Calendar, MessageSquare, Image } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getDisplayName, getFullName } from '@/lib/display-name-utils';
 import type { Profile } from '@/lib/profile-api';
 
 interface UserProfileCardProps {
@@ -18,6 +19,7 @@ interface UserStats {
 
 export function UserProfileCard({ userId, isOpen, onClose }: UserProfileCardProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [rsvpData, setRsvpData] = useState<any>(null);
   const [stats, setStats] = useState<UserStats>({ totalPosts: 0, totalPhotos: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -31,12 +33,19 @@ export function UserProfileCard({ userId, isOpen, onClose }: UserProfileCardProp
     setLoading(true);
     
     try {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      // Fetch profile and RSVP data
+      const [profileResult, rsvpResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single(),
+        supabase
+          .from('rsvps')
+          .select('first_name, last_name, display_name, name')
+          .eq('user_id', userId)
+          .maybeSingle()
+      ]);
       
       // Fetch statistics
       const [postsResult, photosResult] = await Promise.all([
@@ -51,7 +60,8 @@ export function UserProfileCard({ userId, isOpen, onClose }: UserProfileCardProp
           .eq('user_id', userId)
       ]);
       
-      setProfile(profileData);
+      setProfile(profileResult.data);
+      setRsvpData(rsvpResult.data);
       setStats({
         totalPosts: postsResult.count || 0,
         totalPhotos: photosResult.count || 0
@@ -64,6 +74,9 @@ export function UserProfileCard({ userId, isOpen, onClose }: UserProfileCardProp
   };
 
   if (!profile && !loading) return null;
+
+  const displayNameToShow = getDisplayName(profile, rsvpData);
+  const fullName = getFullName(profile, rsvpData);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,15 +96,20 @@ export function UserProfileCard({ userId, isOpen, onClose }: UserProfileCardProp
             {/* Avatar Section */}
             <div className="flex flex-col items-center gap-4">
               <Avatar className="h-24 w-24 border-4 border-accent-purple/30">
-                <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || 'User'} />
+                <AvatarImage src={profile.avatar_url || undefined} alt={displayNameToShow} />
                 <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-3xl">
-                  {(profile.display_name || profile.email)?.charAt(0).toUpperCase() || 'U'}
+                  {displayNameToShow.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="text-center">
                 <h3 className="font-subhead text-xl text-accent-gold">
-                  {profile.display_name || 'Guest'}
+                  {displayNameToShow}
                 </h3>
+                {fullName !== displayNameToShow && (
+                  <p className="text-sm text-accent-gold/70 font-body mb-1">
+                    {fullName}
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground font-body">
                   {profile.email}
                 </p>

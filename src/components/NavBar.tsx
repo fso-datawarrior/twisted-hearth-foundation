@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
+import { getDisplayName } from "@/lib/display-name-utils";
+import { supabase } from "@/integrations/supabase/client";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
 import packageJson from "../../package.json";
 
@@ -24,6 +26,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [userRsvp, setUserRsvp] = useState<any>(null);
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
@@ -69,10 +72,39 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
     };
   }, []);
 
+  // Fetch RSVP data for display name
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('rsvps')
+        .select('first_name, last_name, display_name, name')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => setUserRsvp(data));
+    } else {
+      setUserRsvp(null);
+    }
+  }, [user]);
+
   // Get current page name for mobile display
   const getCurrentPageName = () => {
     const currentLink = allNavLinks.find(link => link.to === location.pathname);
     return currentLink ? currentLink.label : "Home";
+  };
+
+  const displayNameToShow = getDisplayName(profile, userRsvp, user?.email);
+
+  const getInitials = () => {
+    if (profile?.first_name) {
+      return profile.first_name[0].toUpperCase() + (profile?.last_name?.[0]?.toUpperCase() || '');
+    }
+    if (profile?.display_name) {
+      return profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
   };
 
   // More dropdown component
@@ -257,14 +289,14 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
                         <AvatarImage 
                           src={profile?.avatar_url || undefined} 
-                          alt={profile?.display_name || 'User'} 
+                          alt={displayNameToShow} 
                         />
                         <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-sm">
-                          {(profile?.display_name || user.email)?.charAt(0)?.toUpperCase() || "U"}
+                          {getInitials()}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead text-ink">
-                        {profile?.display_name || user.email?.split("@")[0] || "User"}
+                        {displayNameToShow}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>

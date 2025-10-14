@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Profile {
   id: string;
   email: string;
+  first_name: string | null;
+  last_name: string | null;
   display_name: string | null;
   avatar_url: string | null;
   created_at: string;
@@ -10,6 +12,8 @@ export interface Profile {
 }
 
 export interface ProfileUpdate {
+  first_name?: string;
+  last_name?: string;
   display_name?: string;
   avatar_url?: string | null;
 }
@@ -42,7 +46,9 @@ export const getCurrentUserProfile = async (): Promise<{ data: Profile | null; e
 export const updateUserProfile = async (updates: ProfileUpdate): Promise<{ data: any; error: any }> => {
   try {
     const { data, error } = await supabase.rpc('update_user_profile', {
-      p_display_name: updates.display_name || null,
+      p_first_name: updates.first_name !== undefined ? updates.first_name : null,
+      p_last_name: updates.last_name !== undefined ? updates.last_name : null,
+      p_display_name: updates.display_name !== undefined ? updates.display_name : null,
       p_avatar_url: updates.avatar_url !== undefined ? updates.avatar_url : null,
     });
 

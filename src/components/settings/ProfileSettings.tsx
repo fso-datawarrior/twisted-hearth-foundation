@@ -17,6 +17,8 @@ interface ProfileSettingsProps {
 export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSettingsProps) {
   const { toast } = useToast();
   const { refreshProfile } = useAuth();
+  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [lastName, setLastName] = useState(profile?.last_name || '');
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -143,10 +145,21 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
   };
 
   const handleSaveProfile = async () => {
+    if (!firstName.trim()) {
+      toast({
+        title: "First name required",
+        description: "Please enter your first name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setSaving(true);
 
       const { error } = await updateUserProfile({
+        first_name: firstName.trim(),
+        last_name: lastName.trim() || null,
         display_name: displayName.trim() || null
       });
 
@@ -180,6 +193,9 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
   };
 
   const getInitials = () => {
+    if (firstName) {
+      return firstName[0].toUpperCase() + (lastName ? lastName[0].toUpperCase() : '');
+    }
     if (displayName) {
       return displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }
@@ -275,8 +291,34 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first-name">First Name *</Label>
+              <Input
+                id="first-name"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter your first name"
+                maxLength={50}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="last-name">Last Name</Label>
+              <Input
+                id="last-name"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter your last name"
+                maxLength={50}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="display-name">Display Name</Label>
+            <Label htmlFor="display-name">Display Name (Optional)</Label>
             <Input
               id="display-name"
               type="text"
@@ -286,7 +328,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
               maxLength={50}
             />
             <p className="text-xs text-muted-foreground">
-              This is how your name will appear to other users.
+              This is what other users will see. If left blank, we'll use your first name.
             </p>
           </div>
 
@@ -307,7 +349,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
           <div className="flex gap-2 pt-4">
             <Button
               onClick={handleSaveProfile}
-              disabled={saving || displayName === (profile?.display_name || '')}
+              disabled={saving || (!firstName.trim())}
               className="bg-accent-gold hover:bg-accent-gold/80 text-background"
             >
               {saving ? "Saving..." : "Save Changes"}
@@ -315,7 +357,11 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
             
             <Button
               variant="outline"
-              onClick={() => setDisplayName(profile?.display_name || '')}
+              onClick={() => {
+                setFirstName(profile?.first_name || '');
+                setLastName(profile?.last_name || '');
+                setDisplayName(profile?.display_name || '');
+              }}
               disabled={saving}
             >
               Reset
