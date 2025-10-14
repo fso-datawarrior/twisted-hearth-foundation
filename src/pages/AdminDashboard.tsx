@@ -236,15 +236,14 @@ export default function AdminDashboard() {
   const { data: supportReportsCount } = useQuery({
     queryKey: ['support-reports-count'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { count, error } = await supabase
         .from('support_reports')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'open');
       
       if (error) throw error;
-      return data;
-    },
-    select: (data) => (data as any)?.length || 0,
+      return count || 0;
+    }
   });
 
    return (
