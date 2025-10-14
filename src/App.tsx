@@ -1,17 +1,19 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
-import { ProfileProvider } from "@/contexts/ProfileContext";
+import { ProfileProvider, useProfile } from "@/contexts/ProfileContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
+import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
+import { calculateProfileCompletion, shouldShowCompletionBanner } from "@/lib/profile-utils";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +46,58 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppContent() {
+  const { profile } = useProfile();
+  const [showBanner, setShowBanner] = useState(true);
+
+  const completionStatus = calculateProfileCompletion(profile);
+  const shouldShow = shouldShowCompletionBanner(profile) && showBanner;
+
+  return (
+    <>
+      <SkipLink />
+      {shouldShow && (
+        <ProfileCompletionBanner
+          status={completionStatus}
+          onDismiss={() => setShowBanner(false)}
+        />
+      )}
+      <NavBar />
+      <main>
+        <SwipeNavigator>
+          <Toaster />
+          <Sonner />
+          <Suspense fallback={
+            <div className="p-8 text-center text-[--ink]/80">Loading…</div>
+          }>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/vignettes" element={<Vignettes />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/costumes" element={<Costumes />} />
+                <Route path="/feast" element={<Feast />} />
+                <Route path="/rsvp" element={<RSVP />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/discussion" element={<Discussion />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/settings" element={<UserSettings />} />
+                <Route path="/auth" element={<AuthCallback />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/test" element={<TestPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
+          </Suspense>
+        </SwipeNavigator>
+      </main>
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,42 +112,10 @@ function App() {
             <ProfileProvider>
               <AdminProvider>
                 <AudioProvider>
-                  <SkipLink />
-                  <NavBar />
-                  <main>
-                    <SwipeNavigator>
-                      <Toaster />
-                      <Sonner />
-                    <Suspense fallback={
-                        <div className="p-8 text-center text-[--ink]/80">Loading…</div>
-                      }>
-                      <ErrorBoundary>
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="/vignettes" element={<Vignettes />} />
-                          <Route path="/schedule" element={<Schedule />} />
-                          <Route path="/costumes" element={<Costumes />} />
-                          <Route path="/feast" element={<Feast />} />
-                          <Route path="/rsvp" element={<RSVP />} />
-                          <Route path="/gallery" element={<Gallery />} />
-                          <Route path="/discussion" element={<Discussion />} />
-                          <Route path="/contact" element={<Contact />} />
-                          <Route path="/settings" element={<UserSettings />} />
-                          <Route path="/auth" element={<AuthCallback />} />
-                          <Route path="/reset-password" element={<ResetPassword />} />
-                          <Route path="/test" element={<TestPage />} />
-                          <Route path="/admin" element={<AdminDashboard />} />
-                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </ErrorBoundary>
-                    </Suspense>
-                  </SwipeNavigator>
-                </main>
-              </AudioProvider>
-            </AdminProvider>
-          </ProfileProvider>
+                  <AppContent />
+                </AudioProvider>
+              </AdminProvider>
+            </ProfileProvider>
           </MemoizedAuthProvider>
         </MemoizedAnalyticsProvider>
       </BrowserRouter>

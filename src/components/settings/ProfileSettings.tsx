@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Upload, Trash2 } from 'lucide-react';
+import { ImageIcon, Upload, X, Loader2 } from 'lucide-react';
 import { Profile, updateUserProfile, uploadAvatar, deleteAvatar } from '@/lib/profile-api';
 import { useProfile } from '@/contexts/ProfileContext';
+import AvatarCropModal from './AvatarCropModal';
 
 interface ProfileSettingsProps {
   profile: Profile | null;
@@ -17,9 +28,15 @@ interface ProfileSettingsProps {
 export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSettingsProps) {
   const { toast } = useToast();
   const { refreshProfile, updateProfileOptimistic } = useProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -28,34 +45,90 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
     if (!file) return;
 
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please select a JPEG, PNG, or WebP image.",
-        variant: "destructive",
+        title: 'Invalid file type',
+        description: 'Please upload an image file',
+        variant: 'destructive',
       });
       return;
     }
 
-    // Validate file size (2MB)
-    if (file.size > 2 * 1024 * 1024) {
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "File too large",
-        description: "Please select an image smaller than 2MB.",
-        variant: "destructive",
+        title: 'File too large',
+        description: 'Please upload an image smaller than 5MB',
+        variant: 'destructive',
       });
       return;
     }
 
-    setAvatarFile(file);
-    
-    // Create preview
+    // Show crop modal
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setAvatarPreview(e.target?.result as string);
+    reader.onloadend = () => {
+      setImageToCrop(reader.result as string);
+      setCropModalOpen(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload an image smaller than 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageToCrop(reader.result as string);
+      setCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedBlob: Blob) => {
+    // Convert blob to file
+    const file = new File([croppedBlob], 'avatar.jpg', { type: 'image/jpeg' });
+    setAvatarFile(file);
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    setAvatarPreview(previewUrl);
+
+    // Clean up
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleAvatarUpload = async () => {
@@ -122,6 +195,9 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
       // Delete avatar from storage
       await deleteAvatar(profile.avatar_url);
 
+      // Optimistic update
+      updateProfileOptimistic({ avatar_url: null });
+
       // Update profile to remove avatar URL
       const { error } = await updateUserProfile({
         avatar_url: null
@@ -131,6 +207,13 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
         throw error;
       }
 
+      // Clear local state
+      setAvatarFile(null);
+      setAvatarPreview(null);
+
+      // Refresh profile data
+      await refreshProfile();
+
       toast({
         title: "Avatar removed",
         description: "Your profile photo has been removed.",
@@ -139,6 +222,8 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
       onProfileUpdate();
     } catch (error: any) {
       console.error('Avatar removal error:', error);
+      // Revert on error
+      await refreshProfile();
       toast({
         title: "Removal failed",
         description: error.message || "Please try again.",
@@ -146,7 +231,12 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
       });
     } finally {
       setUploading(false);
+      setRemoveDialogOpen(false);
     }
+  };
+
+  const confirmRemoveAvatar = () => {
+    setRemoveDialogOpen(true);
   };
 
   const handleSaveProfile = async () => {
@@ -211,70 +301,77 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
             Upload a profile photo to personalize your account
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={getAvatarDisplay() || undefined} alt="Profile" />
-                <AvatarFallback className="text-lg font-semibold">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-full flex items-center justify-center cursor-pointer">
-                <Camera className="h-6 w-6 text-white" />
+        <CardContent className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={getAvatarDisplay() || undefined} alt="Profile photo" />
+              <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1">
+              {/* Drag & Drop Zone */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                  isDragging
+                    ? 'border-accent-gold bg-accent-gold/10'
+                    : 'border-border hover:border-accent-gold/50 hover:bg-accent-gold/5'
+                }`}
+              >
+                <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm font-medium mb-1">
+                  {avatarPreview ? 'Change Photo' : 'Upload Photo'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Drag & drop or click to browse
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Max 5MB • JPG, PNG, GIF
+                </p>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('avatar-upload')?.click()}
-                  disabled={uploading}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Choose Photo
-                </Button>
-                
-                {(profile?.avatar_url || avatarFile) && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 mt-4">
+                {avatarPreview && (
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRemoveAvatar}
+                    className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-background"
+                    onClick={handleAvatarUpload}
                     disabled={uploading}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Save Photo
+                  </Button>
+                )}
+
+                {(profile?.avatar_url || avatarPreview) && (
+                  <Button
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                    onClick={confirmRemoveAvatar}
+                    disabled={uploading}
+                  >
+                    <X className="h-4 w-4 mr-2" />
                     Remove
                   </Button>
                 )}
               </div>
-
-              {avatarFile && (
-                <Button
-                  size="sm"
-                  onClick={handleAvatarUpload}
-                  disabled={uploading}
-                  className="bg-accent-gold hover:bg-accent-gold/80 text-background"
-                >
-                  {uploading ? "Uploading..." : "Save Photo"}
-                </Button>
-              )}
-
-              <p className="text-xs text-muted-foreground">
-                JPEG, PNG, or WebP. Max 2MB.
-              </p>
             </div>
           </div>
-
-          <input
-            id="avatar-upload"
-            type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
-            onChange={handleAvatarChange}
-            className="hidden"
-            aria-label="Upload avatar image"
-          />
         </CardContent>
       </Card>
 
@@ -335,6 +432,37 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
           </div>
         </CardContent>
       </Card>
+
+      {/* Avatar Crop Modal */}
+      {imageToCrop && (
+        <AvatarCropModal
+          open={cropModalOpen}
+          onOpenChange={setCropModalOpen}
+          imageUrl={imageToCrop}
+          onCropComplete={handleCropComplete}
+        />
+      )}
+
+      {/* Remove Avatar Confirmation Dialog */}
+      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Avatar</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your profile photo? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveAvatar}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
