@@ -180,7 +180,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {!isForgotPassword && (
             <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as any)} className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-accent-gold/20">
@@ -208,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
               </TabsList>
 
               {/* Password Tab */}
-              <TabsContent value="password" className="space-y-4 mt-4">
+              <TabsContent value="password" className="space-y-2 mt-2">
                 <div className="space-y-2">
                   <Label htmlFor="password-email" className="text-accent-gold">Email</Label>
                   <Input
@@ -274,7 +274,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
               </TabsContent>
 
               {/* Magic Link Tab */}
-              <TabsContent value="magic" className="space-y-4 mt-4">
+              <TabsContent value="magic" className="space-y-2 mt-2">
                 <div className="space-y-2">
                   <Label htmlFor="magic-email" className="text-accent-gold">Email</Label>
                   <Input
@@ -294,7 +294,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
               </TabsContent>
 
               {/* OTP Tab */}
-              <TabsContent value="otp" className="space-y-4 mt-4">
+              <TabsContent value="otp" className="space-y-2 mt-2">
                 <div className="space-y-2">
                   <Label htmlFor="otp-email" className="text-accent-gold">Email</Label>
                   <Input
@@ -347,13 +347,13 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1 items-center">
             {authMethod === 'password' && !isForgotPassword && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1 items-center">
                 <Button
                   type="button"
                   variant="link"
-                  className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
+                  className="text-xs text-accent-gold hover:text-accent-gold/80 hover:underline p-0 h-auto"
                   onClick={() => setIsSignUp(!isSignUp)}
                 >
                   {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
@@ -361,7 +361,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
                 <Button
                   type="button"
                   variant="link"
-                  className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
+                  className="text-xs text-accent-gold hover:text-accent-gold/80 hover:underline p-0 h-auto"
                   onClick={() => setIsForgotPassword(!isForgotPassword)}
                 >
                   {isForgotPassword ? "Back to sign in" : "Forgot password?"}
@@ -370,7 +370,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
                   <Button
                     type="button"
                     variant="link"
-                    className="text-xs text-muted-foreground hover:text-accent-gold p-0 h-auto self-start"
+                    className="text-xs text-blue-400 hover:text-blue-300 hover:underline p-0 h-auto"
                     onClick={() => {
                       handleClose();
                       onOpenSupport();
@@ -386,7 +386,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
               <Button
                 type="button"
                 variant="link"
-                className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
+                className="text-xs text-accent-gold hover:text-accent-gold/80 hover:underline p-0 h-auto"
                 onClick={() => setIsForgotPassword(false)}
               >
                 Back to sign in
