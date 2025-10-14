@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,6 +11,7 @@ import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
+import SupportReportModal from "@/components/SupportReportModal";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter
@@ -57,7 +60,11 @@ function App() {
             <AdminProvider>
               <AudioProvider>
                 <SkipLink />
-                <NavBar />
+                <NavBar onOpenSupport={() => setShowSupportModal(true)} />
+                <SupportReportModal 
+                  isOpen={showSupportModal} 
+                  onClose={() => setShowSupportModal(false)} 
+                />
                 <main>
                   <SwipeNavigator>
                     <Toaster />

@@ -2,6 +2,10 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { consoleCapture } from "@/lib/console-capture";
+
+// Initialize console capture immediately
+consoleCapture;
 
 // Global error handlers to catch initialization errors
 window.onerror = (msg, url, lineNo, columnNo, error) => {

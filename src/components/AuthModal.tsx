@@ -1,132 +1,95 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
-import { Mail, KeyRound, Lock } from "lucide-react";
+import { Mail, KeyRound, Lock, Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenSupport?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [authMethod, setAuthMethod] = useState<"magic" | "otp" | "password">("magic");
+  const [authMethod, setAuthMethod] = useState<'magic' | 'otp' | 'password'>('password');
   const [otpSent, setOtpSent] = useState(false);
-  const { devSignIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail, signIn } = useAuth();
-  const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { signIn, signUpWithPassword, signInWithPassword, resetPasswordForEmail, devSignIn } = useAuth();
   const { isDeveloperMode } = useDeveloperMode();
 
   const handleClose = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setOtp("");
+    setOtpSent(false);
+    setIsSignUp(false);
+    setIsForgotPassword(false);
+    setAuthMethod('password');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     onClose();
-    setTimeout(() => {
-      setEmail("");
-      setPassword("");
-      setOtp("");
-      setIsSignUp(false);
-      setIsForgotPassword(false);
-      setOtpSent(false);
-      setAuthMethod("magic");
-    }, 200);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (isForgotPassword) {
-      if (!email.trim()) {
-        return;
-      }
-      
-      setLoading(true);
-      try {
-        await resetPasswordForEmail(email.trim().toLowerCase());
+    setLoading(true);
+
+    try {
+      // Password reset flow
+      if (isForgotPassword) {
+        await resetPasswordForEmail(email);
+        
         toast({
           title: "Password reset link sent!",
           description: "Check your email for the password reset link.",
-          duration: 5000,
         });
         handleClose();
-      } catch (error: any) {
-        toast({
-          title: "Failed to send reset link",
-          description: error?.message || "Please try again or contact support.",
-          variant: "destructive",
-          duration: 6000,
-        });
-      } finally {
-        setLoading(false);
+        return;
       }
-      return;
-    }
 
-    if (!email.trim()) return;
-
-    // Magic Link Sign In
-    if (authMethod === "magic") {
-      setLoading(true);
-      try {
-        await signIn(email.trim().toLowerCase());
+      // Magic Link authentication
+      if (authMethod === 'magic') {
+        await signIn(email);
+        
         toast({
-          title: "Magic Link Sent! ✨",
-          description: "Check your email for the magic sign-in link.",
-          duration: 5000,
+          title: "Magic link sent!",
+          description: "Check your email to sign in.",
         });
         handleClose();
-      } catch (error: any) {
-        toast({
-          title: "Failed to send magic link",
-          description: error?.message || "Please try again.",
-          variant: "destructive",
-          duration: 6000,
-        });
-      } finally {
-        setLoading(false);
+        return;
       }
-      return;
-    }
 
-    // OTP Sign In
-    if (authMethod === "otp") {
-      if (!otpSent) {
-        // Send OTP
-        setLoading(true);
-        try {
+      // OTP authentication
+      if (authMethod === 'otp') {
+        if (!otpSent) {
+          // Send OTP
           const { supabase } = await import("@/integrations/supabase/client");
-          await supabase.auth.signInWithOtp({
+          const { error } = await supabase.auth.signInWithOtp({
             email: email.trim().toLowerCase(),
           });
+          if (error) throw error;
+          
           setOtpSent(true);
           toast({
-            title: "OTP Sent! 🔑",
-            description: "Check your email for the one-time password.",
-            duration: 5000,
+            title: "OTP sent!",
+            description: "Check your email for the 6-digit code.",
           });
-        } catch (error: any) {
-          toast({
-            title: "Failed to send OTP",
-            description: error?.message || "Please try again.",
-            variant: "destructive",
-            duration: 6000,
-          });
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        // Verify OTP
-        if (!otp.trim()) return;
-        setLoading(true);
-        try {
+        } else {
+          // Verify OTP
           const { supabase } = await import("@/integrations/supabase/client");
           const { error } = await supabase.auth.verifyOtp({
             email: email.trim().toLowerCase(),
@@ -134,66 +97,52 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             type: 'email',
           });
           if (error) throw error;
+          
           toast({
             title: "Welcome back!",
-            description: "You're now signed in.",
-            duration: 3000,
+            description: "You have successfully signed in.",
           });
           handleClose();
-        } catch (error: any) {
+        }
+        return;
+      }
+
+      // Password-based authentication
+      if (authMethod === 'password') {
+        if (isSignUp) {
+          // Validate password confirmation
+          if (password !== confirmPassword) {
+            toast({
+              title: "Passwords don't match",
+              description: "Please ensure both password fields are identical.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          await signUpWithPassword(email, password);
+          
           toast({
-            title: "Invalid OTP",
-            description: "Please check the code and try again.",
-            variant: "destructive",
-            duration: 6000,
+            title: "Account created!",
+            description: "Please check your email to confirm your account.",
           });
-        } finally {
-          setLoading(false);
+          handleClose();
+        } else {
+          await signInWithPassword(email, password);
+          
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
+          handleClose();
         }
       }
-      return;
-    }
-
-    // Password-based authentication
-    if (!password.trim()) return;
-
-    setLoading(true);
-    try {
-      if (isSignUp) {
-        await signUpWithPassword(email.trim().toLowerCase(), password);
-        toast({
-          title: "Account created!",
-          description: "Check your email to verify your account.",
-          duration: 5000,
-        });
-        handleClose();
-      } else {
-        await signInWithPassword(email.trim().toLowerCase(), password);
-        toast({
-          title: "Welcome back!",
-          description: "You're now signed in.",
-          duration: 3000,
-        });
-        handleClose();
-      }
     } catch (error: any) {
-      let errorMsg = isSignUp
-        ? "Unable to create account. Please try again."
-        : "Invalid email or password.";
-      
-      if (error?.message?.includes('Email not confirmed')) {
-        errorMsg = "Please check your email and click the confirmation link before signing in.";
-      } else if (error?.message?.includes('invalid')) {
-        errorMsg = "Please check your email and password.";
-      } else if (error?.message?.includes('already registered')) {
-        errorMsg = "This email is already registered. Try signing in instead.";
-      }
-      
+      console.error('Auth error:', error);
       toast({
-        title: isSignUp ? "Sign up failed" : "Sign in failed",
-        description: errorMsg,
+        title: "Authentication failed",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
-        duration: 6000,
       });
     } finally {
       setLoading(false);
@@ -201,24 +150,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleDevSignIn = async () => {
-    if (!email.trim()) {
-      return;
-    }
+    if (!email) return;
     
     setLoading(true);
     try {
-      await devSignIn(email.trim().toLowerCase());
+      await devSignIn(email);
       toast({
-        title: "Dev sign-in successful! 🚀",
-        description: "You're now signed in (dev mode - no email required)",
-        duration: 4000,
+        title: "Dev sign-in successful!",
+        description: "You're now signed in (dev mode).",
       });
       handleClose();
-      setEmail("");
     } catch (error: any) {
       toast({
         title: "Dev sign-in failed",
-        description: error?.message || "Something went wrong with dev mode sign-in",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -228,195 +173,247 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-[425px] mx-auto border-accent-gold">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[425px] mx-auto bg-background border-2 border-accent-gold/30">
         <DialogHeader>
-          <DialogTitle className="font-heading text-xl sm:text-2xl text-accent-gold uppercase">
-            {isForgotPassword ? "Reset Password" : "Sign In to The Bash"}
+          <DialogTitle className="text-2xl font-bold text-accent-gold">
+            {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Sign In"}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm">
-            {isForgotPassword
-              ? "Enter your email to receive a password reset link."
-              : authMethod === "magic"
-              ? "Enter your email to receive a magic link for instant access."
-              : authMethod === "otp"
-              ? otpSent
-                ? "Enter the OTP code sent to your email."
-                : "We'll send a one-time password to your email."
-              : isSignUp
-              ? "Create an account with email and password."
-              : "Sign in with your email and password."
-            }
-          </DialogDescription>
         </DialogHeader>
 
-        {!isForgotPassword && (
-          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as typeof authMethod)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-accent-gold/20">
-              <TabsTrigger 
-                value="magic" 
-                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
-              >
-                <Mail className="w-4 h-4 mr-1" />
-                Magic
-              </TabsTrigger>
-              <TabsTrigger 
-                value="otp"
-                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
-              >
-                <KeyRound className="w-4 h-4 mr-1" />
-                OTP
-              </TabsTrigger>
-              <TabsTrigger 
-                value="password"
-                className="data-[state=active]:bg-accent-gold data-[state=active]:text-background text-xs sm:text-sm"
-              >
-                <Lock className="w-4 h-4 mr-1" />
-                Password
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-subhead text-accent-gold text-sm uppercase">
-              Email Address
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your.email@example.com"
-              required
-              disabled={loading || (authMethod === "otp" && otpSent)}
-              className="bg-background border-accent-purple/30 focus:border-accent-gold"
-            />
-          </div>
+          {!isForgotPassword && (
+            <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as any)} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-accent-gold/20">
+                <TabsTrigger 
+                  value="password" 
+                  className="data-[state=active]:bg-accent-gold/20 data-[state=active]:text-accent-gold text-xs sm:text-sm"
+                >
+                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  Password
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="magic" 
+                  className="data-[state=active]:bg-accent-gold/20 data-[state=active]:text-accent-gold text-xs sm:text-sm"
+                >
+                  <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  Magic
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="otp" 
+                  className="data-[state=active]:bg-accent-gold/20 data-[state=active]:text-accent-gold text-xs sm:text-sm"
+                >
+                  <KeyRound className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  OTP
+                </TabsTrigger>
+              </TabsList>
 
-          {authMethod === "otp" && otpSent && (
+              {/* Password Tab */}
+              <TabsContent value="password" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password-email" className="text-accent-gold">Email</Label>
+                  <Input
+                    id="password-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-accent-gold">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-accent-gold">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent-gold transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  {isSignUp ? "Create an account with email and password" : "Sign in with your email and password"}
+                </p>
+              </TabsContent>
+
+              {/* Magic Link Tab */}
+              <TabsContent value="magic" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="magic-email" className="text-accent-gold">Email</Label>
+                  <Input
+                    id="magic-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  We'll send you a magic link to sign in - no password needed!
+                </p>
+              </TabsContent>
+
+              {/* OTP Tab */}
+              <TabsContent value="otp" className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="otp-email" className="text-accent-gold">Email</Label>
+                  <Input
+                    id="otp-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={otpSent}
+                    className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+                  />
+                </div>
+
+                {otpSent && (
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-code" className="text-accent-gold">6-digit code</Label>
+                    <Input
+                      id="otp-code"
+                      type="text"
+                      placeholder="000000"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      maxLength={6}
+                      required
+                      className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground font-mono text-lg tracking-widest text-center"
+                    />
+                  </div>
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  {otpSent ? "Enter the 6-digit code sent to your email" : "We'll send you a one-time code to sign in"}
+                </p>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {isForgotPassword && (
             <div className="space-y-2">
-              <Label htmlFor="otp" className="font-subhead text-accent-gold text-sm uppercase">
-                One-Time Password
-              </Label>
+              <Label htmlFor="reset-email" className="text-accent-gold">Email</Label>
               <Input
-                id="otp"
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter 6-digit code"
+                id="reset-email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
-                maxLength={6}
-                className="bg-background border-accent-purple/30 focus:border-accent-gold text-center text-lg tracking-widest"
+                className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground"
               />
             </div>
           )}
 
-          {authMethod === "password" && !isForgotPassword && (
-            <div className="space-y-2">
-              <Label htmlFor="password" className="font-subhead text-accent-gold text-sm uppercase">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={loading}
-                minLength={6}
-                className="bg-background border-accent-purple/30 focus:border-accent-gold"
-              />
-            </div>
-          )}
+          <div className="flex flex-col gap-2">
+            {authMethod === 'password' && !isForgotPassword && (
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
+                  onClick={() => setIsForgotPassword(!isForgotPassword)}
+                >
+                  {isForgotPassword ? "Back to sign in" : "Forgot password?"}
+                </Button>
+                {onOpenSupport && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-xs text-muted-foreground hover:text-accent-gold p-0 h-auto self-start"
+                    onClick={() => {
+                      handleClose();
+                      onOpenSupport();
+                    }}
+                  >
+                    Having Trouble Signing In? <span className="font-semibold ml-1">Report Issue</span>
+                  </Button>
+                )}
+              </div>
+            )}
 
-          {authMethod === "magic" && !isForgotPassword && (
-            <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
-              <p className="text-xs text-accent-gold font-medium mb-1">✨ Magic link sign-in</p>
-              <p className="text-xs text-muted-foreground">
-                No password needed. Just click the link in your email.
-              </p>
-            </div>
-          )}
-
-          {authMethod === "otp" && !otpSent && !isForgotPassword && (
-            <div className="bg-accent-gold/10 border border-accent-gold/20 rounded-lg p-3">
-              <p className="text-xs text-accent-gold font-medium mb-1">🔑 One-time password</p>
-              <p className="text-xs text-muted-foreground">
-                We'll send a secure code to your email that you can use to sign in.
-              </p>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between text-xs flex-wrap gap-2">
-            {isForgotPassword ? (
-              <button
+            {isForgotPassword && (
+              <Button
                 type="button"
+                variant="link"
+                className="text-xs text-accent-gold hover:text-accent-gold/80 p-0 h-auto self-start"
                 onClick={() => setIsForgotPassword(false)}
-                className="text-accent-gold hover:text-accent-gold/80 underline"
               >
-                Back to Sign In
-              </button>
-            ) : (
-              <>
-                {authMethod === "password" && (
-                  <button
-                    type="button"
-                    onClick={() => setIsSignUp(!isSignUp)}
-                    className="text-accent-gold hover:text-accent-gold/80 underline"
-                  >
-                    {isSignUp ? "Sign in instead" : "Create account"}
-                  </button>
-                )}
-                {authMethod === "password" && !isSignUp && (
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPassword(true)}
-                    className="text-accent-gold hover:text-accent-gold/80 underline"
-                  >
-                    Forgot Password?
-                  </button>
-                )}
-              </>
+                Back to sign in
+              </Button>
             )}
           </div>
 
           <Button
             type="submit"
-            disabled={
-              loading || 
-              !email.trim() || 
-              (authMethod === "password" && !isForgotPassword && !password.trim()) ||
-              (authMethod === "otp" && otpSent && !otp.trim())
-            }
-            className="w-full bg-accent-gold hover:bg-accent-gold/80 text-background font-subhead"
+            disabled={loading}
+            className="w-full bg-accent-gold hover:bg-accent-gold/90 text-background font-semibold"
           >
-            {loading 
-              ? "Processing..." 
-              : isForgotPassword
-              ? "Send Reset Link"
-              : authMethod === "magic"
-              ? "Send Magic Link"
-              : authMethod === "otp"
-              ? otpSent
-                ? "Verify OTP"
-                : "Send OTP"
-              : isSignUp
-              ? "Sign Up"
-              : "Sign In"
-            }
+            {loading ? "Processing..." : 
+             isForgotPassword ? "Send Reset Link" :
+             authMethod === 'magic' ? "Send Magic Link" :
+             authMethod === 'otp' ? (otpSent ? "Verify Code" : "Send Code") :
+             isSignUp ? "Create Account" : "Sign In"}
           </Button>
 
           {isDeveloperMode && (
-            <div className="pt-4 border-t border-accent-purple/20">
+            <div className="pt-4 border-t border-accent-gold/20">
               <p className="text-xs text-amber-400 mb-2 text-center">🔧 Developer Mode Active</p>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleDevSignIn}
-                disabled={loading || !email.trim()}
+                disabled={loading || !email}
                 className="w-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
               >
                 {loading ? "Processing..." : "Dev Sign-in (Skip Auth)"}
@@ -428,3 +425,5 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     </Dialog>
   );
 }
+
+export { AuthModal };

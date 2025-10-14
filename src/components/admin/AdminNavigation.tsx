@@ -53,6 +53,7 @@ interface AdminNavigationProps {
     photos?: number;
     selectedVignettePhotos?: number;
     activeLibations?: number;
+    supportReports?: number;
   };
 }
 
@@ -94,6 +95,7 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
       icon: Settings,
       items: [
         { id: 'email', label: 'Email Campaigns', icon: Mail },
+        { id: 'support-reports', label: 'Support Reports', icon: MessageSquare, count: counts.supportReports },
         { id: 'database-reset', label: 'Database Reset', icon: Database },
       ],
     },

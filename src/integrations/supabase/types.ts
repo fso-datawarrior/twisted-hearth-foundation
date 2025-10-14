@@ -879,6 +879,42 @@ export type Database = {
         }
         Relationships: []
       }
+      support_reports: {
+        Row: {
+          admin_notes: string | null
+          browser_logs: Json | null
+          created_at: string | null
+          description: string
+          email: string
+          id: string
+          screenshot_url: string | null
+          status: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          browser_logs?: Json | null
+          created_at?: string | null
+          description: string
+          email: string
+          id?: string
+          screenshot_url?: string | null
+          status?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          browser_logs?: Json | null
+          created_at?: string | null
+          description?: string
+          email?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       system_metrics: {
         Row: {
           details: Json | null

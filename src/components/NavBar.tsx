@@ -16,9 +16,10 @@ import packageJson from "../../package.json";
 interface NavBarProps {
   variant?: "public";
   ctaLabel?: string;
+  onOpenSupport?: () => void;
 }
 
-const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
+const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -219,6 +220,12 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                 <Link to="/rsvp">{ctaLabel}</Link>
               </Button>
           </div>
+
+          <AuthModal 
+            isOpen={showAuthModal} 
+            onClose={() => setShowAuthModal(false)}
+            onOpenSupport={onOpenSupport}
+          />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
           <div className="flex nav-full:hidden items-center space-x-4">
