@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Camera, Upload, Trash2 } from 'lucide-react';
 import { Profile, updateUserProfile, uploadAvatar, deleteAvatar } from '@/lib/profile-api';
 import { useAuth } from '@/lib/auth';
+import { syncRSVPFromProfile, loadProfileDataForRSVP } from '@/lib/profile-sync';
 
 interface ProfileSettingsProps {
   profile: Profile | null;
@@ -24,6 +25,30 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Sync RSVP data when component mounts (real-time sync)
+  useEffect(() => {
+    const syncFromRSVP = async () => {
+      if (!profile) return;
+      
+      // Check if we have RSVP data that might be newer than profile
+      const rsvpData = await loadProfileDataForRSVP();
+      if (rsvpData) {
+        // Update local state if RSVP has newer data
+        if (rsvpData.firstName && rsvpData.firstName !== firstName) {
+          setFirstName(rsvpData.firstName);
+        }
+        if (rsvpData.lastName && rsvpData.lastName !== lastName) {
+          setLastName(rsvpData.lastName);
+        }
+        if (rsvpData.displayName && rsvpData.displayName !== displayName) {
+          setDisplayName(rsvpData.displayName);
+        }
+      }
+    };
+
+    syncFromRSVP();
+  }, [profile, firstName, lastName, displayName]);
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -167,10 +192,27 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
         throw error;
       }
 
-      toast({
-        title: "Profile updated!",
-        description: "Your profile information has been saved.",
+      // Sync profile changes to RSVP record
+      const syncResult = await syncRSVPFromProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        displayName: displayName.trim()
       });
+
+      if (!syncResult.success) {
+        console.warn('RSVP sync failed:', syncResult.error);
+        // Don't fail the profile update, just log the warning
+        toast({
+          title: "Profile updated!",
+          description: "Your profile information has been saved. Note: RSVP sync had issues.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Profile updated!",
+          description: "Your profile information has been saved and synced to your RSVP.",
+        });
+      }
 
       onProfileUpdate();
       await refreshProfile();

@@ -12,10 +12,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit } from "lucide-react";
+import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit, Settings, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { z } from "zod";
 import { trackActivity } from "@/lib/analytics-api";
+import { ensureProfileExists, loadProfileDataForRSVP } from "@/lib/profile-sync";
+import { Link } from "react-router-dom";
 
 interface PotluckItem {
   id: string;
@@ -71,7 +73,7 @@ const RSVP = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [additionalGuests, setAdditionalGuests] = useState<AdditionalGuest[]>([]);
 
-  // Load existing RSVP on mount
+  // Load existing RSVP and profile data on mount
   useEffect(() => {
     const loadExistingRsvp = async () => {
       if (!user) return;
@@ -122,14 +124,44 @@ const RSVP = () => {
         });
         setIsEditing(false); // Show sealed state
       } else {
-        // New user, auto-populate email
-        setFormData(prev => ({ ...prev, email: user.email || "" }));
+        // New user - try to load profile data first, then auto-populate email
+        const profileData = await loadProfileDataForRSVP();
+        
+        setFormData(prev => ({ 
+          ...prev, 
+          firstName: profileData?.firstName || "",
+          lastName: profileData?.lastName || "",
+          displayName: profileData?.displayName || "",
+          email: user.email || "" 
+        }));
         setIsEditing(true); // Show form
       }
     };
 
     loadExistingRsvp();
   }, [user]);
+
+  // Load profile data when user changes (for real-time sync)
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user) return;
+      
+      // Only load profile data if we don't have existing RSVP data
+      if (!existingRsvp) {
+        const profileData = await loadProfileDataForRSVP();
+        if (profileData) {
+          setFormData(prev => ({
+            ...prev,
+            firstName: profileData.firstName || prev.firstName,
+            lastName: profileData.lastName || prev.lastName,
+            displayName: profileData.displayName || prev.displayName,
+          }));
+        }
+      }
+    };
+
+    loadProfileData();
+  }, [user, existingRsvp]);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -201,11 +233,7 @@ const RSVP = () => {
       newErrors.lastName = "Last name is required";
     }
     
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
+    // Email validation removed since it's locked to user's auth email
     
     if (formData.guestCount < 1 || formData.guestCount > 10) {
       newErrors.guestCount = "Guest count must be between 1 and 10";
@@ -255,7 +283,7 @@ const RSVP = () => {
               last_name: formData.lastName.trim(),
               display_name: formData.displayName.trim() || null,
               name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
-              email: formData.email.toLowerCase().trim(),
+              email: user!.email!, // Use authenticated user's email
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
@@ -289,6 +317,19 @@ const RSVP = () => {
               updated_at: updatedData.updated_at,
               status: updatedData.status,
             });
+
+            // Sync updated RSVP data to profile
+            const syncResult = await ensureProfileExists({
+              firstName: formData.firstName.trim(),
+              lastName: formData.lastName.trim(),
+              displayName: formData.displayName.trim(),
+              email: user!.email!
+            });
+
+            if (!syncResult.success) {
+              console.warn('Profile sync failed:', syncResult.error);
+              // Don't fail the RSVP update, just log the warning
+            }
           }
 
           // Send update notification emails
@@ -332,7 +373,7 @@ const RSVP = () => {
               last_name: formData.lastName.trim(),
               display_name: formData.displayName.trim() || null,
               name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
-              email: formData.email.toLowerCase().trim(),
+              email: user!.email!, // Use authenticated user's email
               num_guests: formData.guestCount,
               dietary_restrictions: formData.dietary || null,
               additional_guests: (formData.guestCount > 1 ? additionalGuests : null) as any,
@@ -359,6 +400,19 @@ const RSVP = () => {
               updated_at: data.updated_at,
               status: data.status,
             });
+
+            // Sync RSVP data to profile (create profile if it doesn't exist)
+            const syncResult = await ensureProfileExists({
+              firstName: formData.firstName.trim(),
+              lastName: formData.lastName.trim(),
+              displayName: formData.displayName.trim(),
+              email: user!.email!
+            });
+
+            if (!syncResult.success) {
+              console.warn('Profile sync failed:', syncResult.error);
+              // Don't fail the RSVP submission, just log the warning
+            }
           }
 
           // Send confirmation email
@@ -736,7 +790,7 @@ const RSVP = () => {
               </div>
             ) : (
               <div className="bg-card p-8 rounded-lg border border-accent-purple/30 shadow-lg">
-                <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isSubmitting ? "true" : "false"}>
+                <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Honeypot field - anti-spam */}
                 <input 
                   type="text" 
@@ -792,18 +846,36 @@ const RSVP = () => {
                   </p>
                 </div>
                 
-                <FormField
-                  label="Email Address *"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(value) => handleInputChange("email", value)}
-                  error={errors.email}
-                  placeholder="your.email@domain.com"
-                  inputMode="email"
-                  autoComplete="email"
-                  enterKeyHint="next"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="email-display">Email Address *</Label>
+                  <div className="relative">
+                    <div className="flex items-center gap-2 p-3 rounded-md border border-input bg-muted/50 text-sm text-muted-foreground">
+                      <Lock className="h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1">{user?.email}</span>
+                    </div>
+                    <div className="mt-2 p-3 rounded-md bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-2 text-sm">
+                        <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-blue-800 dark:text-blue-200 font-medium">
+                            Need to change your email?
+                          </p>
+                          <p className="text-blue-700 dark:text-blue-300 mt-1">
+                            Visit your{" "}
+                            <Link 
+                              to="/settings" 
+                              className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium underline underline-offset-2"
+                            >
+                              Settings
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>{" "}
+                            to update your email address.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
                 <div>
                   <Label className="font-subhead text-accent-gold mb-2 block">
