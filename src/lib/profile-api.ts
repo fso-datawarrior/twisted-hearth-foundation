@@ -134,3 +134,67 @@ export const deleteAvatar = async (avatarUrl: string): Promise<{ error: any }> =
     return { error };
   }
 };
+
+export interface UserActivityStats {
+  photos_uploaded: number;
+  guestbook_posts: number;
+  events_attended: number;
+  days_active: number;
+}
+
+/**
+ * Get user activity statistics
+ */
+export const getUserActivityStats = async (): Promise<{ 
+  data: UserActivityStats | null; 
+  error: any 
+}> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      return { data: null, error: { message: 'Not authenticated' } };
+    }
+
+    // Get photos count
+    const { count: photosCount } = await supabase
+      .from('photos')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id);
+
+    // Get guestbook posts count
+    const { count: guestbookCount } = await supabase
+      .from('guestbook')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id)
+      .is('deleted_at', null);
+
+    // Get RSVPs count
+    const { count: rsvpsCount } = await supabase
+      .from('rsvps')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id);
+
+    // Get profile created date for days active
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('created_at')
+      .eq('id', user.user.id)
+      .single();
+
+    const daysActive = profile?.created_at 
+      ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    return {
+      data: {
+        photos_uploaded: photosCount || 0,
+        guestbook_posts: guestbookCount || 0,
+        events_attended: rsvpsCount || 0,
+        days_active: daysActive
+      },
+      error: null
+    };
+  } catch (error) {
+    return { data: null, error };
+  }
+};

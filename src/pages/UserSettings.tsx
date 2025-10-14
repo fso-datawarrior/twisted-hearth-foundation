@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useToast } from '@/hooks/use-toast';
 import RequireAuth from '@/components/RequireAuth';
 import { Card } from '@/components/ui/card';
@@ -10,44 +11,11 @@ import { Link } from 'react-router-dom';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import AccountSettings from '@/components/settings/AccountSettings';
 import SecuritySettings from '@/components/settings/SecuritySettings';
-import { getCurrentUserProfile, Profile } from '@/lib/profile-api';
 
 export default function UserSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await getCurrentUserProfile();
-      
-      if (error) {
-        toast({
-          title: "Error loading profile",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setProfile(data);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      toast({
-        title: "Error loading profile",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { profile, loading, refreshProfile } = useProfile();
 
   if (loading) {
     return (
@@ -103,14 +71,14 @@ export default function UserSettings() {
                 <TabsContent value="profile" className="space-y-6">
                   <ProfileSettings 
                     profile={profile} 
-                    onProfileUpdate={loadProfile}
+                    onProfileUpdate={refreshProfile}
                   />
                 </TabsContent>
 
                 <TabsContent value="account" className="space-y-6">
                   <AccountSettings 
                     profile={profile} 
-                    onProfileUpdate={loadProfile}
+                    onProfileUpdate={refreshProfile}
                   />
                 </TabsContent>
 

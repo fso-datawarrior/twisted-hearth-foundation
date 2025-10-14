@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Calendar, AlertTriangle } from 'lucide-react';
-import { Profile, updateUserEmail } from '@/lib/profile-api';
+import { Profile, updateUserEmail, getUserActivityStats, UserActivityStats } from '@/lib/profile-api';
 
 interface AccountSettingsProps {
   profile: Profile | null;
@@ -17,6 +17,25 @@ export default function AccountSettings({ profile, onProfileUpdate }: AccountSet
   const [newEmail, setNewEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [stats, setStats] = useState<UserActivityStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    setLoadingStats(true);
+    const { data, error } = await getUserActivityStats();
+    
+    if (error) {
+      console.error('Failed to load stats:', error);
+    } else {
+      setStats(data);
+    }
+    
+    setLoadingStats(false);
+  };
 
   const handleEmailUpdate = async () => {
     if (newEmail !== confirmEmail) {
@@ -169,6 +188,60 @@ export default function AccountSettings({ profile, onProfileUpdate }: AccountSet
             >
               {updating ? "Updating..." : "Update Email"}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account Statistics */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Activity</CardTitle>
+          <CardDescription>
+            Overview of your account activity and contributions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="space-y-2">
+              <p className="text-2xl font-bold text-accent-gold">
+                {loadingStats ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats?.photos_uploaded || 0
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">Photos Uploaded</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-2xl font-bold text-accent-gold">
+                {loadingStats ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats?.guestbook_posts || 0
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">Guestbook Posts</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-2xl font-bold text-accent-gold">
+                {loadingStats ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats?.events_attended || 0
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">Events Attended</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-2xl font-bold text-accent-gold">
+                {loadingStats ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats?.days_active || 0
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">Days Active</p>
+            </div>
           </div>
         </CardContent>
       </Card>

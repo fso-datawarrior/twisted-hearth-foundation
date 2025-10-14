@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/lib/auth";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
@@ -54,14 +55,15 @@ function App() {
       >
         <MemoizedAnalyticsProvider>
           <MemoizedAuthProvider>
-            <AdminProvider>
-              <AudioProvider>
-                <SkipLink />
-                <NavBar />
-                <main>
-                  <SwipeNavigator>
-                    <Toaster />
-                    <Sonner />
+            <ProfileProvider>
+              <AdminProvider>
+                <AudioProvider>
+                  <SkipLink />
+                  <NavBar />
+                  <main>
+                    <SwipeNavigator>
+                      <Toaster />
+                      <Sonner />
                     <Suspense fallback={
                         <div className="p-8 text-center text-[--ink]/80">Loading…</div>
                       }>
@@ -91,6 +93,7 @@ function App() {
                 </main>
               </AudioProvider>
             </AdminProvider>
+          </ProfileProvider>
           </MemoizedAuthProvider>
         </MemoizedAnalyticsProvider>
       </BrowserRouter>

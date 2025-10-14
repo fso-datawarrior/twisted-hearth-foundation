@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Upload, Trash2 } from 'lucide-react';
 import { Profile, updateUserProfile, uploadAvatar, deleteAvatar } from '@/lib/profile-api';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface ProfileSettingsProps {
   profile: Profile | null;
@@ -15,6 +16,7 @@ interface ProfileSettingsProps {
 
 export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSettingsProps) {
   const { toast } = useToast();
+  const { refreshProfile, updateProfileOptimistic } = useProfile();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -74,6 +76,9 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
         throw error;
       }
 
+      // Optimistic update for instant feedback
+      updateProfileOptimistic({ avatar_url: avatarUrl || '' });
+
       // Update profile with new avatar URL
       const { error: updateError } = await updateUserProfile({
         avatar_url: avatarUrl
@@ -90,9 +95,14 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
 
       setAvatarFile(null);
       setAvatarPreview(null);
+      
+      // Refresh to ensure sync
+      await refreshProfile();
       onProfileUpdate();
     } catch (error: any) {
       console.error('Avatar upload error:', error);
+      // Revert optimistic update on error
+      await refreshProfile();
       toast({
         title: "Upload failed",
         description: error.message || "Please try again.",
@@ -143,6 +153,9 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
     try {
       setSaving(true);
 
+      // Optimistic update
+      updateProfileOptimistic({ display_name: displayName.trim() || null });
+
       const { error } = await updateUserProfile({
         display_name: displayName.trim() || null
       });
@@ -156,9 +169,12 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
         description: "Your profile information has been saved.",
       });
 
+      await refreshProfile();
       onProfileUpdate();
     } catch (error: any) {
       console.error('Profile update error:', error);
+      // Revert on error
+      await refreshProfile();
       toast({
         title: "Update failed",
         description: error.message || "Please try again.",

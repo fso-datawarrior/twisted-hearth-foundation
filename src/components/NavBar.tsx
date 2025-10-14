@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useAuth } from "@/lib/auth";
+import { useProfile } from "@/contexts/ProfileContext";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
@@ -25,6 +26,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { profile: userProfile } = useProfile();
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
   const { isMuted, toggleMute } = useAudio();
@@ -154,12 +156,15 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent-purple/10">
                       <Avatar className="h-8 w-8">
+                        {userProfile?.avatar_url && (
+                          <AvatarImage src={userProfile.avatar_url} alt={userProfile.display_name || 'User'} />
+                        )}
                         <AvatarFallback className="bg-accent-purple text-background text-sm">
-                          {user.email?.charAt(0)?.toUpperCase() || "U"}
+                          {userProfile?.display_name?.[0]?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead text-ink">
-                        {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                        {userProfile?.display_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -321,12 +326,15 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                   <div className="space-y-3 pt-2 border-t border-accent-purple/30">
                     <div className="flex items-center gap-2 text-ink">
                       <Avatar className="h-8 w-8">
+                        {userProfile?.avatar_url && (
+                          <AvatarImage src={userProfile.avatar_url} alt={userProfile.display_name || 'User'} />
+                        )}
                         <AvatarFallback className="bg-accent-purple text-background text-sm">
-                          {user.email?.charAt(0)?.toUpperCase() || "U"}
+                          {userProfile?.display_name?.[0]?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead">
-                        {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                        {userProfile?.display_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
                       </span>
                     </div>
                     
