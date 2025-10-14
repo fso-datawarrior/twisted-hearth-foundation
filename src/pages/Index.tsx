@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { formatEventLong, formatEventTime } from "@/lib/event";
 import { useReveal } from "@/hooks/use-reveal";
@@ -10,6 +10,7 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import { Button } from "@/components/ui/button";
 import PrepLinks from "@/components/PrepLinks";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
 const LINES = [
@@ -65,11 +66,27 @@ function OneLinerRotator() {
 
 const Index = () => {
   const [selectedVignette, setSelectedVignette] = useState<any>(null);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
   // Section reveals
-  const { ref: vigRef, shown: vigShown } = useReveal();
-  const { ref: ctaRef, shown: ctaShown } = useReveal();
+  const vigReveal = useReveal();
+  const ctaReveal = useReveal();
+  const { ref: vigRef, shown: vigShown } = vigReveal;
+  const { ref: ctaRef, shown: ctaShown } = ctaReveal;
+
+  // Check for modal parameter in URL to auto-open Change Password modal
+  useEffect(() => {
+    const modalParam = searchParams.get('modal');
+    if (modalParam === 'change-password') {
+      setShowChangePasswordModal(true);
+      // Remove the modal parameter from URL after opening
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('modal');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Fetch homepage vignettes from database
   const { data: pastVignettes = [], isLoading: vignettesLoading } = useQuery({
@@ -286,6 +303,12 @@ const Index = () => {
           </div>
         )}
       </Modal>
+      
+      {/* Change Password Modal */}
+      <ChangePasswordModal 
+        isOpen={showChangePasswordModal} 
+        onClose={() => setShowChangePasswordModal(false)} 
+      />
       
       {/* Footer with hunt trigger */}
       <div className="relative">

@@ -123,7 +123,7 @@ export default function HeroVideo({
 
 
       {/* Text overlay */}
-      <div className="relative z-20 mx-auto flex max-w-5xl flex-col items-center px-4 py-20 text-center text-ink">
+      <div className="relative z-20 mx-auto flex max-w-5xl flex-col items-center px-4 pt-32 sm:pt-36 md:pt-40 pb-20 text-center text-ink">
         <h1 className="font-[Cinzel] text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-tight text-white drop-shadow-lg hero-title-shadow">
           {headline}
         </h1>

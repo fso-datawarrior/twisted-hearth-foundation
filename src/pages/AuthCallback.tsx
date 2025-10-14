@@ -42,10 +42,10 @@ export default function AuthCallback() {
         const errorCode = hashParams.get('error_code');
         const errorDescription = hashParams.get('error_description');
         
-        // If this is a password recovery link, redirect to reset-password page
+        // If this is a password recovery link, redirect to home page with modal parameter
         if (type === 'recovery') {
-          logger.info('🔐 AuthCallback: Detected password recovery, redirecting to reset-password');
-          navigate('/reset-password' + window.location.hash, { replace: true });
+          logger.info('🔐 AuthCallback: Detected password recovery, redirecting to home with modal');
+          navigate('/?modal=change-password' + window.location.hash, { replace: true });
           return;
         }
         
