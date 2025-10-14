@@ -94,13 +94,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
 
   const displayNameToShow = getDisplayName(profile, userRsvp, user?.email);
 
-  const getInitials = () => {
-    if (profile?.first_name) {
-      return profile.first_name[0].toUpperCase() + (profile?.last_name?.[0]?.toUpperCase() || '');
+  const getInitials = (profileData: typeof profile, rsvpData: typeof userRsvp) => {
+    // Priority 1: Profile first name + last name
+    if (profileData?.first_name) {
+      return profileData.first_name[0].toUpperCase() + (profileData?.last_name?.[0]?.toUpperCase() || '');
     }
-    if (profile?.display_name) {
-      return profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    // Priority 2: RSVP first name + last name
+    if (rsvpData?.first_name) {
+      return rsvpData.first_name[0].toUpperCase() + (rsvpData?.last_name?.[0]?.toUpperCase() || '');
     }
+    // Priority 3: Display name (split and take first letters)
+    if (profileData?.display_name && profileData.display_name !== profileData.email) {
+      return profileData.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    // Priority 4: Email
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
@@ -292,7 +299,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                           alt={displayNameToShow} 
                         />
                         <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-sm">
-                          {getInitials()}
+                          {getInitials(profile, userRsvp)}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead text-ink">
@@ -505,14 +512,14 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
                         <AvatarImage 
                           src={profile?.avatar_url || undefined} 
-                          alt={profile?.display_name || 'User'} 
+                          alt={displayNameToShow} 
                         />
                         <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-sm">
-                          {(profile?.display_name || user.email)?.charAt(0)?.toUpperCase() || "U"}
+                          {getInitials(profile, userRsvp)}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-subhead">
-                        {profile?.display_name || user.email?.split("@")[0] || "User"}
+                        {displayNameToShow}
                       </span>
                     </div>
                     
