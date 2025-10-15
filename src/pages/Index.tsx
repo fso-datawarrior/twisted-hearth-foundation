@@ -18,6 +18,7 @@ const LINES = [
   "A beanstalk that leads to riches — and a very heavy downfall.",
   "A glass coffin where mourning turns into midnight hunger.",
   "Not every bedtime story ends with a kiss goodnight.",
+  "🧪 DEV TEST: v3.0.3.0 - Automated deployment is working!",
 ];
 
 function OneLinerRotator() {
