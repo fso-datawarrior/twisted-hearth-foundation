@@ -51,7 +51,9 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ inputs.target }}" = "preview" ]; then
             firebase hosting:channel:deploy pr-${{ github.event.number || 'manual' }} --expires 7d
           else
+            echo "🚀 Deploying to PRODUCTION..."
             firebase deploy --only hosting
+            echo "✅ Production deployment complete!"
           fi
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
