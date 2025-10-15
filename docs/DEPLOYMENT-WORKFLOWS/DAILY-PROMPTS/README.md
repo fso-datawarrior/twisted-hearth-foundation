@@ -20,7 +20,25 @@
 
 ## 🌆 **Evening Deploy**
 
-### **MERGE-TO-MAIN-DEPLOY.md** ⭐ **RECOMMENDED**
+### **ONE-LINE-DEPLOY.md** ⭐ **SUPER SIMPLE**
+**Just drop branch name and hit enter:**
+- ✅ `Deploy [BRANCH_NAME] to production.`
+- ✅ Checks out branch
+- ✅ Pushes to GitHub
+- ✅ Gives you GitHub Actions link
+
+**Usage:** Copy, change branch name, hit enter!
+
+### **DROP-BRANCH-DEPLOY.md** ⭐ **SIMPLE**
+**Drop branch name and go:**
+- ✅ `Deploy this branch to production: [BRANCH_NAME]`
+- ✅ Checks out branch
+- ✅ Pushes to GitHub
+- ✅ Gives you GitHub Actions link
+
+**Usage:** Copy, change branch name, hit enter!
+
+### **MERGE-TO-MAIN-DEPLOY.md**
 **Standard production deploy (best way):**
 - ✅ Creates PR to main
 - ✅ Merges to main
