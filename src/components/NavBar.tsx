@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
+import { useSupportModal } from "@/contexts/SupportModalContext";
 import { getDisplayName } from "@/lib/display-name-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
@@ -18,10 +19,9 @@ import packageJson from "../../package.json";
 interface NavBarProps {
   variant?: "public";
   ctaLabel?: string;
-  onOpenSupport?: () => void;
 }
 
-const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBarProps) => {
+const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -32,6 +32,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
   const { isMuted, toggleMute } = useAudio();
+  const { openSupportModal } = useSupportModal();
 
   // Main navigation links (always visible in desktop nav bar)
   const mainNavLinks = [
@@ -308,7 +309,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                     </Button>
                   </DropdownMenuTrigger>
                    <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
-                    {/* COMMENTED OUT - Admin toggle and Change Password */}
+                    {/* COMMENTED OUT - Admin toggle and Change Password */}   
                     {/* {isAdmin && (
                       <>
                         <DropdownMenuItem 
@@ -368,7 +369,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
           <AuthModal 
             isOpen={showAuthModal} 
             onClose={() => setShowAuthModal(false)}
-            onOpenSupport={onOpenSupport}
+            onOpenSupport={openSupportModal}
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
@@ -403,7 +404,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
+            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
           >
               <div className="px-6 py-4 space-y-4">
                 {/* Main nav links */}
