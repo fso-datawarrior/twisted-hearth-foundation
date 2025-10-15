@@ -2,7 +2,7 @@ name: Deploy to Development
 
 on:
   push:
-    branches: [ test-preview-channel, dev, develop, v-3.0.0.0-Milestone ]
+    branches: [ test-preview-channel, dev, develop, v-3.0.0.0-Milestone, v-3.0.1.1-UserDropdownViewFIX ]
   workflow_dispatch:
     inputs:
       branch:
