@@ -20,8 +20,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write       # for OIDC / Workload Identity
       contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
