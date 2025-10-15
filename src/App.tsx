@@ -8,10 +8,10 @@ import { AuthProvider } from "@/lib/auth";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+import { SupportModalProvider } from "@/contexts/SupportModalContext";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
-import SupportReportModal from "@/components/SupportReportModal";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -45,8 +45,6 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const [showSupportModal, setShowSupportModal] = useState(false);
-
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter
@@ -59,12 +57,9 @@ function App() {
           <MemoizedAuthProvider>
             <AdminProvider>
               <AudioProvider>
-                <SkipLink />
-                <NavBar onOpenSupport={() => setShowSupportModal(true)} />
-                <SupportReportModal 
-                  isOpen={showSupportModal} 
-                  onClose={() => setShowSupportModal(false)} 
-                />
+                <SupportModalProvider>
+                  <SkipLink />
+                <NavBar />
                 <main>
                   <SwipeNavigator>
                     <Toaster />
@@ -96,6 +91,7 @@ function App() {
                     </Suspense>
                   </SwipeNavigator>
                 </main>
+                </SupportModalProvider>
               </AudioProvider>
             </AdminProvider>
           </MemoizedAuthProvider>
