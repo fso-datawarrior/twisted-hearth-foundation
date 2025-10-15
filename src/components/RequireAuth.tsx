@@ -1,6 +1,5 @@
 import { useAuth } from '@/lib/auth';
 import { AuthModal } from '@/components/AuthModal';
-import { useSupportModal } from '@/contexts/SupportModalContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +10,6 @@ interface RequireAuthProps {
 
 export default function RequireAuth({ children, fallback }: RequireAuthProps) {
   const { user, loading } = useAuth();
-  const { openSupportModal } = useSupportModal();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
 
@@ -59,7 +57,6 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
           <AuthModal 
             isOpen={showAuthModal} 
             onClose={() => setShowAuthModal(false)}
-            onOpenSupport={openSupportModal}
           />
         </div>
       </div>

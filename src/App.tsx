@@ -8,7 +8,6 @@ import { AuthProvider } from "@/lib/auth";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
-import { SupportModalProvider } from "@/contexts/SupportModalContext";
 import SkipLink from "@/components/SkipLink";
 import NavBar from "@/components/NavBar";
 import { SwipeNavigator } from "@/components/SwipeNavigator";
@@ -57,9 +56,8 @@ function App() {
           <MemoizedAuthProvider>
             <AdminProvider>
               <AudioProvider>
-                <SupportModalProvider>
-                  <SkipLink />
-                  <NavBar />
+                <SkipLink />
+                <NavBar />
                 <main>
                   <SwipeNavigator>
                     <Toaster />
@@ -91,7 +89,6 @@ function App() {
                     </Suspense>
                   </SwipeNavigator>
                 </main>
-                </SupportModalProvider>
               </AudioProvider>
             </AdminProvider>
           </MemoizedAuthProvider>
