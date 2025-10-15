@@ -20,20 +20,29 @@
 
 ## 🌆 **Evening Deploy**
 
-### **PERFECT-ONE-COMMAND-DEPLOY.md** ⭐ **RECOMMENDED**
-**Deploy to production (best version):**
+### **MERGE-TO-MAIN-DEPLOY.md** ⭐ **RECOMMENDED**
+**Standard production deploy (best way):**
+- ✅ Creates PR to main
+- ✅ Merges to main
+- ✅ Automatic production deploy
+- ✅ Clean git history
+
+**Usage:** Copy, paste, say "Do this", follow PR process
+
+### **SIMPLE-PRODUCTION-DEPLOY.md**
+**Direct deploy (simple version):**
 - ✅ Checks branch and pushes changes
-- ✅ Provides exact GitHub Actions link
+- ✅ Provides GitHub Actions link
 - ✅ One click to deploy
-- ✅ Monitors progress
+- ✅ No complex automation
 
 **Usage:** Copy, paste, say "Do this", click the link
 
-### **ONE-COMMAND-DEPLOY.md**
-**Alternative production deploy:**
-- ✅ Simple direct deploy
-- ✅ Uses browser automation
-- ✅ Good fallback option
+### **PERFECT-ONE-COMMAND-DEPLOY.md**
+**Direct deploy (complex version):**
+- ✅ Tries full automation
+- ✅ May ask for manual steps
+- ✅ Good for advanced users
 
 ### **QUICK-PRODUCTION-DEPLOY.md**
 **Ultra-simple version:**
