@@ -1,4 +1,4 @@
-name: Firebase Hosting (Preview & Prod)
+name: Deploy to Production
 
 on:
   pull_request:
