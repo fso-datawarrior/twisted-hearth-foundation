@@ -8,11 +8,11 @@ Use this prompt to sync your current changes to the development environment.
 
 **Prompt:**
 ```
-Update my development environment with current changes.
+Update my development environment with current changes. Do this now.
 
 Current branch: [CURRENT_BRANCH_NAME]
 
-DO NOT ASK ME QUESTIONS - JUST DO IT!
+DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Execute these steps immediately:
 1. Run: git status
