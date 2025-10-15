@@ -29,6 +29,15 @@ These are your three essential daily prompts, numbered in order of use.
 - Triggers automated production deployment
 - Confirms production site is updated
 
+## **🔄 04-SYNC-BRANCH-TO-GITHUB.md**
+**When to use:** Anytime you want to save progress
+**Purpose:** Sync current branch to GitHub
+**What it does:**
+- Commits current changes
+- Pushes to GitHub
+- Confirms sync was successful
+- No deployment triggered
+
 ## **🛡️ SAFETY-GUIDELINES.md**
 **When to use:** Always reference before any operation
 **Purpose:** Prevent accidental file deletion and ensure safe git workflow
@@ -55,6 +64,8 @@ These are your three essential daily prompts, numbered in order of use.
 Morning: 01-SETUP-DEV-ENVIRONMENT.md
    ↓
 During day: 02-UPDATE-DEV-ENVIRONMENT.md (multiple times)
+   ↓
+Anytime: 04-SYNC-BRANCH-TO-GITHUB.md (save progress)
    ↓
 End of day: 03-DEPLOY-TO-PRODUCTION.md
 ```
