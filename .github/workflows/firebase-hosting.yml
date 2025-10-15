@@ -1,0 +1,50 @@
+name: Firebase Hosting (Preview & Prod)
+
+on:
+  pull_request:
+    branches: [ main ]     # PRs into main -> PREVIEW deploy (Path A)
+  push:
+    branches: [ main ]     # Push to main -> PRODUCTION deploy (Path A)
+  workflow_dispatch:       # Manual runs for Path B (deploy any branch to prod)
+    inputs:
+      branch:
+        description: 'Branch to build/deploy (e.g., 3.1.0-dev-email-cleanup)'
+        required: true
+        default: 'main'
+      target:
+        description: 'preview or production'
+        required: true
+        default: 'preview'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write       # for OIDC / Workload Identity
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          projectId: twisted-hearth-foundation
+          target: twisted-hearth-foundation   # Hosting Site ID
+          # If running from a PR or manual 'preview', use a preview channel; else deploy 'live'
+          channelId: ${{ (github.event_name == 'pull_request' || inputs.target == 'preview') && 'pr-${{ github.event.number || 'manual' }}' || 'live' }}
