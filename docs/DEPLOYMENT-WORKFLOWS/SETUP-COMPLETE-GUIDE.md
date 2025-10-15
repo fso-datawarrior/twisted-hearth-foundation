@@ -20,8 +20,9 @@
 ## Project Overview
 
 **What We Built:**
-- Unified GitHub Actions workflow supporting both Path A (PR previews) and Path B (manual deploys)
+- Unified GitHub Actions workflow supporting Path A (PR previews), Path B (manual deploys), and Path C (development site)
 - Firebase Hosting integration with automatic authentication
+- Dedicated development environment with live preview capabilities
 - Complete documentation system for daily deployment workflows
 - Cursor chat prompts for automated deployment processes
 

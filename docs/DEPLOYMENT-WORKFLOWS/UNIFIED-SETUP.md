@@ -1,10 +1,11 @@
-# Unified Deployment Setup (Path A & Path B)
+# Unified Deployment Setup (Path A, B & C)
 
-**Purpose:** One-time setup for both deployment workflows. This enables:
+**Purpose:** One-time setup for all deployment workflows. This enables:
 - **Path A**: Dev branch → PR to main → Preview → Merge → Production
 - **Path B**: Dev branch → Manual deploy to production (bypassing main)
+- **Path C**: Dev branch → Development site (daily development with live preview)
 
-Both paths use the same infrastructure, just different triggers.
+All paths use the same infrastructure, just different triggers and targets.
 
 ---
 
@@ -14,6 +15,7 @@ Before starting, verify these are already configured:
 
 ✅ **Firebase Project**: `twisted-hearth-foundation`  
 ✅ **Custom Domain**: `https://2025.partytillyou.rip` (SSL connected)  
+✅ **Development Site**: `twisted-hearth-foundation-dev` (for Path C)  
 ✅ **Workload Identity Federation**: Already configured  
 ✅ **Service Account**: `firebase-adminsdk-fbsvc@twisted-hearth-foundation.iam.gserviceaccount.com`  
 ✅ **Build Output**: `npm run build` produces files in `dist/` folder  
@@ -116,7 +118,69 @@ Your `firebase.json` should look like this (already correct):
 
 ---
 
-## Step 3 — Create .firebaserc File
+## Step 3 — Create Development Workflow (Path C)
+
+**File:** `.github/workflows/firebase-hosting-dev.yml`
+
+```yaml
+name: Deploy to Development
+
+on:
+  push:
+    branches: [ test-preview-channel, dev, develop, v-3.0.0.0-Milestone ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy to development'
+        required: true
+        default: 'dev'
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Development Site
+        run: |
+          firebase use twisted-hearth-foundation
+          firebase target:apply hosting dev twisted-hearth-foundation-dev
+          firebase deploy --only hosting:dev
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+```
+
+**This workflow:**
+- ✅ **Auto-deploys** when you push to development branches
+- ✅ **Manual deploy** option for any branch
+- ✅ **Deploys to development site** (not production)
+- ✅ **Perfect for daily development** with live preview
+
+---
+
+## Step 4 — Create .firebaserc File
 
 **File:** `.firebaserc`
 
@@ -133,7 +197,7 @@ Your `firebase.json` should look like this (already correct):
 
 ---
 
-## Step 4 — Test Path A (Preview → Production)
+## Step 5 — Test Path A (Preview → Production)
 
 Test the standard workflow:
 
@@ -163,7 +227,30 @@ Test the standard workflow:
 
 ---
 
-## Step 5 — Test Path B (Manual Deploy)
+## Step 6 — Test Path C (Development Site)
+
+Test the development workflow:
+
+1. **Push to a development branch:**
+   ```bash
+   git checkout -b test-dev-workflow
+   echo "Testing development deployment" >> README.md
+   git add . && git commit -m "test: development deployment" && git push
+   ```
+
+2. **Check GitHub Actions:**
+   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
+   - Look for "Deploy to Development" workflow
+   - Should complete successfully
+
+3. **Verify development site:**
+   - Visit: https://twisted-hearth-foundation-dev.web.app
+   - Should show your test changes
+   - This is your **permanent development environment**
+
+---
+
+## Step 7 — Test Path B (Manual Deploy)
 
 Test the manual deployment workflow:
 

@@ -6,15 +6,44 @@
 
 ## Quick Comparison
 
-| Aspect | Path A (Standard) | Path B (Manual) |
-|--------|------------------|-----------------|
-| **Workflow** | Dev → PR → Preview → Merge → Prod | Dev → Manual Deploy → Prod |
-| **Review Process** | ✅ PR review, team approval | ❌ Skip review, direct deploy |
-| **Git History** | ✅ Clean merge history | ⚠️ Bypasses main branch |
-| **Speed** | 🐌 Slower (PR process) | ⚡ Faster (immediate) |
-| **Safety** | ✅ Safer (preview + review) | ⚠️ Riskier (no preview) |
-| **Rollback** | ✅ Easy (revert PR) | ⚠️ Manual rollback needed |
-| **Team Visibility** | ✅ Everyone sees changes | ⚠️ May surprise team |
+| Aspect | Path A (Standard) | Path B (Manual) | Path C (Development) |
+|--------|------------------|-----------------|---------------------|
+| **Workflow** | Dev → PR → Preview → Merge → Prod | Dev → Manual Deploy → Prod | Dev → Development Site |
+| **Review Process** | ✅ PR review, team approval | ❌ Skip review, direct deploy | ❌ No review needed |
+| **Git History** | ✅ Clean merge history | ⚠️ Bypasses main branch | ✅ Clean development history |
+| **Speed** | 🐌 Slower (PR process) | ⚡ Faster (immediate) | ⚡⚡ Fastest (auto-deploy) |
+| **Safety** | ✅ Safer (preview + review) | ⚠️ Riskier (no preview) | ✅ Safe (dev only) |
+| **Rollback** | ✅ Easy (revert PR) | ⚠️ Manual rollback needed | ✅ Easy (revert commit) |
+| **Team Visibility** | ✅ Everyone sees changes | ⚠️ May surprise team | ✅ Team can see dev work |
+| **Live Preview** | ✅ Preview URL (expires) | ❌ No preview | ✅ Always available |
+
+---
+
+## When to Use Path C (Development Site)
+
+**✅ Choose Path C when:**
+
+- **Daily development** - Working on features throughout the day
+- **Live preview needed** - Want to see changes immediately as you code
+- **Experimental features** - Testing new ideas without affecting production
+- **Client demos** - Need a stable URL to show work in progress
+- **Team collaboration** - Others need to see your development work
+- **Learning/experimentation** - Trying new approaches or technologies
+- **Bug investigation** - Debugging issues with live environment
+
+**🎯 Perfect for:**
+- Morning development setup
+- Feature development cycles
+- Client presentations
+- Team code reviews
+- Testing integrations
+
+**📋 Daily workflow:**
+1. Use "Setup Development Environment" prompt
+2. Create development branch
+3. Code and push changes
+4. See updates live on development site
+5. When ready, use Path A or B for production
 
 ---
 
