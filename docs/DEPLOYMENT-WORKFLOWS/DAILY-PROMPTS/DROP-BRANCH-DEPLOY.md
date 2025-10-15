@@ -9,6 +9,18 @@
 ```
 Deploy this branch to production: [BRANCH_NAME]
 
+**IMPORTANT:** 
+- Just execute the deployment steps
+- Don't ask clarifying questions
+- Don't explain the file contents
+- Just do it!
+
+**Steps:**
+1. Check out the branch
+2. Push to GitHub
+3. Give me the GitHub Actions link
+4. Done!
+
 **Just do it!** 🚀
 ```
 
