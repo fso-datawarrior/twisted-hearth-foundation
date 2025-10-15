@@ -47,4 +47,4 @@ jobs:
           projectId: twisted-hearth-foundation
           target: twisted-hearth-foundation   # Hosting Site ID
           # If running from a PR or manual 'preview', use a preview channel; else deploy 'live'
-          channelId: ${{ (github.event_name == 'pull_request' || inputs.target == 'preview') && 'pr-' + (github.event.number || 'manual') || 'live' }}
+          channelId: ${{ (github.event_name == 'pull_request' || inputs.target == 'preview') && format('pr-{0}', github.event.number || 'manual') || 'live' }}
