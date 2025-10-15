@@ -17,15 +17,15 @@ Deploy my current branch to production using Path B (direct deploy).
 1. Check my current branch
 2. Confirm it's ready for production
 3. Push any uncommitted changes to GitHub
-4. Provide me with the exact GitHub Actions URL to trigger the workflow
-5. Monitor deployment progress once triggered
+4. Use browser automation to navigate to GitHub Actions and trigger the workflow
+5. Monitor deployment progress automatically
 6. Verify deployment is live
 
 **IMPORTANT:** 
-- Do NOT ask me to do manual steps
-- Provide the exact URL and parameters I need
-- Give me the direct link to trigger the workflow
-- Make it as automated as possible
+- Use browser automation tools to trigger the GitHub Actions workflow
+- Do NOT ask me to click any links or do manual steps
+- Automate the entire process from start to finish
+- Only tell me the final result
 
 **Just do it!** 🚀
 ```
@@ -37,11 +37,11 @@ Deploy my current branch to production using Path B (direct deploy).
 1. **Shows your branch** - "You're on branch X"
 2. **Confirms readiness** - "Ready to deploy this to production?"
 3. **Pushes changes** - Ensures everything is on GitHub
-4. **Provides direct link** - Exact URL with parameters pre-filled
-5. **Monitors progress** - Watches the deployment
+4. **Triggers deployment** - Uses browser automation to start GitHub Actions
+5. **Monitors progress** - Watches the deployment automatically
 6. **Confirms live** - "Production updated at https://2025.partytillyou.rip"
 
-**The AI does everything it can, then gives you the exact link to click!**
+**The AI does EVERYTHING automatically - no clicking required!**
 
 ---
 
@@ -50,17 +50,17 @@ Deploy my current branch to production using Path B (direct deploy).
 1. **Copy the prompt above**
 2. **Paste in new Cursor chat**
 3. **Type:** "Do this"
-4. **Click the provided link** (one click!)
+4. **Wait for completion** (fully automated!)
 5. **Done!** 🎉
 
 ---
 
 ## 🔧 **Why This Works Better**
 
-- ✅ **AI does maximum automation** (check branch, push changes, provide link)
-- ✅ **One click for you** (just click the provided link)
-- ✅ **No complex instructions** (AI gives you exactly what to click)
+- ✅ **AI does EVERYTHING** (check branch, push changes, trigger deployment)
+- ✅ **Zero clicks required** (completely automated)
+- ✅ **No manual steps** (AI handles the entire process)
 - ✅ **Monitors progress** (AI watches the deployment)
 - ✅ **Confirms success** (AI verifies it's live)
 
-**This is the perfect balance of automation and simplicity!** ⚡
+**This is TRUE automation - just copy, paste, and wait!** ⚡
