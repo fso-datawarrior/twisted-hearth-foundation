@@ -35,6 +35,7 @@ I need to set up my development environment for the day. Please help me:
    - Confirm the branch is properly set up
 
 4. **Development Environment Setup:**
+   - Add the new branch to the development deployment triggers (if needed)
    - Deploy the new branch to the development site: https://twisted-hearth-foundation-dev.web.app
    - Verify the deployment was successful
    - Provide me with the development URL for testing
@@ -57,6 +58,11 @@ I need to set up my development environment for the day. Please help me:
 - Branch Naming: [version]-dev-[feature]
 
 **Current Branch Check:** Please start by showing me what branch I'm currently on and if there are any uncommitted changes.
+
+**Troubleshooting Notes:**
+- If the branch doesn't auto-deploy to development site, add it to `.github/workflows/firebase-hosting-dev.yml`
+- If authentication fails, you may need to run `firebase login` locally first
+- Development site: https://twisted-hearth-foundation-dev.web.app
 ```
 
 ---
