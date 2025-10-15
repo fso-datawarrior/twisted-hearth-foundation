@@ -2,7 +2,7 @@
 
 ## Complete Development Workflow
 
-### 1. 🌅 **Morning Setup** - `SETUP-DEV-ENVIRONMENT-PROMPT.md`
+### 1. 🌅 **Morning Setup** - `DAILY-PROMPTS/SETUP-DEV-ENVIRONMENT-PROMPT.md`
 **Use this when starting your development day:**
 
 - ✅ Check current branch status
@@ -23,13 +23,13 @@
 
 **Result:** Live preview of your work as you code
 
-### 3. 🌆 **Evening Deploy** - `DEPLOY-TO-PRODUCTION-PROMPT.md`
+### 3. 🌆 **Evening Deploy** - `DAILY-PROMPTS/PERFECT-ONE-COMMAND-DEPLOY.md`
 **Use this when ready to deploy to production:**
 
-- ✅ Verify current branch
-- ✅ Choose deployment path (A or B)
-- ✅ Deploy to production
-- ✅ Get production URL
+- ✅ Check branch and push changes
+- ✅ Provide exact GitHub Actions link
+- ✅ One click to deploy
+- ✅ Monitor progress and verify
 
 **Result:** Changes live on production site
 
