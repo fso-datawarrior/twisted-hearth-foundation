@@ -4,7 +4,31 @@
 
 ---
 
-## Cursor Chat Prompt
+## ⚡ **Quick Deploy (One-Command)**
+
+**For daily use - just copy, paste, and say "Do this":**
+
+```
+Deploy my current branch to production using Path B (direct deploy). 
+
+**Project:** fso-datawarrior/twisted-hearth-foundation
+**Production:** https://2025.partytillyou.rip
+**Method:** GitHub Actions "Firebase Hosting (Preview & Prod)" workflow
+
+**Steps:**
+1. Check my current branch
+2. Confirm it's ready for production
+3. Trigger GitHub Actions workflow with target=production
+4. Verify deployment is live
+
+**Just do it!** 🚀
+```
+
+---
+
+## 📋 **Detailed Deploy (Full Process)**
+
+**For complex deployments with path selection:**
 
 ```
 I need to deploy my current branch to production. Please help me with the complete deployment process.
