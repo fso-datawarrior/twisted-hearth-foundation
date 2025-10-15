@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "twisted-hearth-foundation"
+  },
+  "targets": {
+    "twisted-hearth-foundation": {
+      "hosting": {
+        "main": [
+          "twisted-hearth-foundation"
+        ],
+        "dev": [
+          "twisted-hearth-foundation-dev"
+        ]
+      }
+    }
+  }
+}
+
