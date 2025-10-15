@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main ]     # PRs into main -> PREVIEW deploy (Path A)
   push:
-    branches: [ main ]     # Push to main -> PRODUCTION deploy (Path A)
+    branches: [ main, v-3.0.1.1-UserDropdownViewFIX ]     # Push to main or your branch -> PRODUCTION deploy
   workflow_dispatch:       # Manual runs for Path B (deploy any branch to prod)
     inputs:
       branch:
