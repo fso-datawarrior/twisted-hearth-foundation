@@ -56,7 +56,7 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
           
           <AuthModal 
             isOpen={showAuthModal} 
-            onClose={() => setShowAuthModal(false)} 
+            onClose={() => setShowAuthModal(false)}
           />
         </div>
       </div>

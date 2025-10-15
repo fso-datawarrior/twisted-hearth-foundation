@@ -18,10 +18,9 @@ import packageJson from "../../package.json";
 interface NavBarProps {
   variant?: "public";
   ctaLabel?: string;
-  onOpenSupport?: () => void;
 }
 
-const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBarProps) => {
+const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -308,7 +307,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                     </Button>
                   </DropdownMenuTrigger>
                    <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
-                    {isAdmin && (
+                    {/* COMMENTED OUT - Admin toggle and Change Password */}   
+                    {/* {isAdmin && (
                       <>
                         <DropdownMenuItem 
                           onClick={toggleAdminView}
@@ -322,20 +322,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                         </div>
                         <div className="w-full h-px bg-accent-purple/30 my-1"></div>
                       </>
-                    )}
+                    )} */}
                     <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
                       <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
                         <User size={16} />
                         Settings
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem 
+                    {/* <DropdownMenuItem 
                       onClick={() => setShowChangePasswordModal(true)}
                       className="flex items-center gap-2 font-subhead text-accent-gold hover:bg-accent-gold/10 cursor-pointer"
                     >
                       <Key size={16} />
                       Change Password
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem 
                       onClick={() => signOut()}
                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
@@ -367,7 +367,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
           <AuthModal 
             isOpen={showAuthModal} 
             onClose={() => setShowAuthModal(false)}
-            onOpenSupport={onOpenSupport}
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
@@ -402,7 +401,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
+            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
           >
               <div className="px-6 py-4 space-y-4">
                 {/* Main nav links */}
@@ -523,7 +522,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       </span>
                     </div>
                     
-                    {isAdmin && (
+                    {/* COMMENTED OUT - Admin toggle and Change Password */}
+                    {/* {isAdmin && (
                       <>
                         <Button
                           onClick={() => { toggleAdminView(); setIsMenuOpen(false); }}
@@ -537,7 +537,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                           Current: {isAdminView ? 'Admin' : 'User'} View
                         </div>
                       </>
-                    )}
+                    )} */}
                     
                     <Link to="/settings">
                       <Button
@@ -550,14 +550,14 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       </Button>
                     </Link>
                     
-                    <Button
+                    {/* <Button
                       onClick={() => { setShowChangePasswordModal(true); setIsMenuOpen(false); }}
                       variant="ghost"
                       className="w-full text-accent-gold hover:bg-accent-gold/10 font-subhead"
                     >
                       <Key size={16} className="mr-2" />
                       Change Password
-                    </Button>
+                    </Button> */}
                     
                     <Button
                       onClick={() => { signOut(); setIsMenuOpen(false); }}
