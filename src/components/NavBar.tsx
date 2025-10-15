@@ -308,8 +308,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                     </Button>
                   </DropdownMenuTrigger>
                    <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-sm border-accent-purple/30">
-                    {/* COMMENTED OUT - Admin toggle and Change Password */}
-                    {/* {isAdmin && (
+                    {isAdmin && (
                       <>
                         <DropdownMenuItem 
                           onClick={toggleAdminView}
@@ -323,20 +322,20 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                         </div>
                         <div className="w-full h-px bg-accent-purple/30 my-1"></div>
                       </>
-                    )} */}
+                    )}
                     <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
                       <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
                         <User size={16} />
                         Settings
                       </DropdownMenuItem>
                     </Link>
-                    {/* <DropdownMenuItem 
+                    <DropdownMenuItem 
                       onClick={() => setShowChangePasswordModal(true)}
                       className="flex items-center gap-2 font-subhead text-accent-gold hover:bg-accent-gold/10 cursor-pointer"
                     >
                       <Key size={16} />
                       Change Password
-                    </DropdownMenuItem> */}
+                    </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => signOut()}
                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
@@ -524,8 +523,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       </span>
                     </div>
                     
-                    {/* COMMENTED OUT - Admin toggle and Change Password */}
-                    {/* {isAdmin && (
+                    {isAdmin && (
                       <>
                         <Button
                           onClick={() => { toggleAdminView(); setIsMenuOpen(false); }}
@@ -539,7 +537,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                           Current: {isAdminView ? 'Admin' : 'User'} View
                         </div>
                       </>
-                    )} */}
+                    )}
                     
                     <Link to="/settings">
                       <Button
@@ -552,14 +550,14 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP", onOpenSupport }: NavBar
                       </Button>
                     </Link>
                     
-                    {/* <Button
+                    <Button
                       onClick={() => { setShowChangePasswordModal(true); setIsMenuOpen(false); }}
                       variant="ghost"
                       className="w-full text-accent-gold hover:bg-accent-gold/10 font-subhead"
                     >
                       <Key size={16} className="mr-2" />
                       Change Password
-                    </Button> */}
+                    </Button>
                     
                     <Button
                       onClick={() => { signOut(); setIsMenuOpen(false); }}
