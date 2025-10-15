@@ -12,13 +12,11 @@ import { Button } from "@/components/ui/button";
 import PrepLinks from "@/components/PrepLinks";
 // import CSSFogBackground from "@/components/CSSFogBackground";
 
-// v3.0.3.0-development - Testing automated dev deployment
 const LINES = [
   "A cottage too cozy to trust… where the meal is already waiting.",
   "A beanstalk that leads to riches — and a very heavy downfall.",
   "A glass coffin where mourning turns into midnight hunger.",
   "Not every bedtime story ends with a kiss goodnight.",
-  "🧪 DEV TEST: v3.0.3.0 - Automated deployment is working!",
 ];
 
 function OneLinerRotator() {

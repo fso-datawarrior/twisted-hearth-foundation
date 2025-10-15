@@ -12,25 +12,25 @@ Update my development environment with current changes.
 
 Current branch: [CURRENT_BRANCH_NAME]
 
-Instructions:
-1. Check current branch and confirm it's the development branch
-2. Check git status for any uncommitted changes
-3. Add all changes to git staging
-4. Commit changes with descriptive message
-5. Push to GitHub to trigger development deployment
-6. Confirm development site is updated
+DO NOT ASK ME QUESTIONS - JUST DO IT!
+
+Execute these steps immediately:
+1. Run: git status
+2. Run: git add .
+3. Run: git commit -m "update: sync changes to dev environment"
+4. Run: git push origin [CURRENT_BRANCH_NAME]
+5. Report: Deployment triggered - check https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
 
 SAFETY CHECKS:
 - NEVER delete files without explicit confirmation
 - ALWAYS check git status before making changes
-- ALWAYS ask for commit message if not provided
 - ALWAYS verify push was successful
 - ALWAYS confirm deployment status
 
 Development URL: https://twisted-hearth-foundation-dev.web.app/
 Repository: https://github.com/fso-datawarrior/twisted-hearth-foundation
 
-Expected workflow: Auto-deploys on push to dev branch
+IMPORTANT: Do NOT ask for confirmation. Do NOT ask what I want to do. Just execute the git commands and report the results.
 ```
 
 ---
