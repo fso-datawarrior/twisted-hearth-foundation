@@ -8,13 +8,25 @@
 
 ```
 Deploy [BRANCH_NAME] to production.
+
+**IMPORTANT:** 
+- Just execute the deployment steps
+- Don't ask clarifying questions
+- Don't explain the file contents
+- Just do it!
+
+**Steps:**
+1. Check out the branch
+2. Push to GitHub
+3. Give me the GitHub Actions link
+4. Done!
+
+**Just do it!** 🚀
 ```
 
 ---
 
-## 📋 **Usage**
-
-**Just replace [BRANCH_NAME] with your branch:**
+## 📋 **Usage Examples**
 
 ```
 Deploy v-3.0.1.1-UserDropdownViewFIX to production.
@@ -39,4 +51,4 @@ Deploy hotfix/email-bug to production.
 3. **Gives you GitHub Actions link**
 4. **Done!**
 
-**That's it!** 🚀
+**No questions, no explanations - just execute!** 🚀
