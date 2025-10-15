@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { useDeveloperMode } from "@/contexts/DeveloperModeContext";
 import { useAdmin } from "@/contexts/AdminContext";
 import { useAudio } from "@/contexts/AudioContext";
+import { useSupportModal } from "@/contexts/SupportModalContext";
 import { getDisplayName } from "@/lib/display-name-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { DEV_MODE_ENABLED } from "@/settings/dev-mode-settings";
@@ -31,6 +32,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
   const { isMuted, toggleMute } = useAudio();
+  const { openSupportModal } = useSupportModal();
 
   // Main navigation links (always visible in desktop nav bar)
   const mainNavLinks = [
@@ -367,6 +369,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           <AuthModal 
             isOpen={showAuthModal} 
             onClose={() => setShowAuthModal(false)}
+            onOpenSupport={openSupportModal}
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
