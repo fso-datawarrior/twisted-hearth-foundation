@@ -40,10 +40,20 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: "projects/1017057598145/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "firebase-adminsdk-fbsvc@twisted-hearth-foundation.iam.gserviceaccount.com"
+          create_credentials_file: true
+          export_environment_variables: true
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: firebase-adminsdk-fbsvc@twisted-hearth-foundation.iam.gserviceaccount.com
           projectId: twisted-hearth-foundation
           target: twisted-hearth-foundation   # Hosting Site ID
           # If running from a PR or manual 'preview', use a preview channel; else deploy 'live'
