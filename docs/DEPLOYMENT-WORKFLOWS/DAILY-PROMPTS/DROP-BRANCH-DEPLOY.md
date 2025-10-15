@@ -18,8 +18,9 @@ Deploy this branch to production: [BRANCH_NAME]
 **Steps:**
 1. Check out the branch
 2. Push to GitHub
-3. Give me the GitHub Actions link
-4. Done!
+3. Give me the specific workflow link: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions/workflows/firebase-hosting.yml
+4. Tell me to click "Run workflow" and set branch to [BRANCH_NAME] and target to "production"
+5. Done!
 
 **Just do it!** 🚀
 ```
