@@ -16,8 +16,11 @@ Deploy my current branch to production using Path B (direct deploy).
 **Steps:**
 1. Check my current branch
 2. Confirm it's ready for production
-3. Trigger GitHub Actions workflow with target=production
-4. Verify deployment is live
+3. Use browser automation to trigger GitHub Actions workflow with target=production
+4. Monitor deployment progress
+5. Verify deployment is live
+
+**IMPORTANT:** Use browser automation tools to navigate to GitHub Actions and trigger the workflow. Do NOT ask me to do manual steps. Automate everything.
 
 **Just do it!** 🚀
 ```
