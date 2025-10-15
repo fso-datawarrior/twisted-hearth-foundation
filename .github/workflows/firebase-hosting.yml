@@ -44,6 +44,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: firebase-adminsdk-fbsvc@twisted-hearth-foundation.iam.gserviceaccount.com
           projectId: twisted-hearth-foundation
           target: twisted-hearth-foundation   # Hosting Site ID
           # If running from a PR or manual 'preview', use a preview channel; else deploy 'live'
