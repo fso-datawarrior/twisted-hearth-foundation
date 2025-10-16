@@ -8,9 +8,11 @@ Use this prompt to set up your development environment for the day.
 
 **Prompt:**
 ```
-Set up my development environment for today.
+Set up my development environment for today. Do this now.
 
 Current branch: [CURRENT_BRANCH_NAME]
+
+DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
 1. Check current branch and confirm it's ready for development

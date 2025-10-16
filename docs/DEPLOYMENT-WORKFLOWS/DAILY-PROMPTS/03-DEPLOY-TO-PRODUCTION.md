@@ -8,9 +8,11 @@ Use this prompt to deploy your current branch to production.
 
 **Prompt:**
 ```
-Deploy my current branch to production.
+Deploy my current branch to production. Do this now.
 
 Current branch: [CURRENT_BRANCH_NAME]
+
+DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
 1. Check current branch and confirm it's ready for production

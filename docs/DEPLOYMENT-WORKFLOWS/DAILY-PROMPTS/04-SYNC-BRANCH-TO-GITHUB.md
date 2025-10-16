@@ -8,9 +8,11 @@ Use this prompt to sync your current branch with the remote GitHub repository.
 
 **Prompt:**
 ```
-Sync my current branch to GitHub.
+Sync my current branch to GitHub. Do this now.
 
 Current branch: [CURRENT_BRANCH_NAME]
+
+DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
 1. Check current branch and confirm it's correct
