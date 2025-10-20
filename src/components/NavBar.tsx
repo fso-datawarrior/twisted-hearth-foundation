@@ -378,19 +378,41 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               {getCurrentPageName()}
             </span>
             
-            {/* Mobile User Avatar Icon - Quick access to settings */}
+            {/* Mobile User Avatar Icon - Dropdown with Settings/Sign out */}
             {user && (
-              <Link to="/settings" className="flex-shrink-0">
-                <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
-                  <AvatarImage 
-                    src={profile?.avatar_url || undefined} 
-                    alt={displayNameToShow} 
-                  />
-                  <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-xs">
-                    {getInitials(profile, userRsvp)}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent-purple/50">
+                    <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
+                      <AvatarImage 
+                        src={profile?.avatar_url || undefined} 
+                        alt={displayNameToShow} 
+                      />
+                      <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-xs">
+                        {getInitials(profile, userRsvp)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="bg-black/90 backdrop-blur-sm border-accent-purple/30 mr-4"
+                >
+                  <Link to="/settings">
+                    <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
+                      <User size={16} />
+                      Settings
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem 
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
+                  >
+                    <LogOut size={16} />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             
             {/* Mobile RSVP Button - Always visible on mobile */}
@@ -419,7 +441,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),2rem)]"
+            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),4rem)]"
           >
               <div className="px-6 py-4 space-y-4">
                 {/* Main nav links */}
