@@ -378,6 +378,21 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               {getCurrentPageName()}
             </span>
             
+            {/* Mobile User Avatar Icon - Quick access to settings */}
+            {user && (
+              <Link to="/settings" className="flex-shrink-0">
+                <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
+                  <AvatarImage 
+                    src={profile?.avatar_url || undefined} 
+                    alt={displayNameToShow} 
+                  />
+                  <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-xs">
+                    {getInitials(profile, userRsvp)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            )}
+            
             {/* Mobile RSVP Button - Always visible on mobile */}
             <Button 
               asChild 
