@@ -154,7 +154,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
 
   return (
     <>
-      <div className="bg-black/90 backdrop-blur-sm p-4 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
+      <div className="bg-black/90 backdrop-blur-sm p-2 rounded-lg border border-accent-purple/30 hover:border-accent-gold/50 transition-colors">
         <div className="flex justify-between items-start gap-3 mb-2">
           <div className="flex items-start gap-3 flex-1">
             {/* Avatar */}
@@ -311,7 +311,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
         {showReplies && replies.length > 0 && (
           <div className="ml-11 space-y-2 border-l border-accent-purple/20 pl-4">
             {replies.map((reply) => (
-              <div key={reply.id} className="bg-bg-2 p-3 rounded-lg">
+              <div key={reply.id} className="bg-bg-2 p-2 rounded-lg">
                 <div className="flex items-center gap-2 text-xs mb-2">
                   <h4 className="font-subhead text-sm text-accent-gold">
                     {reply.is_anonymous ? 'Anonymous Guest' : reply.display_name}

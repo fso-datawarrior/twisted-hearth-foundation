@@ -141,9 +141,9 @@ const Discussion = () => {
   };
   return (
     <div className="min-h-screen bg-background relative">
-      <main className="pt-20 md:pt-24 relative z-10">
+      <main className="pt-28 md:pt-32 relative z-10">
         {/* <CSSFogBackground /> */}
-        <section className="py-8 px-6">
+        <section className="py-8 px-3">
           <div className="container mx-auto max-w-4xl">
             <div className="flex justify-between items-center mb-8">
               <h1 className="font-heading text-4xl md:text-6xl text-shadow-gothic">
@@ -159,7 +159,7 @@ const Discussion = () => {
             {/* Authentication Check */}
             {!user ? (
               <div className="text-center mb-12">
-                <div className="bg-card p-4 sm:p-6 md:p-8 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
+                <div className="bg-card p-2 sm:p-3 md:p-4 rounded-lg border border-accent-purple/30 max-w-2xl mx-auto">
                   <div className="font-heading text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 text-accent-gold">📖</div>
                   <h2 className="font-subhead text-lg sm:text-xl md:text-2xl mb-3 sm:mb-4 text-accent-red tracking-tight text-balance">
                     Sign In to Share Your Tale
