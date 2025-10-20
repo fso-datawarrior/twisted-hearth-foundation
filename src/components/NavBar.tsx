@@ -373,7 +373,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex nav-full:hidden items-center space-x-2 flex-shrink-0">
+          <div className="flex nav-compact:hidden items-center space-x-2 flex-shrink-0">
             <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden hidden min-[520px]:block truncate max-w-[120px]">
               {getCurrentPageName()}
             </span>
