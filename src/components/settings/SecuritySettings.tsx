@@ -18,12 +18,12 @@ export default function SecuritySettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-6 border-2 border-accent-purple/30 rounded-lg bg-accent-purple/5 hover:border-accent-gold/50 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-2 border-accent-purple/30 rounded-lg bg-accent-purple/5 hover:border-accent-gold/50 transition-colors">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-accent-gold/10 rounded-full">
+              <div className="p-3 bg-accent-gold/10 rounded-full flex-shrink-0">
                 <Key className="h-6 w-6 text-accent-gold" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="font-semibold text-lg">Password</p>
                 <p className="text-sm text-muted-foreground">
                   Update your password - no current password required
@@ -32,23 +32,23 @@ export default function SecuritySettings() {
             </div>
             <Button
               onClick={() => setShowPasswordModal(true)}
-              className="bg-accent-gold hover:bg-accent-gold/80 text-background font-semibold"
+              className="bg-accent-gold hover:bg-accent-gold/80 text-background font-semibold w-full sm:w-auto flex-shrink-0"
             >
               Change Password
             </Button>
           </div>
 
-          <div className="flex items-center justify-between p-4 border rounded-lg opacity-50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-lg opacity-50">
             <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-              <div>
+              <Smartphone className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="min-w-0">
                 <p className="font-medium text-muted-foreground">Two-Factor Authentication</p>
                 <p className="text-sm text-muted-foreground">
                   Coming soon - Add an extra layer of security
                 </p>
               </div>
             </div>
-            <Button variant="outline" disabled>
+            <Button variant="outline" disabled className="w-full sm:w-auto flex-shrink-0">
               Set Up 2FA
             </Button>
           </div>
