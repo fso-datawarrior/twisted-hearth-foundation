@@ -404,7 +404,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in"
+            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),2rem)]"
           >
               <div className="px-6 py-4 space-y-4">
                 {/* Main nav links */}

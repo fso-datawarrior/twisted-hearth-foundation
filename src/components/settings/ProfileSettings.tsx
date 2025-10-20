@@ -272,12 +272,13 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => document.getElementById('avatar-upload')?.click()}
                   disabled={uploading}
+                  className="w-full sm:w-auto"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Choose Photo
@@ -289,6 +290,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
                     size="sm"
                     onClick={handleRemoveAvatar}
                     disabled={uploading}
+                    className="w-full sm:w-auto"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Remove

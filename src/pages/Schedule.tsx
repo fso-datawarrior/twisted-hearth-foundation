@@ -7,7 +7,7 @@ const Schedule = () => {
     {
       time: "6:30 PM",
       title: "Book Opens: Welcome to the Dark Forest",
-      description: "Arrival and tour (self-guided or otherwise). The story starts when you crack open the book as twilight falls. Enter the story with your own characters and begin wending your way through the evening's twisted tales.",
+      description: "Arrival and tour (self-guided or otherwise). The story starts when you crack open the book as twilight falls. Enter the story with your own characters and begin winding your way through the evening's twisted tales.",
       type: "arrival"
     },
     {

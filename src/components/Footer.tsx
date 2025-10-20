@@ -67,7 +67,7 @@ function HalloweenIcons() {
 
       {/* Twisted Quote Display - Fixed height to prevent layout shift */}
       <div 
-        className="text-center text-sm h-[4em] max-w-md px-4 flex items-center justify-center"
+        className="text-center text-base md:text-lg h-[6em] max-w-md px-4 flex items-center justify-center"
         style={{ 
           fontFamily: 'Creepster, cursive',
           color: '#c084fc',
