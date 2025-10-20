@@ -16,11 +16,14 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Fix modules that incorrectly import the CJS runtime with the .js extension
+      "react/jsx-runtime.js": "react/jsx-runtime",
+      "react/jsx-dev-runtime.js": "react/jsx-dev-runtime",
     },
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
-    include: ['@tanstack/react-query'],
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', '@tanstack/react-query'],
   },
   build: {
     rollupOptions: {
