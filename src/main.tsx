@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import '@/shims/jsx-runtime'; // Force pre-bundling of React JSX runtime
 import { consoleCapture } from "@/lib/console-capture";
 
 // Initialize console capture immediately
