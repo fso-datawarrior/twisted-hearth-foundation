@@ -11,19 +11,23 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    force: true, // Force dependency re-optimization
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      // Fix modules that incorrectly import the CJS runtime with the .js extension
-      "react/jsx-runtime.js": "react/jsx-runtime",
-      "react/jsx-dev-runtime.js": "react/jsx-dev-runtime",
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      // Normalize any direct file-path imports to use the ESM runtime
+      { find: /^\/?node_modules\/react\/jsx-runtime\.js$/, replacement: 'react/jsx-runtime' },
+      { find: /^\/?node_modules\/react\/jsx-dev-runtime\.js$/, replacement: 'react/jsx-dev-runtime' },
+      { find: 'react/jsx-runtime.js', replacement: 'react/jsx-runtime' },
+      { find: 'react/jsx-dev-runtime.js', replacement: 'react/jsx-dev-runtime' },
+    ],
     dedupe: ["react", "react-dom"],
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', '@tanstack/react-query'],
+    force: true, // Force re-optimization
   },
   build: {
     rollupOptions: {

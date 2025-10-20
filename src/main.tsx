@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import '@/shims/jsx-runtime'; // Force pre-bundling of React JSX runtime
+// Force cache-busting comment: 2025-10-20-22:59
 import { consoleCapture } from "@/lib/console-capture";
 
 // Initialize console capture immediately
