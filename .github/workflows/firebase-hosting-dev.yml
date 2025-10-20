@@ -3,6 +3,7 @@ name: Deploy to Development
 on:
   push:
     branches: 
+      - v-3.0.3.2-Phase1-QuickWinsMobileUI-Fixes
       - v-3.0.3.0-development
       - v-3.0.2.0-fix-production-menu
       - v-3.0.1.1-UserDropdownViewFIX
