@@ -66,7 +66,7 @@ export default function UserSettings() {
   return (
     <RequireAuth>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-28 sm:pt-32 md:pt-36 pb-8 max-w-4xl">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 pt-28 sm:pt-32 md:pt-36 pb-8 max-w-4xl">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Button variant="ghost" size="sm" asChild>

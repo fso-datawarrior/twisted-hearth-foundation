@@ -204,10 +204,12 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           <div className="flex items-center gap-3 nav-full:mr-8">
             <Link 
               to="/" 
-              className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive"
+              className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive flex flex-col leading-tight"
               aria-label="Home - The Ruths' Twisted Fairytale Halloween Bash"
             >
-              The Ruths' Bash
+              <span>THE</span>
+              <span>RUTHS'</span>
+              <span>BASH</span>
             </Link>
             {isDeveloperMode && DEV_MODE_ENABLED && (
               <span className="text-xs text-ink/50 font-mono">
@@ -441,7 +443,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
         {isMenuOpen && (
           <div 
             id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-4 w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem-max(env(safe-area-inset-bottom),2rem))] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),4rem)]"
+            className="block nav-full:hidden absolute top-full right-2 sm:right-4 w-full max-w-[min(20rem,calc(100vw-1rem))] max-h-[calc(100vh-8rem-max(env(safe-area-inset-bottom),2rem))] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),1rem)]"
           >
               <div className="px-6 py-4 space-y-4">
                 {/* Main nav links */}

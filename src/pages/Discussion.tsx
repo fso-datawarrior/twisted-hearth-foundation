@@ -143,7 +143,7 @@ const Discussion = () => {
     <div className="min-h-screen bg-background relative">
       <main className="pt-28 sm:pt-32 md:pt-36 relative z-10">
         {/* <CSSFogBackground /> */}
-        <section className="py-8 px-3">
+        <section className="py-8 px-0.5 sm:px-4 md:px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="flex justify-between items-center mb-8">
               <h1 className="font-heading text-4xl md:text-6xl text-shadow-gothic">

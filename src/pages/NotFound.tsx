@@ -16,7 +16,7 @@ const NotFound = () => {
       {/* Floating Ghosts */}
       <FloatingGhosts />
 
-      <div className="mx-4 max-w-4xl z-20 relative">
+      <div className="mx-0.5 sm:mx-4 md:mx-6 max-w-4xl z-20 relative">
         <div className="rounded-xl border border-[rgba(212,175,55,0.4)] bg-card/60 backdrop-blur-sm p-8 md:p-12 text-center shadow-[0_8px_32px_rgba(212,175,55,0.2)]">
           {/* Arcade 404 Image */}
           <div className="mb-8 flex justify-center">
