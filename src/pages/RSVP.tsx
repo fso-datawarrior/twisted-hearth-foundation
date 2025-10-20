@@ -692,7 +692,7 @@ const RSVP = () => {
     <RequireAuth>
       <div className="min-h-screen bg-background relative">
         <main className="pt-28 sm:pt-32 md:pt-36 relative z-10">
-          <section className="py-16 px-6">
+          <section className="py-16 px-0.5 sm:px-4 md:px-6">
             <div className="container mx-auto max-w-3xl">
               <h1 className="font-heading text-4xl md:text-6xl text-center mb-8 text-shadow-gothic">
                 Join the Twisted Tale
@@ -773,17 +773,17 @@ const RSVP = () => {
                   </div>
                 </div>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8">
                   <Button
                     type="button"
                     onClick={handleEditRsvp}
-                    className="bg-accent-purple hover:bg-accent-purple/80 text-white font-subhead text-lg px-12 py-4 glow-gold motion-safe hover:scale-105 transition-transform"
+                    className="w-full bg-accent-purple hover:bg-accent-purple/80 text-white font-subhead text-lg py-4 glow-gold motion-safe hover:scale-105 transition-transform"
                   >
                     <Edit className="h-5 w-5 mr-2" />
                     Modify Your Fate
                   </Button>
                   
-                  <p className="font-body text-xs text-muted-foreground mt-4 max-w-md mx-auto">
+                  <p className="font-body text-xs text-muted-foreground mt-4 text-center">
                     Need to update your guest count or dietary restrictions? Click above to make changes.
                   </p>
                 </div>
@@ -1120,19 +1120,21 @@ const RSVP = () => {
                     {potluckItems.map((item) => (
                       <Card key={item.id} className="border-2 border-accent-gold bg-background/50">
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-white flex items-center gap-2">
+                              <h3 className="font-semibold text-white flex items-center gap-2 flex-wrap">
                                 {item.item_name}
-                                {item.is_vegan && <span title="Vegan">🌱</span>}
-                                {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
+                                <div className="flex gap-1">
+                                  {item.is_vegan && <span title="Vegan">🌱</span>}
+                                  {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
+                                </div>
                               </h3>
                               {item.notes && <p className="text-sm text-gray-400 mt-1">{item.notes}</p>}
                               <p className="text-xs text-gray-500 mt-1">
                                 Added {new Date(item.created_at).toLocaleDateString()}
                               </p>
                             </div>
-                            <div className="flex gap-2 ml-4">
+                            <div className="flex gap-2 sm:ml-4">
                               <button
                                 onClick={() => handleEditDish(item)}
                                 className="p-2 text-accent-gold hover:bg-accent-gold/10 rounded transition-colors"

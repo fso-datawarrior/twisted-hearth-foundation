@@ -33,11 +33,11 @@ function HalloweenIcons() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 mb-6">
+    <div className="flex flex-col gap-4 mb-6">
       {/* Icons */}
       <div className="flex justify-center gap-6 text-5xl">
         <span 
-          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-orange-400 hover:text-orange-300"
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-orange-400 hover:text-orange-300"
           onMouseEnter={() => handleHover('ghost')}
           onMouseLeave={() => setHoveredIcon(null)}
           role="button"
@@ -46,7 +46,7 @@ function HalloweenIcons() {
           👻
         </span>
         <span 
-          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-purple-400 hover:text-purple-300"
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-purple-400 hover:text-purple-300"
           onMouseEnter={() => handleHover('bat')}
           onMouseLeave={() => setHoveredIcon(null)}
           role="button"
@@ -55,7 +55,7 @@ function HalloweenIcons() {
           🦇
         </span>
         <span 
-          className="cursor-pointer transition-all duration-300 hover:scale-125 hover:animate-shake text-orange-500 hover:text-orange-400"
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-orange-500 hover:text-orange-400"
           onMouseEnter={() => handleHover('pumpkin')}
           onMouseLeave={() => setHoveredIcon(null)}
           role="button"
@@ -66,18 +66,18 @@ function HalloweenIcons() {
       </div>
 
       {/* Twisted Quote Display - Fixed height to prevent layout shift */}
-      <div 
-        className="text-center text-base md:text-lg min-h-[6em] max-w-[90vw] sm:max-w-md px-4 flex items-center justify-center"
-        style={{ 
-          fontFamily: 'Creepster, cursive',
-          color: '#c084fc',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-        }}
-      >
+      <div className="min-h-[3em]">
         {hoveredIcon && activeQuote && (
-          <span className="animate-type-in break-words">
+          <p 
+            className="footer-quote-reveal text-base md:text-lg mb-3"
+            style={{ 
+              fontFamily: 'Creepster, cursive',
+              color: '#c084fc',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}
+          >
             {activeQuote}
-          </span>
+          </p>
         )}
       </div>
     </div>
@@ -88,7 +88,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-bg-2 border-t border-accent-purple/30 py-6 px-6 pb-[max(env(safe-area-inset-bottom),1rem)]">
+    <footer className="bg-bg-2 border-t border-accent-purple/30 py-6 px-0.5 sm:px-4 md:px-6 pb-[max(env(safe-area-inset-bottom),1rem)]">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center">
           {/* Halloween Icons with Hover Quotes */}

@@ -67,6 +67,7 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
 /* Logo responsive font sizing */
 .logo-responsive {
   font-size: 1.5rem; /* text-2xl = 24px */
+  line-height: 0.9; /* Tight line spacing for stacked text */
 }
 
 @media (max-width: 625px) {
@@ -945,6 +946,43 @@ body {
   overflow: hidden;
   white-space: nowrap;
   animation: type-in 1.2s ease-out forwards;
+}
+
+/* ============================================
+   FOOTER-SPECIFIC ANIMATIONS
+   Isolated CSS for Footer component only
+   ============================================ */
+
+/* Footer Halloween Icon Shake Animation */
+@keyframes footer-icon-shake {
+  0%, 100% { transform: rotate(0deg) scale(1.25); }
+  25% { transform: rotate(-5deg) scale(1.3); }
+  75% { transform: rotate(5deg) scale(1.3); }
+}
+
+.footer-icon-shake:hover {
+  animation: footer-icon-shake 0.5s ease-in-out infinite;
+}
+
+/* Footer Twisted Quote Reveal Animation (with wrapping support) */
+@keyframes footer-quote-reveal {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-quote-reveal {
+  display: block;
+  white-space: normal;
+  animation: footer-quote-reveal 1.2s ease-out forwards;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ============================================
