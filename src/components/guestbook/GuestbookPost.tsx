@@ -229,7 +229,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
         )}
       </div>
 
-      <div className="mb-3 ml-14">
+      <div className="mb-3 ml-3 sm:ml-14">
         {isEditing ? (
           <div className="space-y-2">
             <textarea
@@ -267,7 +267,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
         )}
       </div>
 
-      <div className="space-y-3 ml-14">
+      <div className="space-y-3 ml-3 sm:ml-14">
         <EmojiReactions postId={post.id} />
         
         <div className="flex gap-2 text-sm">
@@ -287,7 +287,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowReplies(!showReplies)}
-                  className="text-muted-foreground hover:text-accent-gold"
+                  className="text-muted-foreground hover:text-accent-gold whitespace-nowrap text-xs sm:text-sm"
                 >
                   {showReplies ? 'Hide' : 'Show'} {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
                 </Button>

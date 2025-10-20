@@ -67,7 +67,7 @@ function HalloweenIcons() {
 
       {/* Twisted Quote Display - Fixed height to prevent layout shift */}
       <div 
-        className="text-center text-base md:text-lg h-[6em] max-w-md px-4 flex items-center justify-center"
+        className="text-center text-base md:text-lg min-h-[6em] max-w-[90vw] sm:max-w-md px-4 flex items-center justify-center"
         style={{ 
           fontFamily: 'Creepster, cursive',
           color: '#c084fc',
@@ -75,7 +75,7 @@ function HalloweenIcons() {
         }}
       >
         {hoveredIcon && activeQuote && (
-          <span className="animate-type-in">
+          <span className="animate-type-in break-words">
             {activeQuote}
           </span>
         )}
