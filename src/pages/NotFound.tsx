@@ -12,7 +12,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden pt-20 md:pt-24">
+    <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden pt-28 sm:pt-32 md:pt-36">
       {/* Floating Ghosts */}
       <FloatingGhosts />
 

@@ -266,7 +266,7 @@ const Feast = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <main className="pt-20 relative z-10">
+      <main className="pt-28 sm:pt-32 md:pt-36 relative z-10">
         {/* <CSSFogBackground /> */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
