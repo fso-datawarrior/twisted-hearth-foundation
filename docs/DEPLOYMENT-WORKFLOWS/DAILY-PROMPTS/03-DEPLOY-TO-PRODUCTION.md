@@ -102,11 +102,31 @@ Changes made:
 
 ## **Troubleshooting**
 
-### **If deployment fails:**
+### **If "Authentication Error: Your credentials are no longer valid"**
+
+The `FIREBASE_TOKEN` GitHub secret has expired. To fix:
+
+1. **Generate new Firebase token locally:**
+   ```bash
+   firebase login:ci
+   ```
+
+2. **Update GitHub Secret:**
+   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
+   - Find: `FIREBASE_TOKEN`
+   - Click: "Update"
+   - Paste: The new token
+   - Save
+
+3. **Re-run the deployment:**
+   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
+   - Find the failed workflow
+   - Click "Re-run jobs"
+
+### **If deployment fails (other reasons):**
 1. Check GitHub Actions logs: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
-2. Verify `FIREBASE_TOKEN` secret is set
-3. Check Firebase project permissions
-4. Ensure `firebase.json` is configured correctly
+2. Verify Firebase project permissions
+3. Ensure `firebase.json` is configured correctly
 
 ### **If changes don't appear:**
 1. Wait 2-3 minutes for Firebase CDN propagation

@@ -16,20 +16,28 @@ DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
 1. Check current branch and confirm it's ready for development
-2. Check for any uncommitted changes and ask before proceeding
-3. If I want to create a new branch, ask me:
+2. Check for any uncommitted changes
+3. Check if [CURRENT_BRANCH_NAME] exists in .github/workflows/firebase-hosting-dev.yml
+4. IF branch is NOT in the workflow file:
+   a. Add [CURRENT_BRANCH_NAME] to the branches list
+   b. Commit and push workflow update
+5. If I want to create a new branch, ask me:
    - What version number should we use?
    - What feature/task am I working on today?
    - Create branch name in format: [version]-dev-[feature]
-4. Push the branch to GitHub
-5. Set up development environment for the branch
-6. Confirm development site is accessible
+6. Push the branch to GitHub
+7. Monitor deployment and check for errors
+8. IF authentication error: Provide FIREBASE_TOKEN refresh instructions
+9. Confirm development site is accessible
 
 SAFETY CHECKS:
 - NEVER delete files without explicit confirmation
 - ALWAYS check if files are being used before removing them
+- ALWAYS check if branch is in workflow triggers
+- ALWAYS add branch to workflow if missing
 - ALWAYS commit changes before switching branches
 - ALWAYS verify git status is clean before proceeding
+- ALWAYS monitor deployment for authentication errors
 
 Development URL: https://twisted-hearth-foundation-dev.web.app/
 Repository: https://github.com/fso-datawarrior/twisted-hearth-foundation
@@ -85,6 +93,32 @@ I want to create a new branch:
 ## **Expected Result**
 
 - **Development branch** created and pushed
+- **Branch automatically added to workflow** (if needed)
 - **Development site** auto-deploys: https://twisted-hearth-foundation-dev.web.app/
 - **Ready for coding** with live preview
 - **All changes preserved** and committed
+
+---
+
+## **Troubleshooting**
+
+### **If "Authentication Error: Your credentials are no longer valid"**
+
+The `FIREBASE_TOKEN` GitHub secret has expired. To fix:
+
+1. **Generate new Firebase token locally:**
+   ```bash
+   firebase login:ci
+   ```
+
+2. **Update GitHub Secret:**
+   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
+   - Find: `FIREBASE_TOKEN`
+   - Click: "Update"
+   - Paste: The new token
+   - Save
+
+3. **Re-run the deployment:**
+   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
+   - Find the failed workflow
+   - Click "Re-run jobs"
