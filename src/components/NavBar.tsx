@@ -373,8 +373,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex nav-full:hidden items-center space-x-4">
-            <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden hidden min-[520px]:block">
+          <div className="flex nav-full:hidden items-center space-x-2 flex-shrink-0">
+            <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden hidden min-[520px]:block truncate max-w-[120px]">
               {getCurrentPageName()}
             </span>
             
@@ -426,7 +426,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             </Button>
             
             <button
-              className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
+              className="flex-shrink-0 p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-expanded={isMenuOpen ? "true" : "false"}
               aria-controls="mobile-menu"

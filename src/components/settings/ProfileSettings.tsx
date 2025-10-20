@@ -258,7 +258,7 @@ export default function ProfileSettings({ profile, onProfileUpdate }: ProfileSet
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={getAvatarDisplay() || undefined} alt="Profile" />
