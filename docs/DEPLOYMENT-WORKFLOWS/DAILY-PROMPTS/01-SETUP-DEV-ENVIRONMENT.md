@@ -10,16 +10,16 @@ Use this prompt to set up your development environment for the day.
 ```
 Set up my development environment for today. Do this now.
 
-Current branch: [CURRENT_BRANCH_NAME]
+Use my current branch as the development branch.
 
 DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
-1. Check current branch and confirm it's ready for development
+1. Run: git branch --show-current (detect current branch automatically)
 2. Check for any uncommitted changes
-3. Check if [CURRENT_BRANCH_NAME] exists in .github/workflows/firebase-hosting-dev.yml
+3. Check if current branch exists in .github/workflows/firebase-hosting-dev.yml
 4. IF branch is NOT in the workflow file:
-   a. Add [CURRENT_BRANCH_NAME] to the branches list
+   a. Add current branch to the branches list
    b. Commit and push workflow update
 5. If I want to create a new branch, ask me:
    - What version number should we use?
@@ -49,23 +49,22 @@ Expected workflow: Auto-deploys on push to dev branch
 
 ## **Usage Examples**
 
-### **Use Current Branch:**
+### **Use Current Branch (Most Common):**
 ```
-Set up my development environment for today.
+Set up my development environment for today. Do this now.
 
-Current branch: v-3.0.1.1-UserDropdownViewFIX
+Use my current branch as the development branch.
 ```
 
-### **Create New Branch:**
+### **Create New Branch (If Needed):**
 ```
-Set up my development environment for today.
+Set up my development environment for today. Do this now.
 
-Current branch: v-3.0.1.1-UserDropdownViewFIX
+Use my current branch as the development branch.
 
 I want to create a new branch:
-- Version: 3.0.1.2
+- Version: 3.0.4.0
 - Feature: Email cleanup
-- Branch name: v-3.0.1.2-dev-email-cleanup
 ```
 
 ---

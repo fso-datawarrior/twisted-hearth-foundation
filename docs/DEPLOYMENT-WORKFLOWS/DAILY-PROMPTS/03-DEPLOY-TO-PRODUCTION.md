@@ -10,17 +10,17 @@ Use this prompt to deploy your current branch to production.
 ```
 Deploy my current branch to production. Do this now.
 
-Current branch: [CURRENT_BRANCH_NAME]
+Use my current branch.
 
 DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
-1. Check current branch and confirm it's ready for production
+1. Run: git branch --show-current (detect current branch automatically)
 2. Check git status for any uncommitted changes
 3. Add all changes to git staging
 4. Commit changes with descriptive message
-5. Push branch to GitHub
-6. Merge branch to prod-2025.partytillyou.rip (or push to prod-2025.partytillyou.rip if already on it)
+5. Push current branch to GitHub
+6. Merge current branch to prod-2025.partytillyou.rip (or push if already on prod-2025.partytillyou.rip)
 7. Trigger automated production deployment
 8. Monitor deployment and report success/failure
 9. Provide production URL when complete
@@ -45,18 +45,18 @@ Expected workflow: https://github.com/fso-datawarrior/twisted-hearth-foundation/
 
 ## **Usage Examples**
 
-### **Deploy Current Branch:**
+### **Deploy Current Branch (Recommended):**
 ```
-Deploy my current branch to production.
+Deploy my current branch to production. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch.
 ```
 
 ### **Deploy with Specific Changes:**
 ```
-Deploy my current branch to production.
+Deploy my current branch to production. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch.
 
 Changes made:
 - Fixed email validation logic

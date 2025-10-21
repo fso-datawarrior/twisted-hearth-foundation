@@ -10,16 +10,16 @@ Use this prompt to sync your current branch with the remote GitHub repository.
 ```
 Sync my current branch to GitHub. Do this now.
 
-Current branch: [CURRENT_BRANCH_NAME]
+Use my current branch.
 
 DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Instructions:
-1. Check current branch and confirm it's correct
+1. Run: git branch --show-current (detect current branch automatically)
 2. Check git status for any uncommitted changes
 3. Add all changes to git staging
 4. Commit changes with descriptive message
-5. Push branch to GitHub
+5. Push current branch to GitHub
 6. Confirm sync was successful
 
 SAFETY CHECKS:
@@ -36,18 +36,18 @@ Repository: https://github.com/fso-datawarrior/twisted-hearth-foundation
 
 ## **Usage Examples**
 
-### **Quick Sync:**
+### **Quick Sync (Recommended):**
 ```
-Sync my current branch to GitHub.
+Sync my current branch to GitHub. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch.
 ```
 
 ### **Sync with Specific Changes:**
 ```
-Sync my current branch to GitHub.
+Sync my current branch to GitHub. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch.
 
 Changes made:
 - Fixed email validation logic
@@ -57,9 +57,9 @@ Changes made:
 
 ### **Sync with Commit Message:**
 ```
-Sync my current branch to GitHub.
+Sync my current branch to GitHub. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch.
 
 Commit message: "fix: improve email validation and user interface"
 ```
