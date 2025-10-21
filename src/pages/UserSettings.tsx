@@ -5,11 +5,12 @@ import RequireAuth from '@/components/RequireAuth';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Shield, Settings } from 'lucide-react';
+import { ArrowLeft, User, Shield, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import AccountSettings from '@/components/settings/AccountSettings';
 import SecuritySettings from '@/components/settings/SecuritySettings';
+import NotificationSettings from '@/components/settings/NotificationSettings';
 import { getCurrentUserProfile, Profile } from '@/lib/profile-api';
 
 export default function UserSettings() {
@@ -84,7 +85,7 @@ export default function UserSettings() {
           {/* Settings Tabs */}
           <Card className="border-accent-purple/30">
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-muted/50">
+              <TabsList className="grid w-full grid-cols-4 bg-muted/50">
                 <TabsTrigger value="profile" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Profile</span>
@@ -96,6 +97,10 @@ export default function UserSettings() {
                 <TabsTrigger value="security" className="flex items-center gap-2">
                   <Shield className="h-4 w-4" />
                   <span className="hidden sm:inline">Security</span>
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  <span className="hidden sm:inline">Notifications</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -116,6 +121,10 @@ export default function UserSettings() {
 
                 <TabsContent value="security" className="space-y-6">
                   <SecuritySettings />
+                </TabsContent>
+
+                <TabsContent value="notifications" className="space-y-6">
+                  <NotificationSettings />
                 </TabsContent>
               </div>
             </Tabs>

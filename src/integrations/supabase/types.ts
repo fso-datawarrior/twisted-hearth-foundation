@@ -506,23 +506,74 @@ export type Database = {
       notification_preferences: {
         Row: {
           created_at: string | null
+          email_on_admin_announcement: boolean | null
+          email_on_comment: boolean | null
           email_on_event_update: boolean | null
+          email_on_reaction: boolean | null
+          email_on_reply: boolean | null
+          email_on_rsvp_update: boolean | null
           in_app_notifications: boolean | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          email_on_admin_announcement?: boolean | null
+          email_on_comment?: boolean | null
           email_on_event_update?: boolean | null
+          email_on_reaction?: boolean | null
+          email_on_reply?: boolean | null
+          email_on_rsvp_update?: boolean | null
           in_app_notifications?: boolean | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          email_on_admin_announcement?: boolean | null
+          email_on_comment?: boolean | null
           email_on_event_update?: boolean | null
+          email_on_reaction?: boolean | null
+          email_on_reply?: boolean | null
+          email_on_rsvp_update?: boolean | null
           in_app_notifications?: boolean | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          metadata?: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -1224,6 +1275,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      create_notification: {
+        Args: {
+          p_link?: string
+          p_message: string
+          p_metadata?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       ensure_admins_seeded: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1269,6 +1331,10 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_unread_notification_count: {
+        Args: { p_user_id?: string }
+        Returns: number
+      }
       guestbook_insert_message: {
         Args: {
           p_display_name: string
@@ -1302,9 +1368,17 @@ export type Database = {
         }
         Returns: Json
       }
+      mark_all_notifications_read: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       mark_hint_found: {
         Args: { p_hint_id: number; p_hunt_run_id?: string }
         Returns: Json
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: undefined
       }
       moderate_photo: {
         Args: { p_approved: boolean; p_featured?: boolean; p_photo_id: string }
