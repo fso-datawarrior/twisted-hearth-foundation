@@ -453,7 +453,7 @@ const Feast = () => {
                               className="dietary-checkbox"
                             />
                             <Label htmlFor="vegan" className="text-sm cursor-pointer font-body text-muted-foreground">
-                              🌱 This dish is <strong>Vegetarian</strong>
+                              🥕 This dish is <strong>Vegetarian</strong>
                             </Label>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -510,7 +510,7 @@ const Feast = () => {
                                     <div className="flex-1">
                                       <h4 className="font-semibold text-white flex items-center gap-2">
                                         {item.item_name}
-                                        {item.is_vegan && <span title="Vegetarian">🌱</span>}
+                                        {item.is_vegan && <span title="Vegetarian">🥕</span>}
                                         {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
                                       </h4>
                                       {item.contributor_name && (
@@ -565,8 +565,8 @@ const Feast = () => {
                   </h4>
                   <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🌱</span>
-                      <span className="text-gray-200 font-semibold">🌱 = Vegetarian</span>
+                      <span className="text-lg">🥕</span>
+                      <span className="text-gray-200 font-semibold">🥕 = Vegetarian</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🌾</span>
