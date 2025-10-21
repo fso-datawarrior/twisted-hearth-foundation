@@ -4,6 +4,8 @@ import Footer from "@/components/Footer";
 import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import RequireAuth from "@/components/RequireAuth";
@@ -12,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit, Settings, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, UtensilsCrossed, Plus, Minus, Lock, Edit, Settings, ExternalLink, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { z } from "zod";
 import { trackActivity } from "@/lib/analytics-api";
@@ -24,6 +26,7 @@ interface PotluckItem {
   item_name: string;
   notes: string | null;
   is_vegan: boolean;
+  is_vegetarian: boolean;
   is_gluten_free: boolean;
   created_at: string;
   user_id: string;
@@ -163,6 +166,25 @@ const RSVP = () => {
     loadProfileData();
   }, [user, existingRsvp]);
   
+  // Load notification preferences
+  useEffect(() => {
+    const loadNotificationPrefs = async () => {
+      if (!user) return;
+      
+      const { data: prefData } = await supabase
+        .from('notification_preferences')
+        .select('in_app_notifications, email_on_event_update')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (prefData) {
+        setReceiveNotifications(prefData.email_on_event_update ?? true);
+      }
+    };
+    
+    loadNotificationPrefs();
+  }, [user]);
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -170,12 +192,23 @@ const RSVP = () => {
   const [potluckItems, setPotluckItems] = useState<PotluckItem[]>([]);
   const [dishName, setDishName] = useState("");
   const [dishNotes, setDishNotes] = useState("");
-  const [isVegan, setIsVegan] = useState(false);
+  const [isVegetarian, setIsVegetarian] = useState(false);
   const [isGlutenFree, setIsGlutenFree] = useState(false);
   const [isAddingDish, setIsAddingDish] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<PotluckItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  
+  // Notification preferences
+  const [receiveNotifications, setReceiveNotifications] = useState(true);
+  
+  // Friend invitation modal
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteForm, setInviteForm] = useState({
+    friendName: '',
+    friendEmail: '',
+    personalMessage: ''
+  });
 
   // Load user's potluck contributions
   useEffect(() => {
@@ -428,6 +461,21 @@ const RSVP = () => {
             console.warn("Email function error:", emailErr);
           }
           
+          // Sync notification preference (non-blocking)
+          try {
+            await supabase
+              .from('notification_preferences')
+              .upsert({
+                user_id: user!.id,
+                email_on_event_update: receiveNotifications,
+                in_app_notifications: receiveNotifications,
+              }, {
+                onConflict: 'user_id'
+              });
+          } catch (err) {
+            console.warn('Failed to save notification preference:', err);
+          }
+          
           // Track RSVP submission
           const sessionId = sessionStorage.getItem('analytics_session_id');
           if (sessionId) {
@@ -491,6 +539,140 @@ const RSVP = () => {
     setIsEditing(false);
   };
 
+  const handleDeclineRsvp = async () => {
+    if (!user) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      if (existingRsvp) {
+        // Update existing RSVP to declined
+        const { error } = await supabase
+          .from('rsvps')
+          .update({
+            status: 'declined',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        
+        // Reload RSVP data
+        const { data } = await supabase
+          .from('rsvps')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+          
+        if (data) {
+          const guestData = data.additional_guests as unknown as AdditionalGuest[] | null;
+          setExistingRsvp({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            num_guests: data.num_guests,
+            dietary_restrictions: data.dietary_restrictions,
+            additional_guests: guestData,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+            status: data.status,
+          });
+        }
+      } else {
+        // Create new declined RSVP
+        const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
+        const { data, error } = await supabase
+          .from('rsvps')
+          .insert({
+            user_id: user.id,
+            name: fullName,
+            first_name: formData.firstName.trim(),
+            last_name: formData.lastName.trim(),
+            display_name: formData.displayName.trim() || null,
+            email: user.email!,
+            num_guests: 0,
+            status: 'declined',
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          setExistingRsvp({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            num_guests: data.num_guests,
+            dietary_restrictions: data.dietary_restrictions,
+            additional_guests: null,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+            status: data.status,
+          });
+        }
+      }
+      
+      toast({
+        title: "RSVP Updated",
+        description: "We're sorry you can't make it. You can change your mind anytime!",
+      });
+    } catch (error) {
+      console.error('Decline error:', error);
+      toast({
+        title: "Error",
+        description: "Could not update RSVP. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (!inviteForm.friendName.trim() || !inviteForm.friendEmail.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide your friend's name and email.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      const { error } = await supabase.functions.invoke('send-friend-invitation', {
+        body: {
+          inviterName: existingRsvp?.name || user?.email,
+          friendName: inviteForm.friendName.trim(),
+          friendEmail: inviteForm.friendEmail.trim(),
+          personalMessage: inviteForm.personalMessage.trim() || undefined,
+          eventUrl: window.location.origin
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Invitation Sent! 🎃",
+        description: `Your friend ${inviteForm.friendName} will receive an invitation email shortly.`,
+      });
+      
+      setShowInviteModal(false);
+      setInviteForm({ friendName: '', friendEmail: '', personalMessage: '' });
+    } catch (error) {
+      console.error('Invite error:', error);
+      toast({
+        title: "Failed to Send",
+        description: "Could not send invitation. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleAdditionalGuestChange = (index: number, field: 'name' | 'email', value: string) => {
     setAdditionalGuests(prev => {
       const updated = [...prev];
@@ -548,7 +730,7 @@ const RSVP = () => {
           .update({
             item_name: dishName,
             notes: dishNotes || null,
-            is_vegan: isVegan,
+            is_vegetarian: isVegetarian,
             is_gluten_free: isGlutenFree,
           })
           .eq('id', editingItem.id);
@@ -557,7 +739,7 @@ const RSVP = () => {
 
         setPotluckItems(prev => prev.map(item => 
           item.id === editingItem.id 
-            ? { ...item, item_name: dishName, notes: dishNotes || null, is_vegan: isVegan, is_gluten_free: isGlutenFree }
+            ? { ...item, item_name: dishName, notes: dishNotes || null, is_vegetarian: isVegetarian, is_vegan: isVegetarian, is_gluten_free: isGlutenFree }
             : item
         ));
         toast({
@@ -573,7 +755,7 @@ const RSVP = () => {
             user_id: user.id,
             item_name: dishName,
             notes: dishNotes || null,
-            is_vegan: isVegan,
+            is_vegetarian: isVegetarian,
             is_gluten_free: isGlutenFree,
             user_email: user.email || '',
           })
@@ -593,7 +775,7 @@ const RSVP = () => {
               contributorName,
               dishName,
               notes: dishNotes || undefined,
-              isVegan,
+              isVegetarian,
               isGlutenFree,
             }
           });
@@ -607,7 +789,7 @@ const RSVP = () => {
           console.error('Failed to send contribution confirmation email:', emailErr);
         }
 
-        if (isVegan || isGlutenFree) {
+        if (isVegetarian || isGlutenFree) {
           setShowConfirmDialog(true);
         } else {
           toast({
@@ -621,7 +803,7 @@ const RSVP = () => {
       // Reset form
       setDishName("");
       setDishNotes("");
-      setIsVegan(false);
+      setIsVegetarian(false);
       setIsGlutenFree(false);
       setEditingItem(null);
     } catch (error) {
@@ -640,7 +822,7 @@ const RSVP = () => {
     setEditingItem(item);
     setDishName(item.item_name);
     setDishNotes(item.notes || "");
-    setIsVegan(item.is_vegan);
+    setIsVegetarian(item.is_vegetarian || item.is_vegan);
     setIsGlutenFree(item.is_gluten_free);
     
     // Scroll to contribution form
@@ -684,7 +866,7 @@ const RSVP = () => {
     setEditingItem(null);
     setDishName("");
     setDishNotes("");
-    setIsVegan(false);
+    setIsVegetarian(false);
     setIsGlutenFree(false);
   };
 
@@ -718,6 +900,17 @@ const RSVP = () => {
                 <p className="text-center text-muted-foreground mb-8 font-body">
                   Your presence at the Twisted Tale is confirmed
                 </p>
+
+                {existingRsvp.status === 'declined' && (
+                  <div className="mb-6 p-4 bg-accent-red/10 border border-accent-red/30 rounded-lg">
+                    <p className="text-center text-accent-red font-subhead text-lg">
+                      You've indicated you cannot attend this event.
+                    </p>
+                    <p className="text-center text-muted-foreground text-sm mt-2">
+                      Changed your mind? Click "Modify Your Fate" below to update your RSVP.
+                    </p>
+                  </div>
+                )}
 
                 <div className="space-y-6 bg-background/50 p-6 rounded-lg border border-accent-purple/30">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -786,6 +979,29 @@ const RSVP = () => {
                   <p className="font-body text-xs text-muted-foreground mt-4 text-center">
                     Need to update your guest count or dietary restrictions? Click above to make changes.
                   </p>
+                  
+                  {existingRsvp.status !== 'declined' && (
+                    <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleDeclineRsvp}
+                        disabled={isSubmitting}
+                        className="flex-1 border-accent-red/30 text-accent-red hover:bg-accent-red/10 font-subhead text-sm px-8 py-3"
+                      >
+                        Can't Attend
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowInviteModal(true)}
+                        className="flex-1 border-accent-gold/30 text-accent-gold hover:bg-accent-gold/10 font-subhead text-sm px-8 py-3"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Invite a Friend
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -989,6 +1205,32 @@ const RSVP = () => {
                       autoComplete="off"
                       enterKeyHint="done"
                     />
+                    
+                    {/* Notification Preferences */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          id="notifications"
+                          checked={receiveNotifications}
+                          onCheckedChange={(checked) => setReceiveNotifications(checked as boolean)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label htmlFor="notifications" className="text-sm text-gray-300 cursor-pointer block">
+                            📧 Send me email updates about event changes and announcements
+                          </label>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            You can manage your notification preferences in{" "}
+                            <Link 
+                              to="/settings" 
+                              className="text-accent-gold hover:text-accent-gold/80 underline"
+                            >
+                              Settings
+                            </Link>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -1066,13 +1308,13 @@ const RSVP = () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Checkbox
-                      id="vegan"
-                      checked={isVegan}
-                      onCheckedChange={(checked) => setIsVegan(checked as boolean)}
+                      id="vegetarian"
+                      checked={isVegetarian}
+                      onCheckedChange={(checked) => setIsVegetarian(checked as boolean)}
                       className="dietary-checkbox"
                     />
-                    <label htmlFor="vegan" className="text-sm text-gray-300 cursor-pointer">
-                      🌱 This dish is Vegan
+                    <label htmlFor="vegetarian" className="text-sm text-gray-300 cursor-pointer">
+                      🥕 This dish is Vegetarian
                     </label>
                   </div>
 
@@ -1125,7 +1367,7 @@ const RSVP = () => {
                               <h3 className="font-semibold text-white flex items-center gap-2 flex-wrap">
                                 {item.item_name}
                                 <div className="flex gap-1">
-                                  {item.is_vegan && <span title="Vegan">🌱</span>}
+                                  {(item.is_vegetarian || item.is_vegan) && <span title="Vegetarian">🥕</span>}
                                   {item.is_gluten_free && <span title="Gluten-Free">🌾</span>}
                                 </div>
                               </h3>
@@ -1199,11 +1441,11 @@ const RSVP = () => {
               
               <div className="space-y-3 bg-background/50 p-4 rounded-lg">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">🌱</span>
+                  <span className="text-2xl">🥕</span>
                   <div>
-                    <p className="font-semibold text-white">Vegan</p>
+                    <p className="font-semibold text-white">Vegetarian</p>
                     <p className="text-sm text-gray-400">
-                      Contains no animal products whatsoever - no meat, dairy, eggs, honey, or any animal-derived ingredients.
+                      Contains no meat, poultry, fish, or seafood. May contain dairy and eggs.
                     </p>
                   </div>
                 </div>
@@ -1255,6 +1497,79 @@ const RSVP = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Friend Invitation Modal */}
+      <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
+        <DialogContent className="bg-card border border-accent-purple/30 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white font-heading text-2xl">Invite a Friend</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Share the twisted tale with someone you'd like to join the festivities!
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="friendName" className="text-accent-gold">Friend's Name *</Label>
+              <Input
+                id="friendName"
+                value={inviteForm.friendName}
+                onChange={(e) => setInviteForm(prev => ({ ...prev, friendName: e.target.value }))}
+                placeholder="Enter your friend's name"
+                className="mt-1 bg-background border-input text-white"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="friendEmail" className="text-accent-gold">Friend's Email *</Label>
+              <Input
+                id="friendEmail"
+                type="email"
+                value={inviteForm.friendEmail}
+                onChange={(e) => setInviteForm(prev => ({ ...prev, friendEmail: e.target.value }))}
+                placeholder="friend@example.com"
+                className="mt-1 bg-background border-input text-white"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="personalMessage" className="text-accent-gold">Personal Message (Optional)</Label>
+              <Textarea
+                id="personalMessage"
+                value={inviteForm.personalMessage}
+                onChange={(e) => setInviteForm(prev => ({ ...prev, personalMessage: e.target.value }))}
+                placeholder="Add a personal note to your invitation..."
+                maxLength={280}
+                rows={3}
+                className="mt-1 bg-background border-input text-white resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">{inviteForm.personalMessage.length}/280 characters</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-3 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowInviteModal(false);
+                setInviteForm({ friendName: '', friendEmail: '', personalMessage: '' });
+              }}
+              className="flex-1 border-accent-purple/30 text-accent-purple hover:bg-accent-purple/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSendInvite}
+              disabled={isSubmitting || !inviteForm.friendName.trim() || !inviteForm.friendEmail.trim()}
+              className="flex-1 bg-accent-gold hover:bg-accent-gold/80 text-ink font-subhead"
+            >
+              {isSubmitting ? "Sending..." : "Send Invitation"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </RequireAuth>
   );

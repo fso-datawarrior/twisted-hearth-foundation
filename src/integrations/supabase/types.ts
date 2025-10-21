@@ -503,6 +503,30 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string | null
+          email_on_event_update: boolean | null
+          in_app_notifications: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_on_event_update?: boolean | null
+          in_app_notifications?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_on_event_update?: boolean | null
+          in_app_notifications?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
@@ -722,6 +746,7 @@ export type Database = {
           id: string
           is_gluten_free: boolean | null
           is_vegan: boolean | null
+          is_vegetarian: boolean | null
           item_name: string
           notes: string | null
           user_email: string
@@ -734,6 +759,7 @@ export type Database = {
           id?: string
           is_gluten_free?: boolean | null
           is_vegan?: boolean | null
+          is_vegetarian?: boolean | null
           item_name: string
           notes?: string | null
           user_email: string
@@ -746,6 +772,7 @@ export type Database = {
           id?: string
           is_gluten_free?: boolean | null
           is_vegan?: boolean | null
+          is_vegetarian?: boolean | null
           item_name?: string
           notes?: string | null
           user_email?: string
