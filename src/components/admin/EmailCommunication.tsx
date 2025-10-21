@@ -18,6 +18,7 @@ import {
 } from '@/lib/email-campaigns-api';
 import { EmailTemplateEditor } from './EmailTemplateEditor';
 import { CampaignComposer } from './CampaignComposer';
+import { SystemUpdateComposer } from './SystemUpdateComposer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -439,6 +440,13 @@ export function EmailCommunication() {
               >
                 Campaigns
               </TabsTrigger>
+              <TabsTrigger 
+                value="system-update"
+                className="rounded-t-lg rounded-b-none border border-border border-b-0 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=inactive]:bg-muted/30 data-[state=inactive]:text-muted-foreground relative data-[state=active]:z-10 data-[state=active]:-mb-px px-6 py-3"
+              >
+                <Megaphone className="w-4 h-4 mr-2" />
+                System Update
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="templates" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
@@ -565,6 +573,13 @@ export function EmailCommunication() {
                   ))
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="system-update" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
+              <SystemUpdateComposer 
+                onComplete={() => loadData()}
+                onCancel={() => {}}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
