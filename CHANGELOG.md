@@ -1,5 +1,47 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## v3.3 — Comprehensive Notification System: database triggers, email notifications, user preferences
+
+### 🔔 Notification System Implementation
+
+#### Added
+- **Complete Notification Infrastructure**: Full database schema with notifications table, extended preferences, helper functions, and RLS policies
+- **NotificationSettings Component**: Comprehensive UI with 7 notification preference toggles (in-app, email types)
+- **Email Notification Edge Function**: Robust Mailjet integration with preference checking and beautiful HTML templates
+- **Automatic Triggers**: Notifications fire automatically on guestbook replies, photo reactions, and RSVP confirmations
+- **Settings Integration**: Added 4th "Notifications" tab to UserSettings page with Bell icon
+
+#### Database Enhancements
+- **Notifications Table**: Complete schema with id, user_id, type, title, message, link, is_read, created_at, metadata
+- **Extended Preferences**: Added 5 new columns to notification_preferences (email_on_comment, email_on_reply, email_on_reaction, email_on_rsvp_update, email_on_admin_announcement)
+- **Helper Functions**: create_notification(), mark_notification_read(), mark_all_notifications_read(), get_unread_notification_count()
+- **Trigger Functions**: notify_on_guestbook_reply(), notify_on_photo_reaction(), notify_on_rsvp_update()
+- **Security**: Proper RLS policies ensuring users only see their own notifications, admins see all
+- **Performance**: Optimized indexes for fast notification queries
+
+#### User Experience
+- **Preference Management**: Users can control 7 different notification types through intuitive settings interface
+- **Email Templates**: Professional dark-themed HTML emails with action buttons and preference management links
+- **Automatic Notifications**: Users receive timely notifications about comments, reactions, and RSVP updates
+- **Settings UI**: Beautiful card-based layout with proper icons and loading states
+
+#### Technical Implementation
+- **Edge Function**: send-notification-email with comprehensive error handling and CORS support
+- **TypeScript Types**: Complete type definitions for notifications and extended preferences
+- **Database Migration**: Safe migration strategy preserving existing data while adding new functionality
+- **Integration**: Seamless integration with existing Settings page and user authentication
+
+#### Files Created/Modified
+- ✅ `supabase/migrations/20251021025507_468b22c3-c7ba-4d2f-9afd-5af9f64cb11d.sql` (240 lines)
+- ✅ `src/components/settings/NotificationSettings.tsx` (325 lines)
+- ✅ `src/pages/UserSettings.tsx` (13 lines modified)
+- ✅ `supabase/functions/send-notification-email/index.ts` (184 lines)
+- ✅ `src/integrations/supabase/types.ts` (74 lines added)
+
+**Impact**: Users now receive timely notifications about comments, reactions, and RSVP updates while maintaining full control over their notification preferences through an intuitive settings interface.
+
+---
+
 ## v3.2 — Motion & accessibility polish: proximity-based hunt reveals, section animations, skip link, global focus ring.
 
 ### 🎨 Motion & Accessibility Enhancements
