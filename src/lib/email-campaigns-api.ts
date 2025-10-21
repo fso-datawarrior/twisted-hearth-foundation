@@ -21,7 +21,7 @@ export interface CampaignStats {
 export interface EmailCampaign {
   id: string;
   template_id?: string;
-  recipient_list: 'all' | 'rsvp_yes' | 'rsvp_pending' | 'custom';
+  recipient_list: 'all' | 'rsvp_yes' | 'rsvp_pending' | 'custom' | 'admins';
   custom_recipients?: string[];
   subject: string;
   scheduled_at?: string;
@@ -213,6 +213,13 @@ export async function getRecipientCount(recipientList: string): Promise<number> 
       .eq('status', 'pending');
     if (error) throw error;
     return count || 0;
+  } else if (recipientList === 'admins') {
+    const { count, error } = await supabase
+      .from('user_roles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'admin');
+    if (error) throw error;
+    return count || 0;
   }
   return 0;
 }
@@ -316,8 +323,7 @@ export async function sendSystemUpdate(params: {
     // Send both admin and user versions
     const adminCampaign = await createCampaign({
       subject: `🎃 System Update ${params.version} - Technical Summary`,
-      recipient_list: 'custom', // Send to admins only
-      custom_recipients: [], // Will be populated with admin emails
+      recipient_list: 'admins', // Send to admins only
       template_variables: {
         ...baseVariables,
         FEATURES_ADDED: params.newFeatures || [],
@@ -358,8 +364,7 @@ export async function sendSystemUpdate(params: {
     // Admin/Technical version
     const campaign = await createCampaign({
       subject: `🎃 System Update ${params.version} - Technical Summary`,
-      recipient_list: 'custom', // Send to admins only
-      custom_recipients: [], // Will be populated with admin emails
+      recipient_list: 'admins', // Send to admins only
       template_variables: {
         ...baseVariables,
         FEATURES_ADDED: params.newFeatures || [],

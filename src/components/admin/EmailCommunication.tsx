@@ -541,6 +541,7 @@ export function EmailCommunication() {
                               To: {campaign.recipient_list === 'all' ? 'All Guests' : 
                                    campaign.recipient_list === 'rsvp_yes' ? 'Confirmed RSVPs' :
                                    campaign.recipient_list === 'rsvp_pending' ? 'Pending RSVPs' :
+                                   campaign.recipient_list === 'admins' ? 'All Admins' :
                                    `${campaign.custom_recipients?.length || 0} recipients`}
                             </CardDescription>
                             {campaign.sent_at && (

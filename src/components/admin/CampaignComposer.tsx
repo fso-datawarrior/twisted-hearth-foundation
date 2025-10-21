@@ -231,6 +231,7 @@ export function CampaignComposer({ onSave, onCancel, onSendTest, systemUpdateMod
                 <SelectItem value="all">All Guests</SelectItem>
                 <SelectItem value="rsvp_yes">Confirmed RSVPs</SelectItem>
                 <SelectItem value="rsvp_pending">Pending RSVPs</SelectItem>
+                <SelectItem value="admins">All Admins</SelectItem>
                 <SelectItem value="custom">Custom List</SelectItem>
               </SelectContent>
             </Select>
