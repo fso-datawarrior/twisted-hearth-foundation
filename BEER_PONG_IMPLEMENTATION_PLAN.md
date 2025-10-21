@@ -1,9 +1,9 @@
-# SPEED BEER PONG TOURNAMENT - IMPLEMENTATION PLAN (v2)
+# SPEED BEER PONG TOURNAMENT - IMPLEMENTATION PLAN (v3)
 
 **Project**: Add Beer Pong Tournament Registration & Management
 **Branch**: `prod-2025.partytillyou.rip`
 **Created**: 2025-10-21
-**Updated**: 2025-10-21 (v2 - 5-minute games, custom photos, admin brackets)
+**Updated**: 2025-10-21 (v3 - Time calculator, enhanced management, rule voting)
 
 ---
 
@@ -13,8 +13,11 @@
 2. Enable team registration for 2-person teams (max 20 teams)
 3. Allow teams to **upload custom photos** and add **team slogans**
 4. **Admin bracket management**: generate brackets, record scores, manage matches
-5. **Public bracket display** for game day viewing
-6. Display registered teams on the Schedule page with live updates
+5. **Tournament time calculator**: estimate duration based on team count (4-min or 5-min toggles)
+6. **Enhanced match management**: easy winner/loser changes, "up next" visibility
+7. **Rule discussion/voting system**: community-driven rule proposals and voting
+8. **Public bracket display** for game day viewing with mobile-friendly bracket tree
+9. Display registered teams on the Schedule page with live updates
 
 ---
 
@@ -562,6 +565,178 @@ COMMENT ON VIEW public.beer_pong_teams_public IS
 
 COMMENT ON VIEW public.beer_pong_bracket_public IS
   'Public view of tournament bracket for game day display';
+
+-- ================================================================
+-- RULE DISCUSSION & VOTING SYSTEM
+-- ================================================================
+
+-- Create table for rule proposals
+CREATE TABLE IF NOT EXISTS public.beer_pong_rule_proposals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'accepted', 'rejected', 'archived')),
+  upvotes INTEGER DEFAULT 0,
+  downvotes INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create table for votes on rule proposals
+CREATE TABLE IF NOT EXISTS public.beer_pong_rule_votes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  proposal_id UUID NOT NULL REFERENCES public.beer_pong_rule_proposals(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  vote_type TEXT NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(proposal_id, user_id) -- One vote per user per proposal
+);
+
+-- Enable RLS
+ALTER TABLE public.beer_pong_rule_proposals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.beer_pong_rule_votes ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for rule proposals
+CREATE POLICY "Anyone can view active rule proposals"
+  ON public.beer_pong_rule_proposals FOR SELECT
+  TO public
+  USING (status = 'active');
+
+CREATE POLICY "Authenticated users can create rule proposals"
+  ON public.beer_pong_rule_proposals FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = author_id);
+
+CREATE POLICY "Authors can update own proposals"
+  ON public.beer_pong_rule_proposals FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = author_id);
+
+CREATE POLICY "Admins can manage all proposals"
+  ON public.beer_pong_rule_proposals FOR ALL
+  TO authenticated
+  USING (public.is_admin());
+
+-- RLS Policies for votes
+CREATE POLICY "Anyone can view votes"
+  ON public.beer_pong_rule_votes FOR SELECT
+  TO public
+  USING (true);
+
+CREATE POLICY "Authenticated users can vote"
+  ON public.beer_pong_rule_votes FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own votes"
+  ON public.beer_pong_rule_votes FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Function to cast/change vote
+CREATE OR REPLACE FUNCTION public.vote_on_rule_proposal(
+  p_proposal_id UUID,
+  p_vote_type TEXT
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id UUID;
+  v_old_vote TEXT;
+BEGIN
+  v_user_id := auth.uid();
+
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Must be authenticated to vote';
+  END IF;
+
+  -- Check if user already voted
+  SELECT vote_type INTO v_old_vote
+  FROM beer_pong_rule_votes
+  WHERE proposal_id = p_proposal_id AND user_id = v_user_id;
+
+  IF v_old_vote IS NOT NULL THEN
+    -- User already voted - update vote
+    IF v_old_vote = p_vote_type THEN
+      -- Same vote - remove it (toggle off)
+      DELETE FROM beer_pong_rule_votes
+      WHERE proposal_id = p_proposal_id AND user_id = v_user_id;
+
+      -- Update counts
+      IF p_vote_type = 'upvote' THEN
+        UPDATE beer_pong_rule_proposals
+        SET upvotes = upvotes - 1
+        WHERE id = p_proposal_id;
+      ELSE
+        UPDATE beer_pong_rule_proposals
+        SET downvotes = downvotes - 1
+        WHERE id = p_proposal_id;
+      END IF;
+    ELSE
+      -- Different vote - change it
+      UPDATE beer_pong_rule_votes
+      SET vote_type = p_vote_type, created_at = NOW()
+      WHERE proposal_id = p_proposal_id AND user_id = v_user_id;
+
+      -- Update counts (remove old, add new)
+      IF p_vote_type = 'upvote' THEN
+        UPDATE beer_pong_rule_proposals
+        SET upvotes = upvotes + 1, downvotes = downvotes - 1
+        WHERE id = p_proposal_id;
+      ELSE
+        UPDATE beer_pong_rule_proposals
+        SET upvotes = upvotes - 1, downvotes = downvotes + 1
+        WHERE id = p_proposal_id;
+      END IF;
+    END IF;
+  ELSE
+    -- New vote
+    INSERT INTO beer_pong_rule_votes (proposal_id, user_id, vote_type)
+    VALUES (p_proposal_id, v_user_id, p_vote_type);
+
+    -- Update counts
+    IF p_vote_type = 'upvote' THEN
+      UPDATE beer_pong_rule_proposals
+      SET upvotes = upvotes + 1
+      WHERE id = p_proposal_id;
+    ELSE
+      UPDATE beer_pong_rule_proposals
+      SET downvotes = downvotes + 1
+      WHERE id = p_proposal_id;
+    END IF;
+  END IF;
+
+  RETURN TRUE;
+END;
+$$;
+
+-- View for rule proposals with author info
+CREATE OR REPLACE VIEW public.beer_pong_rules_public AS
+SELECT
+  p.id,
+  p.title,
+  p.description,
+  p.status,
+  p.upvotes,
+  p.downvotes,
+  p.upvotes - p.downvotes AS score,
+  p.created_at,
+  prof.display_name AS author_name
+FROM beer_pong_rule_proposals p
+LEFT JOIN profiles prof ON p.author_id = prof.id
+WHERE p.status = 'active'
+ORDER BY (p.upvotes - p.downvotes) DESC, p.created_at DESC;
+
+GRANT SELECT ON public.beer_pong_rules_public TO anon, authenticated;
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_rule_proposals_status ON public.beer_pong_rule_proposals(status);
+CREATE INDEX IF NOT EXISTS idx_rule_votes_proposal ON public.beer_pong_rule_votes(proposal_id);
+CREATE INDEX IF NOT EXISTS idx_rule_votes_user ON public.beer_pong_rule_votes(user_id);
 ```
 
 ---
@@ -1576,7 +1751,614 @@ export function BeerPongBracketDisplay() {
 
 ---
 
-## 📅 PART 7: UPDATE SCHEDULE PAGE
+## ⏱️ PART 7: TOURNAMENT TIME CALCULATOR
+
+**File**: `src/components/admin/TournamentTimeCalculator.tsx`
+
+```typescript
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Clock, Calendar, Trophy } from 'lucide-react';
+
+export function TournamentTimeCalculator() {
+  const [teamCount, setTeamCount] = useState(0);
+  const [useShortGames, setUseShortGames] = useState(false); // false = 5min, true = 4min
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadTeamCount();
+
+    // Subscribe to team changes
+    const channel = supabase
+      .channel('team_count_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tournament_teams',
+          filter: 'tournament_type=eq.beer_pong'
+        },
+        () => loadTeamCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const loadTeamCount = async () => {
+    const { data, error } = await supabase
+      .from('tournament_teams')
+      .select('id', { count: 'exact' })
+      .eq('tournament_type', 'beer_pong')
+      .neq('status', 'eliminated');
+
+    if (!error && data) {
+      setTeamCount(data.length);
+    }
+    setLoading(false);
+  };
+
+  // Calculate tournament structure
+  const calculateTournament = () => {
+    if (teamCount < 2) {
+      return {
+        rounds: 0,
+        totalMatches: 0,
+        matchesByRound: [],
+        estimatedTime: 0,
+        formattedTime: '0h 0m'
+      };
+    }
+
+    const gameMinutes = useShortGames ? 4 : 5;
+    const setupMinutes = 2; // Time between matches
+    const totalMinutesPerMatch = gameMinutes + setupMinutes;
+
+    // Calculate rounds needed (log2 of team count, rounded up)
+    const rounds = Math.ceil(Math.log2(teamCount));
+
+    // Calculate matches per round
+    const matchesByRound: number[] = [];
+    let remainingTeams = teamCount;
+
+    for (let r = 0; r < rounds; r++) {
+      const matchesThisRound = Math.floor(remainingTeams / 2);
+      matchesByRound.push(matchesThisRound);
+
+      // Account for odd number of teams (byes)
+      const teamsWithByes = remainingTeams % 2;
+      remainingTeams = matchesThisRound + teamsWithByes;
+    }
+
+    const totalMatches = matchesByRound.reduce((sum, m) => sum + m, 0);
+    const estimatedMinutes = totalMatches * totalMinutesPerMatch;
+    const hours = Math.floor(estimatedMinutes / 60);
+    const minutes = estimatedMinutes % 60;
+
+    return {
+      rounds,
+      totalMatches,
+      matchesByRound,
+      estimatedTime: estimatedMinutes,
+      formattedTime: `${hours}h ${minutes}m`
+    };
+  };
+
+  const tournament = calculateTournament();
+
+  if (loading) {
+    return <div className="text-muted-foreground">Loading...</div>;
+  }
+
+  return (
+    <Card className="p-6 bg-gradient-to-br from-bg-2 to-bg border-accent-gold/50">
+      <div className="flex items-center gap-3 mb-6">
+        <Clock className="w-6 h-6 text-accent-gold" />
+        <h3 className="font-subhead text-2xl text-accent-gold">
+          Tournament Time Estimator
+        </h3>
+      </div>
+
+      {/* Team Count */}
+      <div className="mb-6 p-4 bg-bg rounded-lg border border-accent-purple/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-accent-purple" />
+            <span className="font-subhead text-lg">Registered Teams</span>
+          </div>
+          <span className="text-3xl font-bold text-accent-gold">
+            {teamCount} / 20
+          </span>
+        </div>
+      </div>
+
+      {/* Game Time Toggle */}
+      <div className="mb-6 p-4 bg-bg rounded-lg border border-accent-purple/30">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="game-time" className="text-base font-subhead">
+              Game Duration
+            </Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              {useShortGames ? '4 minutes' : '5 minutes'} per game
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm ${!useShortGames ? 'text-accent-gold font-bold' : 'text-muted-foreground'}`}>
+              5 min
+            </span>
+            <Switch
+              id="game-time"
+              checked={useShortGames}
+              onCheckedChange={setUseShortGames}
+            />
+            <span className={`text-sm ${useShortGames ? 'text-accent-gold font-bold' : 'text-muted-foreground'}`}>
+              4 min
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tournament Summary */}
+      {teamCount >= 2 ? (
+        <div className="space-y-4">
+          {/* Total Time */}
+          <div className="p-5 bg-accent-gold/10 rounded-lg border-2 border-accent-gold">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Estimated Total Time
+                </p>
+                <p className="text-4xl font-bold text-accent-gold">
+                  {tournament.formattedTime}
+                </p>
+              </div>
+              <Calendar className="w-12 h-12 text-accent-gold/50" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Includes {useShortGames ? 4 : 5} min games + 2 min setup between matches
+            </p>
+          </div>
+
+          {/* Round Breakdown */}
+          <div className="p-4 bg-bg rounded-lg border border-accent-purple/30">
+            <h4 className="font-subhead text-sm text-accent-purple mb-3">
+              Round Breakdown
+            </h4>
+            <div className="space-y-2">
+              {tournament.matchesByRound.map((matches, index) => {
+                const roundTime = matches * (useShortGames ? 4 : 5) + matches * 2;
+                const roundName = index === tournament.rounds - 1
+                  ? 'Finals'
+                  : `Round ${index + 1}`;
+                return (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {roundName}: {matches} {matches === 1 ? 'match' : 'matches'}
+                    </span>
+                    <span className="text-accent-gold font-mono">
+                      ~{roundTime} min
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-3 bg-bg rounded border border-accent-purple/30 text-center">
+              <p className="text-2xl font-bold text-accent-gold">
+                {tournament.rounds}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Rounds</p>
+            </div>
+            <div className="p-3 bg-bg rounded border border-accent-purple/30 text-center">
+              <p className="text-2xl font-bold text-accent-gold">
+                {tournament.totalMatches}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Matches</p>
+            </div>
+            <div className="p-3 bg-bg rounded border border-accent-purple/30 text-center">
+              <p className="text-2xl font-bold text-accent-gold">
+                {useShortGames ? '4' : '5'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Min/Game</p>
+            </div>
+          </div>
+
+          {/* Time Window Recommendation */}
+          {tournament.estimatedTime > 120 && (
+            <div className="p-4 bg-accent-red/10 rounded-lg border border-accent-red/30">
+              <p className="text-sm text-accent-red font-semibold">
+                ⚠️ Tournament may run long
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Consider using 4-minute games to keep within 2-hour window
+              </p>
+            </div>
+          )}
+
+          {tournament.estimatedTime <= 90 && (
+            <div className="p-4 bg-accent-green/10 rounded-lg border border-accent-green/30">
+              <p className="text-sm text-accent-green font-semibold">
+                ✓ Perfect timing!
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tournament fits comfortably in a 90-120 minute window
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center p-8 text-muted-foreground">
+          <p>Waiting for teams to register...</p>
+          <p className="text-sm mt-2">
+            Time estimate will appear once at least 2 teams are registered
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+}
+```
+
+---
+
+## 💬 PART 8: RULE DISCUSSION & VOTING COMPONENT
+
+**File**: `src/components/BeerPongRuleDiscussion.tsx`
+
+```typescript
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { ThumbsUp, ThumbsDown, MessageSquarePlus, TrendingUp } from 'lucide-react';
+
+interface RuleProposal {
+  id: string;
+  title: string;
+  description: string;
+  upvotes: number;
+  downvotes: number;
+  score: number;
+  author_name: string;
+  created_at: string;
+}
+
+interface UserVote {
+  proposal_id: string;
+  vote_type: 'upvote' | 'downvote';
+}
+
+export function BeerPongRuleDiscussion() {
+  const { user } = useAuth();
+  const [proposals, setProposals] = useState<RuleProposal[]>([]);
+  const [userVotes, setUserVotes] = useState<UserVote[]>([]);
+  const [showNewProposal, setShowNewProposal] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadProposals();
+    if (user) {
+      loadUserVotes();
+    }
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('rule_proposals_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'beer_pong_rule_proposals'
+        },
+        () => loadProposals()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'beer_pong_rule_votes'
+        },
+        () => {
+          loadProposals();
+          if (user) loadUserVotes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const loadProposals = async () => {
+    const { data, error } = await supabase
+      .from('beer_pong_rules_public')
+      .select('*');
+
+    if (error) {
+      console.error('Error loading proposals:', error);
+    } else {
+      setProposals(data || []);
+    }
+  };
+
+  const loadUserVotes = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('beer_pong_rule_votes')
+      .select('proposal_id, vote_type')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error loading user votes:', error);
+    } else {
+      setUserVotes(data || []);
+    }
+  };
+
+  const getUserVote = (proposalId: string): 'upvote' | 'downvote' | null => {
+    const vote = userVotes.find((v) => v.proposal_id === proposalId);
+    return vote ? vote.vote_type : null;
+  };
+
+  const handleVote = async (proposalId: string, voteType: 'upvote' | 'downvote') => {
+    if (!user) {
+      toast.error('Please log in to vote');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.rpc('vote_on_rule_proposal', {
+        p_proposal_id: proposalId,
+        p_vote_type: voteType
+      });
+
+      if (error) throw error;
+
+      // Refresh votes
+      await loadUserVotes();
+      await loadProposals();
+    } catch (error: any) {
+      console.error('Vote error:', error);
+      toast.error(error.message || 'Failed to vote');
+    }
+  };
+
+  const handleSubmitProposal = async () => {
+    if (!title || !description) {
+      toast.error('Please fill in both title and description');
+      return;
+    }
+
+    if (!user) {
+      toast.error('Please log in to submit a proposal');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('beer_pong_rule_proposals')
+        .insert({
+          author_id: user.id,
+          title: title.trim(),
+          description: description.trim(),
+          status: 'active'
+        });
+
+      if (error) throw error;
+
+      toast.success('Rule proposal submitted!');
+      setTitle('');
+      setDescription('');
+      setShowNewProposal(false);
+      await loadProposals();
+    } catch (error: any) {
+      console.error('Proposal submission error:', error);
+      toast.error(error.message || 'Failed to submit proposal');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-heading text-2xl text-accent-purple">
+            Rule Proposals & Discussion
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Suggest rule changes or enhancements for next year
+          </p>
+        </div>
+        {user && (
+          <Button
+            onClick={() => setShowNewProposal(!showNewProposal)}
+            className="bg-accent-purple hover:bg-accent-purple/80"
+          >
+            <MessageSquarePlus className="w-4 h-4 mr-2" />
+            Propose Rule
+          </Button>
+        )}
+      </div>
+
+      {/* New Proposal Form */}
+      {showNewProposal && (
+        <Card className="p-6 bg-bg-2 border-accent-purple/50">
+          <h4 className="font-subhead text-lg text-accent-gold mb-4">
+            Submit a Rule Proposal
+          </h4>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rule-title">Rule Title *</Label>
+              <Input
+                id="rule-title"
+                placeholder="e.g., Add redemption round after sudden death"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <Label htmlFor="rule-description">Description *</Label>
+              <Textarea
+                id="rule-description"
+                placeholder="Explain the rule change and why it would improve the tournament..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {description.length}/500 characters
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSubmitProposal}
+                disabled={loading || !title || !description}
+                className="bg-accent-gold hover:bg-accent-gold/90"
+              >
+                Submit Proposal
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowNewProposal(false);
+                  setTitle('');
+                  setDescription('');
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Proposals List */}
+      {proposals.length === 0 ? (
+        <Card className="p-8 text-center bg-bg-2 border-accent-purple/30">
+          <p className="text-muted-foreground">
+            No rule proposals yet. Be the first to suggest an improvement!
+          </p>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {proposals.map((proposal) => {
+            const userVote = getUserVote(proposal.id);
+            return (
+              <Card
+                key={proposal.id}
+                className="p-5 bg-bg border-accent-purple/30 hover:border-accent-gold/50 transition-colors"
+              >
+                <div className="flex gap-4">
+                  {/* Vote Controls */}
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => handleVote(proposal.id, 'upvote')}
+                      disabled={!user}
+                      className={`p-2 rounded transition-colors ${
+                        userVote === 'upvote'
+                          ? 'bg-accent-green text-white'
+                          : 'bg-bg-2 text-muted-foreground hover:text-accent-green hover:bg-accent-green/20'
+                      }`}
+                      title={user ? 'Upvote' : 'Log in to vote'}
+                    >
+                      <ThumbsUp className="w-5 h-5" />
+                    </button>
+                    <span className={`font-bold text-lg ${
+                      proposal.score > 0 ? 'text-accent-green' :
+                      proposal.score < 0 ? 'text-accent-red' :
+                      'text-muted-foreground'
+                    }`}>
+                      {proposal.score > 0 ? '+' : ''}{proposal.score}
+                    </span>
+                    <button
+                      onClick={() => handleVote(proposal.id, 'downvote')}
+                      disabled={!user}
+                      className={`p-2 rounded transition-colors ${
+                        userVote === 'downvote'
+                          ? 'bg-accent-red text-white'
+                          : 'bg-bg-2 text-muted-foreground hover:text-accent-red hover:bg-accent-red/20'
+                      }`}
+                      title={user ? 'Downvote' : 'Log in to vote'}
+                    >
+                      <ThumbsDown className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Proposal Content */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-subhead text-lg text-accent-gold mb-2">
+                      {proposal.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3 whitespace-pre-wrap">
+                      {proposal.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>
+                        By <strong>{proposal.author_name || 'Anonymous'}</strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {new Date(proposal.created_at).toLocaleDateString()}
+                      </span>
+                      {proposal.score >= 5 && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center gap-1 text-accent-gold font-semibold">
+                            <TrendingUp className="w-3 h-3" />
+                            Popular
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {!user && (
+        <Card className="p-4 bg-accent-purple/10 border-accent-purple/30">
+          <p className="text-sm text-center text-muted-foreground">
+            <strong className="text-accent-purple">Log in</strong> to vote on proposals or submit your own ideas
+          </p>
+        </Card>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 📅 PART 9: UPDATE SCHEDULE PAGE
 
 **File**: `src/pages/Schedule.tsx` (add after existing schedule items)
 
@@ -1584,6 +2366,7 @@ export function BeerPongBracketDisplay() {
 import { BeerPongRegistration } from '@/components/BeerPongRegistration';
 import { BeerPongTeamsList } from '@/components/BeerPongTeamsList';
 import { BeerPongBracketDisplay } from '@/components/BeerPongBracketDisplay';
+import { BeerPongRuleDiscussion } from '@/components/BeerPongRuleDiscussion';
 
 // ... existing imports and schedule code ...
 
@@ -1649,22 +2432,34 @@ import { BeerPongBracketDisplay } from '@/components/BeerPongBracketDisplay';
   <div className="mt-8">
     <BeerPongBracketDisplay />
   </div>
+
+  {/* Rule Discussion Section */}
+  <div className="mt-12">
+    <BeerPongRuleDiscussion />
+  </div>
 </div>
 ```
 
 ---
 
-## 🔧 PART 8: ADMIN DASHBOARD INTEGRATION
+## 🔧 PART 10: ADMIN DASHBOARD INTEGRATION
 
 **File**: `src/pages/AdminDashboard.tsx` (add to admin tabs)
 
 ```typescript
 import { BeerPongBracketManagement } from '@/components/admin/BeerPongBracketManagement';
+import { TournamentTimeCalculator } from '@/components/admin/TournamentTimeCalculator';
 
 // Add a new tab for Beer Pong management:
 
 <TabsContent value="beer-pong">
-  <BeerPongBracketManagement />
+  <div className="space-y-8">
+    {/* Time Calculator at the top */}
+    <TournamentTimeCalculator />
+
+    {/* Bracket Management below */}
+    <BeerPongBracketManagement />
+  </div>
 </TabsContent>
 ```
 
@@ -1680,6 +2475,9 @@ import { BeerPongBracketManagement } from '@/components/admin/BeerPongBracketMan
 - [ ] Test `update_beer_pong_team` function
 - [ ] Test `generate_beer_pong_bracket` function
 - [ ] Test `record_match_result` function
+- [ ] Verify rule proposals tables created
+- [ ] Test `vote_on_rule_proposal` function (upvote, downvote, toggle)
+- [ ] Test RLS policies for rule proposals
 - [ ] Deploy migration to production
 
 ### Phase 2: Team Registration UI
@@ -1711,28 +2509,53 @@ import { BeerPongBracketManagement } from '@/components/admin/BeerPongBracketMan
 - [ ] Test responsive layout
 - [ ] Test empty state (before bracket generated)
 
-### Phase 6: Schedule Page Integration
+### Phase 6: Tournament Time Calculator (Admin)
+- [ ] Create `src/components/admin/TournamentTimeCalculator.tsx`
+- [ ] Test team count real-time updates
+- [ ] Test 4-min vs 5-min toggle calculations
+- [ ] Verify round breakdown accuracy with various team counts
+- [ ] Test time window warnings (>120min, <90min)
+- [ ] Test mobile responsiveness
+
+### Phase 7: Rule Discussion & Voting System
+- [ ] Create `src/components/BeerPongRuleDiscussion.tsx`
+- [ ] Test rule proposal submission
+- [ ] Test upvote/downvote mechanics
+- [ ] Test vote toggle (click same vote to remove)
+- [ ] Test real-time updates across browsers
+- [ ] Test sorting by score (top-voted first)
+- [ ] Test login prompts for anonymous users
+
+### Phase 8: Schedule Page Integration
 - [ ] Update `src/pages/Schedule.tsx`
-- [ ] Add all new components
+- [ ] Add all new components (registration, teams, bracket, rules)
 - [ ] Test layout on mobile
+- [ ] Test rule discussion section positioning
 - [ ] Test accessibility
 
-### Phase 7: Admin Dashboard Integration
+### Phase 9: Admin Dashboard Integration
 - [ ] Add BeerPongBracketManagement to admin tabs
+- [ ] Add TournamentTimeCalculator above bracket management
 - [ ] Test admin permissions
 - [ ] Test bracket generation from admin panel
+- [ ] Test time calculator visibility and accuracy
 
-### Phase 8: Testing & Polish
+### Phase 10: Testing & Polish
 - [ ] End-to-end test: register 2 teams, generate bracket, record results
 - [ ] Test with 20 teams (full tournament)
 - [ ] Test photo uploads from mobile
 - [ ] Test slogan editing
 - [ ] Test real-time updates across multiple browsers
 - [ ] Test admin bracket management on tablets
+- [ ] Test time calculator with odd numbers (3, 5, 7, 11, 13 teams)
+- [ ] Test rule voting from multiple accounts
+- [ ] Test rule proposal character limits
 
-### Phase 9: Documentation & Training
+### Phase 11: Documentation & Training
 - [ ] Print physical rules sheet for tournament day
 - [ ] Create admin guide for running tournament
+- [ ] Document how to use time calculator to decide game duration
+- [ ] Document how to moderate rule proposals (admin panel)
 - [ ] Test backup plan if tech fails (paper bracket)
 
 ---
@@ -1752,18 +2575,64 @@ With setup/transitions: **~2 hours max** (8:00 PM - 10:00 PM)
 
 ## ✅ SUMMARY
 
-This updated implementation plan provides:
+This comprehensive implementation plan (v3) provides:
+
+### Core Features
 1. **Ultra-fast 5-minute games** with 4-minute sudden death trigger
 2. **Coin flip sudden death mechanic** with throw count = opponent cups
-3. **Custom photo uploads** + team slogans
+3. **Custom photo uploads** (2MB max) + team slogans (100 chars)
 4. **Full admin bracket management** with generation, seeding, and scoring
-5. **Public bracket display** with real-time updates
-6. **Complete database schema** with storage bucket, RLS policies, and functions
-7. **All React components** ready to implement
+5. **Public bracket display** with real-time updates and mobile-friendly tree view
 
-**Estimated Development Time**: 10-12 hours
-**Estimated Testing Time**: 3-4 hours
+### New Features (v3)
+6. **Tournament Time Calculator** (Admin Dashboard):
+   - Real-time team count tracking
+   - Toggle between 4-min and 5-min game durations
+   - Automatic round/match calculation
+   - Time window warnings (>2 hours, <90 minutes)
+   - Round-by-round breakdown
 
-**Total Implementation**: ~2 full days
+7. **Enhanced Bracket Management**:
+   - Easy winner/loser recording
+   - "Up next" match visibility
+   - Mobile-optimized admin controls
+   - Real-time bracket updates across all devices
+
+8. **Rule Discussion & Voting System**:
+   - Community rule proposals (title + description)
+   - Upvote/downvote mechanics
+   - Toggle votes (click again to remove)
+   - Popular proposal highlighting (5+ score)
+   - Real-time vote updates
+   - Admin moderation controls
+
+### Technical Implementation
+9. **Complete database schema** with:
+   - Storage bucket for photos with RLS policies
+   - Rule proposals and votes tables
+   - 6 PostgreSQL functions (registration, bracket, voting)
+   - Public views for safe data exposure
+   - Indexes for performance
+
+10. **8 React components** ready to implement:
+    - BeerPongRegistration.tsx
+    - BeerPongTeamsList.tsx
+    - BeerPongBracketManagement.tsx (admin)
+    - BeerPongBracketDisplay.tsx (public)
+    - TournamentTimeCalculator.tsx (admin)
+    - BeerPongRuleDiscussion.tsx (public)
+    - Plus Schedule and AdminDashboard integrations
+
+**Estimated Development Time**: 14-16 hours
+**Estimated Testing Time**: 4-5 hours
+
+**Total Implementation**: ~3 full days (2 days coding + 1 day testing)
+
+**Key Benefits**:
+- ⏱️ Keeps tournament under 2 hours with time calculator
+- 📱 Fully mobile-responsive for game day viewing
+- 🗳️ Community-driven rule improvements for next year
+- 🔄 Real-time updates across all features
+- 🔒 Secure with RLS policies and admin-only functions
 
 Ready to implement! 🏓👻⚡
