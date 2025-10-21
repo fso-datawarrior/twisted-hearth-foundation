@@ -236,3 +236,50 @@ export function parseEmailCSV(csvContent: string): string[] {
   // Remove duplicates
   return [...new Set(emails)];
 }
+
+/**
+ * Send a system update email to all users
+ */
+export async function sendSystemUpdate(params: {
+  version: string;
+  newFeatures?: Array<{ title: string; description: string }>;
+  bugFixes?: string[];
+  improvements?: string[];
+  knownIssues?: string[];
+  additionalNotes?: string;
+}) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Check if user is admin
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
+  // Create campaign with system update template
+  const campaign = await createCampaign({
+    subject: `🎃 System Update ${params.version} - New Features & Improvements`,
+    recipient_list: 'all',
+    template_variables: {
+      VERSION: params.version,
+      NEW_FEATURES: params.newFeatures || [],
+      BUG_FIXES: params.bugFixes || [],
+      IMPROVEMENTS: params.improvements || [],
+      KNOWN_ISSUES: params.knownIssues || [],
+      ADDITIONAL_NOTES: params.additionalNotes || '',
+      SITE_URL: window.location.origin,
+    },
+    status: 'draft',
+  });
+
+  // Send immediately
+  await sendCampaign(campaign.id);
+
+  return campaign;
+}

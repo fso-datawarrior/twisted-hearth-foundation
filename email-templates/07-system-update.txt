@@ -1,0 +1,47 @@
+SYSTEM UPDATE - The Ruths' Twisted Fairytale Halloween Bash
+Version {{VERSION}}
+
+Hi there! 👋
+
+We've made some updates to make your experience even better. Here's what's new:
+
+{{#if NEW_FEATURES}}
+✨ NEW FEATURES:
+{{#each NEW_FEATURES}}
+- {{this.title}}: {{this.description}}
+{{/each}}
+{{/if}}
+
+{{#if BUG_FIXES}}
+🐛 BUG FIXES:
+{{#each BUG_FIXES}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if IMPROVEMENTS}}
+🚀 IMPROVEMENTS:
+{{#each IMPROVEMENTS}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if KNOWN_ISSUES}}
+⚠️ KNOWN ISSUES:
+{{#each KNOWN_ISSUES}}
+- {{this}}
+{{/each}}
+
+We're actively working on fixes for these issues.
+{{/if}}
+
+Check out the updates: {{SITE_URL}}
+
+{{#if ADDITIONAL_NOTES}}
+Note: {{ADDITIONAL_NOTES}}
+{{/if}}
+
+Thanks for being part of The Ruths' Bash! 🎭
+
+Questions or feedback? Visit: {{SITE_URL}}/contact
+Manage notification preferences: {{SITE_URL}}/settings

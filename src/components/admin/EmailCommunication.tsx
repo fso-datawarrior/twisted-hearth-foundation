@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react";
+import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import {
   getTemplates,
@@ -159,6 +159,64 @@ export function EmailCommunication() {
       toast.error('Failed to send test email');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleQuickSystemUpdate = () => {
+    // Check if system update template exists
+    const systemTemplate = templates.find(t => 
+      t.name.toLowerCase().includes('system update') || 
+      t.name.toLowerCase().includes('system-update')
+    );
+    
+    if (!systemTemplate) {
+      toast.warning('System Update template not found. Creating default template...');
+      // Create default system update template
+      createDefaultSystemUpdateTemplate();
+    } else {
+      // Open campaign composer with system update pre-selected
+      setIsCreatingCampaign(true);
+      // You can pre-fill the composer if needed
+    }
+  };
+
+  const createDefaultSystemUpdateTemplate = async () => {
+    try {
+      const defaultTemplate = {
+        name: 'System Update',
+        subject: '🎃 Update: {{VERSION}} - New Features & Improvements',
+        html_content: `
+          <h2>System Update - Version {{VERSION}}</h2>
+          <p>We've made some updates to improve your experience!</p>
+          
+          <h3>✨ New Features</h3>
+          <ul>
+            <li>{{NEW_FEATURE_1}}</li>
+            <li>{{NEW_FEATURE_2}}</li>
+          </ul>
+          
+          <h3>🐛 Bug Fixes</h3>
+          <ul>
+            <li>{{BUG_FIX_1}}</li>
+            <li>{{BUG_FIX_2}}</li>
+          </ul>
+          
+          <h3>⚠️ Known Issues</h3>
+          <ul>
+            <li>{{KNOWN_ISSUE_1}}</li>
+          </ul>
+          
+          <p>Thanks for being part of The Ruths' Bash! 🎭</p>
+        `,
+        is_active: true,
+      };
+      
+      await createTemplate(defaultTemplate);
+      toast.success('System Update template created!');
+      loadData(); // Reload templates
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      toast.error('Failed to create system update template');
     }
   };
 
@@ -343,6 +401,24 @@ export function EmailCommunication() {
             </TabsContent>
 
             <TabsContent value="campaigns" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
+              {/* Quick Actions for Common Templates */}
+              <div className="mb-6 p-4 bg-muted/30 rounded-lg border border-border">
+                <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
+                  Quick Actions
+                </h4>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleQuickSystemUpdate()}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Megaphone className="h-4 w-4" />
+                    Send System Update
+                  </Button>
+                </div>
+              </div>
+
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Email Campaigns</h3>
                 <Button onClick={() => setIsCreatingCampaign(true)} disabled={templates.length === 0}>

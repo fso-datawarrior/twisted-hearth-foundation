@@ -19,6 +19,7 @@ interface CampaignComposerProps {
   onSave: (campaign: any) => void;
   onCancel: () => void;
   onSendTest: (campaign: any) => void;
+  systemUpdateMode?: boolean;
 }
 
 interface User {
@@ -27,7 +28,7 @@ interface User {
   display_name?: string;
 }
 
-export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignComposerProps) {
+export function CampaignComposer({ onSave, onCancel, onSendTest, systemUpdateMode }: CampaignComposerProps) {
   const { user } = useAuth();
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -49,6 +50,12 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
   useEffect(() => {
     updateRecipientCount();
   }, [recipientList, customRecipients]);
+
+  useEffect(() => {
+    if (systemUpdateMode) {
+      setRecipientList('all');
+    }
+  }, [systemUpdateMode]);
 
   const loadTemplates = async () => {
     try {
@@ -287,6 +294,7 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
                       <button
                         onClick={() => removeRecipient(email)}
                         className="ml-1 hover:bg-background/50 rounded-full p-0.5"
+                        title={`Remove ${email}`}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -323,6 +331,7 @@ export function CampaignComposer({ onSave, onCancel, onSendTest }: CampaignCompo
                   accept=".csv,.txt"
                   className="hidden"
                   onChange={handleFileUpload}
+                  title="Upload CSV file with email addresses"
                 />
               </div>
               

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Update - The Ruths' Bash</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #f59e0b;
+    }
+    .header h1 {
+      color: #f59e0b;
+      margin: 0 0 10px 0;
+      font-size: 28px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+    .badge-update {
+      background-color: #3b82f6;
+      color: white;
+    }
+    .section {
+      margin: 30px 0;
+    }
+    .section-title {
+      color: #1f2937;
+      font-size: 20px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-icon {
+      font-size: 24px;
+    }
+    .item-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .item-list li {
+      margin: 10px 0;
+      color: #4b5563;
+    }
+    .item-list li strong {
+      color: #1f2937;
+    }
+    .highlight {
+      background-color: #fef3c7;
+      padding: 15px;
+      border-left: 4px solid #f59e0b;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #dc2626;
+      color: white;
+      padding: 12px 30px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 12px;
+    }
+    .footer a {
+      color: #f59e0b;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🎃 System Update</h1>
+      <p style="color: #6b7280; margin: 5px 0;">The Ruths' Twisted Fairytale Halloween Bash</p>
+      <span class="badge badge-update">Version {{VERSION}}</span>
+    </div>
+
+    <!-- Introduction -->
+    <div class="section">
+      <p>Hi there! 👋</p>
+      <p>We've made some updates to make your experience even better. Here's what's new:</p>
+    </div>
+
+    <!-- New Features -->
+    {{#if NEW_FEATURES}}
+    <div class="section">
+      <div class="section-title">
+        <span class="section-icon">✨</span>
+        <strong>New Features</strong>
+      </div>
+      <ul class="item-list">
+        {{#each NEW_FEATURES}}
+        <li><strong>{{this.title}}:</strong> {{this.description}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+
+    <!-- Bug Fixes -->
+    {{#if BUG_FIXES}}
+    <div class="section">
+      <div class="section-title">
+        <span class="section-icon">🐛</span>
+        <strong>Bug Fixes</strong>
+      </div>
+      <ul class="item-list">
+        {{#each BUG_FIXES}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+
+    <!-- Improvements -->
+    {{#if IMPROVEMENTS}}
+    <div class="section">
+      <div class="section-title">
+        <span class="section-icon">🚀</span>
+        <strong>Improvements</strong>
+      </div>
+      <ul class="item-list">
+        {{#each IMPROVEMENTS}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+
+    <!-- Known Issues -->
+    {{#if KNOWN_ISSUES}}
+    <div class="highlight">
+      <strong style="color: #dc2626;">⚠️ Known Issues</strong>
+      <ul class="item-list" style="margin-top: 10px;">
+        {{#each KNOWN_ISSUES}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">We're actively working on fixes for these issues.</p>
+    </div>
+    {{/if}}
+
+    <!-- Call to Action -->
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{SITE_URL}}" class="cta-button">Check Out the Updates</a>
+    </div>
+
+    <!-- Additional Notes -->
+    {{#if ADDITIONAL_NOTES}}
+    <div class="section">
+      <p style="color: #6b7280; font-style: italic;">{{ADDITIONAL_NOTES}}</p>
+    </div>
+    {{/if}}
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Thanks for being part of The Ruths' Bash! 🎭</p>
+      <p>
+        Questions or feedback? <a href="{{SITE_URL}}/contact">Contact us</a><br>
+        <a href="{{SITE_URL}}/settings">Manage notification preferences</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
