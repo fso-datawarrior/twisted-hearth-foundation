@@ -18,10 +18,11 @@ export default defineConfig(({ mode }) => ({
     alias: [
       { find: "@", replacement: path.resolve(__dirname, "./src") },
       // Normalize any direct file-path imports to use the ESM runtime
-      { find: /^\/?node_modules\/react\/jsx-runtime\.js$/, replacement: 'react/jsx-runtime' },
-      { find: /^\/?node_modules\/react\/jsx-dev-runtime\.js$/, replacement: 'react/jsx-dev-runtime' },
-      { find: 'react/jsx-runtime.js', replacement: 'react/jsx-runtime' },
-      { find: 'react/jsx-dev-runtime.js', replacement: 'react/jsx-dev-runtime' },
+      // Force-redirect any accidental CJS runtime imports to an ESM shim
+      { find: /^\/?node_modules\/react\/jsx-runtime\.js$/, replacement: path.resolve(__dirname, './src/shims/fix-jsx-runtime.ts') },
+      { find: /^\/?node_modules\/react\/jsx-dev-runtime\.js$/, replacement: path.resolve(__dirname, './src/shims/fix-jsx-runtime.ts') },
+      { find: 'react/jsx-runtime.js', replacement: path.resolve(__dirname, './src/shims/fix-jsx-runtime.ts') },
+      { find: 'react/jsx-dev-runtime.js', replacement: path.resolve(__dirname, './src/shims/fix-jsx-runtime.ts') },
     ],
     dedupe: ["react", "react-dom"],
   },
