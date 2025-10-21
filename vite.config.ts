@@ -29,6 +29,20 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', '@tanstack/react-query'],
     force: true, // Force re-optimization
+    esbuildOptions: {
+      plugins: [
+        {
+          name: 'fix-react-jsx-runtime-paths',
+          setup(build) {
+            const redirect = (from: RegExp, to: string) => {
+              build.onResolve({ filter: from }, () => ({ path: to }));
+            };
+            redirect(/react\/jsx-runtime\.js$/, 'react/jsx-runtime');
+            redirect(/react\/jsx-dev-runtime\.js$/, 'react/jsx-dev-runtime');
+          },
+        },
+      ],
+    },
   },
   build: {
     rollupOptions: {
