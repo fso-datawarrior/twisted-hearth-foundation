@@ -3,6 +3,7 @@ name: Deploy to Development
 on:
   push:
     branches: 
+      - v-3.0.3.5-Phase4-NotificationSystem
       - v-3.0.3.4-Phase3-RSVPPageEnhancements
       - v-3.0.3.2-Phase1-QuickWinsMobileUI-Fixes
       - v-3.0.3.0-development
