@@ -1,0 +1,71 @@
+--- a/supabase/migrations/20260121000000_fix_analytics_rls.sql
++++ b/supabase/migrations/20260121000000_fix_analytics_rls.sql
+@@ -0,0 +1,67 @@
++-- Fix analytics table RLS policies to prevent data poisoning
++-- Related to Finding 01: Analytics data poisoning via unrestricted INSERT policies
++
++-- user_sessions table
++DROP POLICY IF EXISTS "System can insert user_sessions" ON public.user_sessions;
++DROP POLICY IF EXISTS "System can update user_sessions" ON public.user_sessions;
++
++CREATE POLICY "Users can insert own sessions"
++  ON public.user_sessions FOR INSERT
++  TO authenticated
++  WITH CHECK (user_id = auth.uid());
++
++CREATE POLICY "Users can update own sessions"
++  ON public.user_sessions FOR UPDATE
++  TO authenticated
++  USING (user_id = auth.uid());
++
++-- page_views table
++DROP POLICY IF EXISTS "System can insert page_views" ON public.page_views;
++DROP POLICY IF EXISTS "System can update page_views" ON public.page_views;
++
++CREATE POLICY "Users can insert own page_views"
++  ON public.page_views FOR INSERT
++  TO authenticated
++  WITH CHECK (user_id = auth.uid());
++
++CREATE POLICY "Users can update own page_views"
++  ON public.page_views FOR UPDATE
++  TO authenticated
++  USING (user_id = auth.uid());
++
++-- user_activity_logs table
++DROP POLICY IF EXISTS "System can insert user_activity_logs" ON public.user_activity_logs;
++
++CREATE POLICY "Users can insert own activity_logs"
++  ON public.user_activity_logs FOR INSERT
++  TO authenticated
++  WITH CHECK (user_id = auth.uid());
++
++-- content_interactions table
++DROP POLICY IF EXISTS "System can insert content_interactions" ON public.content_interactions;
++
++CREATE POLICY "Users can insert own interactions"
++  ON public.content_interactions FOR INSERT
++  TO authenticated
++  WITH CHECK (user_id = auth.uid());
++
++-- system_metrics table (admin only)
++DROP POLICY IF EXISTS "System can insert system_metrics" ON public.system_metrics;
++
++CREATE POLICY "Admins can insert system_metrics"
++  ON public.system_metrics FOR INSERT
++  TO authenticated
++  WITH CHECK (public.is_admin());
++
++-- analytics_daily_aggregates (admin only)
++DROP POLICY IF EXISTS "System can insert daily_aggregates" ON public.analytics_daily_aggregates;
++DROP POLICY IF EXISTS "System can update daily_aggregates" ON public.analytics_daily_aggregates;
++
++CREATE POLICY "Admins can insert daily_aggregates"
++  ON public.analytics_daily_aggregates FOR INSERT
++  TO authenticated
++  WITH CHECK (public.is_admin());
++
++CREATE POLICY "Admins can update daily_aggregates"
++  ON public.analytics_daily_aggregates FOR UPDATE
++  TO authenticated
++  USING (public.is_admin());

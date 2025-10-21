@@ -1,0 +1,60 @@
+--- a/supabase/migrations/20260121000001_scope_profile_reads.sql
++++ b/supabase/migrations/20260121000001_scope_profile_reads.sql
+@@ -0,0 +1,56 @@
++-- Scope profile reads to self + admin only
++-- Related to Finding 04: Overbroad SELECT policies expose user data
++
++-- profiles table
++DROP POLICY IF EXISTS "Users can view all profiles" ON public.profiles;
++
++CREATE POLICY "Users can view own profile"
++  ON public.profiles FOR SELECT
++  TO authenticated
++  USING (auth.uid() = id);
++
++CREATE POLICY "Admins can view all profiles"
++  ON public.profiles FOR SELECT
++  TO authenticated
++  USING (public.is_admin());
++
++-- Create RPC for public display name lookups
++CREATE OR REPLACE FUNCTION public.get_display_name(user_id UUID)
++RETURNS TEXT
++LANGUAGE sql
++STABLE
++SECURITY DEFINER
++SET search_path = public
++AS $$
++  SELECT display_name FROM public.profiles WHERE id = user_id;
++$$;
++
++-- Scope photo_reactions to own + post owner
++DROP POLICY IF EXISTS "Anyone can view photo reactions" ON public.photo_reactions;
++
++CREATE POLICY "Users can view own reactions"
++  ON public.photo_reactions FOR SELECT
++  TO authenticated
++  USING (user_id = auth.uid());
++
++CREATE POLICY "Photo owners can view reactions on their photos"
++  ON public.photo_reactions FOR SELECT
++  TO authenticated
++  USING (
++    EXISTS (
++      SELECT 1 FROM public.photos
++      WHERE photos.id = photo_reactions.photo_id
++      AND photos.user_id = auth.uid()
++    )
++  );
++
++CREATE POLICY "Admins can view all photo reactions"
++  ON public.photo_reactions FOR SELECT
++  TO authenticated
++  USING (public.is_admin());
++
++-- Document intentionally public guestbook policies
++COMMENT ON POLICY "Anyone can view guestbook replies" ON public.guestbook_replies IS
++  'Intentionally public: guestbook is a shared social space for event attendees.';
++
++COMMENT ON POLICY "Anyone can view reactions" ON public.guestbook_reactions IS
++  'Intentionally public: reactions are social features visible to all attendees.';

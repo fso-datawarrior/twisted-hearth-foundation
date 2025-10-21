@@ -1,0 +1,37 @@
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -6,10 +6,10 @@
+     "paths": {
+       "@/*": ["./src/*"]
+     },
+-    "noImplicitAny": false,
+-    "noUnusedParameters": false,
++    "noImplicitAny": true,
++    "noUnusedParameters": true,
+     "skipLibCheck": true,
+     "allowJs": true,
+-    "noUnusedLocals": false,
+-    "strictNullChecks": false
++    "noUnusedLocals": true,
++    "strictNullChecks": true
+   }
+ }
+--- a/tsconfig.app.json
++++ b/tsconfig.app.json
+@@ -15,11 +15,11 @@
+     "jsx": "react-jsx",
+
+     /* Linting */
+-    "strict": false,
+-    "noUnusedLocals": false,
+-    "noUnusedParameters": false,
+-    "noImplicitAny": false,
+-    "noFallthroughCasesInSwitch": false,
++    "strict": true,
++    "noUnusedLocals": true,
++    "noUnusedParameters": true,
++    "noImplicitAny": true,
++    "noFallthroughCasesInSwitch": true,
+
+     "baseUrl": ".",
+     "paths": {

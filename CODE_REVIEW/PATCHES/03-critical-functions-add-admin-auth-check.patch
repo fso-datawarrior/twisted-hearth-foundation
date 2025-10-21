@@ -1,0 +1,46 @@
+--- a/supabase/functions/send-email-campaign/index.ts
++++ b/supabase/functions/send-email-campaign/index.ts
+@@ -1,13 +1,37 @@
+ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+ const corsHeaders = {
+-  'Access-Control-Allow-Origin': '*',
+-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
++  'Access-Control-Allow-Origin': 'https://partytillyou.rip,https://twisted-tale.lovable.app',
++  'Access-Control-Allow-Headers': 'authorization, content-type',
+ };
+
+ serve(async (req) => {
+   if (req.method === 'OPTIONS') {
+     return new Response(null, { headers: corsHeaders });
+   }
+
++  // Step 1: Verify JWT and extract user
++  const authHeader = req.headers.get('authorization');
++  if (!authHeader?.startsWith('Bearer ')) {
++    return new Response('Unauthorized', { status: 401, headers: corsHeaders });
++  }
++
++  const userClient = createClient(
++    Deno.env.get('SUPABASE_URL')!,
++    Deno.env.get('SUPABASE_ANON_KEY')!,
++    { global: { headers: { Authorization: authHeader } } }
++  );
++
++  const { data: { user }, error: userError } = await userClient.auth.getUser();
++  if (userError || !user) {
++    return new Response('Invalid token', { status: 401, headers: corsHeaders });
++  }
++
++  // Step 2: Verify user is admin
++  const { data: isAdmin, error: roleError } = await userClient.rpc('is_admin');
++  if (roleError || !isAdmin) {
++    return new Response('Forbidden: Admin access required', { status: 403, headers: corsHeaders });
++  }
++
++  // Step 3: Now safe to use service role
+   const supabase = createClient(
+     Deno.env.get('SUPABASE_URL')!,
+     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+   );
