@@ -2,6 +2,12 @@
 
 These are your three essential daily prompts, numbered in order of use.
 
+## **🔑 00-REFRESH-FIREBASE-TOKEN.md (DEPRECATED)**
+**Status:** No longer needed with Workload Identity  
+**Purpose:** ~~Refresh Firebase authentication token~~  
+**What changed:** We now use Workload Identity (permanent solution)  
+**Benefit:** No more daily token refresh needed!
+
 ## **🚀 01-SETUP-DEV-ENVIRONMENT.md**
 **When to use:** Start of your workday
 **Purpose:** Set up development environment for the day

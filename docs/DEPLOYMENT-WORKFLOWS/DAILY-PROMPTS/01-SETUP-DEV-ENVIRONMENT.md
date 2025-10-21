@@ -27,7 +27,7 @@ Instructions:
    - Create branch name in format: [version]-dev-[feature]
 6. Push the branch to GitHub
 7. Monitor deployment and check for errors
-8. IF authentication error: Provide FIREBASE_TOKEN refresh instructions
+8. IF authentication error: Check Workload Identity configuration (see docs/DEPLOYMENT-PROD/firebase-project-configuration.md)
 9. Confirm development site is accessible
 
 SAFETY CHECKS:
@@ -103,21 +103,18 @@ I want to create a new branch:
 
 ### **If "Authentication Error: Your credentials are no longer valid"**
 
-The `FIREBASE_TOKEN` GitHub secret has expired. To fix:
+**This should no longer occur with Workload Identity**, but if it does:
 
-1. **Generate new Firebase token locally:**
-   ```bash
-   firebase login:ci
-   ```
+1. **Check Workload Identity Configuration:**
+   - Verify Workload Identity Pool exists: `github-actions`
+   - Check service account binding: `firebase-hosting-deployer@twisted-hearth-foundation.iam.gserviceaccount.com`
+   - Confirm repository restriction: `assertion.repository == "fso-datawarrior/twisted-hearth-foundation"`
 
-2. **Update GitHub Secret:**
-   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
-   - Find: `FIREBASE_TOKEN`
-   - Click: "Update"
-   - Paste: The new token
-   - Save
+2. **Reference Documentation:**
+   - See: `docs/DEPLOYMENT-PROD/firebase-project-configuration.md`
+   - Check: Google Cloud Console → IAM & Admin → Workload Identity Pools
 
 3. **Re-run the deployment:**
    - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
-   - Find the failed workflow
+   - Find the failed workflow run
    - Click "Re-run jobs"

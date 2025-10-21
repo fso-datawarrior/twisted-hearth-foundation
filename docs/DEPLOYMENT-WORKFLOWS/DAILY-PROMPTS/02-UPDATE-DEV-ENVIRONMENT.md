@@ -28,8 +28,9 @@ Execute these steps immediately:
 7. Run: git push origin [current-branch]
 8. Monitor: Check https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
 9. IF deployment fails with authentication error:
-   - Report: FIREBASE_TOKEN needs refresh
-   - Instruct: Update secret at https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
+   - Report: Workload Identity authentication issue
+   - Instruct: Check Firebase configuration at docs/DEPLOYMENT-PROD/firebase-project-configuration.md
+   - Verify: Workload Identity Pool is properly configured
 
 SAFETY CHECKS:
 - NEVER delete files without explicit confirmation
@@ -105,20 +106,16 @@ Changes made:
 
 ### **If "Authentication Error: Your credentials are no longer valid"**
 
-The `FIREBASE_TOKEN` GitHub secret has expired. To fix:
+**This should no longer occur with Workload Identity**, but if it does:
 
-1. **Generate new Firebase token locally:**
-   ```bash
-   firebase login:ci
-   ```
-   This will open a browser, log in, and give you a new token.
+1. **Check Workload Identity Configuration:**
+   - Verify Workload Identity Pool exists: `github-actions`
+   - Check service account binding: `firebase-hosting-deployer@twisted-hearth-foundation.iam.gserviceaccount.com`
+   - Confirm repository restriction: `assertion.repository == "fso-datawarrior/twisted-hearth-foundation"`
 
-2. **Update GitHub Secret:**
-   - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
-   - Find: `FIREBASE_TOKEN`
-   - Click: "Update"
-   - Paste: The new token from step 1
-   - Save
+2. **Reference Documentation:**
+   - See: `docs/DEPLOYMENT-PROD/firebase-project-configuration.md`
+   - Check: Google Cloud Console → IAM & Admin → Workload Identity Pools
 
 3. **Re-run the deployment:**
    - Go to: https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
