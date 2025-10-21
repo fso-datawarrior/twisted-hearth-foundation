@@ -3,6 +3,7 @@ name: Deploy to Development
 on:
   push:
     branches: 
+      - v-3.0.3.7-Phase6-AdditionalFeatureEnhancements
       - v-3.0.3.6-Phase5-AdminSystemUpdatesFeature
       - v-3.0.3.5-Phase4-NotificationSystem
       - v-3.0.3.4-Phase3-RSVPPageEnhancements
