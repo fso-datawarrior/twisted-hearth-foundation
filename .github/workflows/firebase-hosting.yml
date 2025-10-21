@@ -2,15 +2,15 @@ name: Deploy to Production
 
 on:
   pull_request:
-    branches: [ main ]     # PRs into main -> PREVIEW deploy (Path A)
+    branches: [ prod-2025.partytillyou.rip ]     # PRs into production -> PREVIEW deploy
   push:
-    branches: [ main ]     # Push to main -> PRODUCTION deploy (Path A)
-  workflow_dispatch:       # Manual runs for Path B (deploy any branch to prod)
+    branches: [ prod-2025.partytillyou.rip ]     # Push to production -> PRODUCTION deploy
+  workflow_dispatch:       # Manual runs (deploy any branch to prod)
     inputs:
       branch:
-        description: 'Branch to build/deploy (e.g., 3.1.0-dev-email-cleanup)'
+        description: 'Branch to build/deploy (e.g., v-3.0.3.2-dev-fixes)'
         required: true
-        default: 'main'
+        default: 'prod-2025.partytillyou.rip'
       target:
         description: 'preview or production'
         required: true
@@ -51,9 +51,9 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ inputs.target }}" = "preview" ]; then
             firebase hosting:channel:deploy pr-${{ github.event.number || 'manual' }} --expires 7d
           else
-            echo "🚀 Deploying to PRODUCTION..."
+            echo "🚀 Deploying to PRODUCTION from prod-2025.partytillyou.rip branch..."
             firebase deploy --only hosting:main
-            echo "✅ Production deployment complete!"
+            echo "✅ Production deployment complete to https://2025.partytillyou.rip!"
           fi
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

@@ -25,7 +25,7 @@ These are your three essential daily prompts, numbered in order of use.
 **Purpose:** Deploy to production
 **What it does:**
 - Commits all changes
-- Merges to main branch
+- Merges to prod-2025.partytillyou.rip branch (NOT main)
 - Triggers automated production deployment
 - Confirms production site is updated
 
@@ -67,8 +67,10 @@ During day: 02-UPDATE-DEV-ENVIRONMENT.md (multiple times)
    ↓
 Anytime: 04-SYNC-BRANCH-TO-GITHUB.md (save progress)
    ↓
-End of day: 03-DEPLOY-TO-PRODUCTION.md
+End of day: 03-DEPLOY-TO-PRODUCTION.md (merges to prod-2025.partytillyou.rip)
 ```
+
+**Note:** We use `prod-2025.partytillyou.rip` branch for production deployments, NOT `main`. This eliminates worktree conflicts and file deletion issues.
 
 ---
 

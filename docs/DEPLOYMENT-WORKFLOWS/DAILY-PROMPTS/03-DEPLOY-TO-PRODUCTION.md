@@ -20,15 +20,17 @@ Instructions:
 3. Add all changes to git staging
 4. Commit changes with descriptive message
 5. Push branch to GitHub
-6. Merge branch to main (or push to main if already on main)
+6. Merge branch to prod-2025.partytillyou.rip (or push to prod-2025.partytillyou.rip if already on it)
 7. Trigger automated production deployment
 8. Monitor deployment and report success/failure
 9. Provide production URL when complete
 
+NOTE: We use 'prod-2025.partytillyou.rip' branch for production, NOT 'main'. This eliminates worktree conflicts.
+
 SAFETY CHECKS:
 - NEVER delete files without explicit confirmation
 - ALWAYS check git status before making changes
-- ALWAYS commit changes before merging to main
+- ALWAYS commit changes before merging to prod-2025.partytillyou.rip
 - ALWAYS verify push was successful
 - ALWAYS monitor deployment status
 - ALWAYS confirm production site is updated
@@ -72,7 +74,7 @@ Changes made:
 3. ✅ **Stages all changes** (`git add .`)
 4. ✅ **Commits with message** (asks for description if needed)
 5. ✅ **Pushes branch to GitHub**
-6. ✅ **Merges to main** (or pushes to main if already on main)
+6. ✅ **Merges to prod-2025.partytillyou.rip** (or pushes if already on production branch)
 7. ✅ **Triggers automated production deployment**
 8. ✅ **Monitors deployment** and reports status
 9. ✅ **Confirms production site** is updated
@@ -93,10 +95,11 @@ Changes made:
 ## **Expected Result**
 
 - **Changes committed** and pushed to GitHub
-- **Branch merged to main** (if needed)
+- **Branch merged to prod-2025.partytillyou.rip** (if needed)
 - **Production site** auto-updates: https://2025.partytillyou.rip/
 - **Deployment complete** with success confirmation
 - **All changes preserved** and safely stored
+- **No worktree conflicts** - clean merge every time
 
 ---
 
