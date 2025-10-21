@@ -104,6 +104,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 required
                 disabled={loading}
                 minLength={6}
+                autoComplete="new-password"
                 className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
               />
               <button
@@ -136,7 +137,8 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                 required
                 disabled={loading}
                 minLength={6}
-                className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:h-10 md:text-sm"
+                autoComplete="new-password"
+                className="bg-background border-accent-purple/30 focus:border-accent-gold pr-12 h-12 text-base md:text-sm"
               />
               <button
                 type="button"

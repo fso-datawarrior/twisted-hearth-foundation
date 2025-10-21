@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,6 +178,13 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
           <DialogTitle className="text-2xl font-bold text-accent-gold">
             {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Sign In"}
           </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            {isForgotPassword 
+              ? "Enter your email to receive a password reset link" 
+              : isSignUp 
+                ? "Create a new account to join the celebration"
+                : "Sign in to access your account"}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -218,6 +225,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    autoComplete="email"
                     className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
@@ -232,6 +240,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete={isSignUp ? "new-password" : "current-password"}
                       className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground pr-10"
                     />
                     <button
@@ -255,6 +264,7 @@ export default function AuthModal({ isOpen, onClose, onOpenSupport }: AuthModalP
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
+                        autoComplete="new-password"
                         className="bg-background/50 border-accent-gold/30 focus:border-accent-gold text-foreground placeholder:text-muted-foreground pr-10"
                       />
                       <button

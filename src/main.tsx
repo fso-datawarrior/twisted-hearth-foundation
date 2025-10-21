@@ -2,6 +2,8 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import '@/shims/jsx-runtime'; // Force proper ESM JSX runtime pre-bundle
+// Cache-bust: 2025-10-20-23-20
 import { consoleCapture } from "@/lib/console-capture";
 
 // Initialize console capture immediately
