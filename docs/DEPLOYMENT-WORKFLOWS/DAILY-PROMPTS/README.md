@@ -1,6 +1,16 @@
 # 📋 **Daily Prompts**
 
-These are your three essential daily prompts, numbered in order of use.
+These are your essential daily prompts for automated Firebase deployment using Workload Identity authentication.
+
+## **🚀 New to This Project?**
+
+**Start Here**: Read `docs/DEPLOYMENT-PROD/QUICKSTART.md` for a 5-minute overview
+
+**Need Setup?**: Follow `docs/DEPLOYMENT-PROD/WORKLOAD-IDENTITY-SETUP-GUIDE.md` for complete setup
+
+**Architecture**: See `docs/DEPLOYMENT-PROD/DEPLOYMENT-ARCHITECTURE-OVERVIEW.md` for system overview
+
+---
 
 ## **🔑 00-REFRESH-FIREBASE-TOKEN.md (DEPRECATED)**
 **Status:** No longer needed with Workload Identity  
@@ -58,7 +68,7 @@ These are your three essential daily prompts, numbered in order of use.
 ## **📝 How to Use**
 
 1. **Copy the prompt** from the file
-2. **Replace `[CURRENT_BRANCH_NAME]`** with your actual branch name
+2. **Replace `[CURRENT_BRANCH_NAME]`** with your actual branch name (if needed)
 3. **Paste into any chat** (Cursor, ChatGPT, etc.)
 4. **Follow the instructions** provided by the AI
 
@@ -107,3 +117,21 @@ All prompts now include:
 - **Always commit changes** before switching branches
 - **Always verify git status** before making changes
 - **Always confirm deployment** after changes
+
+---
+
+## **🚨 Troubleshooting Quick Links**
+
+### **Authentication Issues**
+- **Workload Identity Setup**: `docs/DEPLOYMENT-PROD/WORKLOAD-IDENTITY-SETUP-GUIDE.md`
+- **Project Configuration**: `docs/DEPLOYMENT-PROD/firebase-project-configuration.md`
+- **Architecture Overview**: `docs/DEPLOYMENT-PROD/DEPLOYMENT-ARCHITECTURE-OVERVIEW.md`
+
+### **Deployment Issues**
+- **Master Checklist**: `docs/DEPLOYMENT-PROD/MASTER-DEPLOYMENT-CHECKLIST.md`
+- **Runbook**: `docs/DEPLOYMENT-PROD/InventoryRunBook.md`
+- **Branch Strategy**: `docs/DEPLOYMENT-WORKFLOWS/PRODUCTION-BRANCH-STRATEGY.md`
+
+### **Replication for New Projects**
+- **Replication Guide**: `docs/DEPLOYMENT-PROD/REPLICATION-GUIDE.md`
+- **Quick Start**: `docs/DEPLOYMENT-PROD/QUICKSTART.md`
