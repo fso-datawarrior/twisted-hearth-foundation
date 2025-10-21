@@ -35,9 +35,12 @@ import {
   Settings,
   Theater,
   AlertTriangle,
-  MessageSquare
+  MessageSquare,
+  Rocket
 } from 'lucide-react';
 import SupportReportManagement from '@/components/admin/SupportReportManagement';
+import ReleaseManagement from '@/components/admin/ReleaseManagement';
+import { getReleaseStats } from '@/lib/release-api';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,7 +52,7 @@ export default function AdminDashboard() {
   const tabGroups = {
     content: ['gallery', 'vignettes', 'homepage', 'guestbook', 'libations'],
     users: ['rsvps', 'tournament', 'user-management', 'admin-roles'],
-    settings: ['email', 'support-reports', 'database-reset'],
+    settings: ['releases', 'email', 'support-reports', 'database-reset'],
   };
 
   const getCurrentGroup = (tab: string): string[] | null => {
@@ -246,6 +249,14 @@ export default function AdminDashboard() {
     }
   });
 
+  // Release stats query
+  const { data: releaseStats } = useQuery({
+    queryKey: ['release-stats'],
+    queryFn: getReleaseStats,
+  });
+
+  const draftReleasesCount = releaseStats?.draft || 0;
+
    return (
      <RequireAdmin>
        <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
@@ -255,8 +266,8 @@ export default function AdminDashboard() {
              <p className="text-sm sm:text-base text-muted-foreground">Manage the Twisted Hearth Foundation event</p>
            </div>
           
-          {/* Consolidated Navigation */}
-           <AdminNavigation
+           {/* Consolidated Navigation */}
+            <AdminNavigation
             activeTab={activeTab}
             onTabChange={handleTabChange}
             counts={{
@@ -266,6 +277,7 @@ export default function AdminDashboard() {
               selectedVignettePhotos,
               activeLibations,
               supportReports: supportReportsCount,
+              draftReleases: draftReleasesCount,
             }}
           />
 
@@ -338,6 +350,19 @@ export default function AdminDashboard() {
                       <p className="text-[10px] sm:text-xs text-muted-foreground truncate">photos selected ({activeVignettes} active)</p>
                     </CardContent>
                   </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+                    <CardHeader className="pb-2 p-3 sm:p-4 md:p-6">
+                      <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                        <Rocket className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-purple-500 flex-shrink-0" />
+                        <span className="truncate">Releases</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-purple-500">{draftReleasesCount}</div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">draft releases ({releaseStats?.deployed || 0} deployed)</p>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Quick Actions - Collapsible */}
@@ -374,6 +399,14 @@ export default function AdminDashboard() {
                       <Images className="h-5 w-5 sm:h-6 sm:w-6" />
                       <span className="text-xs sm:text-sm text-center">Approve Photos</span>
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      className="h-auto min-h-[56px] sm:min-h-[64px] flex-col gap-2 p-3 sm:p-4"
+                      onClick={() => handleTabChange('releases')}
+                    >
+                      <Rocket className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <span className="text-xs sm:text-sm text-center">Manage Releases</span>
+                    </Button>
                   </div>
                  </CollapsibleSection>
 
@@ -406,6 +439,8 @@ export default function AdminDashboard() {
               <UserManagement />
             ) : activeTab === 'database-reset' ? (
               <DatabaseResetPanel />
+            ) : activeTab === 'releases' ? (
+              <ReleaseManagement />
             ) : null}
           </div>
           

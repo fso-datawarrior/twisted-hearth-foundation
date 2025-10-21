@@ -65,8 +65,10 @@ export interface ReleaseFilters {
 
 /**
  * Fetch releases with optional filters
+ * Note: This returns basic release data without child arrays (features, changes, notes)
+ * Use fetchReleaseById() to get full release data with all children
  */
-export async function fetchReleases(filters?: ReleaseFilters): Promise<FullRelease[]> {
+export async function fetchReleases(filters?: ReleaseFilters): Promise<any[]> {
   let query = supabase
     .from('system_releases')
     .select('*')
@@ -91,7 +93,8 @@ export async function fetchReleases(filters?: ReleaseFilters): Promise<FullRelea
     throw new Error(`Failed to fetch releases: ${error.message}`);
   }
 
-  return data as FullRelease[];
+  // Return basic release data (without child arrays)
+  return data || [];
 }
 
 /**

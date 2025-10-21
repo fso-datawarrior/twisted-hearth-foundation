@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import VersionBadge from './VersionBadge';
+import { Badge } from '@/components/ui/badge';
 import { fetchReleases, publishRelease, archiveRelease } from '@/lib/release-api';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -174,12 +175,20 @@ export default function ReleaseManagement() {
                         v{release.version}
                       </TableCell>
                       <TableCell>
-                        <VersionBadge
-                          version=""
-                          status={release.deployment_status}
-                          environment={release.environment}
-                          className="flex items-center gap-1"
-                        />
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant="outline" 
+                            className={
+                              release.environment === 'production' 
+                                ? 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20'
+                                : release.environment === 'staging'
+                                ? 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20'
+                                : 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
+                            }
+                          >
+                            {release.environment.charAt(0).toUpperCase() + release.environment.slice(1)}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1 text-sm ${
