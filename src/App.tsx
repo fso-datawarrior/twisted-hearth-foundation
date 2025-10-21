@@ -29,6 +29,7 @@ const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const TestPage = lazy(() => import("./pages/TestPage"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient({
@@ -76,6 +77,7 @@ function App() {
                           <Route path="/discussion" element={<Discussion />} />
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/settings" element={<UserSettings />} />
+                          <Route path="/notifications" element={<Notifications />} />
                           <Route path="/auth" element={<AuthCallback />} />
                           <Route path="/reset-password" element={<ResetPassword />} />
                           <Route path="/test" element={<TestPage />} />

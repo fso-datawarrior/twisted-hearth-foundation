@@ -3,37 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
-// import CSSFogBackground from "@/components/CSSFogBackground";
 import Card from "@/components/Card";
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoLightbox } from "@/components/gallery/PhotoLightbox";
 import { Photo } from "@/lib/photo-api";
 import { getPublicImageUrlSync } from "@/lib/image-url";
 import { useAnalytics } from "@/contexts/AnalyticsContext";
+import { VignettesCarousel } from "@/components/VignettesCarousel";
 
 const Vignettes = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(3);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const { trackInteraction } = useAnalytics();
-
-  // Responsive items per view
-  useEffect(() => {
-    const updateItemsPerView = () => {
-      if (window.innerWidth < 768) {
-        setItemsPerView(1);
-      } else if (window.innerWidth < 1024) {
-        setItemsPerView(2);
-      } else {
-        setItemsPerView(3);
-      }
-    };
-
-    updateItemsPerView();
-    window.addEventListener('resize', updateItemsPerView);
-    return () => window.removeEventListener('resize', updateItemsPerView);
-  }, []);
 
   // Fetch vignettes with their metadata from past_vignettes table
   const { data: vignettes, isLoading, error } = useQuery({
@@ -120,21 +101,6 @@ const Vignettes = () => {
     generateVignetteUrls();
   }, [vignettes, isLoading]);
 
-  // Carousel navigation
-  const maxIndex = Math.max(0, displayVignettes.length - 1);
-  
-  const nextSlide = () => {
-    setCurrentIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(Math.min(index, maxIndex));
-  };
-
   // Convert vignettes to Photo format for lightbox
   const lightboxPhotos: Photo[] = displayVignettes.map((vignette) => ({
     id: vignette.id,
@@ -157,23 +123,9 @@ const Vignettes = () => {
     if (index !== -1) {
       setLightboxIndex(index);
       setLightboxOpen(true);
-      // Track vignette interaction
       trackInteraction('vignette', vignetteId, 'view');
     }
   };
-
-  // Auto-play carousel
-  useEffect(() => {
-    if (displayVignettes.length <= itemsPerView) return;
-    
-    const interval = setInterval(nextSlide, 5000);
-    return () => clearInterval(interval);
-  }, [displayVignettes.length, itemsPerView, maxIndex]);
-
-  // Reset current index when items per view changes
-  useEffect(() => {
-    setCurrentIndex(prev => Math.min(prev, maxIndex));
-  }, [maxIndex]);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -227,102 +179,10 @@ const Vignettes = () => {
             
             {/* CAROUSEL - Only render when data is ready */}
             {!isLoading && !error && displayVignettes.length > 0 && (
-            <div className="relative max-w-6xl mx-auto">
-              {displayVignettes.length > itemsPerView ? (
-                <>
-                  {/* Carousel Navigation Buttons */}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background"
-                    onClick={prevSlide}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background"
-                    onClick={nextSlide}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-
-                  {/* Carousel Track */}
-                  <div className="overflow-hidden rounded-lg vignettes-carousel-track">
-                    <div 
-                      className="flex transition-transform duration-500 ease-in-out"
-                      style={{ 
-                        transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                        width: `${(displayVignettes.length / itemsPerView) * 100}%`
-                      }}
-                    >
-                      {displayVignettes.map((vignette, index) => (
-                        <div 
-                          key={vignette.id} 
-                          className="relative flex-shrink-0 px-4 vignettes-carousel-item"
-                          style={{ width: `${100 / displayVignettes.length}%` }}
-                        >
-                          <div className="h-full">
-                            <Card
-                              variant="vignette"
-                              image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
-                              title={vignette.title}
-                              hook={vignette.description}
-                              onClick={() => handleVignetteClick(vignette.id)}
-                              className="hover-tilt motion-safe h-full"
-                            >
-                              <div className="mt-4 flex justify-between items-center text-sm">
-                                <span className="font-subhead text-accent-gold">{vignette.year}</span>
-                                <span className="font-body text-muted-foreground">{vignette.theme_tag}</span>
-                              </div>
-                            </Card>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Carousel Dots */}
-                  <div className="flex justify-center mt-8 space-x-2">
-                    {Array.from({ length: maxIndex + 1 }).map((_, index) => (
-                      <button
-                        key={index}
-                        className={`w-3 h-3 rounded-full transition-colors ${
-                          index === currentIndex 
-                            ? 'bg-accent-gold' 
-                            : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                        }`}
-                        onClick={() => goToSlide(index)}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : displayVignettes.length > 0 ? (
-                /* Static Grid for Small Number of Items */
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {displayVignettes.map((vignette, index) => (
-                    <div key={vignette.id} className="relative">
-                      <Card
-                        variant="vignette"
-                        image={vignette.imageUrl || "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop"}
-                        title={vignette.title}
-                        hook={vignette.description}
-                        onClick={() => handleVignetteClick(vignette.id)}
-                        className="hover-tilt motion-safe h-full"
-                      >
-                        <div className="mt-4 flex justify-between items-center text-sm">
-                          <span className="font-subhead text-accent-gold">{vignette.year}</span>
-                          <span className="font-body text-muted-foreground">{vignette.theme_tag}</span>
-                        </div>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+              <VignettesCarousel
+                vignettes={displayVignettes}
+                onVignetteClick={handleVignetteClick}
+              />
             )}
             
             <div className="mt-16 text-center relative">

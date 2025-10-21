@@ -873,6 +873,152 @@ export type Database = {
         }
         Relationships: []
       }
+      release_api_changes: {
+        Row: {
+          change_type: string
+          created_at: string | null
+          description: string
+          endpoint: string
+          id: string
+          release_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          change_type: string
+          created_at?: string | null
+          description: string
+          endpoint: string
+          id?: string
+          release_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string | null
+          description?: string
+          endpoint?: string
+          id?: string
+          release_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_api_changes_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "system_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_changes: {
+        Row: {
+          category: string
+          component: string | null
+          created_at: string | null
+          description: string
+          id: string
+          release_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          category: string
+          component?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          release_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          category?: string
+          component?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          release_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_changes_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "system_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_features: {
+        Row: {
+          benefit: string | null
+          created_at: string | null
+          description: string
+          id: string
+          release_id: string
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          benefit?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          release_id: string
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          benefit?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          release_id?: string
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_features_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "system_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          note_type: string
+          release_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          note_type: string
+          release_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          note_type?: string
+          release_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_notes_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "system_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rsvps: {
         Row: {
           additional_guests: Json | null
@@ -1041,6 +1187,63 @@ export type Database = {
           metric_unit?: string
           metric_value?: number
           recorded_at?: string
+        }
+        Relationships: []
+      }
+      system_releases: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          deployment_status: string
+          email_sent: boolean | null
+          email_sent_at: string | null
+          environment: string
+          id: string
+          is_archived: boolean | null
+          major_version: number
+          minor_version: number
+          patch_version: number
+          pre_release: string | null
+          release_date: string
+          summary: string | null
+          updated_at: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          deployment_status?: string
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          environment?: string
+          id?: string
+          is_archived?: boolean | null
+          major_version: number
+          minor_version: number
+          patch_version: number
+          pre_release?: string | null
+          release_date?: string
+          summary?: string | null
+          updated_at?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          deployment_status?: string
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          environment?: string
+          id?: string
+          is_archived?: boolean | null
+          major_version?: number
+          minor_version?: number
+          patch_version?: number
+          pre_release?: string | null
+          release_date?: string
+          summary?: string | null
+          updated_at?: string | null
+          version?: string
         }
         Relationships: []
       }

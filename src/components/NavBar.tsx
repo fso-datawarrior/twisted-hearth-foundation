@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User, ChevronDown, Bell } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AuthModal } from "@/components/AuthModal";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useAuth } from "@/lib/auth";
@@ -33,6 +34,53 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
   const { isAdmin, isAdminView, toggleAdminView } = useAdmin();
   const { isMuted, toggleMute } = useAudio();
   const { openSupportModal } = useSupportModal();
+  const queryClient = useQueryClient();
+
+  // Unread notifications count
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-count', user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { data, error } = await supabase.rpc('get_unread_notification_count', {
+        p_user_id: user.id
+      });
+      if (error) throw error;
+      return data || 0;
+    },
+    enabled: !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Recent notifications (for dropdown)
+  const { data: recentNotifications } = useQuery({
+    queryKey: ['recent-notifications', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const markAsRead = async (notificationId: string) => {
+    await supabase.rpc('mark_notification_read', {
+      p_notification_id: notificationId
+    });
+    queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+    queryClient.invalidateQueries({ queryKey: ['recent-notifications'] });
+  };
+
+  const markAllAsRead = async () => {
+    await supabase.rpc('mark_all_notifications_read');
+    queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+    queryClient.invalidateQueries({ queryKey: ['recent-notifications'] });
+  };
 
   // Main navigation links (always visible in desktop nav bar)
   const mainNavLinks = [
@@ -232,6 +280,68 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               <Volume2 className="h-5 w-5 text-accent-gold" />
             )}
           </Button>
+
+          {/* Notifications Bell - Desktop */}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative hover:bg-accent-purple/10 font-subhead transition-colors"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5 text-ink" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 bg-black/90 backdrop-blur-sm border-accent-purple/30">
+                <div className="p-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-subhead text-sm text-ink">Notifications</span>
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={markAllAsRead}
+                        className="text-xs text-accent-gold hover:text-accent-gold/80"
+                      >
+                        Mark all read
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-1 max-h-96 overflow-y-auto">
+                    {recentNotifications && recentNotifications.length > 0 ? (
+                      recentNotifications.map((notif: any) => (
+                        <Link
+                          key={notif.id}
+                          to={notif.link || '/notifications'}
+                          onClick={() => !notif.is_read && markAsRead(notif.id)}
+                          className={`block p-2 rounded hover:bg-accent-purple/10 transition-colors ${
+                            !notif.is_read ? 'bg-accent-purple/5' : ''
+                          }`}
+                        >
+                          <p className="text-sm font-subhead text-ink line-clamp-1">{notif.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{notif.message}</p>
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No notifications</p>
+                    )}
+                  </div>
+                  <Link to="/notifications">
+                    <Button variant="outline" className="w-full mt-2" size="sm">
+                      View All Notifications
+                    </Button>
+                  </Link>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           {/* Centered Desktop Navigation */}
           <div className="hidden nav-compact:flex items-center space-x-8">
@@ -589,6 +699,23 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       >
                         <User size={16} className="mr-2" />
                         Settings
+                      </Button>
+                    </Link>
+
+                    {/* Mobile Notifications Link */}
+                    <Link to="/notifications">
+                      <Button
+                        onClick={() => setIsMenuOpen(false)}
+                        variant="ghost"
+                        className="w-full text-ink hover:bg-accent-purple/10 font-subhead relative"
+                      >
+                        <Bell size={16} className="mr-2" />
+                        Notifications
+                        {unreadCount > 0 && (
+                          <span className="ml-auto h-6 w-6 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
                       </Button>
                     </Link>
                     

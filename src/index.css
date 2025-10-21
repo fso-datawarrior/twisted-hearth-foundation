@@ -119,6 +119,145 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
     scroll-behavior: smooth;
   }
 
+  /* Embla Carousel 3D Styles */
+  .embla {
+    position: relative;
+    perspective: 2000px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 0;
+  }
+
+  .embla__viewport {
+    overflow: hidden;
+  }
+
+  .embla__container {
+    display: flex;
+    gap: 20px;
+    backface-visibility: hidden;
+  }
+
+  .embla__slide {
+    flex: 0 0 85%;
+    min-width: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0.4;
+    transform: scale(0.85) translateZ(-100px);
+  }
+
+  .embla__slide--center {
+    opacity: 1;
+    transform: scale(1) translateZ(0) rotateY(0deg);
+    z-index: 10;
+  }
+
+  .embla__slide__inner {
+    height: 100%;
+    padding: 0 10px;
+  }
+
+  .embla__button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    background: hsl(var(--background) / 0.8);
+    border: 1px solid hsl(var(--accent-purple) / 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .embla__button:hover:not(:disabled) {
+    background: hsl(var(--background));
+    border-color: hsl(var(--accent-gold));
+  }
+
+  .embla__button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .embla__button--prev {
+    left: 20px;
+  }
+
+  .embla__button--next {
+    right: 20px;
+  }
+
+  .embla__dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+  }
+
+  .embla__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: hsl(var(--muted-foreground) / 0.3);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .embla__dot:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  .embla__dot--selected {
+    background: hsl(var(--accent-gold));
+    transform: scale(1.2);
+  }
+
+  /* Lazy loading skeleton */
+  .embla__slide--in-view .embla__slide__inner {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .embla__slide {
+      flex: 0 0 90%;
+    }
+
+    .embla__button--prev {
+      left: 10px;
+    }
+
+    .embla__button--next {
+      right: 10px;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .embla__slide {
+      flex: 0 0 50%;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .embla__slide {
+      flex: 0 0 33.333%;
+    }
+  }
+
   .vignettes-carousel-item {
     scroll-snap-align: center;
     scroll-snap-stop: always;
