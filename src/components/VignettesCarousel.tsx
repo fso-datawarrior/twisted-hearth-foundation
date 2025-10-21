@@ -81,15 +81,17 @@ export function VignettesCarousel({ vignettes, onVignetteClick }: VignettesCarou
     <div className="embla relative">
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          {vignettes.map((vignette, index) => (
-            <div 
-              key={vignette.id} 
-              className={`embla__slide ${
-                index === selectedIndex ? 'embla__slide--center' : ''
-              } ${
-                slidesInView.includes(index) ? 'embla__slide--in-view' : ''
-              }`}
-            >
+          {vignettes.map((vignette, index) => {
+            const isCenter = selectedIndex % vignettes.length === index;
+            return (
+              <div 
+                key={vignette.id} 
+                className={`embla__slide ${
+                  isCenter ? 'embla__slide--center' : ''
+                } ${
+                  slidesInView.includes(index) ? 'embla__slide--in-view' : ''
+                }`}
+              >
               <div className="embla__slide__inner">
                 <Card
                   variant="vignette"
@@ -105,8 +107,9 @@ export function VignettesCarousel({ vignettes, onVignetteClick }: VignettesCarou
                   </div>
                 </Card>
               </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
