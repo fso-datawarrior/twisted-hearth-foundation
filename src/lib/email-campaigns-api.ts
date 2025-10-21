@@ -30,6 +30,7 @@ export interface EmailCampaign {
   stats: CampaignStats;
   created_at: string;
   email_templates?: EmailTemplate;
+  template_variables?: Record<string, any>;
 }
 
 // Template Management
@@ -261,13 +262,14 @@ export async function sendSystemUpdate(params: {
   if (!user) throw new Error('Not authenticated');
 
   // Check if user is admin
-  const { data: profile } = await supabase
-    .from('profiles')
+  const { data: userRole } = await supabase
+    .from('user_roles')
     .select('role')
-    .eq('id', user.id)
-    .single();
+    .eq('user_id', user.id)
+    .eq('role', 'admin')
+    .maybeSingle();
 
-  if (profile?.role !== 'admin') {
+  if (!userRole) {
     throw new Error('Unauthorized: Admin access required');
   }
 

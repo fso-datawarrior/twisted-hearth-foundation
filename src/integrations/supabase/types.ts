@@ -161,6 +161,7 @@ export type Database = {
           status: string
           subject: string
           template_id: string | null
+          template_variables: Json | null
         }
         Insert: {
           created_at?: string
@@ -174,6 +175,7 @@ export type Database = {
           status?: string
           subject: string
           template_id?: string | null
+          template_variables?: Json | null
         }
         Update: {
           created_at?: string
@@ -187,6 +189,7 @@ export type Database = {
           status?: string
           subject?: string
           template_id?: string | null
+          template_variables?: Json | null
         }
         Relationships: [
           {
@@ -200,6 +203,7 @@ export type Database = {
       }
       email_templates: {
         Row: {
+          category: string | null
           created_at: string
           created_by: string | null
           html_content: string
@@ -208,9 +212,11 @@ export type Database = {
           name: string
           preview_text: string | null
           subject: string
+          text_content: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           html_content: string
@@ -219,9 +225,11 @@ export type Database = {
           name: string
           preview_text?: string | null
           subject: string
+          text_content?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           html_content?: string
@@ -230,6 +238,7 @@ export type Database = {
           name?: string
           preview_text?: string | null
           subject?: string
+          text_content?: string | null
           updated_at?: string
         }
         Relationships: []
