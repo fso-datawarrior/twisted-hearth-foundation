@@ -10,23 +10,24 @@ Use this prompt to sync your current changes to the development environment.
 ```
 Update my development environment with current changes. Do this now.
 
-Current branch: [CURRENT_BRANCH_NAME]
+Use my current branch as the development branch.
 
 DO NOT ASK ME QUESTIONS - JUST EXECUTE THE COMMANDS!
 
 Execute these steps immediately:
-1. Run: git status
-2. Check if [CURRENT_BRANCH_NAME] exists in .github/workflows/firebase-hosting-dev.yml
-3. IF branch is NOT in the workflow file:
-   a. Add [CURRENT_BRANCH_NAME] to the branches list
+1. Run: git branch --show-current (get the current branch name automatically)
+2. Run: git status
+3. Check if current branch exists in .github/workflows/firebase-hosting-dev.yml
+4. IF branch is NOT in the workflow file:
+   a. Add current branch to the branches list in firebase-hosting-dev.yml
    b. Run: git add .github/workflows/firebase-hosting-dev.yml
-   c. Run: git commit -m "ci: add [CURRENT_BRANCH_NAME] to dev deployment triggers"
-   d. Run: git push origin [CURRENT_BRANCH_NAME]
-4. Run: git add .
-5. Run: git commit -m "update: sync changes to dev environment"
-6. Run: git push origin [CURRENT_BRANCH_NAME]
-7. Monitor: Check https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
-8. IF deployment fails with authentication error:
+   c. Run: git commit -m "ci: add [current-branch] to dev deployment triggers"
+   d. Run: git push origin [current-branch]
+5. Run: git add .
+6. Run: git commit -m "update: sync changes to dev environment"
+7. Run: git push origin [current-branch]
+8. Monitor: Check https://github.com/fso-datawarrior/twisted-hearth-foundation/actions
+9. IF deployment fails with authentication error:
    - Report: FIREBASE_TOKEN needs refresh
    - Instruct: Update secret at https://github.com/fso-datawarrior/twisted-hearth-foundation/settings/secrets/actions
 
@@ -48,18 +49,18 @@ IMPORTANT: Do NOT ask for confirmation. Do NOT ask what I want to do. Just execu
 
 ## **Usage Examples**
 
-### **Quick Update:**
+### **Quick Update (Recommended):**
 ```
-Update my development environment with current changes.
+Update my development environment with current changes. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch as the development branch.
 ```
 
 ### **With Specific Changes:**
 ```
-Update my development environment with current changes.
+Update my development environment with current changes. Do this now.
 
-Current branch: v-3.0.1.2-dev-email-cleanup
+Use my current branch as the development branch.
 
 Changes made:
 - Fixed email validation logic
