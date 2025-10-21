@@ -55,12 +55,43 @@ This document contains the complete Firebase project configuration for the Twist
   - `Organization Administrator` (inherited)
   - `Owner` (inherited)
 
+## Workload Identity Configuration
+
+### Identity Pool
+- **Pool ID**: `github-actions`
+- **Provider**: `github`
+- **Location**: `global`
+- **Full Provider Path**: `projects/1017057598145/locations/global/workloadIdentityPools/github-actions/providers/github`
+
+### Service Account Binding
+- **Service Account**: `firebase-hosting-deployer@twisted-hearth-foundation.iam.gserviceaccount.com`
+- **Role**: `Workload Identity User`
+- **Principal Set**: `principalSet://iam.googleapis.com/projects/1017057598145/locations/global/workloadIdentityPools/github-actions/attribute.repository/fso-datawarrior/twisted-hearth-foundation`
+
+### Attribute Conditions
+- **Repository Restriction**: `assertion.repository == "fso-datawarrior/twisted-hearth-foundation"`
+- **Subject Mapping**: `google.subject` → `assertion.sub`
+- **Repository Mapping**: `attribute.repository` → `assertion.repository`
+
+### Benefits
+- ✅ **No token expiration** - permanent solution
+- ✅ **More secure** - no keys to manage
+- ✅ **Google recommended** - best practice for CI/CD
+- ✅ **Zero maintenance** - set it and forget it
+- ✅ **Organization compliant** - works with secure-by-default policies
+
 ## GitHub Actions Configuration
 
 ### Required Secrets
-- **FIREBASE_TOKEN**: CI token for Firebase authentication
-  - Generated via: `firebase login:ci`
-  - Updated in: GitHub Settings → Secrets and variables → Actions
+- **FIREBASE_TOKEN**: ~~CI token for Firebase authentication~~ **DEPRECATED - No longer needed**
+  - ~~Generated via: `firebase login:ci`~~
+  - ~~Updated in: GitHub Settings → Secrets and variables → Actions~~
+
+### Workload Identity Authentication
+- **Provider**: `google-github-actions/auth@v2`
+- **Workload Identity Provider**: `projects/1017057598145/locations/global/workloadIdentityPools/github-actions/providers/github`
+- **Service Account**: `firebase-hosting-deployer@twisted-hearth-foundation.iam.gserviceaccount.com`
+- **No secrets required** - authentication handled via Workload Identity
 
 ### Workflow Triggers
 - **Production**: Push/PR to `prod-2025.partytillyou.rip` branch
