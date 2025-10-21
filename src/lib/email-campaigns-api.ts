@@ -242,11 +242,20 @@ export function parseEmailCSV(csvContent: string): string[] {
  */
 export async function sendSystemUpdate(params: {
   version: string;
-  newFeatures?: Array<{ title: string; description: string }>;
+  templateType?: 'admin' | 'user' | 'both';
+  releaseDate?: string;
+  summary?: string;
+  newFeatures?: Array<{ title: string; description: string; benefit?: string }>;
   bugFixes?: string[];
   improvements?: string[];
   knownIssues?: string[];
   additionalNotes?: string;
+  // Admin-specific fields
+  apisChanged?: Array<{ endpoint: string; change: string }>;
+  uiUpdates?: Array<{ component: string; change: string }>;
+  breakingChanges?: string[];
+  databaseChanges?: string[];
+  technicalNotes?: string;
 }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
@@ -262,24 +271,127 @@ export async function sendSystemUpdate(params: {
     throw new Error('Unauthorized: Admin access required');
   }
 
-  // Create campaign with system update template
-  const campaign = await createCampaign({
-    subject: `🎃 System Update ${params.version} - New Features & Improvements`,
-    recipient_list: 'all',
-    template_variables: {
-      VERSION: params.version,
-      NEW_FEATURES: params.newFeatures || [],
-      BUG_FIXES: params.bugFixes || [],
-      IMPROVEMENTS: params.improvements || [],
-      KNOWN_ISSUES: params.knownIssues || [],
-      ADDITIONAL_NOTES: params.additionalNotes || '',
-      SITE_URL: window.location.origin,
-    },
-    status: 'draft',
-  });
+  const templateType = params.templateType || 'user';
+  
+  // Helper function to convert technical descriptions to user-friendly language
+  const convertToUserFriendly = (technicalText: string): string => {
+    const conversions: Record<string, string> = {
+      'authentication': 'logging in',
+      'API': 'app features',
+      'database': 'data storage',
+      'performance': 'speed',
+      'bug': 'issue',
+      'fix': 'improvement',
+      'endpoint': 'feature',
+      'component': 'page',
+      'UI': 'interface',
+      'UX': 'user experience',
+      'migration': 'update',
+      'schema': 'data structure',
+      'optimization': 'improvement',
+      'refactor': 'cleanup',
+      'deployment': 'release'
+    };
+    
+    let converted = technicalText;
+    Object.entries(conversions).forEach(([tech, friendly]) => {
+      converted = converted.replace(new RegExp(tech, 'gi'), friendly);
+    });
+    
+    return converted;
+  };
 
-  // Send immediately
-  await sendCampaign(campaign.id);
+  const baseVariables = {
+    VERSION: params.version,
+    RELEASE_DATE: params.releaseDate || new Date().toLocaleDateString(),
+    SUMMARY: params.summary || '',
+    SITE_URL: window.location.origin,
+    ADDITIONAL_NOTES: params.additionalNotes || '',
+    KNOWN_ISSUES: params.knownIssues || [],
+  };
 
-  return campaign;
+  if (templateType === 'both') {
+    // Send both admin and user versions
+    const adminCampaign = await createCampaign({
+      subject: `🎃 System Update ${params.version} - Technical Summary`,
+      recipient_list: 'custom', // Send to admins only
+      custom_recipients: [], // Will be populated with admin emails
+      template_variables: {
+        ...baseVariables,
+        FEATURES_ADDED: params.newFeatures || [],
+        APIS_CHANGED: params.apisChanged || [],
+        UI_UPDATES: params.uiUpdates || [],
+        BUG_FIXES: params.bugFixes || [],
+        IMPROVEMENTS: params.improvements || [],
+        BREAKING_CHANGES: params.breakingChanges || [],
+        DATABASE_CHANGES: params.databaseChanges || [],
+        TECHNICAL_NOTES: params.technicalNotes || '',
+      },
+      status: 'draft',
+    });
+
+    const userCampaign = await createCampaign({
+      subject: `🎃 We Made Your Party Experience Even Better! ${params.version}`,
+      recipient_list: 'all',
+      template_variables: {
+        ...baseVariables,
+        FEATURES_ADDED: params.newFeatures?.map(f => ({
+          title: f.title,
+          benefit: f.benefit || convertToUserFriendly(f.description)
+        })) || [],
+        BUG_FIXES: params.bugFixes?.map(convertToUserFriendly) || [],
+        IMPROVEMENTS: params.improvements?.map(convertToUserFriendly) || [],
+      },
+      status: 'draft',
+    });
+
+    // Send both campaigns
+    await Promise.all([
+      sendCampaign(adminCampaign.id),
+      sendCampaign(userCampaign.id)
+    ]);
+
+    return { adminCampaign, userCampaign };
+  } else if (templateType === 'admin') {
+    // Admin/Technical version
+    const campaign = await createCampaign({
+      subject: `🎃 System Update ${params.version} - Technical Summary`,
+      recipient_list: 'custom', // Send to admins only
+      custom_recipients: [], // Will be populated with admin emails
+      template_variables: {
+        ...baseVariables,
+        FEATURES_ADDED: params.newFeatures || [],
+        APIS_CHANGED: params.apisChanged || [],
+        UI_UPDATES: params.uiUpdates || [],
+        BUG_FIXES: params.bugFixes || [],
+        IMPROVEMENTS: params.improvements || [],
+        BREAKING_CHANGES: params.breakingChanges || [],
+        DATABASE_CHANGES: params.databaseChanges || [],
+        TECHNICAL_NOTES: params.technicalNotes || '',
+      },
+      status: 'draft',
+    });
+
+    await sendCampaign(campaign.id);
+    return campaign;
+  } else {
+    // User-friendly version (default)
+    const campaign = await createCampaign({
+      subject: `🎃 We Made Your Party Experience Even Better! ${params.version}`,
+      recipient_list: 'all',
+      template_variables: {
+        ...baseVariables,
+        FEATURES_ADDED: params.newFeatures?.map(f => ({
+          title: f.title,
+          benefit: f.benefit || convertToUserFriendly(f.description)
+        })) || [],
+        BUG_FIXES: params.bugFixes?.map(convertToUserFriendly) || [],
+        IMPROVEMENTS: params.improvements?.map(convertToUserFriendly) || [],
+      },
+      status: 'draft',
+    });
+
+    await sendCampaign(campaign.id);
+    return campaign;
+  }
 }

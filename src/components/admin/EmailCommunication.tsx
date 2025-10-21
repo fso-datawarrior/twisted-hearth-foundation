@@ -83,7 +83,9 @@ export function EmailCommunication() {
   };
 
   const handleDeleteTemplate = async () => {
-    if (!deleteTarget || deleteTarget.type !== 'template') return;
+    if (!deleteTarget || deleteTarget.type !== 'template') {
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -121,7 +123,9 @@ export function EmailCommunication() {
   };
 
   const handleConfirmSend = async () => {
-    if (!pendingCampaign) return;
+    if (!pendingCampaign) {
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -163,16 +167,20 @@ export function EmailCommunication() {
   };
 
   const handleQuickSystemUpdate = () => {
-    // Check if system update template exists
-    const systemTemplate = templates.find(t => 
-      t.name.toLowerCase().includes('system update') || 
-      t.name.toLowerCase().includes('system-update')
+    // Check if system update templates exist
+    const adminTemplate = templates.find(t => 
+      t.name.toLowerCase().includes('admin summary') || 
+      t.name.toLowerCase().includes('system update - admin')
+    );
+    const userTemplate = templates.find(t => 
+      t.name.toLowerCase().includes('guest announcement') || 
+      t.name.toLowerCase().includes('system update - guest')
     );
     
-    if (!systemTemplate) {
-      toast.warning('System Update template not found. Creating default template...');
-      // Create default system update template
-      createDefaultSystemUpdateTemplate();
+    if (!adminTemplate || !userTemplate) {
+      toast.warning('System Update templates not found. Creating default templates...');
+      // Create default system update templates
+      createDefaultSystemUpdateTemplates();
     } else {
       // Open campaign composer with system update pre-selected
       setIsCreatingCampaign(true);
@@ -180,43 +188,126 @@ export function EmailCommunication() {
     }
   };
 
-  const createDefaultSystemUpdateTemplate = async () => {
+  const createDefaultSystemUpdateTemplates = async () => {
     try {
-      const defaultTemplate = {
-        name: 'System Update',
-        subject: '🎃 Update: {{VERSION}} - New Features & Improvements',
+      const adminTemplate = {
+        name: 'System Update - Admin Summary',
+        subject: '🎃 System Update {{VERSION}} - Technical Summary',
         html_content: `
           <h2>System Update - Version {{VERSION}}</h2>
-          <p>We've made some updates to improve your experience!</p>
+          <p>Technical summary of system updates for administrators.</p>
           
-          <h3>✨ New Features</h3>
+          <h3>✨ Features Added</h3>
           <ul>
-            <li>{{NEW_FEATURE_1}}</li>
-            <li>{{NEW_FEATURE_2}}</li>
+            {{#each FEATURES_ADDED}}
+            <li><strong>{{this.title}}:</strong> {{this.description}}</li>
+            {{/each}}
+          </ul>
+          
+          <h3>🔧 APIs Changed</h3>
+          <ul>
+            {{#each APIS_CHANGED}}
+            <li><code>{{this.endpoint}}</code> - {{this.change}}</li>
+            {{/each}}
+          </ul>
+          
+          <h3>🎨 UI Updates</h3>
+          <ul>
+            {{#each UI_UPDATES}}
+            <li><strong>{{this.component}}:</strong> {{this.change}}</li>
+            {{/each}}
           </ul>
           
           <h3>🐛 Bug Fixes</h3>
           <ul>
-            <li>{{BUG_FIX_1}}</li>
-            <li>{{BUG_FIX_2}}</li>
+            {{#each BUG_FIXES}}
+            <li>{{this}}</li>
+            {{/each}}
           </ul>
           
-          <h3>⚠️ Known Issues</h3>
+          <h3>⚠️ Breaking Changes</h3>
           <ul>
-            <li>{{KNOWN_ISSUE_1}}</li>
+            {{#each BREAKING_CHANGES}}
+            <li>{{this}}</li>
+            {{/each}}
           </ul>
           
-          <p>Thanks for being part of The Ruths' Bash! 🎭</p>
+          <h3>🗄️ Database Changes</h3>
+          <ul>
+            {{#each DATABASE_CHANGES}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+          
+          <p>Technical Contact: <a href="{{SITE_URL}}/admin/contact">Admin Support</a></p>
         `,
         is_active: true,
+        category: 'system-admin'
+      };
+
+      const userTemplate = {
+        name: 'System Update - Guest Announcement',
+        subject: '🎃 We Made Your Party Experience Even Better! {{VERSION}}',
+        html_content: `
+          <h1>🎃 We Made Your Party Experience Even Better!</h1>
+          <p>Hey party people! 🎉✨</p>
+          
+          <h2>✨ What's New & Awesome!</h2>
+          <p>We've been working hard to make your party experience even more magical! 🎩✨</p>
+          {{#each FEATURES_ADDED}}
+          <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 10px; border: 2px solid #d4af37;">
+            <h3>🎉 {{this.title}}</h3>
+            <p>{{this.benefit}}</p>
+          </div>
+          {{/each}}
+          
+          <h2>🔧 What We Fixed!</h2>
+          <p>Oops! We found some sneaky bugs and squashed them! 🐛💥</p>
+          <ul>
+            {{#each BUG_FIXES}}
+            <li>🎯 {{this}}</li>
+            {{/each}}
+          </ul>
+          
+          <h2>🚀 What's Better Now!</h2>
+          <p>We made everything smoother and more fun! 🌟</p>
+          <ul>
+            {{#each IMPROVEMENTS}}
+            <li>⭐ {{this}}</li>
+            {{/each}}
+          </ul>
+          
+          {{#if KNOWN_ISSUES}}
+          <h2>⚠️ Heads Up, Party People!</h2>
+          <p>We found a few little quirks that we're working on fixing:</p>
+          <ul>
+            {{#each KNOWN_ISSUES}}
+            <li>🔍 {{this}}</li>
+            {{/each}}
+          </ul>
+          <p><em>Don't worry - we're on it! These will be fixed soon! 🛠️✨</em></p>
+          {{/if}}
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="{{SITE_URL}}" style="background: linear-gradient(135deg, #d4af37, #ffd700); color: #2d1b4e; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold;">Check It Out! 🎃</a>
+          </div>
+          
+          <p><strong>See you at the bash! 🎭✨</strong></p>
+        `,
+        is_active: true,
+        category: 'system-user'
       };
       
-      await createTemplate(defaultTemplate);
-      toast.success('System Update template created!');
+      await Promise.all([
+        createTemplate(adminTemplate),
+        createTemplate(userTemplate)
+      ]);
+      
+      toast.success('System Update templates created!');
       loadData(); // Reload templates
     } catch (error) {
-      console.error('Failed to create template:', error);
-      toast.error('Failed to create system update template');
+      console.error('Failed to create templates:', error);
+      toast.error('Failed to create system update templates');
     }
   };
 
