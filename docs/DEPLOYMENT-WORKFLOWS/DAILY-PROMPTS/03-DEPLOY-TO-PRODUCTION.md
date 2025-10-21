@@ -4,6 +4,8 @@
 
 Use this prompt to deploy your current branch to production.
 
+**📋 Reference:** See `docs/DEPLOYMENT-PROD/firebase-project-configuration.md` for complete Firebase project details.
+
 ---
 
 **Prompt:**
@@ -104,6 +106,19 @@ Changes made:
 ---
 
 ## **Troubleshooting**
+
+### **If "Invalid project selection" Error**
+
+The Firebase hosting site name in `.firebaserc` doesn't match the actual Firebase Hosting site.
+
+**Solution:**
+1. **Check Firebase configuration:** See `docs/DEPLOYMENT-PROD/firebase-project-configuration.md`
+2. **Verify hosting sites:** Run `firebase hosting:sites:list` (requires authentication)
+3. **Update `.firebaserc`:** Ensure the site name matches the actual Firebase Hosting site
+4. **Common fixes:**
+   - Use `"default"` for the main production site
+   - Use `"twisted-hearth-foundation-dev"` for development site
+   - Verify site names in Firebase Console → Hosting
 
 ### **If "Authentication Error: Your credentials are no longer valid"**
 
