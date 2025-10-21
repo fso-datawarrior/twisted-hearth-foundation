@@ -85,6 +85,8 @@ export function VignettesCarousel({ vignettes, onVignetteClick }: VignettesCarou
             <div 
               key={vignette.id} 
               className={`embla__slide ${
+                index === selectedIndex ? 'embla__slide--center' : ''
+              } ${
                 slidesInView.includes(index) ? 'embla__slide--in-view' : ''
               }`}
             >
@@ -95,7 +97,7 @@ export function VignettesCarousel({ vignettes, onVignetteClick }: VignettesCarou
                   title={vignette.title}
                   hook={vignette.description}
                   onClick={() => onVignetteClick(vignette.id)}
-                  className="hover-tilt motion-safe h-full"
+                  className="hover-tilt motion-safe h-full w-full"
                 >
                   <div className="mt-4 flex justify-between items-center text-sm">
                     <span className="font-subhead text-accent-gold">{vignette.year}</span>
