@@ -2636,3 +2636,918 @@ This comprehensive implementation plan (v3) provides:
 - 🔒 Secure with RLS policies and admin-only functions
 
 Ready to implement! 🏓👻⚡
+
+---
+
+# TWISTED TALES WORDLE - IMPLEMENTATION PLAN (v1)
+
+**Project**: Add Daily Wordle-Style Mini-Game with Easter Egg Unlock
+**Branch**: `v-3.0.3.7-Phase6-AdditionalFeatureEnhancements`
+**Created**: 2025-01-21
+**Updated**: 2025-01-21 (v1 - Complete implementation plan)
+
+---
+
+## 🎯 OBJECTIVES
+
+1. Implement **daily 6-letter word guessing game** with twisted fairytale theme
+2. **Easter egg unlock system**: Click footer icons 13 times to unlock game
+3. **Gradual rollout**: Soft launch to admins first, then all users
+4. **Games submenu integration**: Add to navigation under "Games" section
+5. **Complete database backend**: Full schema with RLS, RPCs, and seed data
+6. **Real-time leaderboard** with streak tracking and statistics
+7. **Mobile-optimized gameplay** with keyboard and responsive design
+
+---
+
+## 🗄️ PART 1: DATABASE SCHEMA
+
+### Migration: Twisted Tales Wordle Game Tables
+
+**File**: `supabase/migrations/20250121120000_twisted_tales_wordle.sql`
+
+```sql
+-- ================================================================
+-- TWISTED TALES WORDLE GAME SYSTEM
+-- Features: Daily words, user progress, leaderboards, RLS
+-- ================================================================
+
+-- 1.1 Words pool (answers + guessable)
+CREATE TABLE IF NOT EXISTS game_words (
+  id SERIAL PRIMARY KEY,
+  word TEXT NOT NULL UNIQUE CHECK (char_length(word) = 6),
+  category TEXT CHECK (category IN ('halloween','fairy_tale','twisted')),
+  difficulty INTEGER CHECK (difficulty BETWEEN 1 AND 5),
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  is_answer_pool BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS game_words_active_idx
+  ON game_words (is_active, is_answer_pool);
+
+-- 1.2 Per-user game progression
+CREATE TABLE IF NOT EXISTS game_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  game_unlocked BOOLEAN NOT NULL DEFAULT false,
+  current_streak INTEGER NOT NULL DEFAULT 0,
+  longest_streak INTEGER NOT NULL DEFAULT 0,
+  total_wins INTEGER NOT NULL DEFAULT 0,
+  total_games INTEGER NOT NULL DEFAULT 0,
+  average_guesses NUMERIC,
+  last_played_date DATE,
+  last_answer_id INTEGER REFERENCES game_words(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id)
+);
+
+CREATE INDEX IF NOT EXISTS game_progress_user_idx ON game_progress(user_id);
+
+-- 1.3 Daily results
+CREATE TABLE IF NOT EXISTS game_daily_results (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  game_date DATE NOT NULL, -- UTC date
+  answer_id INTEGER NOT NULL REFERENCES game_words(id),
+  word_of_day TEXT NOT NULL,
+  guesses JSONB NOT NULL DEFAULT '[]'::jsonb,      -- ["PRINCE","GOBLIN",...]
+  tiles JSONB NOT NULL DEFAULT '[]'::jsonb,        -- [["G","-","Y",...], ...]
+  solved BOOLEAN NOT NULL DEFAULT false,
+  num_guesses INTEGER,
+  completed_at TIMESTAMPTZ,
+  ms_spent INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, game_date)
+);
+
+CREATE INDEX IF NOT EXISTS game_daily_results_date_idx ON game_daily_results(game_date);
+CREATE INDEX IF NOT EXISTS game_daily_results_user_idx ON game_daily_results(user_id);
+
+-- 1.4 RLS
+ALTER TABLE game_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE game_daily_results ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "own_progress_all"
+  ON game_progress FOR ALL
+  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "own_results_all"
+  ON game_daily_results FOR ALL
+  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- 1.5 Triggers to maintain updated_at
+CREATE OR REPLACE FUNCTION touch_updated_at()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END $$;
+
+CREATE TRIGGER t_game_progress_touch
+  BEFORE UPDATE ON game_progress
+  FOR EACH ROW EXECUTE PROCEDURE touch_updated_at();
+
+CREATE TRIGGER t_game_daily_results_touch
+  BEFORE UPDATE ON game_daily_results
+  FOR EACH ROW EXECUTE PROCEDURE touch_updated_at();
+```
+
+### Utility Functions & Constants
+
+```sql
+-- 2.1 UTC today helper
+CREATE OR REPLACE FUNCTION tt_utc_today()
+RETURNS DATE LANGUAGE SQL STABLE AS $$
+  SELECT (now() AT TIME ZONE 'UTC')::date
+$$;
+
+-- 2.2 Salted hash → index mapping
+CREATE OR REPLACE FUNCTION tt_daily_index(_date DATE)
+RETURNS BIGINT LANGUAGE plpgsql STABLE AS $$
+DECLARE
+  salt TEXT := 'TT_SALT_REPLACE_ME';
+  h BIGINT;
+BEGIN
+  SELECT abs(hashtextextended(salt || _date::text, 913)) INTO h;
+  RETURN h;
+END
+$$;
+```
+
+### Core RPCs (Server-Authoritative)
+
+```sql
+-- 3.1 Get daily word
+CREATE OR REPLACE FUNCTION get_daily_word(_date DATE DEFAULT tt_utc_today())
+RETURNS TABLE(answer_id INTEGER, word TEXT) LANGUAGE SQL STABLE AS $$
+  WITH pool AS (
+    SELECT id, word FROM game_words
+    WHERE is_active AND is_answer_pool
+    ORDER BY id
+  ),
+  c AS (SELECT count(*)::int AS n FROM pool)
+  SELECT p.id, p.word
+  FROM pool p, c
+  WHERE (p.id % c.n) = (tt_daily_index(_date) % c.n)
+  LIMIT 1;
+$$;
+
+-- 3.2 Unlock game
+CREATE OR REPLACE FUNCTION unlock_game()
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO game_progress(user_id, game_unlocked)
+  VALUES (auth.uid(), true)
+  ON CONFLICT (user_id) DO UPDATE SET game_unlocked = true;
+END
+$$;
+
+-- 3.3 Letter coloring (duplicate-aware)
+CREATE OR REPLACE FUNCTION tt_color_row(_guess TEXT, _answer TEXT)
+RETURNS TEXT[] LANGUAGE plpgsql IMMUTABLE AS $$
+DECLARE
+  g TEXT := upper(_guess);
+  a TEXT := upper(_answer);
+  len INTEGER := 6;
+  res TEXT[] := array_fill('-'::text, ARRAY[len]);
+  counts JSONB := '{}';
+  i INTEGER;
+BEGIN
+  IF length(g) <> len OR length(a) <> len THEN
+    RAISE EXCEPTION 'words must be 6 letters';
+  END IF;
+  
+  -- Count letters in answer
+  FOR i IN 1..len LOOP
+    counts := jsonb_set(
+      counts,
+      ARRAY[substr(a,i,1)],
+      to_jsonb( coalesce( (counts->>substr(a,i,1))::int, 0) + 1 ), true);
+  END LOOP;
+  
+  -- First pass: greens
+  FOR i IN 1..len LOOP
+    IF substr(g,i,1) = substr(a,i,1) THEN
+      res[i] := 'G';
+      counts := jsonb_set(
+        counts,
+        ARRAY[substr(g,i,1)],
+        to_jsonb( (counts->>substr(g,i,1))::int - 1 ), true);
+    END IF;
+  END LOOP;
+  
+  -- Second pass: yellows where count remains
+  FOR i IN 1..len LOOP
+    IF res[i] = '-' THEN
+      IF (counts ? substr(g,i,1)) AND (counts->>substr(g,i,1))::int > 0 THEN
+        res[i] := 'Y';
+        counts := jsonb_set(
+          counts,
+          ARRAY[substr(g,i,1)],
+          to_jsonb( (counts->>substr(g,i,1))::int - 1 ), true);
+      END IF;
+    END IF;
+  END LOOP;
+  
+  RETURN res;
+END
+$$;
+
+-- 3.4 Submit guess
+CREATE OR REPLACE FUNCTION submit_guess(_guess TEXT)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  uid UUID := auth.uid();
+  d DATE := tt_utc_today();
+  ans RECORD;
+  r RECORD;
+  row_colors TEXT[];
+  new_tiles JSONB;
+  new_guesses JSONB;
+  finished BOOLEAN := false;
+  solved BOOLEAN := false;
+  attempts INTEGER;
+  max_attempts CONSTANT INTEGER := 6;
+BEGIN
+  -- Fetch today's answer
+  SELECT * INTO ans FROM get_daily_word(d);
+  IF ans IS NULL THEN RAISE EXCEPTION 'answer pool empty'; END IF;
+
+  -- Basic guard: word must exist in game_words (guessable)
+  IF NOT EXISTS (
+    SELECT 1 FROM game_words WHERE upper(word) = upper(_guess) AND is_active
+  ) THEN
+    RETURN jsonb_build_object('error','INVALID_WORD');
+  END IF;
+
+  -- Upsert today's result row for this user
+  INSERT INTO game_daily_results(user_id, game_date, answer_id, word_of_day)
+  VALUES (uid, d, ans.answer_id, ans.word)
+  ON CONFLICT (user_id, game_date) DO NOTHING;
+
+  SELECT * INTO r FROM game_daily_results WHERE user_id = uid AND game_date = d FOR UPDATE;
+
+  IF r.solved IS true OR (r.num_guesses IS NOT NULL AND r.num_guesses >= max_attempts) THEN
+    RETURN jsonb_build_object('status','final','guesses', r.guesses, 'tiles', r.tiles, 'numGuesses', r.num_guesses, 'solved', r.solved);
+  END IF;
+
+  -- Compute colors
+  row_colors := tt_color_row(_guess, ans.word);
+  new_tiles := coalesce(r.tiles, '[]'::jsonb) || to_jsonb(row_colors);
+  new_guesses := coalesce(r.guesses, '[]'::jsonb) || to_jsonb(upper(_guess));
+  attempts := jsonb_array_length(new_guesses);
+
+  solved := (SELECT bool_and(x = 'G') FROM unnest(row_colors) AS x);
+  finished := solved OR attempts >= max_attempts;
+
+  UPDATE game_daily_results SET
+    guesses = new_guesses,
+    tiles = new_tiles,
+    num_guesses = CASE WHEN finished THEN attempts ELSE NULL END,
+    solved = CASE WHEN finished THEN solved ELSE false END,
+    completed_at = CASE WHEN finished THEN now() ELSE NULL END
+  WHERE id = r.id;
+
+  -- Update progression if finished
+  IF finished THEN
+    INSERT INTO game_progress(user_id, last_played_date, last_answer_id)
+    VALUES (uid, d, ans.answer_id)
+    ON CONFLICT (user_id) DO UPDATE SET
+      last_played_date = excluded.last_played_date,
+      last_answer_id   = excluded.last_answer_id,
+      total_games = game_progress.total_games + 1,
+      total_wins  = game_progress.total_wins + (CASE WHEN solved THEN 1 ELSE 0 END),
+      current_streak = CASE
+        WHEN solved AND (game_progress.last_played_date = d - 1 OR game_progress.last_played_date IS NULL)
+          THEN coalesce(game_progress.current_streak,0) + 1
+        WHEN solved THEN 1
+        ELSE 0
+      END,
+      longest_streak = greatest(game_progress.longest_streak,
+        CASE WHEN solved THEN
+          CASE
+            WHEN (game_progress.last_played_date = d - 1 OR game_progress.last_played_date IS NULL)
+              THEN coalesce(game_progress.current_streak,0) + 1
+            ELSE 1
+          END
+        ELSE game_progress.longest_streak END),
+      average_guesses = CASE
+        WHEN solved THEN round(((coalesce(game_progress.average_guesses,0) * greatest(game_progress.total_wins,0)) + attempts)::numeric / nullif(greatest(game_progress.total_wins,0) + 1,0), 2)
+        ELSE game_progress.average_guesses END;
+  END IF;
+
+  RETURN jsonb_build_object(
+    'status', CASE WHEN finished THEN 'final' ELSE 'playing' END,
+    'attemptsLeft', max_attempts - attempts,
+    'guesses', new_guesses,
+    'tiles', new_tiles,
+    'solved', solved,
+    'numGuesses', CASE WHEN finished THEN attempts ELSE NULL END
+  );
+END
+$$;
+
+-- 3.5 Get user stats
+CREATE OR REPLACE FUNCTION get_user_game_stats()
+RETURNS JSONB LANGUAGE SQL STABLE AS $$
+  WITH p AS (
+    SELECT * FROM game_progress WHERE user_id = auth.uid()
+  ), d AS (
+    SELECT jsonb_build_object(
+      'currentStreak', coalesce(p.current_streak,0),
+      'longestStreak', coalesce(p.longest_streak,0),
+      'totalWins', coalesce(p.total_wins,0),
+      'totalGames', coalesce(p.total_games,0),
+      'winPct', CASE WHEN coalesce(p.total_games,0) > 0 THEN round(100.0 * p.total_wins / p.total_games, 1) ELSE 0 END,
+      'avgGuesses', coalesce(p.average_guesses, NULL)
+    ) AS j
+    FROM p
+  ) SELECT coalesce((SELECT j FROM d), '{}'::jsonb);
+$$;
+
+-- 3.6 Get leaderboard
+CREATE OR REPLACE FUNCTION get_leaderboard(scope TEXT DEFAULT 'streak', limit_count INTEGER DEFAULT 20, offset_count INTEGER DEFAULT 0)
+RETURNS TABLE (rank_no INTEGER, display_name TEXT, stat NUMERIC) LANGUAGE SQL STABLE AS $$
+  WITH base AS (
+    SELECT gp.user_id,
+      CASE WHEN scope = 'wins' THEN gp.total_wins::numeric
+           WHEN scope = 'avg'  THEN nullif(gp.average_guesses, 9999)
+           ELSE gp.current_streak::numeric END AS stat
+    FROM game_progress gp
+  ), ranked AS (
+    SELECT b.user_id, b.stat,
+           row_number() OVER (
+             ORDER BY
+               CASE WHEN scope = 'avg' THEN b.stat ASC ELSE b.stat DESC END,
+               b.user_id ASC
+           ) AS rk
+    FROM base b
+  )
+  SELECT r.rk,
+         coalesce(p.display_name, substr(cast(r.user_id AS text),1,8) || '…') AS display_name,
+         r.stat
+  FROM ranked r
+  LEFT JOIN profiles p ON p.id = r.user_id
+  WHERE r.stat IS NOT NULL
+  ORDER BY r.rk
+  LIMIT limit_count OFFSET offset_count;
+$$;
+```
+
+### Seed Data
+
+```sql
+-- 4.1 Minimal word seed
+INSERT INTO game_words (word, category, difficulty, is_active, is_answer_pool) VALUES
+('MIRROR','twisted',2,true,true),
+('POISON','halloween',2,true,true),
+('CURSED','twisted',3,true,true),
+('GOBLIN','halloween',2,true,true),
+('WITCHY','halloween',3,true,false), -- guessable only
+('PRINCE','fairy_tale',2,true,true),
+('DRAGON','fairy_tale',3,true,true),
+('CASTLE','fairy_tale',2,true,true);
+```
+
+---
+
+## 🎮 PART 2: REACT COMPONENTS
+
+### Game API Client
+
+**File**: `src/lib/ttGameApi.ts`
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+)
+
+export type SubmitGuessResp = {
+  status: 'playing' | 'final'
+  attemptsLeft: number
+  guesses: string[]
+  tiles: string[][]
+  solved: boolean
+  numGuesses: number | null
+} | { error: 'INVALID_WORD' }
+
+export async function unlockGame() {
+  const { error } = await supabase.rpc('unlock_game')
+  if (error) throw error
+}
+
+export async function submitGuess(guess: string) {
+  const { data, error } = await supabase.rpc('submit_guess', { _guess: guess })
+  if (error) throw error
+  return data as SubmitGuessResp
+}
+
+export async function getUserStats() {
+  const { data, error } = await supabase.rpc('get_user_game_stats')
+  if (error) throw error
+  return data as {
+    currentStreak: number
+    longestStreak: number
+    totalWins: number
+    totalGames: number
+    winPct: number
+    avgGuesses: number | null
+  }
+}
+
+export async function getLeaderboard(scope: 'streak'|'wins'|'avg', limit = 20, offset = 0) {
+  const { data, error } = await supabase.rpc('get_leaderboard', { scope, limit_count: limit, offset_count: offset })
+  if (error) throw error
+  return (data || []) as { rank_no: number, display_name: string, stat: number }[]
+}
+```
+
+### Main Game Component
+
+**File**: `src/pages/TwistedTalesGame.tsx`
+
+```typescript
+import { useEffect, useState } from 'react'
+import { submitGuess, getUserStats } from '@/lib/ttGameApi'
+import { Button } from '@/components/ui/button'
+
+const MAX_ATTEMPTS = 6
+const WORD_LEN = 6
+
+function useReducedMotion() {
+  const [pref, setPref] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPref(mq.matches)
+    const h = (e: MediaQueryListEvent) => setPref(e.matches)
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
+  }, [])
+  return pref
+}
+
+export default function TwistedTalesGame() {
+  const [rows, setRows] = useState<string[]>([])
+  const [tiles, setTiles] = useState<string[][]>([])
+  const [current, setCurrent] = useState('')
+  const [final, setFinal] = useState<null | { solved: boolean; numGuesses: number }>(null)
+  const [stats, setStats] = useState<any>(null)
+  const reduceMotion = useReducedMotion()
+
+  useEffect(() => { getUserStats().then(setStats).catch(console.error) }, [])
+
+  async function onEnter() {
+    if (current.length !== WORD_LEN || final) return
+    try {
+      const resp = await submitGuess(current)
+      if ('error' in resp) {
+        // TODO: show toast "Not in word list"
+        return
+      }
+      setRows(resp.guesses)
+      setTiles(resp.tiles)
+      if (resp.status === 'final') {
+        setFinal({ solved: resp.solved, numGuesses: resp.numGuesses ?? MAX_ATTEMPTS })
+        getUserStats().then(setStats).catch(console.error)
+      }
+      setCurrent('')
+    } catch (e) { console.error(e) }
+  }
+
+  function onKey(k: string) {
+    if (final) return
+    if (k === 'ENTER') return onEnter()
+    if (k === 'DEL') return setCurrent(c => c.slice(0, -1))
+    if (/^[A-Z]$/.test(k) && current.length < WORD_LEN) setCurrent(c => (c + k).toUpperCase())
+  }
+
+  return (
+    <div className="min-h-[calc(100dvh-4rem)] flex flex-col items-center gap-4 p-4 bg-gradient-to-b from-[#0f0d17] to-[#1a1326] text-white">
+      <header className="mt-2 text-center">
+        <h1 className="text-2xl font-bold tracking-wide">Twisted Tales</h1>
+        <p className="text-sm opacity-80">Guess the 6-letter word in 6 tries.</p>
+      </header>
+
+      {/* Board */}
+      <div className="grid gap-2" style={{ gridTemplateRows: `repeat(${MAX_ATTEMPTS}, 1fr)` }}>
+        {Array.from({ length: MAX_ATTEMPTS }).map((_, r) => (
+          <div key={r} className="grid grid-cols-6 gap-2">
+            {Array.from({ length: WORD_LEN }).map((_, c) => {
+              const ch = rows[r]?.[c] ?? (r === rows.length ? current[c] : '') ?? ''
+              const state = tiles[r]?.[c]
+              const cls = state === 'G' ? 'bg-green-600' : state === 'Y' ? 'bg-yellow-500' : (state ? 'bg-gray-700' : 'bg-[#241b33]')
+              return (
+                <div key={c} className={`w-12 h-12 rounded-lg border border-white/10 flex items-center justify-center font-semibold text-lg ${cls} ${reduceMotion ? '' : 'transition-transform'}`}>
+                  {ch}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Keyboard */}
+      <TTKeyboard onKey={onKey} disabled={!!final} />
+
+      {/* Footer stats */}
+      <div className="mt-2 text-sm opacity-90">
+        {stats && (
+          <p>
+            Streak <strong>{stats.currentStreak}</strong> · Best <strong>{stats.longestStreak}</strong> · Win% <strong>{stats.winPct}%</strong> · Avg <strong>{stats.avgGuesses ?? '–'}</strong>
+          </p>
+        )}
+      </div>
+
+      {final && (
+        <div className="fixed bottom-4 inset-x-0 mx-auto w-fit px-4 py-2 rounded-xl bg-white/10 backdrop-blur">
+          {final.solved ? 'You solved it!' : 'Better luck tomorrow.'} Tries: {final.numGuesses}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TTKeyboard({ onKey, disabled }:{ onKey:(k:string)=>void, disabled?:boolean }) {
+  const rows = [
+    'QWERTYUIOP'.split(''),
+    'ASDFGHJKL'.split(''),
+    ['ENTER', ...'ZXCVBNM'.split(''), 'DEL'],
+  ]
+  return (
+    <div className="select-none">
+      {rows.map((r, i) => (
+        <div key={i} className="flex gap-2 justify-center mb-2">
+          {r.map(k => (
+            <button key={k}
+              onClick={() => onKey(k)}
+              disabled={disabled}
+              className="px-3 py-2 rounded-md bg-[#2b2240] hover:bg-[#332653] disabled:opacity-40">
+              {k}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Easter Egg Unlock Hook
+
+**File**: `src/hooks/useEasterEggUnlock.ts`
+
+```typescript
+import { useCallback, useEffect, useState } from 'react'
+import { unlockGame } from '@/lib/ttGameApi'
+
+const KEY = 'tt_unlock_v1'
+
+export function useEasterEggUnlock() {
+  const [count, setCount] = useState<number>(() => Number(localStorage.getItem(KEY) || 0))
+  const [unlocked, setUnlocked] = useState<boolean>(false)
+
+  useEffect(() => {
+    // Optionally: fetch server unlocked state and sync here
+  }, [])
+
+  const click = useCallback(async () => {
+    const next = Math.min(13, count + 1)
+    setCount(next)
+    localStorage.setItem(KEY, String(next))
+    if (next === 13 && !unlocked) {
+      await unlockGame()
+      setUnlocked(true)
+    }
+  }, [count, unlocked])
+
+  return { count, unlocked, click }
+}
+```
+
+### Stats Modal
+
+**File**: `src/components/game/GameStatsModal.tsx`
+
+```typescript
+import { useEffect, useState } from 'react'
+import { getUserStats } from '@/lib/ttGameApi'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+export function GameStatsModal({ open, onClose }:{ open:boolean; onClose:()=>void }){
+  const [stats, setStats] = useState<any>(null)
+  useEffect(() => { if(open) getUserStats().then(setStats) }, [open])
+  
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="w-[22rem] bg-[#201733] text-white border-accent-purple/30">
+        <DialogHeader>
+          <DialogTitle className="text-accent-gold">Your Stats</DialogTitle>
+        </DialogHeader>
+        {stats && (
+          <ul className="space-y-1 text-sm">
+            <li>Current Streak: <b>{stats.currentStreak}</b></li>
+            <li>Longest Streak: <b>{stats.longestStreak}</b></li>
+            <li>Total Wins: <b>{stats.totalWins}</b></li>
+            <li>Win %: <b>{stats.winPct}</b></li>
+            <li>Avg Guesses: <b>{stats.avgGuesses ?? '–'}</b></li>
+          </ul>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+```
+
+### Leaderboard Component
+
+**File**: `src/pages/GameLeaderboard.tsx`
+
+```typescript
+import { useEffect, useState } from 'react'
+import { getLeaderboard } from '@/lib/ttGameApi'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+
+export default function GameLeaderboard(){
+  const [scope, setScope] = useState<'streak'|'wins'|'avg'>('streak')
+  const [rows, setRows] = useState<any[]>([])
+  const [page, setPage] = useState(0)
+
+  useEffect(() => { load() }, [scope, page])
+  async function load(){
+    const data = await getLeaderboard(scope, 20, page*20)
+    setRows(data)
+  }
+
+  return (
+    <div className="p-4 text-white">
+      <div className="flex gap-2 mb-3">
+        {(['streak','wins','avg'] as const).map(s => (
+          <button key={s} onClick={() => { setPage(0); setScope(s) }}
+            className={`px-3 py-1 rounded ${scope===s?'bg-white/15':'bg-white/5'}`}>{s}</button>
+        ))}
+      </div>
+      <Card className="bg-[#201733] border-accent-purple/30">
+        <div className="p-4">
+          <table className="w-full text-sm">
+            <thead className="text-white/70">
+              <tr>
+                <th className="text-left p-2">#</th>
+                <th className="text-left p-2">Player</th>
+                <th className="text-right p-2">Stat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.rank_no} className="border-t border-white/10">
+                  <td className="p-2">{r.rank_no}</td>
+                  <td className="p-2">{r.display_name}</td>
+                  <td className="p-2 text-right">{r.stat}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="flex justify-between mt-3">
+            <Button variant="outline" disabled={page===0} onClick={() => setPage(p=>Math.max(0,p-1))}>Prev</Button>
+            <Button variant="outline" onClick={() => setPage(p=>p+1)}>Next</Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}
+```
+
+---
+
+## 🧭 PART 3: NAVIGATION INTEGRATION
+
+### Update NavBar with Games Submenu
+
+**File**: `src/components/NavBar.tsx` (modify existing)
+
+```typescript
+// Add to moreDropdownLinks array:
+const moreDropdownLinks = [
+  { to: "/vignettes", label: "Vignettes" },
+  { to: "/schedule", label: "Schedule" },
+  { to: "/costumes", label: "Costumes" },
+  { to: "/feast", label: "Feast" },
+  { to: "/discussion", label: "Discussion" },
+  { to: "/games", label: "Games", submenu: [
+    { to: "/twisted-tales-game", label: "Twisted Tales" },
+    { to: "/game-leaderboard", label: "Leaderboard" }
+  ]}
+];
+```
+
+### Update Footer with Easter Egg
+
+**File**: `src/components/Footer.tsx` (modify existing)
+
+```typescript
+import { useEasterEggUnlock } from '@/hooks/useEasterEggUnlock'
+
+function HalloweenIcons() {
+  const [activeQuote, setActiveQuote] = useState<string | null>(null);
+  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+  const { count, unlocked, click } = useEasterEggUnlock();
+
+  // ... existing code ...
+
+  return (
+    <div className="flex flex-col gap-4 mb-6">
+      {/* Icons with click counting */}
+      <div className="flex justify-center gap-6 text-5xl">
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-orange-400 hover:text-orange-300"
+          onMouseEnter={() => handleHover('ghost')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          onClick={click}
+          role="button"
+          aria-label="Twisted fairytale ghost"
+        >
+          👻
+        </span>
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-purple-400 hover:text-purple-300"
+          onMouseEnter={() => handleHover('bat')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          onClick={click}
+          role="button"
+          aria-label="Twisted fairytale bat"
+        >
+          🦇
+        </span>
+        <span 
+          className="cursor-pointer transition-all duration-300 hover:scale-125 footer-icon-shake text-orange-500 hover:text-orange-400"
+          onMouseEnter={() => handleHover('pumpkin')}
+          onMouseLeave={() => setHoveredIcon(null)}
+          onClick={click}
+          role="button"
+          aria-label="Twisted fairytale pumpkin"
+        >
+          🎃
+        </span>
+      </div>
+
+      {/* Progress indicator */}
+      {count >= 3 && count < 13 && (
+        <div className="text-center">
+          <p className="text-xs text-accent-gold">
+            {count}/13 clicks to unlock the secret game...
+          </p>
+        </div>
+      )}
+
+      {unlocked && (
+        <div className="text-center">
+          <p className="text-sm text-accent-green font-semibold">
+            🎮 Secret game unlocked! Check the Games menu.
+          </p>
+        </div>
+      )}
+
+      {/* Existing quote display code... */}
+    </div>
+  );
+}
+```
+
+### Add Routes to App.tsx
+
+**File**: `src/App.tsx` (modify existing)
+
+```typescript
+// Add lazy imports:
+const TwistedTalesGame = lazy(() => import("./pages/TwistedTalesGame"));
+const GameLeaderboard = lazy(() => import("./pages/GameLeaderboard"));
+
+// Add routes:
+<Route path="/twisted-tales-game" element={<RequireAuth fallback={<GameTeaser/>}><TwistedTalesGame/></RequireAuth>} />
+<Route path="/game-leaderboard" element={<GameLeaderboard />} />
+
+function GameTeaser(){
+  return (
+    <div className="p-8 text-center text-white">
+      <h2 className="text-xl font-semibold">Sign in to play Twisted Tales</h2>
+      <p className="opacity-80">Compete on the leaderboard and keep your daily streak.</p>
+    </div>
+  )
+}
+```
+
+---
+
+## 🚀 IMPLEMENTATION CHECKLIST
+
+### Phase 1: Database Setup
+- [ ] Create migration: `supabase/migrations/20250121120000_twisted_tales_wordle.sql`
+- [ ] Test migration locally with `supabase db reset`
+- [ ] Verify RLS policies work correctly
+- [ ] Test all RPC functions (unlock_game, submit_guess, get_user_game_stats, get_leaderboard)
+- [ ] Test letter coloring function with various word combinations
+- [ ] Deploy migration to production
+
+### Phase 2: Core Game Logic
+- [ ] Create `src/lib/ttGameApi.ts`
+- [ ] Test API functions with various inputs
+- [ ] Test error handling for invalid words
+- [ ] Test daily word selection consistency
+
+### Phase 3: Game UI Components
+- [ ] Create `src/pages/TwistedTalesGame.tsx`
+- [ ] Test keyboard input handling
+- [ ] Test game state management
+- [ ] Test mobile responsiveness
+- [ ] Test accessibility features
+
+### Phase 4: Easter Egg System
+- [ ] Create `src/hooks/useEasterEggUnlock.ts`
+- [ ] Update `src/components/Footer.tsx` with click counting
+- [ ] Test unlock progression (3, 6, 9, 12, 13 clicks)
+- [ ] Test unlock persistence across sessions
+- [ ] Test unlock state sync with server
+
+### Phase 5: Stats & Leaderboard
+- [ ] Create `src/components/game/GameStatsModal.tsx`
+- [ ] Create `src/pages/GameLeaderboard.tsx`
+- [ ] Test stats calculation accuracy
+- [ ] Test leaderboard sorting and pagination
+- [ ] Test real-time updates
+
+### Phase 6: Navigation Integration
+- [ ] Update `src/components/NavBar.tsx` with Games submenu
+- [ ] Add routes to `src/App.tsx`
+- [ ] Test navigation flow
+- [ ] Test auth requirements
+
+### Phase 7: Feature Flag & Rollout
+- [ ] Add environment variable `VITE_FEATURE_TWISTED_TALES`
+- [ ] Implement admin-only visibility initially
+- [ ] Test gradual rollout to all users
+- [ ] Monitor performance and usage
+
+### Phase 8: Testing & Polish
+- [ ] End-to-end test: unlock → play → stats → leaderboard
+- [ ] Test with multiple users and different timezones
+- [ ] Test daily word rollover at UTC midnight
+- [ ] Test mobile gameplay experience
+- [ ] Test keyboard shortcuts and accessibility
+
+---
+
+## 📊 UX CONSIDERATIONS
+
+### Easter Egg Discovery
+- **Subtle hints**: Progress counter appears after 3 clicks
+- **Visual feedback**: Icons maintain hover effects while adding click functionality
+- **Persistence**: Unlock state saved locally and synced with server
+- **Discovery path**: Footer → Games menu → Twisted Tales
+
+### Game Experience
+- **Mobile-first**: Touch-friendly keyboard and responsive grid
+- **Accessibility**: Reduced motion support, keyboard navigation
+- **Performance**: Optimized re-renders, efficient state management
+- **Feedback**: Clear visual states for correct/incorrect letters
+
+### Social Features
+- **Leaderboards**: Multiple sorting options (streak, wins, average)
+- **Stats**: Personal progress tracking with meaningful metrics
+- **Daily reset**: UTC-based consistency for global users
+
+---
+
+## ✅ SUMMARY
+
+This implementation provides a complete daily word game with:
+
+### Core Features
+1. **6-letter word guessing** with twisted fairytale theme
+2. **Easter egg unlock** via footer icon clicking (13 clicks)
+3. **Daily word rotation** using deterministic algorithm
+4. **Real-time leaderboard** with multiple sorting options
+5. **Personal statistics** tracking streaks and performance
+
+### Technical Implementation
+6. **Complete database schema** with RLS and RPC functions
+7. **Mobile-optimized UI** with responsive design
+8. **Gradual rollout** starting with admin-only access
+9. **Games submenu** integration in navigation
+10. **Accessibility support** with reduced motion and keyboard navigation
+
+**Estimated Development Time**: 8-10 hours
+**Estimated Testing Time**: 3-4 hours
+
+**Total Implementation**: ~2 days
+
+**Key Benefits**:
+- 🎮 Engaging daily gameplay with social competition
+- 🔍 Easter egg discovery adds mystery and engagement
+- 📱 Mobile-first design for accessibility
+- 🔒 Secure with proper RLS and admin controls
+- 🎯 Gradual rollout minimizes risk
+
+Ready to implement! 🎃📝✨
