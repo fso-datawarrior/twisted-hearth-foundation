@@ -417,6 +417,40 @@ export async function archiveRelease(id: string): Promise<void> {
 }
 
 // ============================================================================
+// DELETE FUNCTIONS
+// ============================================================================
+
+/**
+ * Delete a release (only if not sent)
+ */
+export async function deleteRelease(id: string): Promise<void> {
+  // First check if release has been sent
+  const { data: release, error: fetchError } = await supabase
+    .from('system_releases')
+    .select('email_sent, version')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch release: ${fetchError.message}`);
+  }
+
+  if (release.email_sent) {
+    throw new Error('Cannot delete a release that has been sent to users');
+  }
+
+  // Delete the release (cascade will handle children)
+  const { error } = await supabase
+    .from('system_releases')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(`Failed to delete release: ${error.message}`);
+  }
+}
+
+// ============================================================================
 // EMAIL FUNCTIONS
 // ============================================================================
 

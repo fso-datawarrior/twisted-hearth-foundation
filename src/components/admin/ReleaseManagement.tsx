@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Search, Filter, Eye, Edit, Archive, Mail, CheckCircle } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Archive, Mail, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import VersionBadge from './VersionBadge';
 import { Badge } from '@/components/ui/badge';
-import { fetchReleases, publishRelease, archiveRelease, sendReleaseEmail } from '@/lib/release-api';
+import { fetchReleases, publishRelease, archiveRelease, sendReleaseEmail, deleteRelease } from '@/lib/release-api';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import ReleaseComposer from './ReleaseComposer';
@@ -82,12 +82,25 @@ export default function ReleaseManagement() {
 
   const handleSendEmail = async (id: string, version: string) => {
     try {
-      // Import sendReleaseEmail from release-api
       await sendReleaseEmail(id, 'user');
       toast.success(`Email sent for release v${version}`);
       refetch();
     } catch (error: any) {
       toast.error(`Failed to send email: ${error.message}`);
+    }
+  };
+
+  const handleDelete = async (id: string, version: string) => {
+    if (!confirm(`Are you sure you want to delete release v${version}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deleteRelease(id);
+      toast.success(`Release v${version} deleted successfully`);
+      refetch();
+    } catch (error: any) {
+      toast.error(`Failed to delete release: ${error.message}`);
     }
   };
 
@@ -275,11 +288,15 @@ export default function ReleaseManagement() {
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditingRelease(release.id)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            {release.deployment_status === 'draft' && (
+                            
+                            {!release.email_sent && (
+                              <DropdownMenuItem onClick={() => setEditingRelease(release.id)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            
+                            {release.deployment_status === 'draft' && !release.email_sent && (
                               <DropdownMenuItem
                                 onClick={() => handlePublish(release.id, release.version)}
                               >
@@ -287,7 +304,8 @@ export default function ReleaseManagement() {
                                 Publish
                               </DropdownMenuItem>
                             )}
-                            {release.deployment_status !== 'archived' && (
+                            
+                            {release.deployment_status !== 'archived' && !release.email_sent && (
                               <DropdownMenuItem
                                 onClick={() => handleArchive(release.id, release.version)}
                               >
@@ -295,10 +313,30 @@ export default function ReleaseManagement() {
                                 Archive
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem onClick={() => handleSendEmail(release.id, release.version)}>
-                              <Mail className="mr-2 h-4 w-4" />
-                              Send Email
-                            </DropdownMenuItem>
+                            
+                            {!release.email_sent && (
+                              <DropdownMenuItem onClick={() => handleSendEmail(release.id, release.version)}>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Send Email
+                              </DropdownMenuItem>
+                            )}
+                            
+                            {release.email_sent && (
+                              <DropdownMenuItem disabled>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Email Already Sent
+                              </DropdownMenuItem>
+                            )}
+                            
+                            {!release.email_sent && (
+                              <DropdownMenuItem 
+                                onClick={() => handleDelete(release.id, release.version)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

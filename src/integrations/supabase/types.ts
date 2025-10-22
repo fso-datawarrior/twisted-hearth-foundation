@@ -1479,14 +1479,9 @@ export type Database = {
         Args: { p_is_approved?: boolean; p_rsvp_id: string; p_status: string }
         Returns: undefined
       }
-      aggregate_daily_stats: {
-        Args: { p_date?: string }
-        Returns: undefined
-      }
-      check_admin_status: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      aggregate_daily_stats: { Args: { p_date?: string }; Returns: undefined }
+      archive_release: { Args: { p_release_id: string }; Returns: undefined }
+      check_admin_status: { Args: never; Returns: boolean }
       create_notification: {
         Args: {
           p_link?: string
@@ -1498,12 +1493,9 @@ export type Database = {
         }
         Returns: string
       }
-      ensure_admins_seeded: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      ensure_admins_seeded: { Args: never; Returns: undefined }
       get_active_vignettes: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           created_by: string
@@ -1524,7 +1516,7 @@ export type Database = {
         Returns: Json
       }
       get_analytics_date_range: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           days_count: number
           end_date: string
@@ -1543,6 +1535,7 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_release_full: { Args: { p_release_id: string }; Returns: Json }
       get_unread_notification_count: {
         Args: { p_user_id?: string }
         Returns: number
@@ -1562,10 +1555,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       manage_vignette: {
         Args: {
           p_action: string
@@ -1580,10 +1570,7 @@ export type Database = {
         }
         Returns: Json
       }
-      mark_all_notifications_read: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_hint_found: {
         Args: { p_hint_id: number; p_hunt_run_id?: string }
         Returns: Json
@@ -1596,6 +1583,7 @@ export type Database = {
         Args: { p_approved: boolean; p_featured?: boolean; p_photo_id: string }
         Returns: undefined
       }
+      publish_release: { Args: { p_release_id: string }; Returns: undefined }
       register_team: {
         Args: {
           p_contact_info?: string
@@ -1656,20 +1644,26 @@ export type Database = {
           success: boolean
         }[]
       }
-      update_user_profile: {
-        Args:
-          | { p_avatar_url?: string; p_display_name?: string }
-          | {
+      update_user_profile:
+        | {
+            Args: {
               p_avatar_url?: string
               p_display_name?: string
               p_first_name?: string
               p_last_name?: string
             }
-        Returns: {
-          message: string
-          success: boolean
-        }[]
-      }
+            Returns: {
+              message: string
+              success: boolean
+            }[]
+          }
+        | {
+            Args: { p_avatar_url?: string; p_display_name?: string }
+            Returns: {
+              message: string
+              success: boolean
+            }[]
+          }
       upload_photo: {
         Args: {
           p_caption?: string
