@@ -308,8 +308,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             <MoreDropdown links={moreDropdownLinks} currentPath={location.pathname} />
           </div>
             
-          {/* Right Section - Audio toggle, User, RSVP */}
-          <div className="hidden nav-full:flex items-center space-x-4">
+          {/* Right Section - Audio toggle, Notifications, User, RSVP */}
+          <div className="hidden lg:flex items-center space-x-3">
               {/* Audio Mute Toggle */}
               <Button
                 onClick={toggleMute}
@@ -324,6 +324,26 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                   <Volume2 className="h-5 w-5 text-accent-gold" />
                 )}
               </Button>
+
+              {/* Notification Bell - Desktop */}
+              {user && (
+                <Link to="/notifications">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative hover:bg-accent-purple/10 font-subhead transition-colors"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="h-5 w-5 text-ink" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center bg-accent-red text-background text-[10px] font-bold rounded-full">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              )}
+
               {/* Developer Mode Toggle - Only show when dev mode is enabled */}
               {DEV_MODE_ENABLED && (
                 <Button
@@ -454,7 +474,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex nav-full:hidden items-center space-x-4">
+          <div className="flex lg:hidden items-center space-x-4">
             <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden hidden min-[520px]:block">
               {getCurrentPageName()}
             </span>
