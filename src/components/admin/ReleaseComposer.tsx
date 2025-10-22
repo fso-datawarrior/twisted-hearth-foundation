@@ -23,7 +23,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, GripVertical, Save, Send, Eye, Upload, FileText, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Save, Send, Eye, Upload, FileText, AlertCircle, Mail, Users } from 'lucide-react';
+import EmailPreviewModal from '@/components/admin/EmailPreviewModal';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { parseVersion, formatVersion, getVersionIncrementOptions, isValidVersion } from '@/lib/version-utils';
 import { createReleaseDraft, versionExists, fetchReleaseById, updateRelease } from '@/lib/release-api';
@@ -92,6 +93,9 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
   const [isParsingFile, setIsParsingFile] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [showAdminPreview, setShowAdminPreview] = useState(false);
+  const [showUserPreview, setShowUserPreview] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const form = useForm<ReleaseFormValues>({
     resolver: zodResolver(releaseSchema),
@@ -370,7 +374,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     return result;
   };
 
-  const handlePreview = () => {
+  const handleAdminPreview = () => {
     const data = form.getValues();
     
     // Validate required fields
@@ -379,33 +383,42 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       return;
     }
     
-    // Create preview content
-    const previewContent = `
-Version: ${data.version}
-Environment: ${data.environment}
-Release Date: ${data.release_date}
+    setShowAdminPreview(true);
+  };
 
-Summary:
-${data.summary}
-
-Features: ${data.features?.length || 0}
-API Changes: ${data.api_changes?.length || 0}
-Bug Fixes: ${data.bug_fixes?.length || 0}
-Improvements: ${data.improvements?.length || 0}
-UI Updates: ${data.ui_updates?.length || 0}
-Database Changes: ${data.database_changes?.length || 0}
-Breaking Changes: ${data.breaking_changes?.length || 0}
-Known Issues: ${data.known_issues?.length || 0}
-Technical Notes: ${data.technical_notes?.length || 0}
-    `;
+  const handleUserPreview = () => {
+    const data = form.getValues();
     
-    // Show preview in toast with longer duration
-    toast.info(previewContent, { duration: 10000 });
+    // Validate required fields
+    if (!data.version || !data.summary) {
+      toast.error('Please fill in Version and Summary before previewing');
+      return;
+    }
+    
+    setShowUserPreview(true);
   };
 
   const onSubmit = async (data: ReleaseFormValues) => {
+    console.log('🚀 Form submission started', { releaseId, data });
     setIsSaving(true);
+    setValidationErrors([]);
+    
     try {
+      // Validate form before submission
+      const isValid = await form.trigger();
+      if (!isValid) {
+        const errors = Object.entries(form.formState.errors).map(([field, error]) => {
+          return `${field}: ${error.message || 'Invalid'}`;
+        });
+        console.error('❌ Form validation failed:', form.formState.errors);
+        setValidationErrors(errors);
+        toast.error('Please fix validation errors before saving');
+        setIsSaving(false);
+        return;
+      }
+
+      console.log('✅ Form validation passed');
+
       // Parse version
       const parsed = parseVersion(data.version);
 
@@ -444,28 +457,36 @@ Technical Notes: ${data.technical_notes?.length || 0}
         ],
       };
 
+      console.log('📦 Prepared release data:', releaseData);
+
       if (releaseId) {
         // UPDATE existing release
+        console.log('🔄 Updating existing release:', releaseId);
         await updateRelease(releaseId, releaseData as any);
         toast.success(`Release v${data.version} updated successfully`);
       } else {
         // CREATE new release
+        console.log('✨ Creating new release');
         const exists = await versionExists(data.version);
         if (exists) {
+          console.warn('⚠️ Version already exists:', data.version);
           toast.error('A release with this version already exists');
           setIsSaving(false);
           return;
         }
         
         const newReleaseId = await createReleaseDraft(releaseData as any);
+        console.log('✅ Release created successfully:', newReleaseId);
         toast.success(`Release v${data.version} created successfully`);
       }
       
       onComplete();
     } catch (error: any) {
+      console.error('❌ Failed to save release:', error);
       toast.error(`Failed to ${releaseId ? 'update' : 'create'} release: ${error.message}`);
     } finally {
       setIsSaving(false);
+      console.log('🏁 Form submission completed');
     }
   };
 
@@ -564,6 +585,25 @@ Technical Notes: ${data.technical_notes?.length || 0}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              
+            {/* Validation Errors Alert */}
+            {validationErrors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Validation Errors</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {validationErrors.slice(0, 5).map((error, idx) => (
+                      <li key={idx} className="text-sm">{error}</li>
+                    ))}
+                  </ul>
+                  {validationErrors.length > 5 && (
+                    <p className="text-sm mt-2">+ {validationErrors.length - 5} more errors</p>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Section 1: Version Info */}
             <Card>
             <CardHeader>
@@ -1253,9 +1293,13 @@ Technical Notes: ${data.technical_notes?.length || 0}
               Cancel
             </Button>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Button type="button" variant="outline" onClick={handlePreview} className="w-full sm:w-auto">
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
+              <Button type="button" variant="outline" onClick={handleAdminPreview} className="w-full sm:w-auto">
+                <Mail className="mr-2 h-4 w-4" />
+                Admin
+              </Button>
+              <Button type="button" variant="outline" onClick={handleUserPreview} className="w-full sm:w-auto">
+                <Users className="mr-2 h-4 w-4" />
+                User
               </Button>
               <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
                 <Save className="mr-2 h-4 w-4" />
@@ -1265,6 +1309,20 @@ Technical Notes: ${data.technical_notes?.length || 0}
           </div>
         </form>
       </Form>
+
+      {/* Email Preview Modals */}
+      <EmailPreviewModal
+        isOpen={showAdminPreview}
+        onClose={() => setShowAdminPreview(false)}
+        emailType="admin"
+        releaseData={form.getValues()}
+      />
+      <EmailPreviewModal
+        isOpen={showUserPreview}
+        onClose={() => setShowUserPreview(false)}
+        emailType="user"
+        releaseData={form.getValues()}
+      />
         </>
       )}
     </div>
