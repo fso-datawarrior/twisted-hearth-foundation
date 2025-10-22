@@ -370,34 +370,48 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     const featuresSection = content.match(/## Features\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (featuresSection) {
       const lines = featuresSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.features = lines
-        .map((line, idx) => {
-          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-          return {
-            title: parts[0] || '',
-            description: parts[1] || '',
-            benefit: parts[2] || undefined, // Use undefined instead of empty string for optional fields
-            sort_order: parts[3] ? parseInt(parts[3]) : idx,
-          };
-        })
-        .filter(f => f.title && f.description); // Only include features with required fields
+      result.features = lines.map((line, idx) => {
+        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+        
+        let sortOrder = idx;
+        if (parts[3]) {
+          const parsed = parseInt(parts[3]);
+          if (!isNaN(parsed)) sortOrder = parsed;
+        }
+        
+        return {
+          title: parts[0] || '',
+          description: parts[1] || '',
+          benefit: parts[2] || undefined, // Use undefined instead of empty string for optional fields
+          sort_order: sortOrder,
+        };
+      }).filter(f => f.title && f.description); // Only include features with required fields
     }
 
     // Parse API Changes section
     const apiSection = content.match(/## API Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (apiSection) {
       const lines = apiSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.api_changes = lines
-        .map((line, idx) => {
-          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-          return {
-            endpoint: parts[0] || '',
-            change_type: (parts[1] || 'modified') as any,
-            description: parts[2] || '',
-            sort_order: parts[3] ? parseInt(parts[3]) : idx,
-          };
-        })
-        .filter(a => a.endpoint && a.description); // Only include API changes with required fields
+      result.api_changes = lines.map((line, idx) => {
+        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+        const changeType = (parts[1] || 'modified').toLowerCase();
+        const validChangeType = ['new', 'modified', 'deprecated', 'removed'].includes(changeType) 
+          ? changeType 
+          : 'modified';
+        
+        let sortOrder = idx;
+        if (parts[3]) {
+          const parsed = parseInt(parts[3]);
+          if (!isNaN(parsed)) sortOrder = parsed;
+        }
+        
+        return {
+          endpoint: parts[0] || '',
+          change_type: validChangeType as 'new' | 'modified' | 'deprecated' | 'removed',
+          description: parts[2] || '',
+          sort_order: sortOrder,
+        };
+      }).filter(a => a.endpoint && a.description); // Only include API changes with required fields
     }
 
     // Parse simple list sections (UI, Bugs, Improvements)
@@ -406,16 +420,21 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       const match = content.match(regex);
       if (match) {
         const lines = match[1].split('\n').filter(l => l.trim().startsWith('-'));
-        (result as any)[fieldName] = lines
-          .map((line, idx) => {
-            const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-            return {
-              description: parts[0] || '',
-              component: parts[1] || undefined, // Use undefined for optional component field
-              sort_order: parts[2] ? parseInt(parts[2]) : idx,
-            };
-          })
-          .filter(item => item.description); // Only include items with description
+        (result as any)[fieldName] = lines.map((line, idx) => {
+          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+          
+          let sortOrder = idx;
+          if (parts[2]) {
+            const parsed = parseInt(parts[2]);
+            if (!isNaN(parsed)) sortOrder = parsed;
+          }
+          
+          return {
+            description: parts[0] || '',
+            component: parts[1] || undefined, // Use undefined for optional component field
+            sort_order: sortOrder,
+          };
+        }).filter(item => item.description); // Only include items with description
       }
     };
 
@@ -427,15 +446,24 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     const dbSection = content.match(/## Database Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (dbSection) {
       const lines = dbSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.database_changes = lines
-        .map((line, idx) => {
-          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-          return {
-            description: parts[0] || '',
-            sort_order: parts[1] ? parseInt(parts[1]) : idx,
-          };
-        })
-        .filter(item => item.description); // Only include items with description
+      result.database_changes = lines.map((line, idx) => {
+        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+        
+        // Try to find a valid number in the parts array
+        let sortOrder = idx; // Default to index
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const parsed = parseInt(parts[i]);
+          if (!isNaN(parsed)) {
+            sortOrder = parsed;
+            break;
+          }
+        }
+        
+        return {
+          description: parts[0] || '',
+          sort_order: sortOrder,
+        };
+      }).filter(item => item.description); // Only include items with description
     }
 
     // Parse content-only sections (Breaking, Issues, Technical)
@@ -585,6 +613,35 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     } finally {
       setIsSaving(false);
       console.log('🏁 Form submission completed');
+    }
+  };
+
+  const onError = (errors: any) => {
+    console.error('❌ Form validation errors:', errors);
+    
+    // Flatten nested errors for display
+    const errorMessages: string[] = [];
+    
+    const flattenErrors = (obj: any, prefix = '') => {
+      Object.keys(obj).forEach(key => {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
+        if (obj[key].message) {
+          errorMessages.push(`${fullKey}: ${obj[key].message}`);
+        } else if (typeof obj[key] === 'object') {
+          flattenErrors(obj[key], fullKey);
+        }
+      });
+    };
+    
+    flattenErrors(errors);
+    
+    setValidationErrors(errorMessages);
+    toast.error(`Form validation failed: ${errorMessages.length} error(s) found`);
+    
+    // Scroll to validation errors alert
+    const alertElement = document.querySelector('[role="alert"]');
+    if (alertElement) {
+      alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -1404,6 +1461,23 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
                 <Users className="mr-2 h-4 w-4" />
                 User
               </Button>
+              {import.meta.env.DEV && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    console.log('📋 Form State:', form.getValues());
+                    console.log('📋 Form Errors:', form.formState.errors);
+                    console.log('📋 Is Valid:', form.formState.isValid);
+                    console.log('📋 Is Dirty:', form.formState.isDirty);
+                    toast.info('Check console for form state');
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  Debug Form
+                </Button>
+              )}
               <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
                 <Save className="mr-2 h-4 w-4" />
                 {isSaving ? 'Saving...' : 'Save Draft'}
