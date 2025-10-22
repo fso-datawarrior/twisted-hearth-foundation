@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User, ChevronDown, Bell } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, X, LogOut, Code, Code2, Shield, Eye, Volume2, VolumeX, Key, User, ChevronDown, Bell, Home } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AuthModal } from "@/components/AuthModal";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
@@ -84,15 +85,15 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
 
   // Main navigation links (always visible in desktop nav bar)
   const mainNavLinks = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
-    { to: "/gallery", label: "Gallery" },
+    { to: "/", label: "Home", icon: Home },
   ];
 
   // Dropdown navigation links (under "More" dropdown)
   const moreDropdownLinks = [
+    { to: "/about", label: "About" },
     { to: "/vignettes", label: "Vignettes" },
     { to: "/schedule", label: "Schedule" },
+    { to: "/gallery", label: "Gallery" },
     { to: "/costumes", label: "Costumes" },
     { to: "/feast", label: "Feast" },
     { to: "/discussion", label: "Discussion" },
@@ -248,8 +249,8 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
     >
       <div className="container mx-auto px-[max(env(safe-area-inset-left),1rem)] pr-[max(env(safe-area-inset-right),1rem)] py-4">
         <div className="flex items-center justify-between nav-full:justify-center">
-          {/* Logo/Title - Positioned just to the left of nav links */}
-          <div className="flex items-center gap-3 nav-full:mr-8">
+          {/* Logo/Title - Left side */}
+          <div className="flex items-center gap-3">
             <Link 
               to="/" 
               className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive flex flex-col leading-tight"
@@ -266,120 +267,63 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
             )}
           </div>
 
-          {/* Audio Mute Toggle - Always visible */}
-          <Button
-            onClick={toggleMute}
-            variant="ghost"
-            size="sm"
-            className="hover:bg-accent-purple/10 font-subhead transition-colors ml-4"
-            aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-          >
-            {isMuted ? (
-              <VolumeX className="h-5 w-5 text-ink/60" />
-            ) : (
-              <Volume2 className="h-5 w-5 text-accent-gold" />
-            )}
-          </Button>
-
-          {/* Notifications Bell - Desktop */}
-          {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative hover:bg-accent-purple/10 font-subhead transition-colors"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5 text-ink" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 bg-black/90 backdrop-blur-sm border-accent-purple/30">
-                <div className="p-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-subhead text-sm text-ink">Notifications</span>
-                    {unreadCount > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={markAllAsRead}
-                        className="text-xs text-accent-gold hover:text-accent-gold/80"
-                      >
-                        Mark all read
-                      </Button>
-                    )}
-                  </div>
-                  <div className="space-y-1 max-h-96 overflow-y-auto">
-                    {recentNotifications && recentNotifications.length > 0 ? (
-                      recentNotifications.map((notif: any) => (
-                        <Link
-                          key={notif.id}
-                          to={notif.link || '/notifications'}
-                          onClick={() => !notif.is_read && markAsRead(notif.id)}
-                          className={`block p-2 rounded hover:bg-accent-purple/10 transition-colors ${
-                            !notif.is_read ? 'bg-accent-purple/5' : ''
-                          }`}
-                        >
-                          <p className="text-sm font-subhead text-ink line-clamp-1">{notif.title}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{notif.message}</p>
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">No notifications</p>
-                    )}
-                  </div>
-                  <Link to="/notifications">
-                    <Button variant="outline" className="w-full mt-2" size="sm">
-                      View All Notifications
-                    </Button>
-                  </Link>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
           {/* Centered Desktop Navigation */}
-          <div className="hidden nav-compact:flex items-center space-x-8">
+          <div className="hidden nav-compact:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
             {/* Main navigation links */}
-            {mainNavLinks.map(({ to, label }) => (
+            {mainNavLinks.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
-                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 min-h-[44px] flex items-center touch-manipulation ${
+                className={`font-subhead text-sm uppercase tracking-wider transition-all motion-safe border-0 min-h-[44px] flex items-center gap-2 touch-manipulation group ${
                   location.pathname === to
                     ? "text-accent-gold"
                     : "text-ink hover:text-accent-gold"
                 }`}
               >
-                {label}
+                <Icon className="h-4 w-4" />
+                <span className="group-hover:underline decoration-accent-gold decoration-2 underline-offset-4 group-hover:drop-shadow-[0_0_8px_rgba(197,164,93,0.5)]">
+                  {label}
+                </span>
               </Link>
             ))}
             
-            {/* More dropdown */}
-            <MoreDropdown links={moreDropdownLinks} currentPath={location.pathname} />
-            
-            {/* Admin link (separate from dropdown) */}
+            {/* Admin link with Shield icon */}
             {isAdmin && (
               <Link
                 to="/admin"
-                className={`font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 min-h-[44px] flex items-center touch-manipulation ${
+                className={`font-subhead text-sm uppercase tracking-wider transition-all motion-safe border-0 min-h-[44px] flex items-center gap-2 touch-manipulation group ${
                   location.pathname === '/admin'
                     ? "text-accent-gold"
                     : "text-ink hover:text-accent-gold"
                 }`}
               >
-                Admin
+                <Shield className="h-4 w-4 text-accent-gold" />
+                <span className="group-hover:underline decoration-accent-gold decoration-2 underline-offset-4 group-hover:drop-shadow-[0_0_8px_rgba(197,164,93,0.5)]">
+                  Admin
+                </span>
               </Link>
             )}
+            
+            {/* More dropdown */}
+            <MoreDropdown links={moreDropdownLinks} currentPath={location.pathname} />
           </div>
             
-          {/* Auth Section - Positioned just to the right of nav links */}
-          <div className="hidden nav-full:flex items-center space-x-4 ml-8">
+          {/* Right Section - Audio toggle, User, RSVP */}
+          <div className="hidden nav-full:flex items-center space-x-4">
+              {/* Audio Mute Toggle */}
+              <Button
+                onClick={toggleMute}
+                variant="ghost"
+                size="sm"
+                className="hover:bg-accent-purple/10 font-subhead transition-colors"
+                aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+              >
+                {isMuted ? (
+                  <VolumeX className="h-5 w-5 text-ink/60" />
+                ) : (
+                  <Volume2 className="h-5 w-5 text-accent-gold" />
+                )}
+              </Button>
               {/* Developer Mode Toggle - Only show when dev mode is enabled */}
               {DEV_MODE_ENABLED && (
                 <Button
@@ -457,7 +401,32 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                       <LogOut size={16} />
                       Sign out
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
+                     {/* Notifications in User Dropdown */}
+                     <Link to="/notifications" onClick={() => setIsMenuOpen(false)}>
+                       <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer relative">
+                         <Bell size={16} />
+                         Notifications
+                         {unreadCount > 0 && (
+                           <span className="ml-auto h-5 w-5 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
+                             {unreadCount > 9 ? '9+' : unreadCount}
+                           </span>
+                         )}
+                       </DropdownMenuItem>
+                     </Link>
+                     <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
+                       <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
+                         <User size={16} />
+                         Settings
+                       </DropdownMenuItem>
+                     </Link>
+                     <DropdownMenuItem 
+                       onClick={() => signOut()}
+                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
+                     >
+                       <LogOut size={16} />
+                       Sign out
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
                 <Button
@@ -472,7 +441,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               <Button 
                 asChild 
                 variant="destructive" 
-                className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead"
+                className="bg-accent-red hover:bg-accent-red/80 font-subhead shadow-[0_0_24px_rgba(220,38,38,0.35)]"
               >
                 <Link to="/rsvp">{ctaLabel}</Link>
               </Button>
@@ -549,20 +518,57 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
         </div>
 
-        {/* Mobile Navigation - Show when mobile OR when auth is hidden on desktop */}
-        {isMenuOpen && (
-          <div 
-            id="mobile-menu"
-            className="block nav-full:hidden absolute top-full right-2 sm:right-4 w-full max-w-[min(20rem,calc(100vw-1rem))] max-h-[calc(100vh-8rem-max(env(safe-area-inset-bottom),2rem))] overflow-y-auto bg-bg-2/95 backdrop-blur-md border border-accent-purple/30 rounded-xl shadow-elegant animate-fade-in pb-[max(env(safe-area-inset-bottom),1rem)]"
+        {/* Mobile Sheet Drawer */}
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <SheetContent 
+            side="right" 
+            className="w-80 bg-bg-2/95 backdrop-blur-md border-accent-purple/30 overflow-y-auto"
           >
-              <div className="px-6 py-4 space-y-4">
-                {/* Main nav links */}
-                {mainNavLinks.map(({ to, label }) => (
+            <div className="px-2 py-4 space-y-4">
+              {/* Main nav links */}
+              {mainNavLinks.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-2 font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                    location.pathname === to
+                      ? "text-accent-gold"
+                      : "text-ink hover:text-accent-gold"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </Link>
+              ))}
+              
+              {/* Admin link (if admin) */}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-2 font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                    location.pathname === '/admin'
+                      ? "text-accent-gold"
+                      : "text-ink hover:text-accent-gold"
+                  }`}
+                >
+                  <Shield className="h-4 w-4 text-accent-gold" />
+                  Admin
+                </Link>
+              )}
+              
+              {/* More section with divider */}
+              <div className="pt-2 border-t border-accent-purple/30">
+                <div className="text-xs text-muted-foreground px-1 py-2 uppercase font-semibold tracking-wider">
+                  More
+                </div>
+                {moreDropdownLinks.map(({ to, label }) => (
                   <Link
                     key={to}
                     to={to}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
+                    className={`block py-3 pl-4 font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
                       location.pathname === to
                         ? "text-accent-gold"
                         : "text-ink hover:text-accent-gold"
@@ -571,184 +577,121 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                     {label}
                   </Link>
                 ))}
-                
-                {/* More section with divider */}
-                <div className="pt-2 border-t border-accent-purple/30">
-                  <div className="text-xs text-muted-foreground px-1 py-2 uppercase font-semibold tracking-wider">
-                    More
+              </div>
+              
+              {/* Mobile Audio Toggle */}
+              <div className="pt-2 border-t border-accent-purple/30">
+                <Button
+                  onClick={() => { toggleMute(); setIsMenuOpen(false); }}
+                  variant="ghost"
+                  className="w-full font-subhead hover:bg-accent-purple/10"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    {isMuted ? (
+                      <>
+                        <VolumeX size={16} />
+                        <span>Sound OFF</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 size={16} />
+                        <span>Sound ON</span>
+                      </>
+                    )}
                   </div>
-                  {moreDropdownLinks.map(({ to, label }) => (
-                    <Link
-                      key={to}
-                      to={to}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`block py-3 pl-4 font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
-                        location.pathname === to
-                          ? "text-accent-gold"
-                          : "text-ink hover:text-accent-gold"
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-                
-                {/* Admin link (if admin) - separate section */}
-                {isAdmin && (
-                  <div className="pt-2 border-t border-accent-purple/30">
-                    <Link
-                      to="/admin"
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`block font-subhead text-sm uppercase tracking-wider transition-colors motion-safe border-0 ${
-                        location.pathname === '/admin'
-                          ? "text-accent-gold"
-                          : "text-ink hover:text-accent-gold"
-                      }`}
-                    >
-                      Admin
-                    </Link>
-                  </div>
-                )}
-                
-                {/* Mobile Audio Toggle */}
+                </Button>
+              </div>
+
+              {/* Mobile Developer Mode Toggle - Only show when dev mode is enabled */}
+              {DEV_MODE_ENABLED && (
                 <div className="pt-2 border-t border-accent-purple/30">
                   <Button
-                    onClick={() => { toggleMute(); setIsMenuOpen(false); }}
+                    onClick={() => { toggleDeveloperMode(); setIsMenuOpen(false); }}
                     variant="ghost"
-                    className="w-full font-subhead hover:bg-accent-purple/10"
+                    className={`w-full font-subhead transition-colors ${
+                      isDeveloperMode ? 'text-accent-gold hover:bg-accent-gold/10' : 'text-ink hover:bg-accent-purple/10'
+                    }`}
                   >
                     <div className="flex items-center justify-center gap-2">
-                      {isMuted ? (
-                        <>
-                          <VolumeX size={16} />
-                          <span>Sound OFF</span>
-                        </>
-                      ) : (
-                        <>
-                          <Volume2 size={16} />
-                          <span>Sound ON</span>
-                        </>
+                      {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
+                      <span>Developer Mode {isDeveloperMode ? 'ON' : 'OFF'}</span>
+                      {isDeveloperMode && (
+                        <span className="text-xs font-mono text-ink/60">
+                          v{packageJson.version}
+                        </span>
                       )}
                     </div>
                   </Button>
                 </div>
+              )}
 
-                {/* Mobile Developer Mode Toggle - Only show when dev mode is enabled */}
-                {DEV_MODE_ENABLED && (
-                  <div className="pt-2 border-t border-accent-purple/30">
-                    <Button
-                      onClick={() => { toggleDeveloperMode(); setIsMenuOpen(false); }}
-                      variant="ghost"
-                      className={`w-full font-subhead transition-colors ${
-                        isDeveloperMode ? 'text-accent-gold hover:bg-accent-gold/10' : 'text-ink hover:bg-accent-purple/10'
-                      }`}
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        {isDeveloperMode ? <Code2 size={16} /> : <Code size={16} />}
-                        <span>Developer Mode {isDeveloperMode ? 'ON' : 'OFF'}</span>
-                        {isDeveloperMode && (
-                          <span className="text-xs font-mono text-ink/60">
-                            v{packageJson.version}
-                          </span>
-                        )}
-                      </div>
-                    </Button>
+              {/* Mobile Auth */}
+              {user ? (
+                <div className="space-y-3 pt-2 border-t border-accent-purple/30">
+                  <div className="flex items-center gap-2 text-ink">
+                    <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
+                      <AvatarImage 
+                        src={profile?.avatar_url || undefined} 
+                        alt={displayNameToShow} 
+                      />
+                      <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-sm">
+                        {getInitials(profile, userRsvp)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-subhead">
+                      {displayNameToShow}
+                    </span>
                   </div>
-                )}
-
-                {/* Mobile Auth */}
-                {user ? (
-                  <div className="space-y-3 pt-2 border-t border-accent-purple/30">
-                    <div className="flex items-center gap-2 text-ink">
-                      <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
-                        <AvatarImage 
-                          src={profile?.avatar_url || undefined} 
-                          alt={displayNameToShow} 
-                        />
-                        <AvatarFallback className="bg-accent-purple/20 text-accent-gold text-sm">
-                          {getInitials(profile, userRsvp)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-subhead">
-                        {displayNameToShow}
-                      </span>
-                    </div>
-                    
-                    {/* COMMENTED OUT - Admin toggle and Change Password */}
-                    {/* {isAdmin && (
-                      <>
-                        <Button
-                          onClick={() => { toggleAdminView(); setIsMenuOpen(false); }}
-                          variant="ghost"
-                          className="w-full hover:bg-accent-purple/10 font-subhead"
-                        >
-                          <Shield size={16} className="mr-2" />
-                          {isAdminView ? 'Switch to User View' : 'Switch to Admin View'}
-                        </Button>
-                        <div className="px-2 py-1 text-xs text-ink/60 bg-accent-purple/10 rounded text-center">
-                          Current: {isAdminView ? 'Admin' : 'User'} View
-                        </div>
-                      </>
-                    )} */}
-                    
-                    <Link to="/settings">
-                      <Button
-                        onClick={() => setIsMenuOpen(false)}
-                        variant="ghost"
-                        className="w-full text-ink hover:bg-accent-purple/10 font-subhead"
-                      >
-                        <User size={16} className="mr-2" />
-                        Settings
-                      </Button>
-                    </Link>
-
-                    {/* Mobile Notifications Link */}
-                    <Link to="/notifications">
-                      <Button
-                        onClick={() => setIsMenuOpen(false)}
-                        variant="ghost"
-                        className="w-full text-ink hover:bg-accent-purple/10 font-subhead relative"
-                      >
-                        <Bell size={16} className="mr-2" />
-                        Notifications
-                        {unreadCount > 0 && (
-                          <span className="ml-auto h-6 w-6 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        )}
-                      </Button>
-                    </Link>
-                    
-                    {/* <Button
-                      onClick={() => { setShowChangePasswordModal(true); setIsMenuOpen(false); }}
-                      variant="ghost"
-                      className="w-full text-accent-gold hover:bg-accent-gold/10 font-subhead"
-                    >
-                      <Key size={16} className="mr-2" />
-                      Change Password
-                    </Button> */}
-                    
+                  
+                  <Link to="/settings">
                     <Button
-                      onClick={() => { signOut(); setIsMenuOpen(false); }}
+                      onClick={() => setIsMenuOpen(false)}
                       variant="ghost"
-                      className="w-full text-accent-red hover:bg-accent-red/10 font-subhead"
+                      className="w-full text-ink hover:bg-accent-purple/10 font-subhead"
                     >
-                      <LogOut size={16} className="mr-2" />
-                      Sign out
+                      <User size={16} className="mr-2" />
+                      Settings
                     </Button>
-                  </div>
-                ) : (
+                  </Link>
+
+                  {/* Mobile Notifications Link */}
+                  <Link to="/notifications">
+                    <Button
+                      onClick={() => setIsMenuOpen(false)}
+                      variant="ghost"
+                      className="w-full text-ink hover:bg-accent-purple/10 font-subhead relative"
+                    >
+                      <Bell size={16} className="mr-2" />
+                      Notifications
+                      {unreadCount > 0 && (
+                        <span className="ml-auto h-6 w-6 flex items-center justify-center bg-accent-red text-background text-xs font-bold rounded-full">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+                  
                   <Button
-                    onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }}
+                    onClick={() => { signOut(); setIsMenuOpen(false); }}
                     variant="ghost"
-                    className="w-full hover:bg-accent-purple/10 font-subhead text-ink"
+                    className="w-full text-accent-red hover:bg-accent-red/10 font-subhead"
                   >
-                    Sign In
+                    <LogOut size={16} className="mr-2" />
+                    Sign out
                   </Button>
-                )}
-              </div>
-          </div>
-        )}
+                </div>
+              ) : (
+                <Button
+                  onClick={() => { setShowAuthModal(true); setIsMenuOpen(false); }}
+                  variant="ghost"
+                  className="w-full hover:bg-accent-purple/10 font-subhead text-ink"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
       
       <ChangePasswordModal isOpen={showChangePasswordModal} onClose={() => setShowChangePasswordModal(false)} />
