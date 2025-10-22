@@ -1,0 +1,27 @@
+# Example Release CSV - Copy this to create your own release
+# 
+# QUICK GUIDE FOR AI:
+# - First row MUST be: section,version,release_date,environment,summary,...
+# - All section names lowercase: meta, feature, api_change, bug_fix, improvement, ui_update, database_change, note
+# - Environment: production | staging | development
+# - Change types: new | modified | deprecated | removed
+# - Note types: breaking | known_issue | technical
+# - Dates: YYYY-MM-DD format
+# - Leave sort_order blank for auto-numbering
+# - Use quotes for text containing commas
+#
+# Copy from the line below:
+
+section,version,release_date,environment,summary,title,description,benefit,sort_order,endpoint,change_type,component,note_type,content
+meta,3.0.5,2025-01-22,production,"This release includes performance improvements and bug fixes.",,,,,,,,
+feature,,,,,Enhanced Photo Gallery,"Improved photo loading with lazy loading and better caching",Faster page loads and smoother browsing,0,,,,,
+feature,,,,,New RSVP System,"Completely redesigned RSVP flow with email confirmations",Easier for guests to confirm attendance,1,,,,,
+api_change,,,,,,/api/releases,new,New endpoint for fetching release information,0,,,,
+api_change,,,,,,/api/users/profile,modified,Added support for avatar uploads,1,,,,
+ui_update,,,,,,"Updated navbar design with better mobile responsiveness",,0,,,NavBar.tsx,,
+bug_fix,,,,,,"Fixed navbar collision at 1880px viewport width",,0,,,NavBar.tsx,,
+bug_fix,,,,,,"Resolved memory leak in photo carousel",,1,,,PhotoCarousel.tsx,,
+improvement,,,,,,"Enhanced search performance for large galleries",,0,,,Gallery.tsx,,
+database_change,,,,,,"Added indexes to photos table for faster queries",,0,,,,
+note,,,,,,,,,,,,,breaking,"Release Management API now requires authentication for all endpoints. Update your API calls to include auth headers."
+note,,,,,,,,,,,,,technical,"New caching strategy implemented for better performance."

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import Papa from 'papaparse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,12 +25,19 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Trash2, GripVertical, Save, Send, Eye, Upload, FileText, AlertCircle, Mail, Users } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Save, Send, Eye, Upload, FileText, AlertCircle, Mail, Users, FileSpreadsheet } from 'lucide-react';
 import EmailPreviewModal from '@/components/admin/EmailPreviewModal';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { parseVersion, formatVersion, getVersionIncrementOptions, isValidVersion } from '@/lib/version-utils';
 import { createReleaseDraft, versionExists, fetchReleaseById, updateRelease } from '@/lib/release-api';
 import { toast } from 'sonner';
+
+// Helper to safely parse number or fall back to index
+const toNumOrIndex = (token: string | undefined, idx: number): number => {
+  if (!token) return idx;
+  const parsed = parseInt(token.trim());
+  return Number.isFinite(parsed) ? parsed : idx;
+};
 
 const releaseSchema = z.object({
   version: z.string().min(1, 'Version is required').refine(isValidVersion, 'Invalid version format'),
@@ -40,32 +48,32 @@ const releaseSchema = z.object({
     title: z.string().optional().default(''),
     description: z.string().optional().default(''),
     benefit: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   api_changes: z.array(z.object({
     endpoint: z.string().optional().default(''),
     change_type: z.enum(['new', 'modified', 'deprecated', 'removed']),
     description: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   bug_fixes: z.array(z.object({
     description: z.string().optional().default(''),
     component: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   improvements: z.array(z.object({
     description: z.string().optional().default(''),
     component: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   ui_updates: z.array(z.object({
     description: z.string().optional().default(''),
     component: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   database_changes: z.array(z.object({
     description: z.string().optional().default(''),
-    sort_order: z.number(),
+    sort_order: z.coerce.number().transform(n => Number.isFinite(n) ? n : 0),
   })).default([]),
   breaking_changes: z.array(z.object({
     content: z.string().optional().default(''),
@@ -93,6 +101,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
   const [currentVersion] = useState('1.1.7'); // This should come from API
   const [isParsingFile, setIsParsingFile] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [uploadFileType, setUploadFileType] = useState<'markdown' | 'csv'>('markdown');
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [showAdminPreview, setShowAdminPreview] = useState(false);
   const [showUserPreview, setShowUserPreview] = useState(false);
@@ -226,8 +235,11 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     if (!file) return;
 
     // Validate file type
-    if (!file.name.endsWith('.md')) {
-      toast.error('Please upload a Markdown (.md) file');
+    const isMarkdown = file.name.endsWith('.md');
+    const isCsv = file.name.endsWith('.csv');
+    
+    if (!isMarkdown && !isCsv) {
+      toast.error('Please upload a Markdown (.md) or CSV (.csv) file');
       return;
     }
 
@@ -235,7 +247,14 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
 
     try {
       const text = await file.text();
-      const parsed = parseReleaseTemplate(text);
+      let parsed: Partial<ReleaseFormValues>;
+      
+      if (isCsv) {
+        parsed = parseReleaseCSV(text);
+      } else {
+        parsed = parseReleaseTemplate(text);
+      }
+      
       const normalized = normalizeParsedTemplate(parsed);
       
       // Set all normalized values
@@ -294,6 +313,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
   // Normalize parsed template data to match schema expectations
   const normalizeParsedTemplate = (parsed: Partial<ReleaseFormValues>): Partial<ReleaseFormValues> => {
     const normalized = { ...parsed };
+    let autoNumbered = false;
     
     // Normalize environment
     if (normalized.environment) {
@@ -308,17 +328,38 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     
     // Normalize API changes change_type
     if (normalized.api_changes && Array.isArray(normalized.api_changes)) {
-      normalized.api_changes = normalized.api_changes.map(change => {
+      normalized.api_changes = normalized.api_changes.map((change, idx) => {
+        const newChange = { ...change };
         if (change.change_type) {
           const type = change.change_type.toLowerCase();
           if (['new', 'modified', 'deprecated', 'removed'].includes(type)) {
-            return { ...change, change_type: type as 'new' | 'modified' | 'deprecated' | 'removed' };
+            newChange.change_type = type as 'new' | 'modified' | 'deprecated' | 'removed';
+          } else {
+            newChange.change_type = 'modified' as const;
           }
-          return { ...change, change_type: 'modified' as const };
         }
-        return change;
+        // Ensure valid sort_order
+        if (!Number.isFinite(newChange.sort_order)) {
+          newChange.sort_order = idx;
+          autoNumbered = true;
+        }
+        return newChange;
       });
     }
+    
+    // Reindex all array fields to ensure valid sort_order
+    const arrayFields = ['features', 'bug_fixes', 'improvements', 'ui_updates', 'database_changes'] as const;
+    arrayFields.forEach(field => {
+      if (normalized[field] && Array.isArray(normalized[field])) {
+        (normalized[field] as any) = (normalized[field] as any).map((item: any, idx: number) => {
+          if (!Number.isFinite(item.sort_order)) {
+            autoNumbered = true;
+            return { ...item, sort_order: idx };
+          }
+          return item;
+        });
+      }
+    });
     
     // Normalize release_date to YYYY-MM-DD
     if (normalized.release_date) {
@@ -332,6 +373,10 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       } catch {
         normalized.release_date = undefined;
       }
+    }
+    
+    if (autoNumbered) {
+      toast.info('Some items were auto-numbered. You can reorder them in the form.');
     }
     
     return normalized;
@@ -373,19 +418,13 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       result.features = lines.map((line, idx) => {
         const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
         
-        let sortOrder = idx;
-        if (parts[3]) {
-          const parsed = parseInt(parts[3]);
-          if (!isNaN(parsed)) sortOrder = parsed;
-        }
-        
         return {
           title: parts[0] || '',
           description: parts[1] || '',
-          benefit: parts[2] || undefined, // Use undefined instead of empty string for optional fields
-          sort_order: sortOrder,
+          benefit: parts[2] || undefined,
+          sort_order: toNumOrIndex(parts[3], idx),
         };
-      }).filter(f => f.title && f.description); // Only include features with required fields
+      }).filter(f => f.title && f.description);
     }
 
     // Parse API Changes section
@@ -399,19 +438,13 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
           ? changeType 
           : 'modified';
         
-        let sortOrder = idx;
-        if (parts[3]) {
-          const parsed = parseInt(parts[3]);
-          if (!isNaN(parsed)) sortOrder = parsed;
-        }
-        
         return {
           endpoint: parts[0] || '',
           change_type: validChangeType as 'new' | 'modified' | 'deprecated' | 'removed',
           description: parts[2] || '',
-          sort_order: sortOrder,
+          sort_order: toNumOrIndex(parts[3], idx),
         };
-      }).filter(a => a.endpoint && a.description); // Only include API changes with required fields
+      }).filter(a => a.endpoint && a.description);
     }
 
     // Parse simple list sections (UI, Bugs, Improvements)
@@ -423,18 +456,12 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
         (result as any)[fieldName] = lines.map((line, idx) => {
           const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
           
-          let sortOrder = idx;
-          if (parts[2]) {
-            const parsed = parseInt(parts[2]);
-            if (!isNaN(parsed)) sortOrder = parsed;
-          }
-          
           return {
             description: parts[0] || '',
-            component: parts[1] || undefined, // Use undefined for optional component field
-            sort_order: sortOrder,
+            component: parts[1] || undefined,
+            sort_order: toNumOrIndex(parts[2], idx),
           };
-        }).filter(item => item.description); // Only include items with description
+        }).filter(item => item.description);
       }
     };
 
@@ -449,21 +476,11 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       result.database_changes = lines.map((line, idx) => {
         const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
         
-        // Try to find a valid number in the parts array
-        let sortOrder = idx; // Default to index
-        for (let i = parts.length - 1; i >= 0; i--) {
-          const parsed = parseInt(parts[i]);
-          if (!isNaN(parsed)) {
-            sortOrder = parsed;
-            break;
-          }
-        }
-        
         return {
           description: parts[0] || '',
-          sort_order: sortOrder,
+          sort_order: toNumOrIndex(parts[1], idx),
         };
-      }).filter(item => item.description); // Only include items with description
+      }).filter(item => item.description);
     }
 
     // Parse content-only sections (Breaking, Issues, Technical)
@@ -483,6 +500,96 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     parseContentSection('Breaking Changes', 'breaking_changes');
     parseContentSection('Known Issues', 'known_issues');
     parseContentSection('Technical Notes', 'technical_notes');
+
+    return result;
+  };
+
+  const parseReleaseCSV = (csvText: string): Partial<ReleaseFormValues> => {
+    const result: Partial<ReleaseFormValues> = {
+      features: [],
+      api_changes: [],
+      ui_updates: [],
+      bug_fixes: [],
+      improvements: [],
+      database_changes: [],
+      breaking_changes: [],
+      known_issues: [],
+      technical_notes: [],
+    };
+
+    const parsed = Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.toLowerCase().trim(),
+    });
+
+    if (parsed.errors.length > 0) {
+      throw new Error(`CSV parse error: ${parsed.errors[0].message}`);
+    }
+
+    const rows = parsed.data as any[];
+    
+    rows.forEach((row, idx) => {
+      const section = (row.section || '').toLowerCase().trim();
+      
+      if (section === 'meta') {
+        if (row.version) result.version = row.version.trim();
+        if (row.release_date) result.release_date = row.release_date.trim();
+        if (row.environment) result.environment = row.environment.trim().toLowerCase() as any;
+        if (row.summary) result.summary = row.summary.trim();
+      } else if (section === 'feature') {
+        result.features!.push({
+          title: row.title?.trim() || '',
+          description: row.description?.trim() || '',
+          benefit: row.benefit?.trim() || undefined,
+          sort_order: toNumOrIndex(row.sort_order, result.features!.length),
+        });
+      } else if (section === 'api_change') {
+        const changeType = (row.change_type || 'modified').toLowerCase().trim();
+        result.api_changes!.push({
+          endpoint: row.endpoint?.trim() || '',
+          change_type: ['new', 'modified', 'deprecated', 'removed'].includes(changeType) 
+            ? changeType as any 
+            : 'modified',
+          description: row.description?.trim() || '',
+          sort_order: toNumOrIndex(row.sort_order, result.api_changes!.length),
+        });
+      } else if (section === 'bug_fix') {
+        result.bug_fixes!.push({
+          description: row.description?.trim() || '',
+          component: row.component?.trim() || undefined,
+          sort_order: toNumOrIndex(row.sort_order, result.bug_fixes!.length),
+        });
+      } else if (section === 'improvement') {
+        result.improvements!.push({
+          description: row.description?.trim() || '',
+          component: row.component?.trim() || undefined,
+          sort_order: toNumOrIndex(row.sort_order, result.improvements!.length),
+        });
+      } else if (section === 'ui_update') {
+        result.ui_updates!.push({
+          description: row.description?.trim() || '',
+          component: row.component?.trim() || undefined,
+          sort_order: toNumOrIndex(row.sort_order, result.ui_updates!.length),
+        });
+      } else if (section === 'database_change') {
+        result.database_changes!.push({
+          description: row.description?.trim() || '',
+          sort_order: toNumOrIndex(row.sort_order, result.database_changes!.length),
+        });
+      } else if (section === 'note') {
+        const noteType = (row.note_type || '').toLowerCase().trim();
+        const content = row.content?.trim() || '';
+        
+        if (noteType === 'breaking') {
+          result.breaking_changes!.push({ content });
+        } else if (noteType === 'known_issue') {
+          result.known_issues!.push({ content });
+        } else if (noteType === 'technical') {
+          result.technical_notes!.push({ content });
+        }
+      }
+    });
 
     return result;
   };
@@ -558,23 +665,42 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
         release_date: data.release_date,
         summary: data.summary,
         environment: data.environment,
-        features: data.features.map(f => ({
+        features: data.features.map((f, i) => ({
           title: f.title || '',
           description: f.description || '',
           benefit: f.benefit,
-          sort_order: f.sort_order || 0,
+          sort_order: Number.isFinite(f.sort_order) ? f.sort_order : i,
         })),
-        api_changes: data.api_changes.map(a => ({
+        api_changes: data.api_changes.map((a, i) => ({
           endpoint: a.endpoint || '',
           change_type: a.change_type,
           description: a.description || '',
-          sort_order: a.sort_order || 0,
+          sort_order: Number.isFinite(a.sort_order) ? a.sort_order : i,
         })),
         changes: [
-          ...data.bug_fixes.map(item => ({ description: item.description || '', component: item.component, category: 'bug_fix' as const, sort_order: item.sort_order || 0 })),
-          ...data.improvements.map(item => ({ description: item.description || '', component: item.component, category: 'improvement' as const, sort_order: item.sort_order || 0 })),
-          ...data.ui_updates.map(item => ({ description: item.description || '', component: item.component, category: 'ui_update' as const, sort_order: item.sort_order || 0 })),
-          ...data.database_changes.map(item => ({ description: item.description || '', category: 'database' as const, sort_order: item.sort_order || 0 })),
+          ...data.bug_fixes.map((item, i) => ({ 
+            description: item.description || '', 
+            component: item.component, 
+            category: 'bug_fix' as const, 
+            sort_order: Number.isFinite(item.sort_order) ? item.sort_order : i 
+          })),
+          ...data.improvements.map((item, i) => ({ 
+            description: item.description || '', 
+            component: item.component, 
+            category: 'improvement' as const, 
+            sort_order: Number.isFinite(item.sort_order) ? item.sort_order : i 
+          })),
+          ...data.ui_updates.map((item, i) => ({ 
+            description: item.description || '', 
+            component: item.component, 
+            category: 'ui_update' as const, 
+            sort_order: Number.isFinite(item.sort_order) ? item.sort_order : i 
+          })),
+          ...data.database_changes.map((item, i) => ({ 
+            description: item.description || '', 
+            category: 'database' as const, 
+            sort_order: Number.isFinite(item.sort_order) ? item.sort_order : i 
+          })),
         ],
         notes: [
           ...data.breaking_changes.map(item => ({ content: item.content || '', note_type: 'breaking' as const })),
@@ -701,34 +827,80 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <CardContent className="space-y-4">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-1">
-                        <Input
-                          type="file"
-                          accept=".md"
-                          onChange={handleFileUpload}
-                          disabled={isParsingFile}
-                          className="cursor-pointer"
-                        />
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Upload a filled release template (.md file). Find the template at{' '}
-                          <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                            docs/RELEASE_TEMPLATE.md
-                          </code>
-                        </p>
-                      </div>
-                      {isParsingFile && (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-                          <span className="text-sm">Parsing...</span>
+                          <input
+                            type="radio"
+                            id="upload-markdown"
+                            name="uploadType"
+                            value="markdown"
+                            checked={uploadFileType === 'markdown'}
+                            onChange={() => setUploadFileType('markdown')}
+                            className="w-4 h-4"
+                          />
+                          <label htmlFor="upload-markdown" className="text-sm cursor-pointer flex items-center gap-1">
+                            <FileText className="h-4 w-4" />
+                            Markdown (.md)
+                          </label>
                         </div>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            id="upload-csv"
+                            name="uploadType"
+                            value="csv"
+                            checked={uploadFileType === 'csv'}
+                            onChange={() => setUploadFileType('csv')}
+                            className="w-4 h-4"
+                          />
+                          <label htmlFor="upload-csv" className="text-sm cursor-pointer flex items-center gap-1">
+                            <FileSpreadsheet className="h-4 w-4" />
+                            CSV (.csv)
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1">
+                          <Input
+                            type="file"
+                            accept={uploadFileType === 'markdown' ? '.md' : '.csv'}
+                            onChange={handleFileUpload}
+                            disabled={isParsingFile}
+                            className="cursor-pointer"
+                          />
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {uploadFileType === 'markdown' ? (
+                              <>
+                                Upload a filled release template (.md file). Find the template at{' '}
+                                <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                                  docs/RELEASE_TEMPLATE.md
+                                </code>
+                              </>
+                            ) : (
+                              <>
+                                Upload a structured CSV file. Find the template and instructions at{' '}
+                                <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                                  docs/RELEASE_TEMPLATE.csv
+                                </code>
+                              </>
+                            )}
+                          </p>
+                        </div>
+                        {isParsingFile && (
+                          <div className="flex items-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                            <span className="text-sm">Parsing...</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <Alert>
                       <FileText className="h-4 w-4" />
                       <AlertTitle>How to use</AlertTitle>
                       <AlertDescription>
-                        1. Copy <code>docs/RELEASE_TEMPLATE.md</code> and fill it out manually or with an LLM
+                        1. Copy <code>docs/RELEASE_TEMPLATE.{uploadFileType === 'markdown' ? 'md' : 'csv'}</code> and fill it out manually or with an LLM
                         <br />
                         2. Upload the completed file here
                         <br />

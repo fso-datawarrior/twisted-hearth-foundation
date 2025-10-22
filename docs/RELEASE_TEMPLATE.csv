@@ -1,0 +1,87 @@
+# Release Template CSV for The Ruths' Bash
+# 
+# Instructions for AI Assistants:
+# ================================
+# This CSV file defines the structure for creating release notes. Each row represents either:
+# - Metadata about the release (section=meta)
+# - A feature, change, or note item
+#
+# CSV STRUCTURE:
+# ==============
+# The CSV has these columns: section, [type-specific columns]
+#
+# SECTION TYPES AND THEIR COLUMNS:
+# =================================
+#
+# 1. META (Required - exactly one row):
+#    section,version,release_date,environment,summary
+#    - version: Semantic version (e.g., 3.0.5)
+#    - release_date: YYYY-MM-DD format
+#    - environment: production | staging | development (lowercase)
+#    - summary: Brief overview (200 words max)
+#
+# 2. FEATURE:
+#    section,title,description,benefit,sort_order
+#    - title: Feature name
+#    - description: What it does
+#    - benefit: How it helps users (optional)
+#    - sort_order: Display order (integer, can be blank to auto-number)
+#
+# 3. API_CHANGE:
+#    section,endpoint,change_type,description,sort_order
+#    - endpoint: API path (e.g., /api/releases)
+#    - change_type: new | modified | deprecated | removed (lowercase)
+#    - description: What changed
+#    - sort_order: Display order (can be blank)
+#
+# 4. UI_UPDATE:
+#    section,description,component,sort_order
+#    - description: What changed in the UI
+#    - component: Which component was updated (optional)
+#    - sort_order: Display order (can be blank)
+#
+# 5. BUG_FIX:
+#    section,description,component,sort_order
+#    - description: What was fixed
+#    - component: Which component (optional)
+#    - sort_order: Display order (can be blank)
+#
+# 6. IMPROVEMENT:
+#    section,description,component,sort_order
+#    - description: What was improved
+#    - component: Which component (optional)
+#    - sort_order: Display order (can be blank)
+#
+# 7. DATABASE_CHANGE:
+#    section,description,sort_order
+#    - description: Database schema or data change
+#    - sort_order: Display order (can be blank)
+#
+# 8. NOTE:
+#    section,note_type,content
+#    - note_type: breaking | known_issue | technical (lowercase)
+#    - content: The note content
+#
+# FORMATTING RULES FOR AI:
+# =========================
+# 1. Always use lowercase for: environment, change_type, note_type, section
+# 2. Use YYYY-MM-DD for dates
+# 3. Leave sort_order blank if you want automatic numbering (0, 1, 2...)
+# 4. Put comma-containing text in quotes: "Fixed bug in gallery, improved performance"
+# 5. Use straight quotes (") not smart quotes ("")
+# 6. One meta row is required; other sections are optional
+# 7. Skip empty optional fields rather than using empty quotes
+#
+# EXAMPLE:
+# ========
+# section,version,release_date,environment,summary,title,description,benefit,sort_order,endpoint,change_type,component,note_type,content
+# meta,3.0.5,2025-01-22,production,"This release includes performance improvements and bug fixes.",,,,,,,,
+# feature,,,,,Enhanced Photo Gallery,"Improved photo loading with lazy loading and better caching",Faster page loads and smoother browsing,0,,,,,
+# api_change,,,,,,/api/releases,new,New endpoint for fetching release information,0,,,,
+# bug_fix,,,,,,"Fixed navbar collision at 1880px viewport width",,0,,,NavBar.tsx,,
+# note,,,,,,,,,,,,,breaking,"Release Management API now requires authentication for all endpoints."
+#
+# BEGIN TEMPLATE DATA BELOW THIS LINE
+# ====================================
+
+section,version,release_date,environment,summary,title,description,benefit,sort_order,endpoint,change_type,component,note_type,content
