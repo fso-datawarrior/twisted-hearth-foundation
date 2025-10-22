@@ -309,7 +309,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
             
           {/* Right Section - Audio toggle, Notifications, User, RSVP */}
-          <div className="hidden lg:flex items-center space-x-3 flex-shrink-0">
+          <div className="hidden lg:flex items-center gap-1 flex-shrink-0">
               {/* Audio Mute Toggle */}
               <Button
                 onClick={toggleMute}
@@ -474,16 +474,50 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           />
 
           {/* Mobile Menu Button - Show when mobile OR when auth is hidden on desktop */}
-          <div className="flex lg:hidden items-center space-x-4">
+          <div className="flex lg:hidden items-center gap-1">
             <span className="font-subhead text-accent-gold text-sm uppercase tracking-wider nav-compact:hidden hidden min-[520px]:block">
               {getCurrentPageName()}
             </span>
+            
+            {/* Audio Mute Toggle - Mobile */}
+            <Button
+              onClick={toggleMute}
+              variant="ghost"
+              size="sm"
+              className="hover:bg-accent-purple/10 font-subhead transition-colors -mx-2"
+              aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+            >
+              {isMuted ? (
+                <VolumeX className="h-5 w-5 text-ink/60" />
+              ) : (
+                <Volume2 className="h-5 w-5 text-accent-gold" />
+              )}
+            </Button>
+
+            {/* Notification Bell - Mobile */}
+            {user && (
+              <Link to="/notifications">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative hover:bg-accent-purple/10 font-subhead transition-colors -mx-2"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5 text-ink" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center bg-accent-red text-background text-[10px] font-bold rounded-full">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
             
             {/* Mobile User Avatar Icon - Dropdown with Settings/Sign out */}
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent-purple/50">
+                  <button className="flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent-purple/50 mx-2">
                     <Avatar className="h-8 w-8 border-2 border-accent-purple/30">
                       <AvatarImage 
                         src={profile?.avatar_url || undefined} 
@@ -521,13 +555,13 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               asChild 
               variant="destructive" 
               size="sm"
-              className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead text-xs px-3 py-1"
+              className="bg-accent-red hover:bg-accent-red/80 glow-gold font-subhead text-xs px-3 py-1 -mx-1"
             >
               <Link to="/rsvp">{ctaLabel}</Link>
             </Button>
             
             <button
-              className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent"
+              className="p-2 text-ink hover:text-accent-gold transition-colors motion-safe border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 bg-transparent -mx-1"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-expanded={isMenuOpen ? "true" : "false"}
               aria-controls="mobile-menu"
