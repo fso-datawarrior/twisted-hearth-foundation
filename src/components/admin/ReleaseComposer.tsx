@@ -36,44 +36,44 @@ const releaseSchema = z.object({
   environment: z.enum(['development', 'staging', 'production']),
   summary: z.string().min(10, 'Summary must be at least 10 characters'),
   features: z.array(z.object({
-    title: z.string().min(1, 'Title is required'),
-    description: z.string().min(1, 'Description is required'),
-    benefit: z.string().optional(),
+    title: z.string().optional().default(''),
+    description: z.string().optional().default(''),
+    benefit: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   api_changes: z.array(z.object({
-    endpoint: z.string().min(1, 'Endpoint is required'),
+    endpoint: z.string().optional().default(''),
     change_type: z.enum(['new', 'modified', 'deprecated', 'removed']),
-    description: z.string().min(1, 'Description is required'),
+    description: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   bug_fixes: z.array(z.object({
-    description: z.string().min(1, 'Description is required'),
-    component: z.string().optional(),
+    description: z.string().optional().default(''),
+    component: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   improvements: z.array(z.object({
-    description: z.string().min(1, 'Description is required'),
-    component: z.string().optional(),
+    description: z.string().optional().default(''),
+    component: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   ui_updates: z.array(z.object({
-    description: z.string().min(1, 'Description is required'),
-    component: z.string().optional(),
+    description: z.string().optional().default(''),
+    component: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   database_changes: z.array(z.object({
-    description: z.string().min(1, 'Description is required'),
+    description: z.string().optional().default(''),
     sort_order: z.number(),
   })).default([]),
   breaking_changes: z.array(z.object({
-    content: z.string().min(1, 'Content is required'),
+    content: z.string().optional().default(''),
   })).default([]),
   known_issues: z.array(z.object({
-    content: z.string().min(1, 'Content is required'),
+    content: z.string().optional().default(''),
   })).default([]),
   technical_notes: z.array(z.object({
-    content: z.string().min(1, 'Content is required'),
+    content: z.string().optional().default(''),
   })).default([]),
 });
 

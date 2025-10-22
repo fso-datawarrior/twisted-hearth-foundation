@@ -53,10 +53,18 @@ export default function EmailPreviewModal({
         : '09-system-update-user';
 
       const templateData = prepareTemplateData(releaseData, emailType);
-      const html = await loadAndRenderTemplate(templateName, templateData);
-      setRenderedHtml(html);
+      
+      try {
+        const html = await loadAndRenderTemplate(templateName, templateData);
+        setRenderedHtml(html);
+      } catch (templateError) {
+        // Fallback to simple HTML preview if template loading fails
+        const fallbackHtml = generateFallbackPreview(releaseData, emailType);
+        setRenderedHtml(fallbackHtml);
+        console.warn('Using fallback preview - template not found:', templateError);
+      }
     } catch (error) {
-      console.error('Failed to render email template:', error);
+      console.error('Failed to render email preview:', error);
       toast.error('Failed to load email preview');
       setRenderedHtml('<div style="padding: 20px; color: red;">Failed to load email template</div>');
     } finally {
@@ -64,7 +72,152 @@ export default function EmailPreviewModal({
     }
   };
 
-  const prepareTemplateData = (data: ReleaseData, type: 'admin' | 'user') => {
+  const generateFallbackPreview = (data: ReleaseData, type: 'admin' | 'user'): string => {
+    const styles = `
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    `;
+    
+    let content = `
+      <div style="${styles}">
+        <h1 style="color: #8B5CF6;">Release v${data.version || '[Version]'}</h1>
+        <p><strong>Release Date:</strong> ${data.release_date || '[Date]'}</p>
+        <p><strong>Environment:</strong> ${data.environment || 'production'}</p>
+        
+        <h2>Summary</h2>
+        <p>${data.summary || '[No summary provided]'}</p>
+    `;
+
+    if (type === 'admin') {
+      // Full technical details for admin
+      if (data.features && data.features.length > 0) {
+        content += `<h2>Features Added</h2><ul>`;
+        data.features.forEach(f => {
+          if (f.title && f.description) {
+            content += `<li><strong>${f.title}</strong>: ${f.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.api_changes && data.api_changes.length > 0) {
+        content += `<h2>API Changes</h2><ul>`;
+        data.api_changes.forEach(a => {
+          if (a.endpoint && a.description) {
+            content += `<li><strong>${a.endpoint}</strong> (${a.change_type}): ${a.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.bug_fixes && data.bug_fixes.length > 0) {
+        content += `<h2>Bug Fixes</h2><ul>`;
+        data.bug_fixes.forEach(b => {
+          if (b.description) {
+            content += `<li>${b.description}${b.component ? ` (${b.component})` : ''}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.improvements && data.improvements.length > 0) {
+        content += `<h2>Improvements</h2><ul>`;
+        data.improvements.forEach(i => {
+          if (i.description) {
+            content += `<li>${i.description}${i.component ? ` (${i.component})` : ''}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.ui_updates && data.ui_updates.length > 0) {
+        content += `<h2>UI Updates</h2><ul>`;
+        data.ui_updates.forEach(u => {
+          if (u.description) {
+            content += `<li>${u.description}${u.component ? ` (${u.component})` : ''}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.database_changes && data.database_changes.length > 0) {
+        content += `<h2>Database Changes</h2><ul>`;
+        data.database_changes.forEach(d => {
+          if (d.description) {
+            content += `<li>${d.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.breaking_changes && data.breaking_changes.length > 0) {
+        content += `<h2>Breaking Changes</h2><ul>`;
+        data.breaking_changes.forEach(b => {
+          if (b.content) {
+            content += `<li>${b.content}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.known_issues && data.known_issues.length > 0) {
+        content += `<h2>Known Issues</h2><ul>`;
+        data.known_issues.forEach(k => {
+          if (k.content) {
+            content += `<li>${k.content}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.technical_notes && data.technical_notes.length > 0) {
+        content += `<h2>Technical Notes</h2><ul>`;
+        data.technical_notes.forEach(t => {
+          if (t.content) {
+            content += `<li>${t.content}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+    } else {
+      // User-friendly version
+      if (data.features && data.features.length > 0) {
+        content += `<h2>What's New</h2><ul>`;
+        data.features.forEach(f => {
+          if (f.title && (f.benefit || f.description)) {
+            content += `<li><strong>${f.title}</strong>: ${f.benefit || f.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.bug_fixes && data.bug_fixes.length > 0) {
+        content += `<h2>Bug Fixes</h2><ul>`;
+        data.bug_fixes.forEach(b => {
+          if (b.description) {
+            content += `<li>${b.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+      
+      if (data.improvements && data.improvements.length > 0) {
+        content += `<h2>Improvements</h2><ul>`;
+        data.improvements.forEach(i => {
+          if (i.description) {
+            content += `<li>${i.description}</li>`;
+          }
+        });
+        content += `</ul>`;
+      }
+    }
+    
+    content += `</div>`;
+    return content;
+  };
     const baseData = {
       VERSION: data.version || '[Version]',
       RELEASE_DATE: data.release_date || '[Date]',
