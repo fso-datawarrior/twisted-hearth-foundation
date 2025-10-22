@@ -248,9 +248,9 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
       aria-label="Main navigation"
     >
       <div className="container mx-auto px-[max(env(safe-area-inset-left),1rem)] pr-[max(env(safe-area-inset-right),1rem)] py-4">
-        <div className="flex items-center justify-between nav-full:justify-center">
+        <div className="flex items-center justify-between">
           {/* Logo/Title - Left side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <Link 
               to="/" 
               className="font-heading text-2xl font-bold text-ink hover:text-accent-gold transition-colors motion-safe border-0 logo-responsive flex flex-col leading-tight"
@@ -268,7 +268,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
 
           {/* Centered Desktop Navigation */}
-          <div className="hidden nav-compact:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
+          <div className="hidden nav-compact:flex items-center space-x-6 2xl:space-x-8 flex-1 justify-center">
             {/* Main navigation links */}
             {mainNavLinks.map(({ to, label, icon: Icon }) => (
               <Link
@@ -309,7 +309,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
           </div>
             
           {/* Right Section - Audio toggle, Notifications, User, RSVP */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-3 flex-shrink-0">
               {/* Audio Mute Toggle */}
               <Button
                 onClick={toggleMute}
