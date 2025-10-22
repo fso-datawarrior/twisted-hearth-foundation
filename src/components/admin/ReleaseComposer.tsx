@@ -284,11 +284,11 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     if (envMatch) result.environment = envMatch[1].trim() as any;
 
     // Extract summary
-    const summaryMatch = content.match(/## Executive Summary\n(.+?)(?=\n##)/s);
+    const summaryMatch = content.match(/## Executive Summary\n(.+?)(?=\n+##)/s);
     if (summaryMatch) result.summary = summaryMatch[1].trim();
 
     // Parse Features section
-    const featuresSection = content.match(/## Features\n(?:<!--.*?-->\n)?(.+?)(?=\n##)/s);
+    const featuresSection = content.match(/## Features\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (featuresSection) {
       const lines = featuresSection[1].split('\n').filter(l => l.trim().startsWith('-'));
       result.features = lines.map((line, idx) => {
@@ -303,7 +303,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     }
 
     // Parse API Changes section
-    const apiSection = content.match(/## API Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n##)/s);
+    const apiSection = content.match(/## API Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (apiSection) {
       const lines = apiSection[1].split('\n').filter(l => l.trim().startsWith('-'));
       result.api_changes = lines.map((line, idx) => {
@@ -319,7 +319,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
 
     // Parse simple list sections (UI, Bugs, Improvements)
     const parseSimpleSection = (sectionName: string, fieldName: keyof ReleaseFormValues) => {
-      const regex = new RegExp(`## ${sectionName}\\n(?:<!--.*?-->\\n)?(.+?)(?=\\n##)`, 's');
+      const regex = new RegExp(`## ${sectionName}\\n(?:<!--.*?-->\\n)?(.+?)(?=\\n+##)`, 's');
       const match = content.match(regex);
       if (match) {
         const lines = match[1].split('\n').filter(l => l.trim().startsWith('-'));
@@ -339,7 +339,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     parseSimpleSection('Improvements', 'improvements');
 
     // Parse Database Changes
-    const dbSection = content.match(/## Database Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n##)/s);
+    const dbSection = content.match(/## Database Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (dbSection) {
       const lines = dbSection[1].split('\n').filter(l => l.trim().startsWith('-'));
       result.database_changes = lines.map((line, idx) => {
@@ -353,7 +353,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
 
     // Parse content-only sections (Breaking, Issues, Technical)
     const parseContentSection = (sectionName: string, fieldName: keyof ReleaseFormValues) => {
-      const regex = new RegExp(`## ${sectionName}\\n(?:<!--.*?-->\\n)?(.+?)(?=\\n##|$)`, 's');
+      const regex = new RegExp(`## ${sectionName}\\n(?:<!--.*?-->\\n)?(.+?)(?=\\n+##|$)`, 's');
       const match = content.match(regex);
       if (match) {
         const lines = match[1].split('\n').filter(l => l.trim().startsWith('-'));

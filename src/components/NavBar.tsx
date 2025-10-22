@@ -433,19 +433,6 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
                          )}
                        </DropdownMenuItem>
                      </Link>
-                     <Link to="/settings" onClick={() => setIsMenuOpen(false)}>
-                       <DropdownMenuItem className="flex items-center gap-2 font-subhead text-ink hover:bg-accent-purple/10 cursor-pointer">
-                         <User size={16} />
-                         Settings
-                       </DropdownMenuItem>
-                     </Link>
-                     <DropdownMenuItem 
-                       onClick={() => signOut()}
-                       className="flex items-center gap-2 font-subhead text-accent-red hover:bg-accent-red/10 cursor-pointer"
-                     >
-                       <LogOut size={16} />
-                       Sign out
-                     </DropdownMenuItem>
                    </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
