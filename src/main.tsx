@@ -40,9 +40,9 @@ async function start() {
   });
   
   try {
-    // 🧪 TEST: Skip SW cleanup in Lovable preview environment
-    if (!isLovablePreview && 'serviceWorker' in navigator && !sessionStorage.getItem('sw_cleanup_done_v7')) {
-      console.log('🧹 Running service worker cleanup (production only)');
+    // Run SW/cache cleanup once in all environments to avoid stale module issues
+    if ('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleanup_done_v8')) {
+      console.log('🧹 Running service worker cleanup (one-time, all envs)');
       const regs = await navigator.serviceWorker.getRegistrations();
       if (regs.length) {
         await Promise.all(regs.map((r) => r.unregister()));
@@ -53,13 +53,11 @@ async function start() {
           await Promise.all(keys.map((k) => caches.delete(k)));
         }
       }
-      sessionStorage.setItem('sw_cleanup_done_v7', '1');
+      sessionStorage.setItem('sw_cleanup_done_v8', '1');
       // Reload once to ensure the page is no longer controlled by any SW
       console.log('🔄 Reloading after SW cleanup');
       location.reload();
       return; // Do not render on this pass
-    } else if (isLovablePreview) {
-      console.log('⏭️ Skipping SW cleanup in Lovable preview');
     }
   } catch (e) {
     console.log('⚠️ SW cleanup skipped/failed:', e);
