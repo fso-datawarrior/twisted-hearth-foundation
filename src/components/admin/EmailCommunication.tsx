@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2, Megaphone } from "lucide-react";
+import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2, Megaphone, Copy } from "lucide-react";
 import { toast } from "sonner";
 import {
   getTemplates,
@@ -13,6 +13,7 @@ import {
   deleteTemplate,
   createCampaign,
   sendCampaign,
+  cloneCampaign,
   type EmailTemplate,
   type EmailCampaign,
 } from '@/lib/email-campaigns-api';
@@ -162,6 +163,20 @@ export function EmailCommunication() {
     } catch (error) {
       console.error('Failed to send test email:', error);
       toast.error('Failed to send test email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloneCampaign = async (campaignId: string) => {
+    try {
+      setIsLoading(true);
+      await cloneCampaign(campaignId);
+      toast.success('Campaign duplicated successfully!');
+      loadData();
+    } catch (error) {
+      console.error('Failed to clone campaign:', error);
+      toast.error('Failed to duplicate campaign');
     } finally {
       setIsLoading(false);
     }
@@ -566,6 +581,16 @@ export function EmailCommunication() {
                                 )}
                               </div>
                             )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCloneCampaign(campaign.id)}
+                              title="Duplicate this campaign"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       </CardHeader>

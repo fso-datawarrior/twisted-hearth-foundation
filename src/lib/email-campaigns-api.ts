@@ -179,6 +179,24 @@ export async function deleteCampaign(id: string) {
   if (error) throw error;
 }
 
+// Clone/Duplicate Campaign
+export async function cloneCampaign(id: string): Promise<EmailCampaign> {
+  // Get the original campaign
+  const original = await getCampaign(id);
+  
+  // Create a new campaign with the same data but reset status
+  const clonedData = {
+    template_id: original.template_id,
+    recipient_list: original.recipient_list,
+    custom_recipients: original.custom_recipients,
+    subject: `${original.subject} (Copy)`,
+    template_variables: original.template_variables,
+    status: 'draft' as const,
+  };
+  
+  return await createCampaign(clonedData);
+}
+
 // Send Campaign
 export async function sendCampaign(campaignId: string) {
   const { data, error } = await supabase.functions.invoke('send-email-campaign', {
