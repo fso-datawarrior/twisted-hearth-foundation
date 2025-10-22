@@ -218,6 +218,8 @@ export default function EmailPreviewModal({
     content += `</div>`;
     return content;
   };
+
+  const prepareTemplateData = (data: ReleaseData, type: 'admin' | 'user') => {
     const baseData = {
       VERSION: data.version || '[Version]',
       RELEASE_DATE: data.release_date || '[Date]',
