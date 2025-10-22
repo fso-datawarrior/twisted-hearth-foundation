@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We Made Your Party Experience Even Better!</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #2d1b4e 0%, #4a2c6f 100%);">
+  <div style="background-color: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+    <h1 style="color: #2d1b4e; text-align: center; font-size: 28px; margin-bottom: 10px;">🎃 We Made Your Party Experience Even Better!</h1>
+    <p style="text-align: center; font-size: 18px; color: #666; margin-bottom: 30px;">Hey party people! 🎉✨</p>
+
+    {{#if SUMMARY}}
+    <p>{{SUMMARY}}</p>
+    {{/if}}
+
+    {{#if FEATURES_ADDED}}
+    <h2 style="color: #2d1b4e; margin-top: 30px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">✨ What's New & Awesome!</h2>
+    <p>We've been working hard to make your party experience even more magical! 🎩✨</p>
+    
+    {{#each FEATURES_ADDED}}
+    <div style="background: linear-gradient(135deg, #fff9e6, #ffffff); padding: 20px; margin: 15px 0; border-radius: 10px; border: 2px solid #d4af37; box-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);">
+      <h3 style="color: #2d1b4e; margin-top: 0; font-size: 20px;">🎉 {{this.title}}</h3>
+      <p style="margin: 10px 0 0 0; color: #555;">{{#if this.benefit}}{{this.benefit}}{{else}}{{this.description}}{{/if}}</p>
+    </div>
+    {{/each}}
+    {{/if}}
+
+    {{#if BUG_FIXES}}
+    <h2 style="color: #2d1b4e; margin-top: 30px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">🔧 What We Fixed!</h2>
+    <p>Oops! We found some sneaky bugs and squashed them! 🐛💥</p>
+    <ul style="list-style: none; padding: 0;">
+      {{#each BUG_FIXES}}
+      <li style="background: #f9f9f9; padding: 12px; margin: 10px 0; border-left: 4px solid #8b5cf6; border-radius: 4px;">🎯 {{this}}</li>
+      {{/each}}
+    </ul>
+    {{/if}}
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{SITE_URL}}" style="display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #d4af37, #ffd700); color: #2d1b4e; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 18px;">Check It Out! 🎃</a>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em;">
+      <p>Questions? Visit <a href="{{SITE_URL}}/contact">our support page</a></p>
+      <p>Twisted Hearth Foundation</p>
+    </div>
+  </div>
+</body>
+</html>

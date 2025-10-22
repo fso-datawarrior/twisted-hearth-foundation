@@ -26,7 +26,8 @@ import {
   UserCog,
   Shield,
   Mail,
-  Database
+  Database,
+  Rocket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,7 @@ interface AdminNavigationProps {
     selectedVignettePhotos?: number;
     activeLibations?: number;
     supportReports?: number;
+    draftReleases?: number;
   };
 }
 
@@ -94,6 +96,7 @@ export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigat
       label: 'Settings',
       icon: Settings,
       items: [
+        { id: 'releases', label: 'Release Management', icon: Rocket, count: counts.draftReleases },
         { id: 'email', label: 'Email Campaigns', icon: Mail },
         { id: 'support-reports', label: 'Support Reports', icon: MessageSquare, count: counts.supportReports },
         { id: 'database-reset', label: 'Database Reset', icon: Database },

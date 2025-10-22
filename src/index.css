@@ -141,22 +141,38 @@ All colors are HSL for consistency. Motion respects prefers-reduced-motion.
   .embla__slide {
     flex: 0 0 85%;
     min-width: 0;
+    height: 500px;
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    opacity: 0.4;
+                opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 1;
     transform: scale(0.85) translateZ(-100px);
+    z-index: 1;
   }
 
   .embla__slide--center {
     opacity: 1;
     transform: scale(1) translateZ(0) rotateY(0deg);
     z-index: 10;
+    filter: brightness(1);
+  }
+
+  .embla__slide:not(.embla__slide--center) {
+    opacity: 0.5;
+    filter: brightness(0.6);
+    z-index: 1;
   }
 
   .embla__slide__inner {
     height: 100%;
     padding: 0 10px;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .embla__slide__inner > * {
+    width: 100%;
   }
 
   .embla__button {

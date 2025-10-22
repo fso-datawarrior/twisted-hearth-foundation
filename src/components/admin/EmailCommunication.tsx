@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2, Megaphone } from "lucide-react";
+import { Plus, Mail, Send, Clock, CheckCircle, XCircle, Pencil, Trash2, Megaphone, Copy } from "lucide-react";
 import { toast } from "sonner";
 import {
   getTemplates,
@@ -13,11 +13,13 @@ import {
   deleteTemplate,
   createCampaign,
   sendCampaign,
+  cloneCampaign,
   type EmailTemplate,
   type EmailCampaign,
 } from '@/lib/email-campaigns-api';
 import { EmailTemplateEditor } from './EmailTemplateEditor';
 import { CampaignComposer } from './CampaignComposer';
+import { SystemUpdateComposer } from './SystemUpdateComposer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -161,6 +163,20 @@ export function EmailCommunication() {
     } catch (error) {
       console.error('Failed to send test email:', error);
       toast.error('Failed to send test email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloneCampaign = async (campaignId: string) => {
+    try {
+      setIsLoading(true);
+      await cloneCampaign(campaignId);
+      toast.success('Campaign duplicated successfully!');
+      loadData();
+    } catch (error) {
+      console.error('Failed to clone campaign:', error);
+      toast.error('Failed to duplicate campaign');
     } finally {
       setIsLoading(false);
     }
@@ -439,6 +455,13 @@ export function EmailCommunication() {
               >
                 Campaigns
               </TabsTrigger>
+              <TabsTrigger 
+                value="system-update"
+                className="rounded-t-lg rounded-b-none border border-border border-b-0 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=inactive]:bg-muted/30 data-[state=inactive]:text-muted-foreground relative data-[state=active]:z-10 data-[state=active]:-mb-px px-6 py-3"
+              >
+                <Megaphone className="w-4 h-4 mr-2" />
+                System Update
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="templates" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
@@ -559,12 +582,29 @@ export function EmailCommunication() {
                               </div>
                             )}
                           </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCloneCampaign(campaign.id)}
+                              title="Duplicate this campaign"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
                     </Card>
                   ))
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="system-update" className="mt-0 pt-6 space-y-4 border border-t-0 border-border rounded-b-lg rounded-tr-lg bg-card p-6">
+              <SystemUpdateComposer 
+                onComplete={() => loadData()}
+                onCancel={() => {}}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
