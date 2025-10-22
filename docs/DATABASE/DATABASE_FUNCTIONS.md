@@ -500,6 +500,146 @@ $$;
 
 **Usage**: Triggered on `auth.users` table insert
 
+## Release Management System Functions
+
+### get_latest_release()
+**Purpose**: Get the latest deployed release information
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_latest_release()
+RETURNS TABLE (
+  id UUID,
+  version TEXT,
+  major_version INTEGER,
+  minor_version INTEGER,
+  patch_version INTEGER,
+  pre_release TEXT,
+  release_date TIMESTAMPTZ,
+  summary TEXT,
+  environment TEXT,
+  deployment_status TEXT,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+)
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT 
+    sr.id,
+    sr.version,
+    sr.major_version,
+    sr.minor_version,
+    sr.patch_version,
+    sr.pre_release,
+    sr.release_date,
+    sr.summary,
+    sr.environment,
+    sr.deployment_status,
+    sr.created_at,
+    sr.updated_at
+  FROM system_releases sr
+  WHERE sr.deployment_status = 'deployed'
+  ORDER BY sr.major_version DESC, sr.minor_version DESC, sr.patch_version DESC
+  LIMIT 1;
+$$;
+```
+
+### get_release_full()
+**Purpose**: Get complete release information with all related data
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_release_full(release_id UUID)
+RETURNS JSONB
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT jsonb_build_object(
+    'release', to_jsonb(sr.*),
+    'features', (
+      SELECT jsonb_agg(to_jsonb(rf.*))
+      FROM release_features rf
+      WHERE rf.release_id = sr.id
+    ),
+    'api_changes', (
+      SELECT jsonb_agg(to_jsonb(rac.*))
+      FROM release_api_changes rac
+      WHERE rac.release_id = sr.id
+    ),
+    'changes', (
+      SELECT jsonb_agg(to_jsonb(rc.*))
+      FROM release_changes rc
+      WHERE rc.release_id = sr.id
+    ),
+    'notes', (
+      SELECT jsonb_agg(to_jsonb(rn.*))
+      FROM release_notes rn
+      WHERE rn.release_id = sr.id
+    )
+  )
+  FROM system_releases sr
+  WHERE sr.id = release_id;
+$$;
+```
+
+### archive_release()
+**Purpose**: Archive a release (admin only)
+
+```sql
+CREATE OR REPLACE FUNCTION public.archive_release(release_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Check if user is admin
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Access denied. Admin role required.';
+  END IF;
+  
+  -- Update release status to archived
+  UPDATE system_releases 
+  SET deployment_status = 'archived', updated_at = now()
+  WHERE id = release_id;
+  
+  RETURN FOUND;
+END;
+$$;
+```
+
+### publish_release()
+**Purpose**: Publish a release (admin only)
+
+```sql
+CREATE OR REPLACE FUNCTION public.publish_release(release_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Check if user is admin
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Access denied. Admin role required.';
+  END IF;
+  
+  -- Update release status to deployed and set release date
+  UPDATE system_releases 
+  SET 
+    deployment_status = 'deployed',
+    release_date = COALESCE(release_date, now()),
+    updated_at = now()
+  WHERE id = release_id;
+  
+  RETURN FOUND;
+END;
+$$;
+```
+
 ## Function Permissions
 
 ### Grant Statements
@@ -515,8 +655,11 @@ GRANT EXECUTE ON FUNCTION public.submit_rsvp(text, text, smallint, text, text, t
 GRANT EXECUTE ON FUNCTION public.update_user_profile TO authenticated;
 GRANT EXECUTE ON FUNCTION public.update_user_email TO authenticated;
 
--- Content management functions
-GRANT EXECUTE ON FUNCTION public.manage_vignette TO authenticated;
+-- Release Management System functions
+GRANT EXECUTE ON FUNCTION public.get_latest_release() TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_release_full(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.archive_release(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.publish_release(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_active_vignettes TO authenticated;
 
 -- Guestbook functions

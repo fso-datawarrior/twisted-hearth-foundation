@@ -204,7 +204,7 @@ const NavBar = ({ variant = "public", ctaLabel = "RSVP" }: NavBarProps) => {
               ? "text-accent-gold"
               : "text-ink hover:text-accent-gold"
           }`}
-          aria-expanded={isOpen}
+          aria-expanded={isOpen ? "true" : "false"}
           aria-haspopup="true"
           aria-label="More navigation options"
         >

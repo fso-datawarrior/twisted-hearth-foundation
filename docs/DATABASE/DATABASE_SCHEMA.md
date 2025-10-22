@@ -451,9 +451,111 @@ CREATE TABLE public.analytics_daily_aggregates (
 );
 ```
 
-### 10. Support System
+### 11. Release Management System (RMS)
 
-#### `support_reports` (Issue Tracking)
+#### `system_releases` (Main Release Metadata)
+```sql
+CREATE TABLE public.system_releases (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  version TEXT NOT NULL UNIQUE,
+  major_version INTEGER NOT NULL,
+  minor_version INTEGER NOT NULL,
+  patch_version INTEGER NOT NULL,
+  pre_release TEXT,
+  release_date TIMESTAMPTZ,
+  summary TEXT,
+  environment TEXT NOT NULL DEFAULT 'development' CHECK (environment IN ('development', 'staging', 'production')),
+  deployment_status TEXT NOT NULL DEFAULT 'draft' CHECK (deployment_status IN ('draft', 'deployed', 'archived')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by UUID REFERENCES auth.users(id)
+);
+```
+
+#### `release_features` (New Features Per Release)
+```sql
+CREATE TABLE public.release_features (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  release_id UUID NOT NULL REFERENCES public.system_releases(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT CHECK (category IN ('feature', 'enhancement', 'improvement')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `release_api_changes` (API Modifications)
+```sql
+CREATE TABLE public.release_api_changes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  release_id UUID NOT NULL REFERENCES public.system_releases(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  method TEXT CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH')),
+  change_type TEXT NOT NULL CHECK (change_type IN ('added', 'modified', 'deprecated', 'removed')),
+  description TEXT,
+  breaking_change BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `release_changes` (Generic Changes)
+```sql
+CREATE TABLE public.release_changes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  release_id UUID NOT NULL REFERENCES public.system_releases(id) ON DELETE CASCADE,
+  change_type TEXT NOT NULL CHECK (change_type IN ('ui', 'bug_fix', 'improvement', 'security', 'performance', 'other')),
+  title TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `release_notes` (Technical and Additional Notes)
+```sql
+CREATE TABLE public.release_notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  release_id UUID NOT NULL REFERENCES public.system_releases(id) ON DELETE CASCADE,
+  note_type TEXT NOT NULL CHECK (note_type IN ('technical', 'additional', 'breaking_changes', 'migration')),
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+### 12. Notification System
+
+#### `notification_preferences` (User Notification Settings)
+```sql
+CREATE TABLE public.notification_preferences (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  in_app_notifications BOOLEAN DEFAULT true,
+  email_notifications BOOLEAN DEFAULT true,
+  email_on_comment BOOLEAN DEFAULT true,
+  email_on_reply BOOLEAN DEFAULT true,
+  email_on_reaction BOOLEAN DEFAULT true,
+  email_on_rsvp_update BOOLEAN DEFAULT true,
+  email_on_admin_announcement BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+#### `notifications` (User Notifications)
+```sql
+CREATE TABLE public.notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('comment', 'reply', 'reaction', 'rsvp_update', 'event_update', 'admin_announcement')),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link TEXT,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  metadata JSONB DEFAULT '{}'::jsonb
+);
+```
+
+### 13. Support System
 ```sql
 CREATE TABLE public.support_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

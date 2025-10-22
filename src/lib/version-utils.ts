@@ -95,9 +95,15 @@ export function compareVersions(v1: string, v2: string): number {
   }
   
   // Handle pre-release precedence
-  if (!parts1.preRelease && !parts2.preRelease) return 0;
-  if (!parts1.preRelease) return 1;  // v1 is release, v2 is pre-release
-  if (!parts2.preRelease) return -1; // v2 is release, v1 is pre-release
+  if (!parts1.preRelease && !parts2.preRelease) {
+    return 0;
+  }
+  if (!parts1.preRelease) {
+    return 1;  // v1 is release, v2 is pre-release
+  }
+  if (!parts2.preRelease) {
+    return -1; // v2 is release, v1 is pre-release
+  }
   
   // Compare pre-release identifiers
   return parts1.preRelease.localeCompare(parts2.preRelease);

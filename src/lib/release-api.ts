@@ -116,12 +116,7 @@ export async function fetchReleaseById(id: string): Promise<FullRelease> {
   }
 
   // Transform the JSONB response into FullRelease format
-  const response = data as any;
-  const release = response.release;
-  const features = response.features || [];
-  const api_changes = response.api_changes || [];
-  const changes = response.changes || [];
-  const notes = response.notes || [];
+  const { release, features = [], api_changes = [], changes = [], notes = [] } = data as any;
 
   return {
     ...release,
@@ -267,14 +262,30 @@ export async function updateRelease(
   // Update main release record
   const releaseUpdate: Record<string, any> = {};
   
-  if (data.version !== undefined) releaseUpdate.version = data.version;
-  if (data.major_version !== undefined) releaseUpdate.major_version = data.major_version;
-  if (data.minor_version !== undefined) releaseUpdate.minor_version = data.minor_version;
-  if (data.patch_version !== undefined) releaseUpdate.patch_version = data.patch_version;
-  if (data.pre_release !== undefined) releaseUpdate.pre_release = data.pre_release;
-  if (data.release_date !== undefined) releaseUpdate.release_date = data.release_date;
-  if (data.summary !== undefined) releaseUpdate.summary = data.summary;
-  if (data.environment !== undefined) releaseUpdate.environment = data.environment;
+  if (data.version !== undefined) {
+    releaseUpdate.version = data.version;
+  }
+  if (data.major_version !== undefined) {
+    releaseUpdate.major_version = data.major_version;
+  }
+  if (data.minor_version !== undefined) {
+    releaseUpdate.minor_version = data.minor_version;
+  }
+  if (data.patch_version !== undefined) {
+    releaseUpdate.patch_version = data.patch_version;
+  }
+  if (data.pre_release !== undefined) {
+    releaseUpdate.pre_release = data.pre_release;
+  }
+  if (data.release_date !== undefined) {
+    releaseUpdate.release_date = data.release_date;
+  }
+  if (data.summary !== undefined) {
+    releaseUpdate.summary = data.summary;
+  }
+  if (data.environment !== undefined) {
+    releaseUpdate.environment = data.environment;
+  }
 
   if (Object.keys(releaseUpdate).length > 0) {
     const { error: releaseError } = await supabase
@@ -480,7 +491,7 @@ export async function getReleaseStats() {
     };
   }
 
-  const stats = {
+  return {
     total: releases.length,
     draft: releases.filter((r) => r.deployment_status === 'draft').length,
     deployed: releases.filter((r) => r.deployment_status === 'deployed').length,
@@ -489,6 +500,4 @@ export async function getReleaseStats() {
     staging: releases.filter((r) => r.environment === 'staging').length,
     development: releases.filter((r) => r.environment === 'development').length,
   };
-
-  return stats;
 }

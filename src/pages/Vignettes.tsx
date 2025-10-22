@@ -26,7 +26,9 @@ const Vignettes = () => {
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       return data;
     }
   });
@@ -37,7 +39,9 @@ const Vignettes = () => {
   useEffect(() => {
     const generateVignetteUrls = async () => {
       // Don't set any data during initial loading
-      if (isLoading) return;
+      if (isLoading) {
+        return;
+      }
       
       if (!vignettes || vignettes.length === 0) {
         // Only set empty array if loading is complete and still no data

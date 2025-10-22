@@ -237,6 +237,7 @@ const GuestbookPost: React.FC<GuestbookPostProps> = ({ post, authorProfile, onUp
               onChange={(e) => setEditMessage(e.target.value)}
               className="w-full p-3 bg-bg-2 border border-accent-purple/20 rounded-md font-body text-muted-foreground resize-none focus:outline-none focus:border-accent-gold"
               rows={4}
+              aria-label="Edit your guestbook post"
               maxLength={2000}
             />
             <div className="flex gap-2">
