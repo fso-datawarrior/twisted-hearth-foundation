@@ -9,6 +9,7 @@ ENVIRONMENT: production
 This major release focuses on dramatically improving mobile user experience and implementing a comprehensive notification system. We've addressed critical mobile UI issues affecting users on small screens, enhanced the RSVP process with new features, and built a complete notification infrastructure. The release also includes new admin tools for system communication and a modern carousel experience for browsing past events.
 
 ## Features
+<!-- Format: TITLE | DESCRIPTION | BENEFIT | SORT_ORDER -->
 - Comprehensive Notification System | Complete in-app and email notification infrastructure with user preferences | Users stay informed about comments, reactions, and updates | 0
 - Friend Invitation Feature | Personalized RSVP invitations with custom messages | Easy sharing and viral growth for the event | 1
 - Release Management System | Professional version tracking and admin interface | Better release documentation and communication | 2
@@ -16,12 +17,14 @@ This major release focuses on dramatically improving mobile user experience and 
 - Admin System Update Emails | Formatted email campaigns for user announcements | Professional communication of platform updates | 4
 
 ## API Changes
+<!-- Format: ENDPOINT | TYPE (new/modified/deprecated/removed) | DESCRIPTION | SORT_ORDER -->
 - /api/notifications | new | Endpoints for notification management and preferences | 0
 - /api/releases | new | Release Management System API endpoints | 1
 - /api/friend-invitation | new | Send personalized invitations to friends | 2
 - /api/system-update | new | Admin system update email functionality | 3
 
 ## UI Updates
+<!-- Format: DESCRIPTION | COMPONENT | SORT_ORDER -->
 - Mobile avatar dropdown with Settings and Sign out access | NavBar.tsx | 0
 - Notification bell icon with unread count badge | NavBar.tsx | 1
 - Dedicated notifications page with filtering | Notifications.tsx | 2
@@ -32,6 +35,7 @@ This major release focuses on dramatically improving mobile user experience and 
 - Mobile-optimized hamburger menu with proper padding | NavBar.tsx | 7
 
 ## Bug Fixes
+<!-- Format: DESCRIPTION | COMPONENT | SORT_ORDER -->
 - Settings profile photo buttons overflow on mobile devices | ProfileSettings.tsx | 0
 - Android navigation bar covers hamburger menu bottom | NavBar.tsx | 1
 - Footer secret message text too small to read | Footer.tsx | 2
@@ -40,6 +44,7 @@ This major release focuses on dramatically improving mobile user experience and 
 - RSVP "Vegan" option corrected to "Vegetarian" | RSVP.tsx | 5
 
 ## Improvements
+<!-- Format: DESCRIPTION | COMPONENT | SORT_ORDER -->
 - 22 mobile UX improvements across the platform | Multiple components | 0
 - RSVP decline option with status management | RSVP.tsx | 1
 - Progressive responsive padding system | Multiple pages | 2
@@ -51,6 +56,7 @@ This major release focuses on dramatically improving mobile user experience and 
 - Real-time notification updates every 30 seconds | NavBar.tsx | 8
 
 ## Database Changes
+<!-- Format: DESCRIPTION | SORT_ORDER -->
 - Created notifications table with RLS policies | New migration | 0
 - Extended notification_preferences table with 7 new columns | Schema update | 1
 - Added is_vegetarian column to potluck_items table | Schema update | 2
@@ -59,12 +65,15 @@ This major release focuses on dramatically improving mobile user experience and 
 - Implemented triggers for automatic notifications on comments, reactions, RSVP updates | New triggers | 5
 
 ## Breaking Changes
+<!-- Format: CONTENT -->
 - None - All changes are backward compatible
 
 ## Known Issues
+<!-- Format: CONTENT -->
 - None identified at release time
 
 ## Technical Notes
+<!-- Format: CONTENT -->
 - **Mobile Testing**: All mobile improvements tested on actual iOS and Android devices
 - **Database Migrations**: 3 new migrations deployed with proper RLS policies
 - **Edge Functions**: 2 new Supabase edge functions for email notifications and friend invitations
