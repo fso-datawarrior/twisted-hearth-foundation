@@ -27,15 +27,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import VersionBadge from './VersionBadge';
 import { Badge } from '@/components/ui/badge';
-import { fetchReleases, publishRelease, archiveRelease } from '@/lib/release-api';
+import { fetchReleases, publishRelease, archiveRelease, sendReleaseEmail } from '@/lib/release-api';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import ReleaseComposer from './ReleaseComposer';
 
 export default function ReleaseManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [environmentFilter, setEnvironmentFilter] = useState<string>('all');
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingRelease, setEditingRelease] = useState<string | null>(null);
 
   // Fetch releases
   const { data: releases, isLoading, refetch } = useQuery({
@@ -72,17 +75,52 @@ export default function ReleaseManagement() {
     }
   };
 
+  const handleViewDetails = (id: string) => {
+    // For now, navigate to edit view to see details
+    setEditingRelease(id);
+  };
+
+  const handleSendEmail = async (id: string, version: string) => {
+    try {
+      // Import sendReleaseEmail from release-api
+      await sendReleaseEmail(id, 'user');
+      toast.success(`Email sent for release v${version}`);
+      refetch();
+    } catch (error: any) {
+      toast.error(`Failed to send email: ${error.message}`);
+    }
+  };
+
+  // If creating or editing, show composer instead of list
+  if (isCreating || editingRelease) {
+    return (
+      <ReleaseComposer 
+        releaseId={editingRelease}
+        onComplete={() => {
+          setIsCreating(false);
+          setEditingRelease(null);
+          refetch();
+        }}
+        onCancel={() => {
+          setIsCreating(false);
+          setEditingRelease(null);
+        }}
+      />
+    );
+  }
+
+  // Otherwise show the list view
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Release Management</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-2xl sm:text-3xl font-bold">Release Management</h2>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Manage system releases and announcements
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsCreating(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Create Release
         </Button>
@@ -155,8 +193,8 @@ export default function ReleaseManagement() {
               No releases found. Create your first release to get started.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Version</TableHead>
@@ -233,11 +271,11 @@ export default function ReleaseManagement() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewDetails(release.id)}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditingRelease(release.id)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
@@ -257,7 +295,7 @@ export default function ReleaseManagement() {
                                 Archive
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSendEmail(release.id, release.version)}>
                               <Mail className="mr-2 h-4 w-4" />
                               Send Email
                             </DropdownMenuItem>

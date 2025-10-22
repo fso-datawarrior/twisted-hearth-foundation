@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,7 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2, GripVertical, Save, Send, Eye } from 'lucide-react';
 import { parseVersion, formatVersion, getVersionIncrementOptions, isValidVersion } from '@/lib/version-utils';
-import { createReleaseDraft, versionExists } from '@/lib/release-api';
+import { createReleaseDraft, versionExists, fetchReleaseById, updateRelease } from '@/lib/release-api';
 import { toast } from 'sonner';
 
 const releaseSchema = z.object({
@@ -77,8 +77,16 @@ const releaseSchema = z.object({
 
 type ReleaseFormValues = z.infer<typeof releaseSchema>;
 
-export default function ReleaseComposer() {
+interface ReleaseComposerProps {
+  releaseId?: string | null;
+  onComplete: () => void;
+  onCancel: () => void;
+}
+
+export default function ReleaseComposer({ releaseId, onComplete, onCancel }: ReleaseComposerProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingRelease, setIsLoadingRelease] = useState(false);
+  const [activeTab, setActiveTab] = useState('features');
   const [currentVersion] = useState('1.1.7'); // This should come from API
 
   const form = useForm<ReleaseFormValues>({
@@ -101,6 +109,59 @@ export default function ReleaseComposer() {
   });
 
   const versionOptions = getVersionIncrementOptions(currentVersion);
+
+  // Load release data when editing
+  useEffect(() => {
+    if (releaseId) {
+      setIsLoadingRelease(true);
+      fetchReleaseById(releaseId)
+        .then((release) => {
+          form.reset({
+            version: release.version,
+            release_date: release.release_date,
+            environment: release.environment,
+            summary: release.summary,
+            features: release.features || [],
+            api_changes: release.api_changes || [],
+            bug_fixes: release.changes?.filter(c => c.category === 'bug_fix').map(c => ({
+              description: c.description,
+              component: c.component,
+              sort_order: c.sort_order,
+            })) || [],
+            improvements: release.changes?.filter(c => c.category === 'improvement').map(c => ({
+              description: c.description,
+              component: c.component,
+              sort_order: c.sort_order,
+            })) || [],
+            ui_updates: release.changes?.filter(c => c.category === 'ui_update').map(c => ({
+              description: c.description,
+              component: c.component,
+              sort_order: c.sort_order,
+            })) || [],
+            database_changes: release.changes?.filter(c => c.category === 'database').map(c => ({
+              description: c.description,
+              sort_order: c.sort_order,
+            })) || [],
+            breaking_changes: release.notes?.filter(n => n.note_type === 'breaking').map(n => ({
+              content: n.content,
+            })) || [],
+            known_issues: release.notes?.filter(n => n.note_type === 'known_issue').map(n => ({
+              content: n.content,
+            })) || [],
+            technical_notes: release.notes?.filter(n => n.note_type === 'technical').map(n => ({
+              content: n.content,
+            })) || [],
+          });
+        })
+        .catch((error) => {
+          toast.error(`Failed to load release: ${error.message}`);
+          onCancel();
+        })
+        .finally(() => {
+          setIsLoadingRelease(false);
+        });
+    }
+  }, [releaseId, form, onCancel]);
 
   const addItem = (field: keyof ReleaseFormValues) => {
     const currentItems = form.getValues(field) as any[];
@@ -143,17 +204,42 @@ export default function ReleaseComposer() {
     form.setValue(field, currentItems.filter((_, i) => i !== index) as any);
   };
 
+  const handlePreview = () => {
+    const data = form.getValues();
+    
+    // Validate required fields
+    if (!data.version || !data.release_date || !data.summary) {
+      toast.error('Please fill in Version, Release Date, and Summary before previewing');
+      return;
+    }
+    
+    // Create preview content
+    const previewContent = `
+Version: ${data.version}
+Environment: ${data.environment}
+Release Date: ${data.release_date}
+
+Summary:
+${data.summary}
+
+Features: ${data.features?.length || 0}
+API Changes: ${data.api_changes?.length || 0}
+Bug Fixes: ${data.bug_fixes?.length || 0}
+Improvements: ${data.improvements?.length || 0}
+UI Updates: ${data.ui_updates?.length || 0}
+Database Changes: ${data.database_changes?.length || 0}
+Breaking Changes: ${data.breaking_changes?.length || 0}
+Known Issues: ${data.known_issues?.length || 0}
+Technical Notes: ${data.technical_notes?.length || 0}
+    `;
+    
+    // Show preview in toast with longer duration
+    toast.info(previewContent, { duration: 10000 });
+  };
+
   const onSubmit = async (data: ReleaseFormValues) => {
     setIsSaving(true);
     try {
-      // Check if version exists
-      const exists = await versionExists(data.version);
-      if (exists) {
-        toast.error('A release with this version already exists');
-        setIsSaving(false);
-        return;
-      }
-
       // Parse version
       const parsed = parseVersion(data.version);
 
@@ -192,38 +278,58 @@ export default function ReleaseComposer() {
         ],
       };
 
-      const releaseId = await createReleaseDraft(releaseData as any);
-      toast.success(`Release v${data.version} created successfully`);
+      if (releaseId) {
+        // UPDATE existing release
+        await updateRelease(releaseId, releaseData as any);
+        toast.success(`Release v${data.version} updated successfully`);
+      } else {
+        // CREATE new release
+        const exists = await versionExists(data.version);
+        if (exists) {
+          toast.error('A release with this version already exists');
+          setIsSaving(false);
+          return;
+        }
+        
+        const newReleaseId = await createReleaseDraft(releaseData as any);
+        toast.success(`Release v${data.version} created successfully`);
+      }
       
-      // Reset form or redirect
-      form.reset();
+      onComplete();
     } catch (error: any) {
-      toast.error(`Failed to create release: ${error.message}`);
+      toast.error(`Failed to ${releaseId ? 'update' : 'create'} release: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">Release Composer</h2>
-          <p className="text-muted-foreground mt-1">
-            Create a new release with all details
+          <h2 className="text-2xl sm:text-3xl font-bold">
+            {releaseId ? 'Edit Release' : 'Create Release'}
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+            {releaseId ? 'Update release details' : 'Create a new release with all details'}
           </p>
         </div>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      {isLoadingRelease ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Section 1: Version Info */}
           <Card>
             <CardHeader>
               <CardTitle>Version Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="version"
@@ -235,7 +341,7 @@ export default function ReleaseComposer() {
                       </FormControl>
                       <FormDescription>
                         Suggested versions:
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {versionOptions.map((opt) => (
                             <Button
                               key={opt.type}
@@ -243,6 +349,7 @@ export default function ReleaseComposer() {
                               variant="outline"
                               size="sm"
                               onClick={() => field.onChange(opt.suggested)}
+                              className="text-xs"
                             >
                               {opt.suggested} ({opt.type})
                             </Button>
@@ -321,24 +428,50 @@ export default function ReleaseComposer() {
               <CardTitle>Release Content</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="features" className="w-full">
-                <TabsList className="grid grid-cols-5 lg:grid-cols-9 w-full">
-                  <TabsTrigger value="features">Features</TabsTrigger>
-                  <TabsTrigger value="api">API</TabsTrigger>
-                  <TabsTrigger value="ui">UI</TabsTrigger>
-                  <TabsTrigger value="bugs">Bugs</TabsTrigger>
-                  <TabsTrigger value="improvements">Improvements</TabsTrigger>
-                  <TabsTrigger value="database">Database</TabsTrigger>
-                  <TabsTrigger value="breaking">Breaking</TabsTrigger>
-                  <TabsTrigger value="issues">Issues</TabsTrigger>
-                  <TabsTrigger value="technical">Technical</TabsTrigger>
-                </TabsList>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                {/* Mobile: Dropdown Selector */}
+                <div className="block lg:hidden mb-4">
+                  <Select
+                    value={activeTab}
+                    onValueChange={(value) => setActiveTab(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select content type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="features">Features</SelectItem>
+                      <SelectItem value="api">API Changes</SelectItem>
+                      <SelectItem value="ui">UI Updates</SelectItem>
+                      <SelectItem value="bugs">Bug Fixes</SelectItem>
+                      <SelectItem value="improvements">Improvements</SelectItem>
+                      <SelectItem value="database">Database Changes</SelectItem>
+                      <SelectItem value="breaking">Breaking Changes</SelectItem>
+                      <SelectItem value="issues">Known Issues</SelectItem>
+                      <SelectItem value="technical">Technical Notes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Desktop: Horizontal Tabs */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <TabsList className="grid grid-cols-9 w-max min-w-full">
+                    <TabsTrigger value="features" className="text-xs sm:text-sm">Features</TabsTrigger>
+                    <TabsTrigger value="api" className="text-xs sm:text-sm">API</TabsTrigger>
+                    <TabsTrigger value="ui" className="text-xs sm:text-sm">UI</TabsTrigger>
+                    <TabsTrigger value="bugs" className="text-xs sm:text-sm">Bugs</TabsTrigger>
+                    <TabsTrigger value="improvements" className="text-xs sm:text-sm">Improvements</TabsTrigger>
+                    <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
+                    <TabsTrigger value="breaking" className="text-xs sm:text-sm">Breaking</TabsTrigger>
+                    <TabsTrigger value="issues" className="text-xs sm:text-sm">Issues</TabsTrigger>
+                    <TabsTrigger value="technical" className="text-xs sm:text-sm">Technical</TabsTrigger>
+                  </TabsList>
+                </div>
 
                 {/* Features Tab */}
                 <TabsContent value="features" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">New features in this release</p>
-                    <Button type="button" size="sm" onClick={() => addItem('features')}>
+                    <Button type="button" size="sm" onClick={() => addItem('features')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Feature
                     </Button>
@@ -413,9 +546,9 @@ export default function ReleaseComposer() {
 
                 {/* API Changes Tab */}
                 <TabsContent value="api" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">API modifications</p>
-                    <Button type="button" size="sm" onClick={() => addItem('api_changes')}>
+                    <Button type="button" size="sm" onClick={() => addItem('api_changes')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add API Change
                     </Button>
@@ -436,7 +569,7 @@ export default function ReleaseComposer() {
                           </Button>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
                             name={`api_changes.${index}.endpoint`}
@@ -499,9 +632,9 @@ export default function ReleaseComposer() {
 
                 {/* UI Updates Tab */}
                 <TabsContent value="ui" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">UI updates and improvements</p>
-                    <Button type="button" size="sm" onClick={() => addItem('ui_updates')}>
+                    <Button type="button" size="sm" onClick={() => addItem('ui_updates')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add UI Update
                     </Button>
@@ -562,9 +695,9 @@ export default function ReleaseComposer() {
 
                 {/* Bug Fixes Tab */}
                 <TabsContent value="bugs" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Bug fixes in this release</p>
-                    <Button type="button" size="sm" onClick={() => addItem('bug_fixes')}>
+                    <Button type="button" size="sm" onClick={() => addItem('bug_fixes')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Bug Fix
                     </Button>
@@ -625,9 +758,9 @@ export default function ReleaseComposer() {
 
                 {/* Improvements Tab */}
                 <TabsContent value="improvements" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Performance and quality improvements</p>
-                    <Button type="button" size="sm" onClick={() => addItem('improvements')}>
+                    <Button type="button" size="sm" onClick={() => addItem('improvements')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Improvement
                     </Button>
@@ -688,9 +821,9 @@ export default function ReleaseComposer() {
 
                 {/* Database Changes Tab */}
                 <TabsContent value="database" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Database schema and migration changes</p>
-                    <Button type="button" size="sm" onClick={() => addItem('database_changes')}>
+                    <Button type="button" size="sm" onClick={() => addItem('database_changes')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Database Change
                     </Button>
@@ -734,9 +867,9 @@ export default function ReleaseComposer() {
 
                 {/* Breaking Changes Tab */}
                 <TabsContent value="breaking" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Breaking changes that require action</p>
-                    <Button type="button" size="sm" onClick={() => addItem('breaking_changes')}>
+                    <Button type="button" size="sm" onClick={() => addItem('breaking_changes')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Breaking Change
                     </Button>
@@ -780,9 +913,9 @@ export default function ReleaseComposer() {
 
                 {/* Known Issues Tab */}
                 <TabsContent value="issues" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Known issues in this release</p>
-                    <Button type="button" size="sm" onClick={() => addItem('known_issues')}>
+                    <Button type="button" size="sm" onClick={() => addItem('known_issues')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Known Issue
                     </Button>
@@ -826,9 +959,9 @@ export default function ReleaseComposer() {
 
                 {/* Technical Notes Tab */}
                 <TabsContent value="technical" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p className="text-sm text-muted-foreground">Technical notes for developers</p>
-                    <Button type="button" size="sm" onClick={() => addItem('technical_notes')}>
+                    <Button type="button" size="sm" onClick={() => addItem('technical_notes')} className="w-full sm:w-auto">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Technical Note
                     </Button>
@@ -874,16 +1007,16 @@ export default function ReleaseComposer() {
           </Card>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-between">
-            <Button type="button" variant="outline">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button type="button" variant="outline" onClick={handlePreview} className="w-full sm:w-auto">
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
                 <Save className="mr-2 h-4 w-4" />
                 {isSaving ? 'Saving...' : 'Save Draft'}
               </Button>
@@ -891,6 +1024,7 @@ export default function ReleaseComposer() {
           </div>
         </form>
       </Form>
+      )}
     </div>
   );
 }
