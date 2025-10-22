@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Plus, Trash2, GripVertical, Save, Send, Eye, Upload, FileText, AlertCircle, Mail, Users } from 'lucide-react';
 import EmailPreviewModal from '@/components/admin/EmailPreviewModal';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -253,7 +254,18 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       form.setValue('known_issues', parsed.known_issues || []);
       form.setValue('technical_notes', parsed.technical_notes || []);
       
-      toast.success('Release template loaded successfully! Review and modify as needed.');
+      // Trigger validation to check if parsed data is valid
+      setTimeout(async () => {
+        const isValid = await form.trigger();
+        if (!isValid) {
+          const errors = Object.entries(form.formState.errors);
+          console.warn('⚠️ Uploaded template has validation issues:', form.formState.errors);
+          toast.warning(`Template loaded with ${errors.length} validation issue(s). Please review highlighted fields.`);
+        } else {
+          toast.success('Release template loaded successfully! Review and modify as needed.');
+        }
+      }, 100);
+      
       setShowFileUpload(false);
     } catch (error: any) {
       toast.error(`Failed to parse file: ${error.message}`);
@@ -295,30 +307,34 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     const featuresSection = content.match(/## Features\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (featuresSection) {
       const lines = featuresSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.features = lines.map((line, idx) => {
-        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-        return {
-          title: parts[0] || '',
-          description: parts[1] || '',
-          benefit: parts[2] || '',
-          sort_order: parts[3] ? parseInt(parts[3]) : idx,
-        };
-      });
+      result.features = lines
+        .map((line, idx) => {
+          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+          return {
+            title: parts[0] || '',
+            description: parts[1] || '',
+            benefit: parts[2] || undefined, // Use undefined instead of empty string for optional fields
+            sort_order: parts[3] ? parseInt(parts[3]) : idx,
+          };
+        })
+        .filter(f => f.title && f.description); // Only include features with required fields
     }
 
     // Parse API Changes section
     const apiSection = content.match(/## API Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (apiSection) {
       const lines = apiSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.api_changes = lines.map((line, idx) => {
-        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-        return {
-          endpoint: parts[0] || '',
-          change_type: (parts[1] || 'modified') as any,
-          description: parts[2] || '',
-          sort_order: parts[3] ? parseInt(parts[3]) : idx,
-        };
-      });
+      result.api_changes = lines
+        .map((line, idx) => {
+          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+          return {
+            endpoint: parts[0] || '',
+            change_type: (parts[1] || 'modified') as any,
+            description: parts[2] || '',
+            sort_order: parts[3] ? parseInt(parts[3]) : idx,
+          };
+        })
+        .filter(a => a.endpoint && a.description); // Only include API changes with required fields
     }
 
     // Parse simple list sections (UI, Bugs, Improvements)
@@ -327,14 +343,16 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       const match = content.match(regex);
       if (match) {
         const lines = match[1].split('\n').filter(l => l.trim().startsWith('-'));
-        (result as any)[fieldName] = lines.map((line, idx) => {
-          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-          return {
-            description: parts[0] || '',
-            component: parts[1] || '',
-            sort_order: parts[2] ? parseInt(parts[2]) : idx,
-          };
-        });
+        (result as any)[fieldName] = lines
+          .map((line, idx) => {
+            const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+            return {
+              description: parts[0] || '',
+              component: parts[1] || undefined, // Use undefined for optional component field
+              sort_order: parts[2] ? parseInt(parts[2]) : idx,
+            };
+          })
+          .filter(item => item.description); // Only include items with description
       }
     };
 
@@ -346,13 +364,15 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     const dbSection = content.match(/## Database Changes\n(?:<!--.*?-->\n)?(.+?)(?=\n+##)/s);
     if (dbSection) {
       const lines = dbSection[1].split('\n').filter(l => l.trim().startsWith('-'));
-      result.database_changes = lines.map((line, idx) => {
-        const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
-        return {
-          description: parts[0] || '',
-          sort_order: parts[1] ? parseInt(parts[1]) : idx,
-        };
-      });
+      result.database_changes = lines
+        .map((line, idx) => {
+          const parts = line.replace(/^-\s*/, '').split('|').map(p => p.trim());
+          return {
+            description: parts[0] || '',
+            sort_order: parts[1] ? parseInt(parts[1]) : idx,
+          };
+        })
+        .filter(item => item.description); // Only include items with description
     }
 
     // Parse content-only sections (Breaking, Issues, Technical)
@@ -361,9 +381,11 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
       const match = content.match(regex);
       if (match) {
         const lines = match[1].split('\n').filter(l => l.trim().startsWith('-'));
-        (result as any)[fieldName] = lines.map(line => ({
-          content: line.replace(/^-\s*/, '').trim(),
-        }));
+        (result as any)[fieldName] = lines
+          .map(line => ({
+            content: line.replace(/^-\s*/, '').trim(),
+          }))
+          .filter(item => item.content); // Only include items with content
       }
     };
 
@@ -520,67 +542,72 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
         <>
           {/* File Upload Section - Only show when creating new release */}
           {!releaseId && (
-            <Card className="border-dashed border-2">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">AI-Assisted Release Creation</CardTitle>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      Upload a completed release template file to auto-populate all fields
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFileUpload(!showFileUpload)}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    {showFileUpload ? 'Hide' : 'Upload Template'}
-                  </Button>
-                </div>
-              </CardHeader>
-              {showFileUpload && (
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <Input
-                        type="file"
-                        accept=".md"
-                        onChange={handleFileUpload}
-                        disabled={isParsingFile}
-                        className="cursor-pointer"
-                      />
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Upload a filled release template (.md file). Find the template at{' '}
-                        <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                          docs/RELEASE_TEMPLATE.md
-                        </code>
-                      </p>
-                    </div>
-                    {isParsingFile && (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-                        <span className="text-sm">Parsing...</span>
+            <Collapsible open={showFileUpload} onOpenChange={setShowFileUpload}>
+              <Card className="border-dashed border-2">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Upload className="h-5 w-5" />
+                          AI-Assisted Release Creation
+                        </CardTitle>
+                        <p className="text-muted-foreground text-sm mt-1">
+                          Upload a completed release template file to auto-populate all fields
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <Alert>
-                    <FileText className="h-4 w-4" />
-                    <AlertTitle>How to use</AlertTitle>
-                    <AlertDescription>
-                      1. Copy <code>docs/RELEASE_TEMPLATE.md</code> and fill it out manually or with an LLM
-                      <br />
-                      2. Upload the completed file here
-                      <br />
-                      3. Review and modify the auto-populated fields
-                      <br />
-                      4. Save as draft or publish
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              )}
-            </Card>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                      >
+                        {showFileUpload ? 'Hide' : 'Show'}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <Input
+                          type="file"
+                          accept=".md"
+                          onChange={handleFileUpload}
+                          disabled={isParsingFile}
+                          className="cursor-pointer"
+                        />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Upload a filled release template (.md file). Find the template at{' '}
+                          <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            docs/RELEASE_TEMPLATE.md
+                          </code>
+                        </p>
+                      </div>
+                      {isParsingFile && (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                          <span className="text-sm">Parsing...</span>
+                        </div>
+                      )}
+                    </div>
+                    <Alert>
+                      <FileText className="h-4 w-4" />
+                      <AlertTitle>How to use</AlertTitle>
+                      <AlertDescription>
+                        1. Copy <code>docs/RELEASE_TEMPLATE.md</code> and fill it out manually or with an LLM
+                        <br />
+                        2. Upload the completed file here
+                        <br />
+                        3. Review and modify the auto-populated fields
+                        <br />
+                        4. Save as draft or publish
+                      </AlertDescription>
+                    </Alert>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           )}
 
           <Form {...form}>
