@@ -235,34 +235,27 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
 
     try {
       const text = await file.text();
-      
-      // Parse the template file
       const parsed = parseReleaseTemplate(text);
+      const normalized = normalizeParsedTemplate(parsed);
       
-      // Populate form fields
-      form.setValue('version', parsed.version || '');
-      form.setValue('release_date', parsed.release_date || new Date().toISOString().split('T')[0]);
-      form.setValue('environment', parsed.environment || 'production');
-      form.setValue('summary', parsed.summary || '');
-      form.setValue('features', parsed.features || []);
-      form.setValue('api_changes', parsed.api_changes || []);
-      form.setValue('ui_updates', parsed.ui_updates || []);
-      form.setValue('bug_fixes', parsed.bug_fixes || []);
-      form.setValue('improvements', parsed.improvements || []);
-      form.setValue('database_changes', parsed.database_changes || []);
-      form.setValue('breaking_changes', parsed.breaking_changes || []);
-      form.setValue('known_issues', parsed.known_issues || []);
-      form.setValue('technical_notes', parsed.technical_notes || []);
-      
-      // Trigger validation to check if parsed data is valid
+      // Set all normalized values
+      Object.entries(normalized).forEach(([key, value]) => {
+        if (value !== undefined) {
+          form.setValue(key as any, value);
+        }
+      });
+
+      // Trigger validation after setting values
       setTimeout(async () => {
         const isValid = await form.trigger();
         if (!isValid) {
-          const errors = Object.entries(form.formState.errors);
-          console.warn('⚠️ Uploaded template has validation issues:', form.formState.errors);
-          toast.warning(`Template loaded with ${errors.length} validation issue(s). Please review highlighted fields.`);
+          const errors = form.formState.errors;
+          const flattened = flattenValidationErrors(errors);
+          setValidationErrors(flattened);
+          toast.warning(`Template uploaded with ${flattened.length} validation issue(s). Please review and fix.`);
         } else {
-          toast.success('Release template loaded successfully! Review and modify as needed.');
+          setValidationErrors([]);
+          toast.success("Template uploaded and validated successfully!");
         }
       }, 100);
       
@@ -272,6 +265,76 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     } finally {
       setIsParsingFile(false);
     }
+  };
+
+  // Helper to flatten validation errors into readable strings
+  const flattenValidationErrors = (errors: any, prefix = ''): string[] => {
+    const messages: string[] = [];
+    
+    Object.keys(errors).forEach(key => {
+      const error = errors[key];
+      const path = prefix ? `${prefix}.${key}` : key;
+      
+      if (error?.message) {
+        messages.push(`${path}: ${error.message}`);
+      } else if (Array.isArray(error)) {
+        error.forEach((item, index) => {
+          if (item && typeof item === 'object') {
+            messages.push(...flattenValidationErrors(item, `${path}[${index}]`));
+          }
+        });
+      } else if (error && typeof error === 'object') {
+        messages.push(...flattenValidationErrors(error, path));
+      }
+    });
+    
+    return messages;
+  };
+
+  // Normalize parsed template data to match schema expectations
+  const normalizeParsedTemplate = (parsed: Partial<ReleaseFormValues>): Partial<ReleaseFormValues> => {
+    const normalized = { ...parsed };
+    
+    // Normalize environment
+    if (normalized.environment) {
+      const env = normalized.environment.toLowerCase();
+      if (['production', 'staging', 'development'].includes(env)) {
+        normalized.environment = env as 'production' | 'staging' | 'development';
+      } else {
+        normalized.environment = 'production';
+        toast.info('Environment normalized to production');
+      }
+    }
+    
+    // Normalize API changes change_type
+    if (normalized.api_changes && Array.isArray(normalized.api_changes)) {
+      normalized.api_changes = normalized.api_changes.map(change => {
+        if (change.change_type) {
+          const type = change.change_type.toLowerCase();
+          if (['new', 'modified', 'deprecated', 'removed'].includes(type)) {
+            return { ...change, change_type: type as 'new' | 'modified' | 'deprecated' | 'removed' };
+          }
+          return { ...change, change_type: 'modified' as const };
+        }
+        return change;
+      });
+    }
+    
+    // Normalize release_date to YYYY-MM-DD
+    if (normalized.release_date) {
+      try {
+        const date = new Date(normalized.release_date);
+        if (!isNaN(date.getTime())) {
+          normalized.release_date = date.toISOString().split('T')[0];
+        } else {
+          normalized.release_date = undefined;
+        }
+      } catch {
+        normalized.release_date = undefined;
+      }
+    }
+    
+    return normalized;
   };
 
   const parseReleaseTemplate = (content: string): Partial<ReleaseFormValues> => {
@@ -420,7 +483,20 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
     setShowUserPreview(true);
   };
 
+  const onInvalid = (errors: any) => {
+    const flattened = flattenValidationErrors(errors);
+    setValidationErrors(flattened);
+    toast.warning(`Please fix ${flattened.length} validation issue(s) before saving.`);
+    
+    // Try to focus first invalid field
+    const firstErrorPath = Object.keys(errors)[0];
+    if (firstErrorPath) {
+      form.setFocus(firstErrorPath as any);
+    }
+  };
+
   const onSubmit = async (data: ReleaseFormValues) => {
+    setValidationErrors([]);
     console.log('🚀 Form submission started', { releaseId, data });
     setIsSaving(true);
     setValidationErrors([]);
@@ -611,7 +687,7 @@ export default function ReleaseComposer({ releaseId, onComplete, onCancel }: Rel
           )}
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
               
             {/* Validation Errors Alert */}
             {validationErrors.length > 0 && (
