@@ -121,6 +121,8 @@ serve(async (req) => {
       *,
       profiles:user_id (
         display_name,
+        first_name,
+        last_name,
         email
       )
     `)
@@ -128,18 +130,27 @@ serve(async (req) => {
     .single();
 
   if (rsvpError || !rsvpData) {
-    console.error('Failed to fetch RSVP:', rsvpError);
-    return new Response(JSON.stringify({ error: 'RSVP not found' }), { 
+    console.error('Failed to fetch RSVP:', {
+      error: rsvpError,
+      rsvpId: body.rsvpId,
+      errorCode: rsvpError?.code,
+      errorMessage: rsvpError?.message,
+      errorDetails: rsvpError?.details
+    });
+    return new Response(JSON.stringify({ 
+      error: 'RSVP not found', 
+      details: rsvpError?.message 
+    }), { 
       status: 404, 
       headers: cors(origin) 
     });
   }
 
-  // Extract name data
+  // Extract name data with fallback logic - prioritize profile data, then RSVP data
   const nameData = {
-    display_name: rsvpData.profiles?.display_name,
-    first_name: rsvpData.first_name,
-    last_name: rsvpData.last_name,
+    display_name: rsvpData.profiles?.display_name || rsvpData.display_name,
+    first_name: rsvpData.profiles?.first_name || rsvpData.first_name,
+    last_name: rsvpData.profiles?.last_name || rsvpData.last_name,
     name: rsvpData.name, // Legacy field
     email: rsvpData.email
   };
