@@ -114,8 +114,12 @@ serve(async (req) => {
     return new Response("Bad Request", { status: 400, headers: cors(origin) }); 
   }
 
-  // Fetch RSVP and profile data from database
-  const { data: rsvpData, error: rsvpError } = await supabase
+  // Fetch RSVP data with profile join - with fallback for missing FK
+  let rsvpData: any = null;
+  let profileData: any = null;
+  
+  // First attempt: try joined select (requires FK constraint)
+  const { data: joinedData, error: joinError } = await supabase
     .from('rsvps')
     .select(`
       *,
@@ -129,28 +133,65 @@ serve(async (req) => {
     .eq('id', body.rsvpId)
     .single();
 
-  if (rsvpError || !rsvpData) {
+  if (joinError && joinError.code === 'PGRST200') {
+    // Fallback: FK relationship missing, fetch separately
+    console.warn('FK relationship missing, using fallback query:', joinError);
+    
+    const { data: rsvp, error: rsvpError } = await supabase
+      .from('rsvps')
+      .select('*')
+      .eq('id', body.rsvpId)
+      .single();
+    
+    if (rsvpError || !rsvp) {
+      console.error('Failed to fetch RSVP (fallback):', rsvpError);
+      return new Response(JSON.stringify({ 
+        error: 'RSVP not found', 
+        details: rsvpError?.message 
+      }), { 
+        status: 404, 
+        headers: cors(origin) 
+      });
+    }
+    
+    rsvpData = rsvp;
+    
+    // Fetch profile separately if user_id exists
+    if (rsvp.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, first_name, last_name, email')
+        .eq('id', rsvp.user_id)
+        .single();
+      
+      profileData = profile;
+    }
+  } else if (joinError || !joinedData) {
     console.error('Failed to fetch RSVP:', {
-      error: rsvpError,
+      error: joinError,
       rsvpId: body.rsvpId,
-      errorCode: rsvpError?.code,
-      errorMessage: rsvpError?.message,
-      errorDetails: rsvpError?.details
+      errorCode: joinError?.code,
+      errorMessage: joinError?.message,
+      errorDetails: joinError?.details
     });
     return new Response(JSON.stringify({ 
       error: 'RSVP not found', 
-      details: rsvpError?.message 
+      details: joinError?.message 
     }), { 
       status: 404, 
       headers: cors(origin) 
     });
+  } else {
+    // Success with joined query
+    rsvpData = joinedData;
+    profileData = joinedData.profiles;
   }
 
   // Extract name data with fallback logic - prioritize profile data, then RSVP data
   const nameData = {
-    display_name: rsvpData.profiles?.display_name || rsvpData.display_name,
-    first_name: rsvpData.profiles?.first_name || rsvpData.first_name,
-    last_name: rsvpData.profiles?.last_name || rsvpData.last_name,
+    display_name: profileData?.display_name || rsvpData.display_name,
+    first_name: profileData?.first_name || rsvpData.first_name,
+    last_name: profileData?.last_name || rsvpData.last_name,
     name: rsvpData.name, // Legacy field
     email: rsvpData.email
   };

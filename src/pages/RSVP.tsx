@@ -367,15 +367,29 @@ const RSVP = () => {
 
           // Send update notification emails
           try {
-            await supabase.functions.invoke("send-rsvp-confirmation", {
+            const { data: emailData, error: emailError } = await supabase.functions.invoke("send-rsvp-confirmation", {
               body: {
                 rsvpId: existingRsvp.id,
                 email: formData.email,
                 isUpdate: true,
               },
             });
+            
+            if (emailError || (emailData && typeof emailData === 'object' && 'error' in emailData)) {
+              console.warn("Email delivery failed:", emailError || emailData);
+              toast({
+                title: "⚠️ Email Delivery Issue",
+                description: "We updated your RSVP, but the confirmation email couldn't be sent. We'll retry shortly.",
+                variant: "default"
+              });
+            }
           } catch (emailErr) {
             console.warn("Email function error:", emailErr);
+            toast({
+              title: "⚠️ Email Delivery Issue",
+              description: "We updated your RSVP, but the confirmation email couldn't be sent. We'll retry shortly.",
+              variant: "default"
+            });
           }
 
           // Track RSVP update
@@ -450,15 +464,29 @@ const RSVP = () => {
 
           // Send confirmation email
           try {
-            await supabase.functions.invoke("send-rsvp-confirmation", {
+            const { data: emailData, error: emailError } = await supabase.functions.invoke("send-rsvp-confirmation", {
               body: {
                 rsvpId: data.id,
                 email: formData.email,
                 isUpdate: false,
               },
             });
+            
+            if (emailError || (emailData && typeof emailData === 'object' && 'error' in emailData)) {
+              console.warn("Email delivery failed:", emailError || emailData);
+              toast({
+                title: "⚠️ Email Delivery Issue",
+                description: "We received your RSVP, but the confirmation email couldn't be sent. We'll retry shortly.",
+                variant: "default"
+              });
+            }
           } catch (emailErr) {
             console.warn("Email function error:", emailErr);
+            toast({
+              title: "⚠️ Email Delivery Issue",
+              description: "We received your RSVP, but the confirmation email couldn't be sent. We'll retry shortly.",
+              variant: "default"
+            });
           }
           
           // Sync notification preference (non-blocking)
