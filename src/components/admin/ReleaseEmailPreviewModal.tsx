@@ -47,7 +47,7 @@ export default function ReleaseEmailPreviewModal({
   onEmailSent,
 }: ReleaseEmailPreviewModalProps) {
   const [emailType, setEmailType] = useState<'admin' | 'user'>('admin');
-  const [recipientGroups, setRecipientGroups] = useState<string[]>(['admins']);
+  const [recipientGroups, setRecipientGroups] = useState<string[]>([]);
   const [customRecipients, setCustomRecipients] = useState<string[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [comboboxOpen, setComboboxOpen] = useState(false);
@@ -131,6 +131,13 @@ export default function ReleaseEmailPreviewModal({
 
     setIsSending(true);
     try {
+      console.log('Sending email with params:', {
+        releaseId: release.id,
+        emailType,
+        recipientGroups,
+        customRecipients,
+      });
+
       await sendReleaseEmail({
         releaseId: release.id,
         emailType,
@@ -141,9 +148,9 @@ export default function ReleaseEmailPreviewModal({
       toast.success(`System update email sent successfully to ${emailType} recipients`);
       onEmailSent();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send email:', error);
-      toast.error('Failed to send email');
+      toast.error(`Failed to send email: ${error.message}`);
     } finally {
       setIsSending(false);
     }

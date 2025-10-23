@@ -463,21 +463,88 @@ export async function sendReleaseEmail(params: {
   recipientGroups: string[]; // ['all', 'admins', 'rsvp_yes', etc]
   customRecipients: string[]; // individual email addresses
 }): Promise<void> {
-  const { data, error } = await supabase.functions.invoke('send-release-email', {
-    body: {
-      release_id: params.releaseId,
-      email_type: params.emailType,
-      recipient_groups: params.recipientGroups,
-      custom_recipients: params.customRecipients,
+  console.log('🚀 Attempting to send release email:', params);
+  
+  try {
+    // Try to call the edge function first
+    console.log('📡 Calling edge function...');
+    const { data, error } = await supabase.functions.invoke('send-release-email', {
+      body: {
+        release_id: params.releaseId,
+        email_type: params.emailType,
+        recipient_groups: params.recipientGroups,
+        custom_recipients: params.customRecipients,
+      }
+    });
+
+    if (error) {
+      console.error('❌ Edge function error:', error);
+      throw new Error(`Edge function failed: ${error.message}`);
     }
-  });
 
-  if (error) {
-    console.error('Error sending release email:', error);
-    throw new Error(`Failed to send email: ${error.message}`);
+    console.log('✅ Release email sent successfully via edge function');
+    return;
+  } catch (error: any) {
+    console.error('❌ Failed to send via edge function:', error);
+    
+    // Fallback: Use existing email campaign system
+    console.log('🔄 Falling back to email campaign system...');
+    
+    try {
+      const release = await fetchReleaseById(params.releaseId);
+      
+      // Generate email content using our template
+      const { generateEmailPreview } = await import('./release-email-templates');
+      const { html: emailHtml, subject: emailSubject } = generateEmailPreview(release, params.emailType);
+      
+      // Create a campaign record
+      const { data: campaign, error: campaignError } = await supabase
+        .from('email_campaigns')
+        .insert({
+          subject: emailSubject,
+          message_html: emailHtml,
+          message_text: 'System update announcement - please view HTML version',
+          recipient_list: 'custom',
+          custom_recipients: params.customRecipients,
+          recipient_count: params.customRecipients.length,
+          status: 'draft', // Mark as draft so it can be sent via existing system
+          created_by: null,
+        })
+        .select('id')
+        .single();
+
+      if (campaignError) {
+        console.error('❌ Failed to create campaign record:', campaignError);
+        throw new Error(`Failed to create campaign: ${campaignError.message}`);
+      }
+
+      // Update release as sent
+      await supabase
+        .from('system_releases')
+        .update({
+          email_sent: true,
+          email_sent_at: new Date().toISOString(),
+        })
+        .eq('id', params.releaseId);
+
+      console.log('✅ Fallback email campaign created successfully');
+      throw new Error(`Email campaign created but not sent. Please use the Email Communication dashboard to send campaign ID: ${campaign.id}. The send-release-email edge function needs to be deployed for direct sending.`);
+      
+    } catch (fallbackError: any) {
+      console.error('❌ Fallback also failed:', fallbackError);
+      
+      // Final fallback: Just mark as attempted
+      await supabase
+        .from('system_releases')
+        .update({
+          email_sent: false,
+          email_sent_at: null,
+        })
+        .eq('id', params.releaseId);
+
+      throw new Error(`Failed to send email: ${error.message}. The send-release-email edge function may not be deployed yet. Please deploy the edge function or use the Email Communication dashboard for sending emails.`);
+    }
   }
-
-  console.log(`Release email (${params.emailType}) sent for release ${params.releaseId}`);
 }
 
 /**

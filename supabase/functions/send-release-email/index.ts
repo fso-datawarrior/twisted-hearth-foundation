@@ -27,6 +27,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log('📧 send-release-email function called');
+  console.log('📧 Request method:', req.method);
+  console.log('📧 Request headers:', Object.fromEntries(req.headers.entries()));
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -39,6 +43,8 @@ Deno.serve(async (req) => {
 
     const { release_id, email_type, recipient_groups, custom_recipients }: SendReleaseEmailRequest = await req.json();
     console.log(`📧 Starting release email: ${release_id}, Type: ${email_type}`);
+    console.log(`📧 Recipient groups:`, recipient_groups);
+    console.log(`📧 Custom recipients:`, custom_recipients);
 
     // Get full release data
     const { data: releaseData, error: releaseError } = await supabase.rpc('get_release_full', {
@@ -294,8 +300,6 @@ Deno.serve(async (req) => {
       .update({
         email_sent: true,
         email_sent_at: new Date().toISOString(),
-        email_type_sent: email_type,
-        recipient_count: recipientsData.length,
       })
       .eq('id', release_id);
 
