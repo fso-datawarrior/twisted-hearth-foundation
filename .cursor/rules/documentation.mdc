@@ -1,0 +1,54 @@
+---
+globs: *.md,docs/*
+description: Documentation and project documentation standards
+---
+
+# Documentation Standards
+
+## Documentation Structure
+- Keep documentation in `docs/` directory
+- Use Markdown format (.md files)
+- Include table of contents for long documents
+- Use consistent formatting
+
+## Code Documentation
+- Document complex functions and components
+- Use JSDoc comments for TypeScript
+- Explain business logic and algorithms
+- Include usage examples
+
+## API Documentation
+- Document all API endpoints
+- Include request/response examples
+- Document error codes and messages
+- Keep API docs up to date
+
+## README Files
+- Include project overview
+- Document setup instructions
+- List dependencies and requirements
+- Include contribution guidelines
+
+## Changelog
+- Keep CHANGELOG.md updated
+- Use semantic versioning
+- Document breaking changes
+- Include migration guides
+
+## Deployment Documentation
+- Document deployment process
+- Include environment setup
+- Document configuration options
+- Include troubleshooting guides
+
+## User Documentation
+- Write clear user guides
+- Include screenshots when helpful
+- Document common workflows
+- Provide FAQ sections
+
+## Technical Documentation
+- Document architecture decisions
+- Include system diagrams
+- Document data flow
+- Explain security considerations

@@ -1,0 +1,40 @@
+---
+description: Git workflow and branch management
+---
+
+# Git Workflow & Branch Management
+
+## Branch Naming Convention
+Use semantic versioning with descriptive suffixes:
+- `v-3.0.4.0-MiscFixFeaturesUpdates` - Version-based branches
+- `version-2.3.4.1-Batch3-Batch4` - Batch update branches
+- `version-2.3.5.0-ProdWorkingCopy` - Production working copies
+
+## Git Commands Workflow
+1. Always check current branch: `git branch --show-current`
+2. Check status before operations: `git status`
+3. Fetch latest changes: `git fetch origin`
+4. Pull updates: `git pull origin [branch-name]`
+5. Stage changes: `git add .`
+6. Commit with descriptive messages: `git commit -m "type: description"`
+7. Push to remote: `git push origin [branch-name]`
+
+## Commit Message Format
+Use conventional commits:
+- `feat:` - New features
+- `fix:` - Bug fixes
+- `docs:` - Documentation changes
+- `style:` - Code style changes
+- `refactor:` - Code refactoring
+- `test:` - Test additions/changes
+
+## Safety Checks
+- Never delete files without explicit confirmation
+- Always check git status before making changes
+- Always verify push was successful
+- Always confirm branch is up to date with remote
+
+## Repository Information
+- Repository: https://github.com/fso-datawarrior/twisted-hearth-foundation
+- Main branch: main
+- Current working branch: v-3.0.4.0-MiscFixFeaturesUpdates

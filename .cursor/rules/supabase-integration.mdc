@@ -1,0 +1,47 @@
+---
+description: Supabase integration and database management
+---
+
+# Supabase Integration & Database Management
+
+## Database Structure
+- Supabase PostgreSQL database
+- Migrations in `supabase/migrations/`
+- Functions in `supabase/functions/`
+- Types defined in `src/integrations/supabase/types.ts`
+
+## Client Configuration
+- Client setup in `src/integrations/supabase/client.ts`
+- Environment variables for API keys
+- Proper error handling for database operations
+- Use TypeScript types for database queries
+
+## Migration Management
+- Create migrations for schema changes
+- Use descriptive migration names
+- Test migrations in development first
+- Document breaking changes
+
+## Database Functions
+- Edge functions in `supabase/functions/`
+- Use TypeScript for function development
+- Implement proper error handling
+- Follow Supabase function conventions
+
+## Query Patterns
+- Use Supabase client methods
+- Implement proper error handling
+- Use TypeScript types for responses
+- Handle loading and error states in UI
+
+## Security
+- Use Row Level Security (RLS)
+- Implement proper authentication
+- Validate user permissions
+- Sanitize user inputs
+
+## Environment Variables
+- Store sensitive data in environment variables
+- Use different configs for dev/prod
+- Never commit API keys to repository
+- Document required environment variables

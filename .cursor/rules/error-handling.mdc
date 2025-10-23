@@ -1,0 +1,53 @@
+---
+description: Error handling and debugging best practices
+---
+
+# Error Handling & Debugging
+
+## Error Handling Patterns
+- Use try/catch blocks for async operations
+- Implement proper error boundaries in React
+- Provide meaningful error messages
+- Log errors for debugging
+
+## React Error Boundaries
+- Implement error boundaries for component trees
+- Display fallback UI for errors
+- Log errors to monitoring service
+- Provide recovery options
+
+## API Error Handling
+- Handle different HTTP status codes
+- Implement retry logic for transient errors
+- Show user-friendly error messages
+- Log detailed errors for debugging
+
+## Form Validation
+- Validate inputs on both client and server
+- Provide immediate feedback
+- Use proper validation libraries
+- Handle validation errors gracefully
+
+## Debugging Tools
+- Use browser dev tools
+- Implement console logging
+- Use React DevTools
+- Monitor network requests
+
+## Error Logging
+- Log errors to external service
+- Include relevant context
+- Don't log sensitive information
+- Use appropriate log levels
+
+## User Experience
+- Don't show technical error messages to users
+- Provide helpful error messages
+- Include recovery suggestions
+- Maintain application state on errors
+
+## Testing Error Scenarios
+- Test error conditions
+- Mock error responses
+- Test error boundaries
+- Verify error recovery

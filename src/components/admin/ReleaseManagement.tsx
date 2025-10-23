@@ -27,10 +27,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import VersionBadge from './VersionBadge';
 import { Badge } from '@/components/ui/badge';
-import { fetchReleases, publishRelease, archiveRelease, sendReleaseEmail, deleteRelease } from '@/lib/release-api';
+import { fetchReleases, publishRelease, archiveRelease, deleteRelease, fetchReleaseById } from '@/lib/release-api';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import ReleaseComposer from './ReleaseComposer';
+import ReleaseEmailPreviewModal from './ReleaseEmailPreviewModal';
+import { FullRelease } from '@/lib/release-api';
 
 export default function ReleaseManagement() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,6 +41,7 @@ export default function ReleaseManagement() {
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingRelease, setEditingRelease] = useState<string | null>(null);
+  const [emailPreviewRelease, setEmailPreviewRelease] = useState<FullRelease | null>(null);
 
   // Fetch releases
   const { data: releases, isLoading, refetch } = useQuery({
@@ -80,13 +83,12 @@ export default function ReleaseManagement() {
     setEditingRelease(id);
   };
 
-  const handleSendEmail = async (id: string, version: string) => {
+  const handleSendEmail = async (id: string) => {
     try {
-      await sendReleaseEmail(id, 'user');
-      toast.success(`Email sent for release v${version}`);
-      refetch();
+      const release = await fetchReleaseById(id);
+      setEmailPreviewRelease(release);
     } catch (error: any) {
-      toast.error(`Failed to send email: ${error.message}`);
+      toast.error(`Failed to load release: ${error.message}`);
     }
   };
 
@@ -314,17 +316,10 @@ export default function ReleaseManagement() {
                               </DropdownMenuItem>
                             )}
                             
-                            {!release.email_sent && (
-                              <DropdownMenuItem onClick={() => handleSendEmail(release.id, release.version)}>
+                            {release.deployment_status === 'deployed' && (
+                              <DropdownMenuItem onClick={() => handleSendEmail(release.id)}>
                                 <Mail className="mr-2 h-4 w-4" />
-                                Send Email
-                              </DropdownMenuItem>
-                            )}
-                            
-                            {release.email_sent && (
-                              <DropdownMenuItem disabled>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Email Already Sent
+                                Send System Update Email
                               </DropdownMenuItem>
                             )}
                             
@@ -348,6 +343,19 @@ export default function ReleaseManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Email Preview Modal */}
+      {emailPreviewRelease && (
+        <ReleaseEmailPreviewModal
+          isOpen={!!emailPreviewRelease}
+          onClose={() => setEmailPreviewRelease(null)}
+          release={emailPreviewRelease}
+          onEmailSent={() => {
+            refetch();
+            setEmailPreviewRelease(null);
+          }}
+        />
+      )}
     </div>
   );
 }

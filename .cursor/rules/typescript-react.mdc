@@ -1,0 +1,38 @@
+---
+globs: *.ts,*.tsx
+description: TypeScript and React development standards
+---
+
+# TypeScript & React Development Standards
+
+## Code Style
+- Always use semicolons
+- Use TypeScript strict mode
+- Prefer functional components with hooks
+- Use proper TypeScript types and interfaces
+
+## Import Standards
+- Use @/ path aliases for internal imports
+- Group imports: React first, then third-party, then local
+- Use named imports when possible
+
+## Component Guidelines
+- Use PascalCase for component names
+- Export components as default exports
+- Use proper prop typing with interfaces
+- Implement proper error boundaries
+
+## State Management
+- Use React hooks (useState, useEffect, useContext)
+- Prefer local state over global state when possible
+- Use custom hooks for reusable logic
+
+## Error Handling
+- Always handle async operations with try/catch
+- Use proper error boundaries for component errors
+- Provide meaningful error messages
+
+## Performance
+- Use React.memo for expensive components
+- Implement proper dependency arrays in useEffect
+- Avoid unnecessary re-renders

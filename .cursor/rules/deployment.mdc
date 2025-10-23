@@ -1,0 +1,55 @@
+---
+description: Deployment and production workflow
+---
+
+# Deployment & Production Workflow
+
+## Deployment Environments
+- Development: Local development with hot reload
+- Production: Firebase Hosting deployment
+- Database: Supabase production instance
+
+## Firebase Deployment
+- Project: twisted-hearth-foundation
+- Build command: `npm run build`
+- Output directory: `dist/`
+- Use Firebase CLI for deployment
+
+## Pre-deployment Checklist
+1. Ensure all tests pass
+2. Build project successfully
+3. Check for TypeScript errors
+4. Verify environment variables
+5. Test database connections
+6. Review security settings
+
+## Build Process
+- Use Vite for building
+- Optimize assets for production
+- Minify JavaScript and CSS
+- Generate source maps for debugging
+
+## Environment Configuration
+- Separate configs for dev/prod
+- Use environment variables for API keys
+- Configure CORS properly
+- Set up proper error logging
+
+## Monitoring
+- Monitor application performance
+- Track error rates
+- Monitor database performance
+- Set up alerts for critical issues
+
+## Rollback Strategy
+- Keep previous deployments available
+- Use Git tags for releases
+- Document rollback procedures
+- Test rollback process regularly
+
+## Security Considerations
+- Use HTTPS in production
+- Implement proper authentication
+- Validate all inputs
+- Use secure headers
+- Regular security audits

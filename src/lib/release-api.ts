@@ -457,29 +457,43 @@ export async function deleteRelease(id: string): Promise<void> {
 /**
  * Send release announcement email
  */
-export async function sendReleaseEmail(
-  id: string,
-  emailType: 'admin' | 'user'
-): Promise<void> {
-  // Get the full release data
-  const release = await fetchReleaseById(id);
-
-  // TODO: Call email edge function once email templates are updated
-  // For now, just mark as sent
-  const { error } = await supabase
-    .from('system_releases')
-    .update({
-      email_sent: true,
-      email_sent_at: new Date().toISOString(),
-    })
-    .eq('id', id);
+export async function sendReleaseEmail(params: {
+  releaseId: string;
+  emailType: 'admin' | 'user';
+  recipientGroups: string[]; // ['all', 'admins', 'rsvp_yes', etc]
+  customRecipients: string[]; // individual email addresses
+}): Promise<void> {
+  const { data, error } = await supabase.functions.invoke('send-release-email', {
+    body: {
+      release_id: params.releaseId,
+      email_type: params.emailType,
+      recipient_groups: params.recipientGroups,
+      custom_recipients: params.customRecipients,
+    }
+  });
 
   if (error) {
-    console.error('Error marking email as sent:', error);
+    console.error('Error sending release email:', error);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 
-  console.log(`Release email (${emailType}) sent for release ${release.version}`);
+  console.log(`Release email (${params.emailType}) sent for release ${params.releaseId}`);
+}
+
+/**
+ * Generate email preview for a release without sending
+ */
+export async function previewReleaseEmail(
+  releaseId: string,
+  emailType: 'admin' | 'user'
+): Promise<{ html: string; subject: string }> {
+  // Get the full release data
+  const release = await fetchReleaseById(releaseId);
+  
+  // Import the template generator
+  const { generateEmailPreview } = await import('./release-email-templates');
+  
+  return generateEmailPreview(release, emailType);
 }
 
 // ============================================================================

@@ -1,0 +1,53 @@
+---
+globs: src/components/admin/*,src/pages/*,src/components/ui/*
+description: UI component development guidelines
+---
+
+# UI Component Development Guidelines
+
+## Component Structure
+- Use functional components with TypeScript
+- Implement proper prop interfaces
+- Use React hooks for state management
+- Follow single responsibility principle
+
+## Styling Standards
+- Use Tailwind CSS classes
+- Use the cn() utility function for conditional classes
+- Follow mobile-first responsive design
+- Maintain consistent spacing and typography
+
+## Admin Components
+- Located in `src/components/admin/`
+- Include proper error handling
+- Implement loading states
+- Use proper form validation
+- Follow accessibility guidelines
+
+## Page Components
+- Located in `src/pages/`
+- Use proper routing integration
+- Implement SEO-friendly structure
+- Include proper meta tags
+- Handle loading and error states
+
+## shadcn/ui Components
+- Located in `src/components/ui/`
+- DO NOT MODIFY these files
+- Use as-is for consistency
+- Import and extend when needed
+- Follow shadcn/ui documentation
+
+## Responsive Design
+- Mobile-first approach
+- Use Tailwind breakpoints: sm, md, lg, xl
+- Test on multiple screen sizes
+- Ensure touch-friendly interfaces
+- Optimize for mobile performance
+
+## Accessibility
+- Use semantic HTML elements
+- Implement proper ARIA labels
+- Ensure keyboard navigation
+- Maintain color contrast ratios
+- Test with screen readers
