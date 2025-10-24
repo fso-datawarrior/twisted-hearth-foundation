@@ -1,5 +1,31 @@
 # Changelog - The Ruths' Twisted Fairytale Halloween Bash
 
+## v3.5 — Latest Updates: Network Dependencies, RSVP Email Fixes, and Documentation Updates
+
+### 🔧 Network & Dependency Fixes - COMPLETED
+
+#### Fixed
+- **Network dependency tree issues**: Resolved dependency conflicts and optimization
+- **RSVP email sending issues**: Fixed email delivery problems with proper error handling
+- **NavBar component improvements**: Enhanced navigation with latest fixes and collision prevention
+- **Documentation consistency**: Renamed Twisted-Pond-Tournament.md to Twisted-Pong-Tournament.md
+
+#### Technical Improvements
+- **Dependency optimization**: Cleaned up package dependencies and resolved conflicts
+- **Email system reliability**: Improved RSVP email delivery with better error handling
+- **UI stability**: Fixed navbar collision issues with flexbox layout
+- **Code quality**: Enhanced component reliability and user experience
+
+#### Files Modified
+- ✅ `package.json` (dependency updates)
+- ✅ `src/components/NavBar.tsx` (collision fixes)
+- ✅ `docs/FUTURE-FEATURES/Twisted-Pong-Tournament.md` (naming consistency)
+- ✅ Email system components (RSVP delivery fixes)
+
+**Impact**: Improved system stability, better email delivery, and enhanced user experience with more reliable navigation.
+
+---
+
 ## v3.4 — Complete Phase 6 Implementation: Notification UI, Modern Carousel, Release Management System, and Communication Package
 
 ### 🔔 Phase 6 Notification System - COMPLETED
