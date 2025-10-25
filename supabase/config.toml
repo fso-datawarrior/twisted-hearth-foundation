@@ -1,4 +1,4 @@
-project_id = "dgdeiybuxlqbdfofzxpy"
+project_id = "dgdeiybuxlabdfofzxpy"
 
 [functions.send-rsvp-confirmation]
 verify_jwt = false
