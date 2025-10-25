@@ -1,0 +1,7 @@
+project_id: twisted-hearth-foundation
+pmo_repo: fso-datawarrior/pmo-central
+export:
+  include:
+    - open_issues
+    - open_prs
+    - labels

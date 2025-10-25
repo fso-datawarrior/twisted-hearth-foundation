@@ -1,0 +1,63 @@
+name: Export to PMO
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "10 4 * * *"   # daily 04:10 UTC
+  push:
+    branches: [ main, master ]     # keep both to be safe
+    paths: [ ".pmo/**", "ops/export/**" ]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools (jq, yq)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          curl -sSLo yq.tar.gz https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64.tar.gz
+          tar -xzf yq.tar.gz
+          sudo mv yq_linux_amd64 /usr/local/bin/yq
+          yq --version
+
+      - name: Build export JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash ops/export/project_export.sh
+
+      - name: Read PMO metadata
+        id: meta
+        run: |
+          echo "repo=$(yq -r '.pmo_repo' .pmo/config.yaml)" >> "$GITHUB_OUTPUT"
+          echo "pid=$(yq -r '.project_id' .pmo/config.yaml)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout PMO repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.meta.outputs.repo }}
+          token: ${{ secrets.PMO_PUSH_TOKEN }}
+          path: pmo-central
+
+      - name: Copy export into PMO dashboards
+        run: |
+          mkdir -p pmo-central/docs/dashboards
+          cp export/${{ steps.meta.outputs.pid }}.json \
+             pmo-central/docs/dashboards/${{ steps.meta.outputs.pid }}.json
+
+      - name: Create PR in PMO
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PMO_PUSH_TOKEN }}
+          path: pmo-central
+          commit-message: "feat(pmo): update export for ${{ steps.meta.outputs.pid }}"
+          title: "PMO export: ${{ steps.meta.outputs.pid }}"
+          body: |
+            Automated export from `${{ github.repository }}`.
+          branch: pmo-sync/${{ steps.meta.outputs.pid }}-${{ github.run_number }}
+          delete-branch: true
+          base: master   # change to 'main' if PMO default branch is main
